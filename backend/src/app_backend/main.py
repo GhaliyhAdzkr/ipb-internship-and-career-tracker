@@ -6,14 +6,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app_backend.shared.database import engine, Base
-from app_backend.routers.api import auth
+from app_backend.routers.api import auth, profile, company
 
 # Buat semua tabel database
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="IPB Internship and Career Tracker API",
-    description="API untuk tracking magang dan karir mahasiswa IPB",
+    description="IPB Internship and Career Tracker API | V1.0.0",
     version="1.0.0"
 )
 
@@ -28,13 +28,15 @@ app.add_middleware(
 
 # Include routers
 app.include_router(auth.router)
+app.include_router(profile.router)
+app.include_router(company.router)
 
 
 @app.get("/", tags=["root"])
 async def root():
     """Root endpoint"""
     return {
-        "message": "Selamat datang di IPB Internship and Career Tracker API",
+        "message": "IPB Internship and Career Tracker API",
         "version": "1.0.0",
         "docs": "/docs",
         "redoc": "/redoc"

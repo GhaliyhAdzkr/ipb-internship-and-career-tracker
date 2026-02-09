@@ -1,23 +1,33 @@
 """
 Application Settings
-Konfigurasi aplikasi menggunakan Pydantic Settings
 """
 from pydantic_settings import BaseSettings
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 
 class Settings(BaseSettings):
     """Konfigurasi aplikasi"""
     
-    db_url: str = "postgresql://user:password@localhost:5432/internship_career_tracker"
-    db_test_url: str = "postgresql://user:password@localhost:5432/internship_career_tracker_test"
+    db_url: str = os.getenv("DATABASE_URL", "postgresql://user:password@localhost:5432/internship_career_tracker")
+    db_test_url: str = os.getenv("DATABASE_TEST_URL", "postgresql://user:password@localhost:5432/internship_career_tracker_test")
 
     session_auto_commit: bool = False
     session_auto_flush: bool = False
     
     # JWT Settings
-    secret_key: str = "your-secret-key-here-change-in-production-09876543210987654321"
-    algorithm: str = "HS256"
-    access_token_expire_minutes: int = 30
+    secret_key: str = os.getenv("SECRET_KEY", "your-secret-key-here-change-in-production-09876543210987654321")
+    algorithm: str = os.getenv("ALGORITHM", "HS256")
+    access_token_expire_minutes: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+    refresh_token_expire_days: int = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "7"))
+    
+    # Password Reset Settings
+    reset_password_token_expire_minutes: int = int(os.getenv("RESET_PASSWORD_TOKEN_EXPIRE_MINUTES", "15"))
+    
+    # API Versioning
+    api_version: str = "v1"
 
     class Config:
         env_file = ".env"

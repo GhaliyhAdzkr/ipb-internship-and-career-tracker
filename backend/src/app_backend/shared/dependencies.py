@@ -9,14 +9,13 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 
-from app_backend.models.user import UserModel
+from app_backend.models.users import Users
 from app_backend.shared.database import get_session
 from app_backend.shared.security import decode_access_token
 from app_backend.domain.user import User as DomainUser
 
 # Security scheme untuk JWT
 security = HTTPBearer()
-
 
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
@@ -53,17 +52,10 @@ async def get_current_user(
         raise credentials_exception
     
     # Ambil user dari database
-    user = session.query(UserModel).filter(UserModel.id == user_id).first()
+    user = session.query(Users).filter(Users.id == user_id).first()
     
     if user is None:
         raise credentials_exception
-    
-    # Cek apakah user aktif
-    if not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Akun user dinonaktifkan"
-        )
     
     # Convert ke domain model dan return
     return user.to_domain()
@@ -86,18 +78,21 @@ async def get_current_active_user(
     return current_user
 
 
-async def get_current_verified_user(
-    current_user: DomainUser = Depends(get_current_user)
-) -> DomainUser:
+async def require_role(roles: list[str]):
     """
-    Dependency untuk mendapatkan user yang sudah terverifikasi
+    Dependency untuk memastikan user memiliki role tertentu
     
-    Raises:
-        HTTPException: Jika email user belum terverifikasi
+    Args:
+        roles: List of allowed roles (e.g., ["ADMIN", "LECTURER"])
+    
+    Returns:
+        Dependency function
     """
-    if not current_user.is_verified:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Email belum terverifikasi"
-        )
-    return current_user
+    async def role_checker(current_user: DomainUser = Depends(get_current_active_user)) -> DomainUser:
+        if current_user.role not in roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Akses ditolak. Role yang diperlukan: {', '.join(roles)}"
+            )
+        return current_user
+    return role_checker

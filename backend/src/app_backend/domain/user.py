@@ -1,11 +1,20 @@
 """
-Domain Model - Pure business logic tanpa dependency database
-Model domain murni yang berisi business logic
+Domain Model untuk User
+Model domain yang berisi business logic untuk pengguna
 """
 import uuid
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Literal
 from dataclasses import dataclass, field
+from enum import Enum
+
+
+class UserRole(str, Enum):
+    """Enum untuk role user"""
+    ADMIN = "ADMIN"
+    STUDENT = "STUDENT"
+    COMPANY = "COMPANY"
+    LECTURER = "LECTURER"
 
 
 @dataclass
@@ -14,24 +23,27 @@ class User:
     
     id: uuid.UUID
     email: str
-    username: str
-    full_name: str
-    hashed_password: str
+    password_hash: str
+    role: str  # ADMIN, STUDENT, COMPANY, LECTURER
     is_active: bool = True
-    is_verified: bool = False
-    created_at: datetime = field(default_factory=datetime.now)
-    updated_at: datetime = field(default_factory=datetime.now)
+    last_login_at: Optional[datetime] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
     
     def __post_init__(self):
         """Validasi domain rules"""
         if not self.email or '@' not in self.email:
             raise ValueError("Alamat email tidak valid")
         
-        if not self.username or len(self.username) < 3:
-            raise ValueError("Username harus minimal 3 karakter")
+        if self.role not in [UserRole.ADMIN.value, UserRole.STUDENT.value, 
+                             UserRole.COMPANY.value, UserRole.LECTURER.value]:
+            raise ValueError(f"Role tidak valid: {self.role}")
         
-        if not self.full_name:
-            raise ValueError("Nama lengkap wajib diisi")
+        # Set timestamps jika belum ada
+        if self.created_at is None:
+            self.created_at = datetime.utcnow()
+        if self.updated_at is None:
+            self.updated_at = datetime.utcnow()
     
     def activate(self):
         """Aktifkan akun user"""
@@ -43,12 +55,26 @@ class User:
         self.is_active = False
         self.updated_at = datetime.utcnow()
     
-    def verify_email(self):
-        """Tandai email sebagai terverifikasi"""
-        self.is_verified = True
+    def update_last_login(self):
+        """Update waktu login terakhir"""
+        self.last_login_at = datetime.utcnow()
         self.updated_at = datetime.utcnow()
     
-    def update_profile(self, full_name: Optional[str] = None, username: Optional[str] = None):
+    def is_student(self) -> bool:
+        """Cek apakah user adalah student"""
+        return self.role == UserRole.STUDENT.value
+    
+    def is_company(self) -> bool:
+        """Cek apakah user adalah company"""
+        return self.role == UserRole.COMPANY.value
+    
+    def is_lecturer(self) -> bool:
+        """Cek apakah user adalah lecturer"""
+        return self.role == UserRole.LECTURER.value
+    
+    def is_admin(self) -> bool:
+        """Cek apakah user adalah admin"""
+        return self.role == UserRole.ADMIN.value
         """Update profil user"""
         if full_name:
             self.full_name = full_name

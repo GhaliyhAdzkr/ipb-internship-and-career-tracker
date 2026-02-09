@@ -21,7 +21,6 @@ SessionLocal = sessionmaker(
 
 Base = declarative_base()
 
-
 def get_session():
     """Dependency untuk mendapatkan database session"""
     session = SessionLocal()
