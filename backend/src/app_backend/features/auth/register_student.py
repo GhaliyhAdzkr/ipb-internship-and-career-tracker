@@ -112,8 +112,9 @@ def register_student_command_handler(
             updated_at=domain_student.updated_at
         )
         
-        # Simpan dalam transaksi
+        # Simpan dalam transaksi - PENTING: flush user dulu sebelum add profile
         session.add(user_model)
+        session.flush()  # Pastikan user ter-insert dulu ke database
         session.add(student_model)
         session.commit()
         session.refresh(user_model)

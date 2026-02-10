@@ -96,8 +96,9 @@ def register_lecturer_command_handler(
             updated_at=datetime.utcnow()
         )
         
-        # Simpan dalam transaksi
+        # Simpan dalam transaksi - PENTING: flush user dulu sebelum add profile
         session.add(user_model)
+        session.flush()  # Pastikan user ter-insert dulu ke database
         session.add(lecturer_model)
         session.commit()
         session.refresh(user_model)

@@ -102,8 +102,9 @@ def register_company_command_handler(
             updated_at=domain_company.updated_at
         )
         
-        # Simpan dalam transaksi
+        # Simpan dalam transaksi - PENTING: flush user dulu sebelum add profile
         session.add(user_model)
+        session.flush()  # Pastikan user ter-insert dulu ke database
         session.add(company_model)
         session.commit()
         session.refresh(user_model)
