@@ -918,6 +918,30 @@ files = [
 all = ["flake8 (>=7.1.1)", "mypy (>=1.11.2)", "pytest (>=8.3.2)", "ruff (>=0.6.2)"]
 
 [[package]]
+name = "inflect"
+version = "7.5.0"
+description = "Correctly generate plurals, singular nouns, ordinals, indefinite articles"
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "inflect-7.5.0-py3-none-any.whl", hash = "sha256:2aea70e5e70c35d8350b8097396ec155ffd68def678c7ff97f51aa69c1d92344"},
+    {file = "inflect-7.5.0.tar.gz", hash = "sha256:faf19801c3742ed5a05a8ce388e0d8fe1a07f8d095c82201eb904f5d27ad571f"},
+]
+
+[package.dependencies]
+more_itertools = ">=8.5.0"
+typeguard = ">=4.0.1"
+
+[package.extras]
+check = ["pytest-checkdocs (>=2.4)", "pytest-ruff (>=0.2.1) ; sys_platform != \"cygwin\""]
+cover = ["pytest-cov"]
+doc = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "rst.linker (>=1.9)", "sphinx (>=3.5)", "sphinx-lint"]
+enabler = ["pytest-enabler (>=2.2)"]
+test = ["pygments", "pytest (>=6,!=8.1.*)"]
+type = ["pytest-mypy"]
+
+[[package]]
 name = "iniconfig"
 version = "2.3.0"
 description = "brain-dead simple config-ini parsing"
@@ -1108,6 +1132,18 @@ groups = ["dev"]
 files = [
     {file = "mdurl-0.1.2-py3-none-any.whl", hash = "sha256:84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8"},
     {file = "mdurl-0.1.2.tar.gz", hash = "sha256:bb413d29f5eea38f31dd4754dd7377d4465116fb207585f97bf925588687c1ba"},
+]
+
+[[package]]
+name = "more-itertools"
+version = "10.8.0"
+description = "More routines for operating on iterables, beyond itertools"
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "more_itertools-10.8.0-py3-none-any.whl", hash = "sha256:52d4362373dcf7c52546bc4af9a86ee7c4579df9a8dc268be0a2f949d376cc9b"},
+    {file = "more_itertools-10.8.0.tar.gz", hash = "sha256:f638ddf8a1a0d134181275fb5d58b086ead7c6a72429ad725c67503f13ba30bd"},
 ]
 
 [[package]]
@@ -1928,6 +1964,29 @@ files = [
 ]
 
 [[package]]
+name = "sqlacodegen"
+version = "3.2.0"
+description = "Automatic model code generator for SQLAlchemy"
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "sqlacodegen-3.2.0-py3-none-any.whl", hash = "sha256:bec3da027832a1513487ca9169224b64b5578c6b54f1bed31b4821584de010cf"},
+    {file = "sqlacodegen-3.2.0.tar.gz", hash = "sha256:ce2a8a3c422bee40a58e9469befd4aec87a160f37158acbcc1c05e9d1c2e786d"},
+]
+
+[package.dependencies]
+inflect = ">=4.0.0"
+SQLAlchemy = ">=2.0.29"
+
+[package.extras]
+citext = ["sqlalchemy-citext (>=1.7.0)"]
+geoalchemy2 = ["geoalchemy2 (>=0.17.0)"]
+pgvector = ["pgvector (>=0.2.4)"]
+sqlmodel = ["sqlmodel (>=0.0.22)"]
+test = ["coverage (>=7)", "mysql-connector-python", "psycopg[binary]", "pytest (>=7.4)", "sqlacodegen[geoalchemy2,pgvector,sqlmodel]"]
+
+[[package]]
 name = "sqlalchemy"
 version = "2.0.46"
 description = "Database Abstraction Library"
@@ -2055,6 +2114,21 @@ files = [
     {file = "stevedore-5.6.0-py3-none-any.whl", hash = "sha256:4a36dccefd7aeea0c70135526cecb7766c4c84c473b1af68db23d541b6dc1820"},
     {file = "stevedore-5.6.0.tar.gz", hash = "sha256:f22d15c6ead40c5bbfa9ca54aa7e7b4a07d59b36ae03ed12ced1a54cf0b51945"},
 ]
+
+[[package]]
+name = "typeguard"
+version = "4.4.4"
+description = "Run-time type checker for Python"
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "typeguard-4.4.4-py3-none-any.whl", hash = "sha256:b5f562281b6bfa1f5492470464730ef001646128b180769880468bd84b68b09e"},
+    {file = "typeguard-4.4.4.tar.gz", hash = "sha256:3a7fd2dffb705d4d0efaed4306a704c89b9dee850b688f060a8b1615a79e5f74"},
+]
+
+[package.dependencies]
+typing_extensions = ">=4.14.0"
 
 [[package]]
 name = "typing-extensions"
@@ -2401,4 +2475,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<4.0"
-content-hash = "1ea6e549853bae49e76939b19d5019f0b177f06f3604b9d14ffec999dd4ce1d0"
+content-hash = "be819f263723635d5ae7c2be9edaf4ec70aa030fc90bd79b669ebdbdb4a42d9a"
