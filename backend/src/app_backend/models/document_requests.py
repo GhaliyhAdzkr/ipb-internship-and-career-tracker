@@ -1,24 +1,59 @@
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import Column, String, Text, DateTime, Enum, ForeignKey, text, PrimaryKeyConstraint
-from sqlalchemy.orm import relationship
+"""
+Model: public.document_requests
+Permohonan surat pengantar/rekomendasi kampus.
+"""
 
-from app_backend.shared.database import Base
+from __future__ import annotations
+
+import datetime
+import uuid
+from typing import TYPE_CHECKING, Optional
+
+from sqlalchemy import DateTime, ForeignKeyConstraint, String, Text, Uuid, text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app_backend.models.base import Base
+
+if TYPE_CHECKING:
+    from app_backend.models.profiles_student import ProfilesStudent
+    from app_backend.models.vacancies import Vacancies
 
 
 class DocumentRequests(Base):
-    """ORM Model for document_requests table"""
-    
-    __tablename__ = 'document_requests'
+    __tablename__ = "document_requests"
     __table_args__ = (
-        PrimaryKeyConstraint('id', name='document_requests_pkey'),
+        ForeignKeyConstraint(
+            ["reference_vacancy_id"],
+            ["vacancies.id"],
+            ondelete="SET NULL",
+            name="document_requests_reference_vacancy_id_fkey",
+        ),
+        ForeignKeyConstraint(
+            ["student_id"],
+            ["profiles_student.user_id"],
+            ondelete="CASCADE",
+            name="document_requests_student_id_fkey",
+        ),
     )
 
-    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text('gen_random_uuid()'))
-    document_type = Column(String(50), nullable=False)
-    student_id = Column(UUID(as_uuid=True), ForeignKey('profiles_student.user_id', name='document_requests_student_id_fkey'))
-    reference_id = Column(UUID(as_uuid=True))
-    generated_url = Column(Text)
-    status = Column(Enum('PENDING', 'APPROVED', 'REJECTED', 'REVISION', name='validation_status_enum'), server_default=text("'PENDING'::validation_status_enum"))
-    created_at = Column(DateTime(timezone=True), server_default=text('CURRENT_TIMESTAMP'))
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, primary_key=True, server_default=text("public.gen_random_uuid()")
+    )
+    document_type: Mapped[str] = mapped_column(String(50), nullable=False)
+    student_id: Mapped[Optional[uuid.UUID]] = mapped_column(Uuid)
+    reference_vacancy_id: Mapped[Optional[uuid.UUID]] = mapped_column(Uuid)
+    generated_url: Mapped[Optional[str]] = mapped_column(Text)
+    status: Mapped[Optional[str]] = mapped_column(
+        String(20), server_default=text("'PENDING'::character varying")
+    )
+    created_at: Mapped[Optional[datetime.datetime]] = mapped_column(
+        DateTime(True), server_default=text("CURRENT_TIMESTAMP")
+    )
 
-    student = relationship('ProfilesStudent', back_populates='document_requests')
+    # Relationships
+    reference_vacancy: Mapped[Optional["Vacancies"]] = relationship(
+        "Vacancies", back_populates="document_requests"
+    )
+    student: Mapped[Optional["ProfilesStudent"]] = relationship(
+        "ProfilesStudent", back_populates="document_requests"
+    )

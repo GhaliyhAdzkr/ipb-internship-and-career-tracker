@@ -1,30 +1,87 @@
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import Column, String, Text, Numeric, DateTime, Enum, ForeignKey, text, PrimaryKeyConstraint, UniqueConstraint, Index
-from sqlalchemy.orm import relationship
+"""
+Model: public.applications
+Rekaman pelamaran mahasiswa ke lowongan (Self-Reported ATS).
+"""
 
-from app_backend.shared.database import Base
+from __future__ import annotations
+
+import datetime
+import decimal
+import uuid
+from typing import TYPE_CHECKING, Optional
+
+from sqlalchemy import (DateTime, Enum, ForeignKeyConstraint, Index, Numeric,
+                        Text, UniqueConstraint, Uuid, text)
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app_backend.models.base import Base
+
+if TYPE_CHECKING:
+    from app_backend.models.application_logs import ApplicationLogs
+    from app_backend.models.placements import Placements
+    from app_backend.models.profiles_student import ProfilesStudent
+    from app_backend.models.vacancies import Vacancies
 
 
 class Applications(Base):
-    """ORM Model for applications table"""
-    
-    __tablename__ = 'applications'
+    __tablename__ = "applications"
     __table_args__ = (
-        PrimaryKeyConstraint('id', name='applications_pkey'),
-        UniqueConstraint('vacancy_id', 'student_id', name='applications_vacancy_id_student_id_key'),
-        Index('idx_apps_student', 'student_id', 'status')
+        ForeignKeyConstraint(
+            ["student_id"],
+            ["profiles_student.user_id"],
+            ondelete="CASCADE",
+            name="applications_student_id_fkey",
+        ),
+        ForeignKeyConstraint(
+            ["vacancy_id"],
+            ["vacancies.id"],
+            ondelete="RESTRICT",
+            name="applications_vacancy_id_fkey",
+        ),
+        UniqueConstraint(
+            "vacancy_id", "student_id", name="applications_vacancy_id_student_id_key"
+        ),
+        Index("idx_apps_student", "student_id", "status"),
+        Index("idx_apps_vacancy", "vacancy_id"),
     )
 
-    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text('gen_random_uuid()'))
-    vacancy_id = Column(UUID(as_uuid=True), ForeignKey('vacancies.id', name='applications_vacancy_id_fkey'), nullable=False)
-    student_id = Column(UUID(as_uuid=True), ForeignKey('profiles_student.user_id', name='applications_student_id_fkey'), nullable=False)
-    status = Column(Enum('APPLIED', 'SCREENING', 'INTERVIEW', 'OFFERED', 'ACCEPTED', 'REJECTED', 'WITHDRAWN', name='app_status_enum'), server_default=text("'APPLIED'::app_status_enum"))
-    match_percentage = Column(Numeric(5, 2))
-    cv_snapshot_url = Column(Text)
-    applied_at = Column(DateTime(timezone=True), server_default=text('CURRENT_TIMESTAMP'))
-    updated_at = Column(DateTime(timezone=True), server_default=text('CURRENT_TIMESTAMP'))
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, primary_key=True, server_default=text("public.gen_random_uuid()")
+    )
+    vacancy_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    student_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    cv_snapshot_url: Mapped[str] = mapped_column(Text, nullable=False)
+    status: Mapped[Optional[str]] = mapped_column(
+        Enum(
+            "APPLIED",
+            "SCREENING",
+            "INTERVIEW",
+            "OFFERED",
+            "ACCEPTED",
+            "REJECTED",
+            "WITHDRAWN",
+            name="app_status_enum",
+        ),
+        server_default=text("'APPLIED'::app_status_enum"),
+    )
+    match_percentage: Mapped[Optional[decimal.Decimal]] = mapped_column(Numeric(5, 2))
+    applied_at: Mapped[Optional[datetime.datetime]] = mapped_column(
+        DateTime(True), server_default=text("CURRENT_TIMESTAMP")
+    )
+    updated_at: Mapped[Optional[datetime.datetime]] = mapped_column(
+        DateTime(True), server_default=text("CURRENT_TIMESTAMP")
+    )
 
-    student = relationship('ProfilesStudent', back_populates='applications')
-    vacancy = relationship('Vacancies', back_populates='applications')
-    application_logs = relationship('ApplicationLogs', back_populates='application')
-    placements = relationship('Placements', uselist=False, back_populates='application')
+    # Relationships
+    student: Mapped["ProfilesStudent"] = relationship(
+        "ProfilesStudent", back_populates="applications"
+    )
+    vacancy: Mapped["Vacancies"] = relationship(
+        "Vacancies", back_populates="applications"
+    )
+    application_logs: Mapped[list["ApplicationLogs"]] = relationship(
+        "ApplicationLogs", back_populates="application"
+    )
+    placements: Mapped[Optional["Placements"]] = relationship(
+        "Placements", uselist=False, back_populates="application"
+    )

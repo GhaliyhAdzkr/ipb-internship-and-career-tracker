@@ -1,23 +1,34 @@
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import Column, String, text, PrimaryKeyConstraint, UniqueConstraint
-from sqlalchemy.orm import relationship
+"""
+Model: public.master_departments
+Tabel master untuk Program Studi dan Fakultas.
+"""
 
-from app_backend.shared.database import Base
+from __future__ import annotations
+
+import uuid
+from typing import TYPE_CHECKING
+
+from sqlalchemy import String, UniqueConstraint, Uuid, text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app_backend.models.base import Base
+
+if TYPE_CHECKING:
+    from app_backend.models.profiles_student import ProfilesStudent
 
 
 class MasterDepartments(Base):
-    """ORM Model for master_departments table"""
-    
-    __tablename__ = 'master_departments'
-    __table_args__ = (
-        PrimaryKeyConstraint('id', name='master_departments_pkey'),
-        UniqueConstraint('code', name='master_departments_code_key')
+    __tablename__ = "master_departments"
+    __table_args__ = (UniqueConstraint("code", name="master_departments_code_key"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, primary_key=True, server_default=text("public.gen_random_uuid()")
     )
+    code: Mapped[str] = mapped_column(String(10), nullable=False)
+    name: Mapped[str] = mapped_column(String(150), nullable=False)
+    faculty: Mapped[str] = mapped_column(String(100), nullable=False)
 
-    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text('gen_random_uuid()'))
-    code = Column(String(10), nullable=False)
-    name = Column(String(100), nullable=False)
-    faculty = Column(String(100), nullable=False)
-
-    profiles_lecturer = relationship('ProfilesLecturer', back_populates='department')
-    profiles_student = relationship('ProfilesStudent', back_populates='department')
+    # Relationships
+    profiles_student: Mapped[list["ProfilesStudent"]] = relationship(
+        "ProfilesStudent", back_populates="department"
+    )

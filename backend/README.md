@@ -6,7 +6,7 @@ Backend API untuk aplikasi IPB Internship and Career Tracker menggunakan FastAPI
 
 ## Struktur Lengkap
 
-```
+```bash
 backend/
 ├── src/
 │   └── app_backend/
@@ -42,43 +42,51 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 ```
 
 ### Menjalankan Aplikasi
+
 Jalankan container Docker:
-```
+
+```bash
 make up
 ```
 
 Hentikan container Docker:
-```
+
+```bash
 make down
 ```
 
 Jalankan server lokal:
-```
-make start-local
+
+```bash
+make dev
 ```
 
 Isi database dengan data palsu:
-```
+
+```bash
 make load-fixtures
 ```
 
 Jalankan tes:
-```
+
+```bash
 make test
 ```
 
 Jalankan tes dengan coverage:
-```
+
+```bash
 make coverage
 ```
 
 Jalankan tes dengan coverage fitur:
-```
+
+```bash
 make coverage-features
 ```
 
-Server: http://localhost:8000
-API Docs: http://localhost:8000/docs
+Server: <http://localhost:8000>
+API Docs: <http://localhost:8000/docs>
 
 ## Prinsip Desain Sistem
 

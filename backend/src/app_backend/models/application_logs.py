@@ -1,24 +1,81 @@
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import Column, Text, DateTime, Enum, ForeignKey, text, PrimaryKeyConstraint
-from sqlalchemy.orm import relationship
+"""
+Model: public.application_logs
+Audit trail setiap perubahan status lamaran (termasuk bukti proof_url).
+"""
 
-from app_backend.shared.database import Base
+from __future__ import annotations
+
+import datetime
+import uuid
+from typing import TYPE_CHECKING, Optional
+
+from sqlalchemy import DateTime, Enum, ForeignKeyConstraint, Text, Uuid, text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app_backend.models.base import Base
+
+if TYPE_CHECKING:
+    from app_backend.models.applications import Applications
+    from app_backend.models.users import Users
 
 
 class ApplicationLogs(Base):
-    """ORM Model for application_logs table"""
-    
-    __tablename__ = 'application_logs'
+    __tablename__ = "application_logs"
     __table_args__ = (
-        PrimaryKeyConstraint('id', name='application_logs_pkey'),
+        ForeignKeyConstraint(
+            ["application_id"],
+            ["applications.id"],
+            ondelete="CASCADE",
+            name="application_logs_application_id_fkey",
+        ),
+        ForeignKeyConstraint(
+            ["changed_by"],
+            ["auth.users.id"],
+            ondelete="SET NULL",
+            name="application_logs_changed_by_fkey",
+        ),
     )
 
-    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text('gen_random_uuid()'))
-    application_id = Column(UUID(as_uuid=True), ForeignKey('applications.id', ondelete='CASCADE', name='application_logs_application_id_fkey'))
-    previous_status = Column(Enum('APPLIED', 'SCREENING', 'INTERVIEW', 'OFFERED', 'ACCEPTED', 'REJECTED', 'WITHDRAWN', name='app_status_enum'))
-    new_status = Column(Enum('APPLIED', 'SCREENING', 'INTERVIEW', 'OFFERED', 'ACCEPTED', 'REJECTED', 'WITHDRAWN', name='app_status_enum'), nullable=False)
-    changed_by = Column(UUID(as_uuid=True))
-    reason = Column(Text)
-    created_at = Column(DateTime(timezone=True), server_default=text('CURRENT_TIMESTAMP'))
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, primary_key=True, server_default=text("public.gen_random_uuid()")
+    )
+    application_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    new_status: Mapped[str] = mapped_column(
+        Enum(
+            "APPLIED",
+            "SCREENING",
+            "INTERVIEW",
+            "OFFERED",
+            "ACCEPTED",
+            "REJECTED",
+            "WITHDRAWN",
+            name="app_status_enum",
+        ),
+        nullable=False,
+    )
+    previous_status: Mapped[Optional[str]] = mapped_column(
+        Enum(
+            "APPLIED",
+            "SCREENING",
+            "INTERVIEW",
+            "OFFERED",
+            "ACCEPTED",
+            "REJECTED",
+            "WITHDRAWN",
+            name="app_status_enum",
+        )
+    )
+    changed_by: Mapped[Optional[uuid.UUID]] = mapped_column(Uuid)
+    proof_url: Mapped[Optional[str]] = mapped_column(Text)
+    reason: Mapped[Optional[str]] = mapped_column(Text)
+    created_at: Mapped[Optional[datetime.datetime]] = mapped_column(
+        DateTime(True), server_default=text("CURRENT_TIMESTAMP")
+    )
 
-    application = relationship('Applications', back_populates='application_logs')
+    # Relationships
+    application: Mapped["Applications"] = relationship(
+        "Applications", back_populates="application_logs"
+    )
+    users: Mapped[Optional["Users"]] = relationship(
+        "Users", back_populates="application_logs"
+    )

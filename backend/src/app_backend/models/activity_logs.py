@@ -1,25 +1,57 @@
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import Column, Date, Text, Numeric, DateTime, Enum, ForeignKey, text, PrimaryKeyConstraint
-from sqlalchemy.orm import relationship
+"""
+Model: public.activity_logs
+Logbook harian aktivitas magang (raw dan yang sudah di-enhance AI).
+"""
 
-from app_backend.shared.database import Base
+from __future__ import annotations
+
+import datetime
+import decimal
+import uuid
+from typing import TYPE_CHECKING, Optional
+
+from sqlalchemy import (CheckConstraint, Date, DateTime, ForeignKeyConstraint,
+                        Index, Numeric, Text, Uuid, text)
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app_backend.models.base import Base
+
+if TYPE_CHECKING:
+    from app_backend.models.placements import Placements
 
 
 class ActivityLogs(Base):
-    """ORM Model for activity_logs table"""
-    
-    __tablename__ = 'activity_logs'
+    __tablename__ = "activity_logs"
     __table_args__ = (
-        PrimaryKeyConstraint('id', name='activity_logs_pkey'),
+        CheckConstraint(
+            "duration_hours > 0::numeric AND duration_hours <= 24::numeric",
+            name="activity_logs_duration_hours_check",
+        ),
+        ForeignKeyConstraint(
+            ["placement_id"],
+            ["placements.id"],
+            ondelete="CASCADE",
+            name="activity_logs_placement_id_fkey",
+        ),
+        Index("idx_activity_logs_date", "placement_id", "activity_date"),
     )
 
-    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text('gen_random_uuid()'))
-    placement_id = Column(UUID(as_uuid=True), ForeignKey('placements.id', ondelete='CASCADE', name='activity_logs_placement_id_fkey'))
-    activity_date = Column(Date, nullable=False)
-    description = Column(Text, nullable=False)
-    duration_hours = Column(Numeric(4, 2))
-    status = Column(Enum('PENDING', 'APPROVED', 'REJECTED', 'REVISION', name='validation_status_enum'), server_default=text("'PENDING'::validation_status_enum"))
-    mentor_comment = Column(Text)
-    created_at = Column(DateTime(timezone=True), server_default=text('CURRENT_TIMESTAMP'))
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, primary_key=True, server_default=text("public.gen_random_uuid()")
+    )
+    placement_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    activity_date: Mapped[datetime.date] = mapped_column(Date, nullable=False)
+    duration_hours: Mapped[decimal.Decimal] = mapped_column(
+        Numeric(4, 2), nullable=False
+    )
+    description_raw: Mapped[str] = mapped_column(Text, nullable=False)
+    description_ai_enhanced: Mapped[Optional[str]] = mapped_column(Text)
+    attachment_url: Mapped[Optional[str]] = mapped_column(Text)
+    created_at: Mapped[Optional[datetime.datetime]] = mapped_column(
+        DateTime(True), server_default=text("CURRENT_TIMESTAMP")
+    )
 
-    placement = relationship('Placements', back_populates='activity_logs')
+    # Relationships
+    placement: Mapped["Placements"] = relationship(
+        "Placements", back_populates="activity_logs"
+    )

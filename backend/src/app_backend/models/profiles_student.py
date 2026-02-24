@@ -1,69 +1,83 @@
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import Boolean, Column, String, Integer, Numeric, Text, DateTime, ForeignKey, text, PrimaryKeyConstraint, UniqueConstraint
-from sqlalchemy.orm import relationship
+"""
+Model: public.profiles_student
+Data profil mahasiswa dengan relasi ke master_departments.
+"""
 
-from app_backend.shared.database import Base
+from __future__ import annotations
+
+import datetime
+import decimal
+import uuid
+from typing import TYPE_CHECKING, Optional
+
+from sqlalchemy import (Boolean, CheckConstraint, DateTime,
+                        ForeignKeyConstraint, Integer, Numeric, String, Text,
+                        UniqueConstraint, Uuid, text)
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app_backend.models.base import Base
+
+if TYPE_CHECKING:
+    from app_backend.models.applications import Applications
+    from app_backend.models.document_requests import DocumentRequests
+    from app_backend.models.master_departments import MasterDepartments
+    from app_backend.models.placements import Placements
+    from app_backend.models.student_skills import StudentSkills
+    from app_backend.models.student_wishlist_vacancies import \
+        StudentWishlistVacancies
 
 
 class ProfilesStudent(Base):
-    """ORM Model for profiles_student table"""
-    
-    __tablename__ = 'profiles_student'
+    __tablename__ = "profiles_student"
     __table_args__ = (
-        PrimaryKeyConstraint('user_id', name='profiles_student_pkey'),
-        UniqueConstraint('nim', name='profiles_student_nim_key')
+        CheckConstraint("semester > 0", name="profiles_student_semester_check"),
+        ForeignKeyConstraint(
+            ["department_id"],
+            ["master_departments.id"],
+            ondelete="RESTRICT",
+            name="profiles_student_department_id_fkey",
+        ),
+        ForeignKeyConstraint(
+            ["user_id"],
+            ["auth.users.id"],
+            ondelete="CASCADE",
+            name="profiles_student_user_id_fkey",
+        ),
+        UniqueConstraint("nim", name="profiles_student_nim_key"),
     )
 
-    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id', ondelete='CASCADE', name='profiles_student_user_id_fkey'), primary_key=True)
-    nim = Column(String(20), nullable=False)
-    full_name = Column(String(150), nullable=False)
-    semester = Column(Integer, nullable=False)
-    department_id = Column(UUID(as_uuid=True), ForeignKey('master_departments.id', name='profiles_student_department_id_fkey'))
-    gpa = Column(Numeric(3, 2))
-    phone_number = Column(String(20))
-    linkedin_url = Column(Text)
-    cv_url = Column(Text)
-    is_mbkm_eligible = Column(Boolean, server_default=text('false'))
-    updated_at = Column(DateTime(timezone=True), server_default=text('CURRENT_TIMESTAMP'))
+    user_id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
+    nim: Mapped[str] = mapped_column(String(20), nullable=False)
+    full_name: Mapped[str] = mapped_column(String(150), nullable=False)
+    semester: Mapped[int] = mapped_column(Integer, nullable=False)
+    department_id: Mapped[Optional[uuid.UUID]] = mapped_column(Uuid)
+    gpa: Mapped[Optional[decimal.Decimal]] = mapped_column(Numeric(3, 2))
+    phone_number: Mapped[Optional[str]] = mapped_column(String(20))
+    linkedin_url: Mapped[Optional[str]] = mapped_column(Text)
+    cv_url: Mapped[Optional[str]] = mapped_column(Text)
+    is_mbkm_eligible: Mapped[Optional[bool]] = mapped_column(
+        Boolean, server_default=text("true")
+    )
+    updated_at: Mapped[Optional[datetime.datetime]] = mapped_column(
+        DateTime(True), server_default=text("CURRENT_TIMESTAMP")
+    )
 
-    department = relationship('MasterDepartments', back_populates='profiles_student')
-    document_requests = relationship('DocumentRequests', back_populates='student')
-    student_skills = relationship('StudentSkills', back_populates='student')
-    applications = relationship('Applications', back_populates='student')
-    placements = relationship('Placements', back_populates='student')
-    
-    def to_domain(self):
-        """Convert ORM model to domain model"""
-        from app_backend.domain.student import Student
-        from decimal import Decimal
-        
-        return Student(
-            user_id=self.user_id,
-            nim=self.nim,
-            full_name=self.full_name,
-            semester=self.semester,
-            department_id=self.department_id,
-            gpa=Decimal(str(self.gpa)) if self.gpa is not None else None,
-            phone_number=self.phone_number,
-            linkedin_url=self.linkedin_url,
-            cv_url=self.cv_url,
-            is_mbkm_eligible=self.is_mbkm_eligible if self.is_mbkm_eligible is not None else False,
-            updated_at=self.updated_at
-        )
-    
-    @staticmethod
-    def from_domain(student):
-        """Create ORM model from domain model"""
-        return ProfilesStudent(
-            user_id=student.user_id,
-            nim=student.nim,
-            full_name=student.full_name,
-            semester=student.semester,
-            department_id=student.department_id,
-            gpa=student.gpa,
-            phone_number=student.phone_number,
-            linkedin_url=student.linkedin_url,
-            cv_url=student.cv_url,
-            is_mbkm_eligible=student.is_mbkm_eligible,
-            updated_at=student.updated_at
-        )
+    # Relationships
+    department: Mapped[Optional["MasterDepartments"]] = relationship(
+        "MasterDepartments", back_populates="profiles_student"
+    )
+    applications: Mapped[list["Applications"]] = relationship(
+        "Applications", back_populates="student"
+    )
+    document_requests: Mapped[list["DocumentRequests"]] = relationship(
+        "DocumentRequests", back_populates="student"
+    )
+    student_skills: Mapped[list["StudentSkills"]] = relationship(
+        "StudentSkills", back_populates="student"
+    )
+    student_wishlist_vacancies: Mapped[list["StudentWishlistVacancies"]] = relationship(
+        "StudentWishlistVacancies", back_populates="student"
+    )
+    placements: Mapped[list["Placements"]] = relationship(
+        "Placements", back_populates="student"
+    )

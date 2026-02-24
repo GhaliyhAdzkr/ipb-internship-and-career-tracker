@@ -1,174 +1,142 @@
 """
-Reset Password Feature - Command Handlers
-Fitur untuk request dan reset password
+Reset Password Feature – Command Handlers.
+Menggunakan auth.auth_action_tokens (stateful, one-time token) bukan JWT
+agar token bisa di-invalidate secara eksplisit dan dicegah re-use.
 """
+
 import uuid
 from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
 from typing import Optional
-from datetime import datetime
 
 from sqlalchemy.orm import Session
 
+from app_backend.conf.settings import settings
+from app_backend.models.auth_action_tokens import AuthActionTokens
 from app_backend.models.users import Users
 from app_backend.schemas.user import RequestResetPassword, ResetPassword
-from app_backend.shared.security import (
-    create_reset_password_token,
-    decode_access_token,
-    verify_token_type,
-    hash_password
-)
-
-
-class ResetPasswordException(Exception):
-    """Exception yang terjadi saat reset password"""
-    pass
-
+from app_backend.shared.security import (generate_secure_token, hash_password,
+                                         hash_token)
 
 # ============ Request Reset Password ============
 
+
 @dataclass
 class RequestResetPasswordCommand:
-    """Command untuk request reset password"""
     payload: RequestResetPassword
 
 
 @dataclass
 class RequestResetPasswordResult:
-    """Result dari proses request reset password"""
-    token: Optional[str] = None  # Token untuk testing/dev, production kirim via email
+    """
+    `token` hanya diisi di mode DEV untuk testing via API.
+    Di production, kirim via email dan hapus field ini dari response.
+    """
+
+    token: Optional[str] = None
     message: Optional[str] = None
     error_message: Optional[str] = None
 
     def got_error(self) -> bool:
-        """Cek apakah ada error"""
         return self.error_message is not None
 
 
 def request_reset_password_command_handler(
-    command: RequestResetPasswordCommand, 
-    session: Session
+    command: RequestResetPasswordCommand,
+    session: Session,
 ) -> RequestResetPasswordResult:
     """
-    Handle request reset password
-    
     Business Rules:
-    1. Email harus terdaftar
-    2. User harus aktif
-    3. Generate reset token dan kirim via email
-    
-    SECURITY NOTE: Selalu return success message meskipun email tidak ditemukan
-    untuk mencegah email enumeration attack
+    1. Selalu kembalikan pesan sukses generik (mencegah email enumeration).
+    2. Jika email terdaftar & aktif: buat AuthActionToken baru dengan
+       action_type=RESET_PASSWORD dan simpan hash ke DB.
+    3. Kirim raw token via email (stub: kembalikan di response untuk dev).
     """
-    
-    # Cari user berdasarkan email
-    user = session.query(Users).filter(
-        Users.email == command.payload.email
-    ).first()
-    
-    # SECURITY: Jangan reveal apakah email ada atau tidak
-    if not user:
-        return RequestResetPasswordResult(
-            message="Jika email terdaftar, instruksi reset password akan dikirim ke email Anda"
-        )
-    
-    # Check if user is active
-    if not user.is_active:
-        return RequestResetPasswordResult(
-            message="Jika email terdaftar, instruksi reset password akan dikirim ke email Anda"
-        )
-    
-    # Generate reset password token
-    reset_token = create_reset_password_token(user.email)
-    
-    # ===== EMAIL SENDING NOT IMPLEMENTED YET =====
-    # TODO: Setup SMTP configuration untuk kirim email reset password
-    # Contoh implementasi:
-    # send_email(
-    #     to=user.email,
-    #     subject="Reset Password IPB Career Tracker",
-    #     body=f"Click link berikut untuk reset password: {FRONTEND_URL}/reset-password?token={reset_token}"
-    # )
-    # 
-    # DEVELOPMENT MODE: Token dikembalikan di response untuk testing
-    # PRODUCTION MODE: Hapus field 'token' dari response, kirim via email saja
-    # =============================================
-    
+    GENERIC_MSG = (
+        "Jika email terdaftar, instruksi reset password akan dikirim ke email Anda"
+    )
+
+    user = session.query(Users).filter(Users.email == command.payload.email).first()
+
+    if not user or not user.is_active:
+        return RequestResetPasswordResult(message=GENERIC_MSG)
+
+    raw_token = generate_secure_token()
+    expires_at = datetime.now(timezone.utc) + timedelta(
+        minutes=settings.reset_password_token_expire_minutes
+    )
+
+    action_token = AuthActionTokens(
+        user_id=user.id,
+        token_hash=hash_token(raw_token),
+        action_type="RESET_PASSWORD",
+        expires_at=expires_at,
+        is_used=False,
+    )
+    session.add(action_token)
+    session.commit()
+
+    # TODO: Kirim raw_token via email (SMTP worker).
+    # Di production: hapus field `token` dari response ini.
     return RequestResetPasswordResult(
-        token=reset_token,  # DEV ONLY: Hapus di production
-        message="Instruksi reset password telah dikirim ke email Anda"
+        token=raw_token,  # DEV ONLY
+        message=GENERIC_MSG,
     )
 
 
 # ============ Reset Password ============
 
+
 @dataclass
 class ResetPasswordCommand:
-    """Command untuk reset password"""
     payload: ResetPassword
 
 
 @dataclass
 class ResetPasswordResult:
-    """Result dari proses reset password"""
     message: Optional[str] = None
     error_message: Optional[str] = None
 
     def got_error(self) -> bool:
-        """Cek apakah ada error"""
         return self.error_message is not None
 
 
 def reset_password_command_handler(
-    command: ResetPasswordCommand, 
-    session: Session
+    command: ResetPasswordCommand,
+    session: Session,
 ) -> ResetPasswordResult:
     """
-    Handle reset password dengan token
-    
     Business Rules:
-    1. Token harus valid dan belum expired
-    2. Token type harus 'reset_password'
-    3. Hash password baru
-    4. Update password di database
+    1. Cari token di DB berdasarkan hash (SHA-256).
+    2. Token harus belum dipakai dan belum expired.
+    3. Hash password baru, update auth.users, tandai token as used.
     """
-    
-    # Decode and verify token
-    payload = decode_access_token(command.payload.token)
-    
-    if not payload:
+    token_hash = hash_token(command.payload.token)
+
+    action_token = (
+        session.query(AuthActionTokens)
+        .filter(
+            AuthActionTokens.token_hash == token_hash,
+            AuthActionTokens.action_type == "RESET_PASSWORD",
+        )
+        .first()
+    )
+
+    if not action_token or not action_token.is_valid():
         return ResetPasswordResult(error_message="Token tidak valid atau sudah expired")
-    
-    # Verify token type
-    if not verify_token_type(payload, "reset_password"):
-        return ResetPasswordResult(error_message="Token tidak valid")
-    
-    # Get email from payload
-    email = payload.get("email")
-    if not email:
-        return ResetPasswordResult(error_message="Token tidak mengandung email")
-    
-    # Find user
-    user = session.query(Users).filter(Users.email == email).first()
-    
-    if not user:
-        return ResetPasswordResult(error_message="User tidak ditemukan")
-    
-    # Check if user is active
-    if not user.is_active:
-        return ResetPasswordResult(error_message="User tidak aktif")
-    
+
+    user = session.query(Users).filter(Users.id == action_token.user_id).first()
+    if not user or not user.is_active:
+        return ResetPasswordResult(
+            error_message="User tidak ditemukan atau tidak aktif"
+        )
+
     try:
-        # Hash new password
-        new_password_hash = hash_password(command.payload.new_password)
-        
-        # Update password
-        user.password_hash = new_password_hash
-        user.updated_at = datetime.utcnow()
-        
+        user.password_hash = hash_password(command.payload.new_password)
+        user.updated_at = datetime.now(timezone.utc)
+        action_token.mark_used()
         session.commit()
-        
         return ResetPasswordResult(message="Password berhasil direset")
-        
-    except Exception as e:
+    except Exception as exc:
         session.rollback()
-        return ResetPasswordResult(error_message=f"Reset password gagal: {str(e)}")
+        return ResetPasswordResult(error_message=f"Reset password gagal: {exc}")

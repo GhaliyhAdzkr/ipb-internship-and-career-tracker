@@ -1,105 +1,95 @@
 """
-Profile Router - API endpoints untuk student profile
+Profile Router – API endpoints untuk manajemen profil mahasiswa.
+
+Endpoints:
+  GET /me          – Profil lengkap mahasiswa yang sedang login
+  PUT /cv-data     – Update info kontak, URL CV, dan skills
 """
+
+from __future__ import annotations
+
 from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from app_backend.features.profile import (
-    GetStudentProfileCommand,
-    get_student_profile_command_handler,
-    UpdateCVDataCommand,
-    update_cv_data_command_handler,
-)
-from app_backend.schemas.profile import StudentProfileResponse, CVDataUpdate
-from app_backend.shared.database import get_session
-from app_backend.shared.dependencies import get_current_active_user
 from app_backend.domain.user import User as DomainUser
+from app_backend.features.profile import (GetStudentProfileCommand,
+                                          UpdateCVDataCommand,
+                                          get_student_profile_command_handler,
+                                          update_cv_data_command_handler)
+from app_backend.schemas.profile import CVDataUpdate, StudentProfileResponse
+from app_backend.shared.database import get_session
+from app_backend.shared.dependencies import require_student
 
 router = APIRouter(
     prefix="/api/v1/profile",
-    tags=["profile"]
+    tags=["profile"],
 )
 
 
-@router.get("/me", response_model=StudentProfileResponse)
+@router.get(
+    "/me",
+    response_model=StudentProfileResponse,
+    summary="Profil lengkap mahasiswa yang sedang login",
+)
 async def get_my_profile(
-    current_user: DomainUser = Depends(get_current_active_user),
     session=Depends(get_session),
+    current_user: DomainUser = Depends(require_student),
 ) -> StudentProfileResponse:
     """
-    Mengambil data profil mahasiswa yang sedang login
-    
-    Data yang dikembalikan:
-    - Data akademik (NIM, Jurusan, IPK, Semester, SKS)
-    - Data CV (Telepon, LinkedIn, CV URL)
-    - Skills dengan level
-    
-    Endpoint ini hanya untuk mahasiswa (role STUDENT)
+    Kembalikan profil lengkap mahasiswa:
+    - Data akademik: NIM, nama, semester, IPK, prodi
+    - Data kontak: telepon, LinkedIn, URL CV
+    - Skills dengan level expertise (1=Beginner … 5=Expert)
+
+    Hanya dapat diakses oleh **STUDENT**.
     """
-    
-    # Validasi role
-    if current_user.role != "STUDENT":
-        raise HTTPException(
-            status_code=HTTPStatus.FORBIDDEN,
-            detail="Endpoint ini hanya untuk mahasiswa"
-        )
-    
     result = get_student_profile_command_handler(
         command=GetStudentProfileCommand(user_id=current_user.id),
         session=session,
     )
-    
     if result.got_error():
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail=result.error_message
+            detail=result.error_message,
         )
-    
     return result.profile
 
 
-@router.put("/cv-data", status_code=HTTPStatus.OK)
+@router.put(
+    "/cv-data",
+    status_code=HTTPStatus.OK,
+    summary="Update data CV mahasiswa",
+)
 async def update_cv_data(
     cv_data: CVDataUpdate,
-    current_user: DomainUser = Depends(get_current_active_user),
     session=Depends(get_session),
+    current_user: DomainUser = Depends(require_student),
 ) -> dict:
     """
-    Update data CV mahasiswa (Skill, Pengalaman, Kontak)
-    
-    Data yang bisa diupdate:
-    - phone_number: Nomor telepon
-    - linkedin_url: URL profil LinkedIn
-    - cv_url: URL file CV (Google Drive, Dropbox, dll)
-    - skills: Daftar skills dengan level 1-5
-    
-    Endpoint ini hanya untuk mahasiswa (role STUDENT)
-    
-    Catatan:
-    - Data akademik (NIM, Jurusan, IPK) tidak bisa diubah melalui endpoint ini
-    - Data akademik diambil langsung dari database IPB
+    Update data CV mahasiswa (PATCH semantics).
+
+    - **phone_number**: Nomor telepon (opsional)
+    - **linkedin_url**: URL profil LinkedIn (opsional)
+    - **cv_url**: URL file CV – Google Drive, Dropbox, dll (opsional)
+    - **skills**: Daftar skills dengan level 1–5. Jika dikirim,
+      **menggantikan seluruh skills** yang sudah ada (full replace).
+
+    Field yang tidak dikirim tidak akan diubah.
+    Data akademik (NIM, prodi, IPK) tidak dapat diubah melalui endpoint ini.
+
+    Hanya dapat diakses oleh **STUDENT**.
     """
-    
-    # Validasi role
-    if current_user.role != "STUDENT":
-        raise HTTPException(
-            status_code=HTTPStatus.FORBIDDEN,
-            detail="Endpoint ini hanya untuk mahasiswa"
-        )
-    
     result = update_cv_data_command_handler(
         command=UpdateCVDataCommand(
             user_id=current_user.id,
-            payload=cv_data
+            payload=cv_data,
         ),
         session=session,
     )
-    
     if result.got_error():
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
-            detail=result.error_message
+            detail=result.error_message,
         )
-    
     return {"message": result.message}

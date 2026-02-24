@@ -1,22 +1,11 @@
-"""
-Profile Features - Command handlers untuk student profile
-"""
 from app_backend.features.profile.get_student_profile import (
-    GetStudentProfileCommand,
-    get_student_profile_command_handler,
-    GetStudentProfileResult
-)
+    GetStudentProfileCommand, get_student_profile_command_handler)
 from app_backend.features.profile.update_cv_data import (
-    UpdateCVDataCommand,
-    update_cv_data_command_handler,
-    UpdateCVDataResult
-)
+    UpdateCVDataCommand, update_cv_data_command_handler)
 
 __all__ = [
-    'GetStudentProfileCommand',
-    'get_student_profile_command_handler',
-    'GetStudentProfileResult',
-    'UpdateCVDataCommand',
-    'update_cv_data_command_handler',
-    'UpdateCVDataResult',
+    "GetStudentProfileCommand",
+    "get_student_profile_command_handler",
+    "UpdateCVDataCommand",
+    "update_cv_data_command_handler",
 ]

@@ -1,34 +1,95 @@
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import Column, Date, DateTime, Enum, ForeignKey, text, PrimaryKeyConstraint, UniqueConstraint, Index
-from sqlalchemy.orm import relationship
+"""
+Model: public.placements
+Rekaman penempatan magang yang aktif setelah lamaran disetujui.
+"""
 
-from app_backend.shared.database import Base
+from __future__ import annotations
+
+import datetime
+import uuid
+from typing import TYPE_CHECKING, Optional
+
+from sqlalchemy import (CheckConstraint, Date, DateTime, Enum,
+                        ForeignKeyConstraint, Index, String, Text,
+                        UniqueConstraint, Uuid, text)
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app_backend.models.base import Base
+
+if TYPE_CHECKING:
+    from app_backend.models.activity_logs import ActivityLogs
+    from app_backend.models.applications import Applications
+    from app_backend.models.master_external_companies import \
+        MasterExternalCompanies
+    from app_backend.models.profiles_student import ProfilesStudent
 
 
 class Placements(Base):
-    """ORM Model for placements table"""
-    
-    __tablename__ = 'placements'
+    __tablename__ = "placements"
     __table_args__ = (
-        PrimaryKeyConstraint('id', name='placements_pkey'),
-        UniqueConstraint('application_id', name='placements_application_id_key'),
-        Index('idx_placements_student', 'student_id')
+        CheckConstraint("end_date >= start_date", name="placements_check"),
+        ForeignKeyConstraint(
+            ["application_id"],
+            ["applications.id"],
+            ondelete="RESTRICT",
+            name="placements_application_id_fkey",
+        ),
+        ForeignKeyConstraint(
+            ["company_id"],
+            ["master_external_companies.id"],
+            ondelete="RESTRICT",
+            name="placements_company_id_fkey",
+        ),
+        ForeignKeyConstraint(
+            ["student_id"],
+            ["profiles_student.user_id"],
+            ondelete="CASCADE",
+            name="placements_student_id_fkey",
+        ),
+        UniqueConstraint("application_id", name="placements_application_id_key"),
+        Index("idx_placements_student", "student_id", "status"),
     )
 
-    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text('gen_random_uuid()'))
-    student_id = Column(UUID(as_uuid=True), ForeignKey('profiles_student.user_id', name='placements_student_id_fkey'), nullable=False)
-    company_id = Column(UUID(as_uuid=True), ForeignKey('profiles_company.user_id', name='placements_company_id_fkey'), nullable=False)
-    application_id = Column(UUID(as_uuid=True), ForeignKey('applications.id', name='placements_application_id_fkey'))
-    lecturer_id = Column(UUID(as_uuid=True), ForeignKey('profiles_lecturer.user_id', name='placements_lecturer_id_fkey'))
-    start_date = Column(Date, nullable=False)
-    end_date = Column(Date, nullable=False)
-    status = Column(Enum('ACTIVE', 'COMPLETED', 'DROPPED', 'EXTENDED', name='placement_status_enum'), server_default=text("'ACTIVE'::placement_status_enum"))
-    created_at = Column(DateTime(timezone=True), server_default=text('CURRENT_TIMESTAMP'))
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, primary_key=True, server_default=text("public.gen_random_uuid()")
+    )
+    student_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    company_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    start_date: Mapped[datetime.date] = mapped_column(Date, nullable=False)
+    end_date: Mapped[datetime.date] = mapped_column(Date, nullable=False)
+    application_id: Mapped[Optional[uuid.UUID]] = mapped_column(Uuid)
+    external_supervisor_name: Mapped[Optional[str]] = mapped_column(String(150))
+    status: Mapped[Optional[str]] = mapped_column(
+        Enum(
+            "ACTIVE",
+            "COMPLETED",
+            "DROPPED",
+            "EXTENDED",
+            name="placement_status_enum",
+        ),
+        server_default=text("'ACTIVE'::placement_status_enum"),
+    )
+    auto_generated_report_url: Mapped[Optional[str]] = mapped_column(Text)
+    last_report_generated_at: Mapped[Optional[datetime.datetime]] = mapped_column(
+        DateTime(True)
+    )
+    created_at: Mapped[Optional[datetime.datetime]] = mapped_column(
+        DateTime(True), server_default=text("CURRENT_TIMESTAMP")
+    )
+    updated_at: Mapped[Optional[datetime.datetime]] = mapped_column(
+        DateTime(True), server_default=text("CURRENT_TIMESTAMP")
+    )
 
-    application = relationship('Applications', back_populates='placements')
-    company = relationship('ProfilesCompany', back_populates='placements')
-    lecturer = relationship('ProfilesLecturer', back_populates='placements')
-    student = relationship('ProfilesStudent', back_populates='placements')
-    activity_logs = relationship('ActivityLogs', back_populates='placement')
-    placement_milestones = relationship('PlacementMilestones', back_populates='placement')
-    sks_conversions = relationship('SksConversions', back_populates='placement')
+    # Relationships
+    application: Mapped[Optional["Applications"]] = relationship(
+        "Applications", back_populates="placements"
+    )
+    company: Mapped["MasterExternalCompanies"] = relationship(
+        "MasterExternalCompanies", back_populates="placements"
+    )
+    student: Mapped["ProfilesStudent"] = relationship(
+        "ProfilesStudent", back_populates="placements"
+    )
+    activity_logs: Mapped[list["ActivityLogs"]] = relationship(
+        "ActivityLogs", back_populates="placement"
+    )

@@ -2,19 +2,32 @@
 FastAPI Application
 Entry point aplikasi FastAPI
 """
+
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app_backend.shared.database import engine, Base
-from app_backend.routers.api import auth, profile, company
+import app_backend.models  # noqa: F401 – registrasi semua tabel ke metadata
+from app_backend.models.base import Base
+from app_backend.routers.api import admin, auth, profile
+from app_backend.shared.database import engine
 
-# Buat semua tabel database
-Base.metadata.create_all(bind=engine)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    import os
+    # Buat semua tabel saat server start; dilewati ketika TESTING=1
+    if not os.environ.get("TESTING"):
+        Base.metadata.create_all(bind=engine)
+    yield
+
 
 app = FastAPI(
     title="IPB Internship and Career Tracker API",
     description="IPB Internship and Career Tracker API | V1.0.0",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan,
 )
 
 # Konfigurasi CORS
@@ -29,7 +42,7 @@ app.add_middleware(
 # Include routers
 app.include_router(auth.router)
 app.include_router(profile.router)
-app.include_router(company.router)
+app.include_router(admin.router)
 
 
 @app.get("/", tags=["root"])
@@ -39,7 +52,7 @@ async def root():
         "message": "IPB Internship and Career Tracker API",
         "version": "1.0.0",
         "docs": "/docs",
-        "redoc": "/redoc"
+        "redoc": "/redoc",
     }
 
 

@@ -1,188 +1,193 @@
-"""Pydantic schemas untuk validasi request/response API.
-
-Berisi schema untuk validasi data user
 """
+Pydantic schemas untuk validasi request/response API
+"""
+
 import uuid
 from datetime import datetime
-from typing import Optional
-from pydantic import BaseModel, EmailStr, Field, field_validator
 from enum import Enum
+from typing import Optional
+
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+
+# ─────────────────────────────────────────────
+# Shared
+# ─────────────────────────────────────────────
 
 
 class UserRole(str, Enum):
-    """Enum untuk role user"""
+    """Role user sesuai DB enum auth.user_role_enum."""
+
     ADMIN = "ADMIN"
     STUDENT = "STUDENT"
-    COMPANY = "COMPANY"
-    LECTURER = "LECTURER"
 
 
-class UserBase(BaseModel):
-    """Schema dasar untuk user"""
+def _validate_password_strength(v: str) -> str:
+    """Validasi kekuatan password: min 8 char, ada angka, huruf besar & kecil."""
+    if not any(c.isdigit() for c in v):
+        raise ValueError("Password harus mengandung minimal satu angka")
+    if not any(c.isupper() for c in v):
+        raise ValueError("Password harus mengandung minimal satu huruf besar")
+    if not any(c.islower() for c in v):
+        raise ValueError("Password harus mengandung minimal satu huruf kecil")
+    return v
+
+
+# ─────────────────────────────────────────────
+# Registration
+# ─────────────────────────────────────────────
+
+
+class StudentRegister(BaseModel):
+    """Payload registrasi mahasiswa baru. Role otomatis STUDENT."""
+
     email: EmailStr
-
-
-class UserCreate(UserBase):
-    """Schema untuk registrasi user
-    
-    SECURITY: Role TIDAK dikirim dari client, tapi ditentukan dari endpoint yang dipanggil
-    """
-    password: str = Field(..., min_length=8, max_length=100)
-    
-    @field_validator('password')
-    @classmethod
-    def validate_password(cls, v: str) -> str:
-        if not any(char.isdigit() for char in v):
-            raise ValueError('Password harus mengandung minimal satu angka')
-        if not any(char.isupper() for char in v):
-            raise ValueError('Password harus mengandung minimal satu huruf besar')
-        if not any(char.islower() for char in v):
-            raise ValueError('Password harus mengandung minimal satu huruf kecil')
-        return v
-
-
-class StudentRegister(UserBase):
-    """Schema untuk registrasi mahasiswa"""
     password: str = Field(..., min_length=8, max_length=100)
     nim: str = Field(..., min_length=6, max_length=20)
     full_name: str = Field(..., min_length=3, max_length=150)
     semester: int = Field(..., ge=1, le=14)
-    
-    @field_validator('password')
+
+    @field_validator("password")
     @classmethod
     def validate_password(cls, v: str) -> str:
-        if not any(char.isdigit() for char in v):
-            raise ValueError('Password harus mengandung minimal satu angka')
-        if not any(char.isupper() for char in v):
-            raise ValueError('Password harus mengandung minimal satu huruf besar')
-        if not any(char.islower() for char in v):
-            raise ValueError('Password harus mengandung minimal satu huruf kecil')
-        return v
+        return _validate_password_strength(v)
 
 
-class CompanyRegister(UserBase):
-    """Schema untuk registrasi perusahaan"""
+class AdminRegister(BaseModel):
+    """Payload registrasi admin / fasilitator CDA. Role otomatis ADMIN."""
+
+    email: EmailStr
     password: str = Field(..., min_length=8, max_length=100)
-    company_name: str = Field(..., min_length=3, max_length=150)
-    industry: Optional[str] = Field(None, max_length=100)
-    
-    @field_validator('password')
-    @classmethod
-    def validate_password(cls, v: str) -> str:
-        if not any(char.isdigit() for char in v):
-            raise ValueError('Password harus mengandung minimal satu angka')
-        if not any(char.isupper() for char in v):
-            raise ValueError('Password harus mengandung minimal satu huruf besar')
-        if not any(char.islower() for char in v):
-            raise ValueError('Password harus mengandung minimal satu huruf kecil')
-        return v
-
-
-class LecturerRegister(UserBase):
-    """Schema untuk registrasi dosen"""
-    password: str = Field(..., min_length=8, max_length=100)
-    nip: str = Field(..., min_length=9, max_length=30, description="NIP Dosen")
     full_name: str = Field(..., min_length=3, max_length=150)
-    department_id: Optional[uuid.UUID] = Field(None, description="ID Departemen")
-    
-    @field_validator('password')
+    unit_name: str = Field(
+        ..., min_length=2, max_length=150, description="Unit kerja (contoh: CDA IPB)"
+    )
+    nip: Optional[str] = Field(None, max_length=30, description="NIP (opsional)")
+
+    @field_validator("password")
     @classmethod
     def validate_password(cls, v: str) -> str:
-        if not any(char.isdigit() for char in v):
-            raise ValueError('Password harus mengandung minimal satu angka')
-        if not any(char.isupper() for char in v):
-            raise ValueError('Password harus mengandung minimal satu huruf besar')
-        if not any(char.islower() for char in v):
-            raise ValueError('Password harus mengandung minimal satu huruf kecil')
-        return v
+        return _validate_password_strength(v)
 
 
-class AdminCreateUser(UserBase):
-    """Schema untuk admin membuat user (dengan role)"""
-    password: str = Field(..., min_length=8, max_length=100)
-    role: UserRole = Field(..., description="Role user: ADMIN, STUDENT, COMPANY, LECTURER")
-
-
-class UserResponse(UserBase):
-    """Schema untuk response user"""
-    id: uuid.UUID
-    role: str
-    is_active: bool
-    last_login_at: Optional[datetime] = None
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
-    
-    class Config:
-        from_attributes = True
+# ─────────────────────────────────────────────
+# Login
+# ─────────────────────────────────────────────
 
 
 class UserLogin(BaseModel):
-    """Schema untuk login user"""
+    """Payload login dengan email + password."""
+
     email: EmailStr
     password: str
 
 
-class Token(BaseModel):
-    """Schema untuk response JWT token"""
-    access_token: str
-    token_type: str = "bearer"
-    user: UserResponse
-
-
-class TokenWithRefresh(BaseModel):
-    """Schema untuk response JWT token dengan refresh token"""
-    access_token: str
-    refresh_token: str
-    token_type: str = "bearer"
-    user: UserResponse
-
-
-class RefreshTokenRequest(BaseModel):
-    """Schema untuk request refresh token"""
-    refresh_token: str = Field(..., description="Refresh token yang valid")
+# ─────────────────────────────────────────────
+# Tokens
+# ─────────────────────────────────────────────
 
 
 class TokenData(BaseModel):
-    """Schema untuk payload token"""
+    """Isi payload JWT access token."""
+
     user_id: Optional[uuid.UUID] = None
     email: Optional[str] = None
     role: Optional[str] = None
 
 
+class Token(BaseModel):
+    """Response login: access token saja (backward-compat)."""
+
+    access_token: str
+    token_type: str = "bearer"
+    expires_in: int = Field(..., description="Durasi validitas token dalam detik")
+
+
+class TokenWithRefresh(BaseModel):
+    """Response login lengkap: access + refresh token."""
+
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+    expires_in: int = Field(
+        ..., description="Durasi validitas access token dalam detik"
+    )
+
+
+class RefreshTokenRequest(BaseModel):
+    """Payload untuk rotate refresh token."""
+
+    refresh_token: str = Field(
+        ..., description="Refresh token yang valid dan belum di-revoke"
+    )
+
+
+class LogoutRequest(BaseModel):
+    """Payload logout – revoke satu sesi (refresh token tertentu)."""
+
+    refresh_token: str = Field(
+        ..., description="Refresh token sesi yang akan di-revoke"
+    )
+
+
+# ─────────────────────────────────────────────
+# Password reset
+# ─────────────────────────────────────────────
+
+
 class RequestResetPassword(BaseModel):
-    """Schema untuk request reset password"""
+    """Req untuk meminta link reset password dikirim ke email."""
+
     email: EmailStr = Field(..., description="Email akun yang akan direset")
 
 
 class ResetPassword(BaseModel):
-    """Schema untuk reset password dengan token"""
-    token: str = Field(..., description="Reset password token dari email")
-    new_password: str = Field(..., min_length=8, max_length=100, description="Password baru")
-    
-    @field_validator('new_password')
+    """Payload reset password menggunakan action token."""
+
+    token: str = Field(..., description="Token reset password dari email")
+    new_password: str = Field(..., min_length=8, max_length=100)
+
+    @field_validator("new_password")
     @classmethod
     def validate_password(cls, v: str) -> str:
-        if not any(char.isdigit() for char in v):
-            raise ValueError('Password harus mengandung minimal satu angka')
-        if not any(char.isupper() for char in v):
-            raise ValueError('Password harus mengandung minimal satu huruf besar')
-        if not any(char.islower() for char in v):
-            raise ValueError('Password harus mengandung minimal satu huruf kecil')
-        return v
+        return _validate_password_strength(v)
 
 
 class ChangePassword(BaseModel):
-    """Schema untuk change password (user sudah login)"""
+    """Payload ganti password untuk user yang sudah login."""
+
     current_password: str = Field(..., description="Password saat ini")
-    new_password: str = Field(..., min_length=8, max_length=100, description="Password baru")
-    
-    @field_validator('new_password')
+    new_password: str = Field(..., min_length=8, max_length=100)
+
+    @field_validator("new_password")
     @classmethod
     def validate_password(cls, v: str) -> str:
-        if not any(char.isdigit() for char in v):
-            raise ValueError('Password harus mengandung minimal satu angka')
-        if not any(char.isupper() for char in v):
-            raise ValueError('Password harus mengandung minimal satu huruf besar')
-        if not any(char.islower() for char in v):
-            raise ValueError('Password harus mengandung minimal satu huruf kecil')
-        return v
+        return _validate_password_strength(v)
+
+
+# ─────────────────────────────────────────────
+# Response
+# ─────────────────────────────────────────────
+
+
+class UserResponse(BaseModel):
+    """Response data user (tidak ekspos password_hash)."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    email: str
+    role: str
+    is_active: bool
+    last_login_at: Optional[datetime] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+
+class LoginResponse(BaseModel):
+    """Response login lengkap: token + user info."""
+
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+    expires_in: int
+    user: UserResponse

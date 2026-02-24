@@ -1,66 +1,76 @@
 """
-Import all ORM models
+Models package – re-exports semua ORM entity dari file atomik.
+
+Import order penting: Base harus diimport pertama agar semua model
+teregistrasi ke metadata yang sama sebelum digunakan.
 """
-# Master tables
-from app_backend.models.master_departments import MasterDepartments
-from app_backend.models.master_skills import MasterSkills
 
-# Users
-from app_backend.models.users import Users
-
-# Notification Queue
-from app_backend.models.notification_queue import NotificationQueue
-
-# Profiles
-from app_backend.models.profiles_company import ProfilesCompany
-from app_backend.models.profiles_lecturer import ProfilesLecturer
-from app_backend.models.profiles_student import ProfilesStudent
-
-# Skills relation tables
-from app_backend.models.student_skills import StudentSkills
-
-# Document Requests
-from app_backend.models.document_requests import DocumentRequests
-
-# Vacancies
-from app_backend.models.vacancies import Vacancies
-from app_backend.models.vacancy_skills import VacancySkills
-
-# Applications
-from app_backend.models.applications import Applications
-from app_backend.models.application_logs import ApplicationLogs
-
-# Placements
-from app_backend.models.placements import Placements
-from app_backend.models.activity_logs import ActivityLogs
-from app_backend.models.placement_milestones import PlacementMilestones
-from app_backend.models.sks_conversions import SksConversions
+from app_backend.models.activity_logs import ActivityLogs  # noqa: F401
+from app_backend.models.application_logs import ApplicationLogs  # noqa: F401
+# --- Public schema: applications ---
+from app_backend.models.applications import Applications  # noqa: F401
+from app_backend.models.auth_action_tokens import \
+    AuthActionTokens  # noqa: F401
+# --- Shared base ---
+from app_backend.models.base import Base  # noqa: F401
+# --- Public schema: documents & notifications ---
+from app_backend.models.document_requests import DocumentRequests  # noqa: F401
+# --- Public schema: master data ---
+from app_backend.models.master_departments import \
+    MasterDepartments  # noqa: F401
+from app_backend.models.master_external_companies import \
+    MasterExternalCompanies  # noqa: F401
+from app_backend.models.master_skills import MasterSkills  # noqa: F401
+from app_backend.models.notification_queue import \
+    NotificationQueue  # noqa: F401
+# --- Public schema: placements & activity ---
+from app_backend.models.placements import Placements  # noqa: F401
+# --- Public schema: profiles ---
+from app_backend.models.profiles_admin import ProfilesAdmin  # noqa: F401
+from app_backend.models.profiles_student import ProfilesStudent  # noqa: F401
+# --- Public schema: skills junction ---
+from app_backend.models.student_skills import StudentSkills  # noqa: F401
+from app_backend.models.student_wishlist_vacancies import \
+    StudentWishlistVacancies  # noqa: F401
+from app_backend.models.user_refresh_tokens import \
+    UserRefreshTokens  # noqa: F401
+# --- Auth schema ---
+from app_backend.models.users import Users  # noqa: F401
+# --- Public schema: vacancies ---
+from app_backend.models.vacancies import Vacancies  # noqa: F401
+from app_backend.models.vacancy_skills import VacancySkills  # noqa: F401
+# --- Views ---
+from app_backend.models.views import \
+    t_view_internship_distribution  # noqa: F401
 
 __all__ = [
-    # Master tables
-    "MasterDepartments",
-    "MasterSkills",
-    # Users
+    "Base",
+    # auth
     "Users",
-    # Notification Queue
-    "NotificationQueue",
-    # Profiles
-    "ProfilesCompany",
-    "ProfilesLecturer",
+    "UserRefreshTokens",
+    "AuthActionTokens",
+    # master
+    "MasterDepartments",
+    "MasterExternalCompanies",
+    "MasterSkills",
+    # profiles
+    "ProfilesAdmin",
     "ProfilesStudent",
-    # Skills
+    # skills
     "StudentSkills",
-    # Documents
-    "DocumentRequests",
-    # Vacancies
-    "Vacancies",
     "VacancySkills",
-    # Applications
+    # vacancies
+    "Vacancies",
+    "StudentWishlistVacancies",
+    # applications
     "Applications",
     "ApplicationLogs",
-    # Placements
+    # placements
     "Placements",
     "ActivityLogs",
-    "PlacementMilestones",
-    "SksConversions",
+    # documents & notifications
+    "DocumentRequests",
+    "NotificationQueue",
+    # views
+    "t_view_internship_distribution",
 ]

@@ -1,21 +1,51 @@
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import Boolean, Column, ForeignKey, text, PrimaryKeyConstraint
-from sqlalchemy.orm import relationship
+"""
+Model: public.vacancy_skills
+Relasi many-to-many antara vacancies dan master_skills (prasyarat keahlian).
+"""
 
-from app_backend.shared.database import Base
+from __future__ import annotations
+
+import uuid
+from typing import TYPE_CHECKING, Optional
+
+from sqlalchemy import Boolean, ForeignKeyConstraint, Index, Uuid, text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app_backend.models.base import Base
+
+if TYPE_CHECKING:
+    from app_backend.models.master_skills import MasterSkills
+    from app_backend.models.vacancies import Vacancies
 
 
 class VacancySkills(Base):
-    """ORM Model for vacancy_skills table"""
-    
-    __tablename__ = 'vacancy_skills'
+    __tablename__ = "vacancy_skills"
     __table_args__ = (
-        PrimaryKeyConstraint('vacancy_id', 'skill_id', name='vacancy_skills_pkey'),
+        ForeignKeyConstraint(
+            ["skill_id"],
+            ["master_skills.id"],
+            ondelete="CASCADE",
+            name="vacancy_skills_skill_id_fkey",
+        ),
+        ForeignKeyConstraint(
+            ["vacancy_id"],
+            ["vacancies.id"],
+            ondelete="CASCADE",
+            name="vacancy_skills_vacancy_id_fkey",
+        ),
+        Index("idx_vacancy_skills", "skill_id"),
     )
 
-    vacancy_id = Column(UUID(as_uuid=True), ForeignKey('vacancies.id', ondelete='CASCADE', name='vacancy_skills_vacancy_id_fkey'), primary_key=True)
-    skill_id = Column(UUID(as_uuid=True), ForeignKey('master_skills.id', ondelete='CASCADE', name='vacancy_skills_skill_id_fkey'), primary_key=True)
-    is_mandatory = Column(Boolean, server_default=text('true'))
+    vacancy_id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
+    skill_id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
+    is_mandatory: Mapped[Optional[bool]] = mapped_column(
+        Boolean, server_default=text("true")
+    )
 
-    skill = relationship('MasterSkills', back_populates='vacancy_skills')
-    vacancy = relationship('Vacancies', back_populates='vacancy_skills')
+    # Relationships
+    skill: Mapped["MasterSkills"] = relationship(
+        "MasterSkills", back_populates="vacancy_skills"
+    )
+    vacancy: Mapped["Vacancies"] = relationship(
+        "Vacancies", back_populates="vacancy_skills"
+    )

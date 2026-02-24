@@ -1,4 +1,4 @@
-.PHONY: up down start-local test coverage
+.PHONY: up down dev start load-fixtures test coverage lint format install install-dev
 
 up:
 	docker compose up -d --remove-orphans
@@ -6,11 +6,14 @@ up:
 down:
 	docker compose down --remove-orphans
 
-start-local:
+dev:
 	poetry run uvicorn app_backend.main:app --reload
 
+start:
+	poetry run uvicorn app_backend.main:app --host 0.0.0.0 --port 8000
+
 load-fixtures:
-	poetry run python -m app_backend.scripts.load_fixtures
+	poetry run load_fixtures
 
 test:
 ifdef filter
@@ -19,11 +22,19 @@ else
 	poetry run pytest -vv
 endif
 
-coverage: test
-	poetry run pytest --cov-report term-missing --cov=app_backend
+coverage:
+	poetry run pytest --cov=app_backend --cov-report term-missing --cov-report html -vv
+
+lint:
+	poetry run flake8 src/ tests/
+	poetry run bandit -r src/ -ll
+
+format:
+	poetry run black src/ tests/
+	poetry run isort src/ tests/
 
 install:
 	poetry install
 
-dev:
+install-dev:
 	poetry install --with dev

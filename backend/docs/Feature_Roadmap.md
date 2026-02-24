@@ -1,4 +1,4 @@
-# Feature List: IPB Internship & Career Tracker
+# Feature List: IPB Internship & Career Tracker (Middleman Model)
 
 **Tech Stack:** FastAPI (Backend), PostgreSQL (SQLAlchemy), Agno/LangGraph (AI Agents), Python Pandas (Automation).
 
@@ -6,193 +6,164 @@
 
 ## 1. User Management & Authentication (IAM) -> **@Peka**
 
-*Fondasi keamanan dan pengelolaan akses pengguna.*
+*Fondasi keamanan dan pengelolaan akses pengguna dengan arsitektur Multi-Schema.*
 
-### 1.1 Authentication & Security
+### 1.1 Authentication & Security (Schema: auth)
 
 * [ ] **Register (Sign Up):** Pendaftaran user baru dengan hashing password (bcrypt).
-* *Schema Ref:* Insert ke `users`.
-
-* [ ] **Login (Sign In):** Autentikasi email/password dan generate JWT Token.
-* *Schema Ref:* Read `users`, update `last_login_at`.
-
-* [ ] **Role-Based Access Control (RBAC):** Middleware membatasi endpoint berdasarkan role (`ADMIN`, `STUDENT`, `COMPANY`, `LECTURER`).
-
-* [ ] **Audit Trail Login:** Mencatat timestamp login terakhir.
-* *Schema Ref:* Trigger update `users.last_login_at`.
+* *Schema Ref:* Insert ke `auth.users`.
+* [ ] **JWT Login (Sign In):** Autentikasi kredensial. Menghasilkan Stateless Access Token dan Stateful Refresh Token.
+* *Schema Ref:* Read `auth.users`, insert `auth.user_refresh_tokens`, update `last_login_at`.
+* [ ] **Token Rotation & Refresh:** Endpoint untuk memperbarui Access Token menggunakan Refresh Token.
+* *Schema Ref:* Query & Update `auth.user_refresh_tokens`.
+* [ ] **Role-Based Access Control (RBAC):** Middleware membatasi endpoint secara ketat hanya untuk `ADMIN` dan `STUDENT`.
+* [ ] **Device Session Logout:** Mencabut (revoke) sesi perangkat spesifik atau seluruh perangkat.
+* *Schema Ref:* Update `auth.user_refresh_tokens.is_revoked`.
 
 ### 1.2 User Utilities
 
-* [ ] **Password Reset:** Mekanisme reset password via email link token.
-* *Schema Ref:* Update `users.password_hash`.
-
-* [ ] **Account Activation:** Admin dapat menonaktifkan user bermasalah.
-* *Schema Ref:* Update `users.is_active`.
+* [ ] **Password Reset (Action Tokens):** Mekanisme reset sandi menggunakan token sekali pakai yang dikirim via email.
+* *Schema Ref:* Insert/Update `auth.auth_action_tokens`.
+* [ ] **Account Activation:** Admin dapat menonaktifkan pengguna bermasalah.
+* *Schema Ref:* Update `auth.users.is_active`.
 
 ---
 
-## 2. Profile Management (Setup Data) -> **@Insan**
+## 2. Profile Management (Setup Data) -> **@Peka**
 
-*Manajemen data profil untuk semua tipe pengguna.*
+*Manajemen data profil dan entitas referensi utama sistem.*
 
 ### 2.1 Master Data (Admin)
 
-* [ ] **Manage Departments:** CRUD data Program Studi.
-* *Schema Ref:* `master_departments`.
-
-* [ ] **Manage Master Skills:** Standarisasi nama skill (mencegah duplikasi "Python" vs "python").
-* *Schema Ref:* `master_skills`.
-
-* [ ] **Manage Master Courses:** Input mata kuliah dan bobot SKS.
-* *Schema Ref:* `master_courses`.
+* [ ] **Manage Departments:** CRUD data Program Studi dan Fakultas.
+* *Schema Ref:* `public.master_departments`.
+* [ ] **Manage External Companies:** Katalogisasi perusahaan untuk referensi lowongan (Middleman data).
+* *Schema Ref:* `public.master_external_companies`.
+* [ ] **Manage Master Skills:** Standarisasi pustaka keahlian untuk *Matching Engine*.
+* *Schema Ref:* `public.master_skills`.
 
 ### 2.2 Student Profile (Mahasiswa)
 
-* [ ] **Basic Setup & Academic Sync:** Input NIM, Nama, dan relasi ke Prodi.
-* *Schema Ref:* `profiles_student` relasi ke `master_departments`.
+* [ ] **Basic Setup & Academic Sync:** Input NIM, Nama, Semester, dan relasi ke Prodi.
+* *Schema Ref:* `public.profiles_student`.
+* [ ] **CV Upload:** Upload dokumen ke Object Storage, simpan URL.
+* *Schema Ref:* Update `public.profiles_student.cv_url`.
+* [ ] **Manage Skills:** Penandaan (*tagging*) keahlian teknis/non-teknis yang dimiliki mahasiswa.
+* *Schema Ref:* `public.student_skills`.
+* [ ] **[AI] CV Parser:** Ekstrak keahlian otomatis dari file PDF CV mahasiswa.
+* *Tech:* Agno Agent membaca PDF -> Output JSON Skills -> Insert `public.student_skills`.
 
-* [ ] **CV & Portfolio Upload:** Upload file ke Object Storage, simpan URL.
-* *Schema Ref:* Update `profiles_student.cv_url`.
+### 2.3 Admin Profile (Fasilitator)
 
-* [ ] **Manage Skills:** Tagging skill yang dimiliki mahasiswa.
-* *Schema Ref:* `student_skills`.
-
-* [ ] **AI CV Parser:** Ekstrak skill otomatis dari file PDF CV mahasiswa.
-* *Tech:* Agno Agent membaca PDF -> Output JSON Skills -> Insert `student_skills`.
-
-### 2.3 Company & Lecturer Profile
-
-* [ ] **Company Setup & Verification:** Input profil perusahaan dan status verifikasi oleh Admin.
-* *Schema Ref:* `profiles_company`.
-
-* [ ] **Lecturer Slot Management:** Mengatur kuota bimbingan maksimal.
-* *Schema Ref:* `profiles_lecturer.max_mentoring_slots`.
+* [ ] **Admin Setup:** Input NIP, Nama Lengkap, dan Unit Kerja (contoh: CDA IPB).
+* *Schema Ref:* `public.profiles_admin`.
 
 ---
 
-## 3. Job Discovery & Engagement -> **@Peka**
+## 3. Aggregated Job Board & Discovery -> **@Peka**
 
-*Fitur pencarian kerja dan interaksi awal (Pre-Application).*
+*Papan lowongan terpusat yang dikurasi oleh internal IPB.*
 
-### 3.1 Vacancy Management (Company)
+### 3.1 Vacancy Management (Admin)
 
-* [ ] **Post Vacancy:** Posting lowongan dengan syarat skill spesifik.
-* *Schema Ref:* Insert `vacancies` & `vacancy_skills`.
+* [ ] **Post External Vacancy:** Posting lowongan yang ditemukan di internet ke dalam sistem (termasuk tipe kompensasi `PAID`/`UNPAID`).
+* *Schema Ref:* Insert `public.vacancies` & `public.vacancy_skills`.
+* [ ] **Vacancy Scraper Worker:** Background task yang menarik metadata lowongan dari portal publik secara otomatis.
+* *Schema Ref:* Insert `public.vacancies` (is_scraped = TRUE).
+* [ ] **Auto-Close Scheduler:** Pekerja latar belakang menutup lowongan yang melewati `close_date`.
+* *Schema Ref:* Update `public.vacancies.is_active`.
 
-* [ ] **Auto-Close Scheduler:** Cron job menutup lowongan yang melewati `close_date`.
-* *Schema Ref:* Update `vacancies.is_active`.
+### 3.2 Student Discovery
 
-### 3.2 Student Discovery (Search & Wishlist)
-
-* [ ] **Advanced Job Search:** Filter lowongan by Lokasi, Tipe (MBKM), Gaji.
-* *Schema Ref:* Query `vacancies`.
-
-* [ ] **Company Profile Viewing:** Melihat detail perusahaan.
-* [ ] **Bookmark Company:** Follow perusahaan favorit.
-* *Schema Ref:* Insert `student_bookmarks_company`.
-
-* [ ] **Save Job (Wishlist):** Simpan lowongan dengan catatan pribadi (misal: "Deadline tgl 20").
-* *Schema Ref:* Insert `student_wishlist_vacancies`.
-
-* [ ] **🔵 AI Job Matching:** Menghitung % kecocokan profil pelamar vs lowongan.
-* *Logic:* Bandingkan `student_skills` vs `vacancy_skills` + Semantik analisis deskripsi.
-* *Schema Ref:* Update `applications.match_percentage` (saat apply) atau display dynamic score.
+* [ ] **Advanced Job Search:** Filter lowongan berdasarkan Lokasi, Tipe, dan Kompensasi.
+* *Schema Ref:* Query `public.vacancies`.
+* [ ] **Save Job (Wishlist):** Menyimpan lowongan incaran beserta catatan pengingat pribadi.
+* *Schema Ref:* Insert `public.student_wishlist_vacancies`.
+* [ ] **[AI] Job Matching:** Menghitung persentase kecocokan profil pelamar dengan prasyarat lowongan.
+* *Logic:* Bandingkan `student_skills` vs `vacancy_skills`.
 
 ---
 
-## 4. Application Tracking System (ATS) -> **@Insan**
+## 4. Self-Reported ATS -> **@Insan**
 
-*Manajemen siklus pelamaran (Applied to Accepted).*
+*Pelacakan status lamaran secara mandiri oleh mahasiswa.*
 
-### 4.1 Application Workflow
+### 4.1 Application Initialization
 
-* [ ] **One-Click Apply:** Melamar menggunakan snapshot CV profil tanpa input ulang.
-* *Schema Ref:* Insert `applications` (copy `cv_url` ke `cv_snapshot_url`).
+* [ ] **Initialize External Apply:** Menekan tombol lamar untuk mengunci CV dan mencatat niat pelamaran sebelum dialihkan ke situs eksternal.
+* *Schema Ref:* Insert `public.applications` (copy `cv_url` ke `cv_snapshot_url`).
 
-* [ ] **Status Pipeline Management:** Update status (`SCREENING` -> `INTERVIEW` -> `OFFERED`).
-* *Schema Ref:* Update `applications.status`.
+### 4.2 Self-Reporting Pipeline
 
-* [ ] **History Logging:** Audit trail otomatis siapa yang mengubah status dan kapan.
-* *Schema Ref:* Trigger insert `application_logs`.
+* [ ] **Status Update (Self-Report):** Mahasiswa memperbarui status mandiri (contoh: `SCREENING` -> `INTERVIEW`).
+* *Schema Ref:* Update `public.applications.status`.
+* [ ] **Proof Upload (LoA/Email):** Kewajiban mengunggah bukti tangkapan layar jika status diubah ke `ACCEPTED`.
+* *Schema Ref:* Insert `public.application_logs` (mengisi `proof_url`).
+* [ ] **History Logging:** Audit otomatis pelacakan waktu setiap perubahan status lamaran.
+* *Schema Ref:* Trigger/Insert `public.application_logs`.
 
-* [ ] **Interview Scheduler:** Menambahkan catatan jadwal saat status berubah ke INTERVIEW.
-* *Schema Ref:* Insert `application_logs` dengan `reason` berisi jadwal.
+### 4.3 Admin Verification
 
-### 4.2 Utilities
-
-* [ ] **Withdraw Application:** Mahasiswa membatalkan lamaran.
-* *Schema Ref:* Update status `WITHDRAWN`.
-
----
-
-## 5. Internship Management (The Tracker) -> **@Peka**
-
-*Fase pelaksanaan magang (Post-Accepted).*
-
-### 5.1 Placement Lifecycle
-
-* [ ] **Placement Activation:** Sistem otomatis membuat record placement saat lamaran = `ACCEPTED`.
-* *Schema Ref:* Trigger insert `placements` from `applications`.
-
-* [ ] **Assign Lecturer:** Penetapan Dosen Pembimbing untuk placement tersebut.
-* *Schema Ref:* Update `placements.lecturer_id`.
-
-* [ ] **Auto-Generate Milestones:** Membuat target otomatis (Laporan Minggu 1, Laporan Akhir) saat placement aktif.
-* *Schema Ref:* Bulk Insert `placement_milestones`.
-
-### 5.2 Activity & Logbook
-
-* [ ] **Daily Log Entry:** Input kegiatan harian, durasi, dan bukti.
-* *Schema Ref:* Insert `activity_logs`.
-
-* [ ] **Mentor Validation:** Dosen/Mentor approve atau reject logbook.
-* *Schema Ref:* Update `activity_logs.status` & `mentor_comment`.
-
-* [ ] **🔵 AI Log Enhancer:** Memperbaiki tata bahasa deskripsi kegiatan agar profesional.
-* *Tech:* Agno Agent rewrite `activity_logs.description` (Draft -> Professional).
+* [ ] **Verify Accepted Application:** Admin meninjau bukti `proof_url` sebelum menyetujui aktivasi penempatan magang.
+* *Schema Ref:* Query `public.application_logs` -> Eksekusi ke Placement.
 
 ---
 
-## 6. Academic Integration & Automation -> **@Insan**
+## 5. Tracker & Auto-Report Automation -> **@Insan**
 
-*Integrasi dengan kebutuhan administratif kampus (MBKM).*
+*Pencatatan aktivitas magang untuk otomatisasi pelaporan.*
 
-### 6.1 Document Automation
+### 5.1 Placement Management
 
-* [ ] **Request Surat Pengantar:** Form request surat resmi.
-* *Schema Ref:* Insert `document_requests`.
+* [ ] **Placement Activation:** Sistem otomatis (atau via verifikasi Admin) membuat rekaman penempatan saat lamaran valid disetujui.
+* *Schema Ref:* Insert `public.placements`.
 
-* [ ] **PDF Generator Worker:** Script Python membuat PDF surat, upload storage, update URL.
-* *Tech:* ReportLab/WeasyPrint.
-* *Schema Ref:* Update `document_requests.generated_url`.
+### 5.2 Activity Logging
 
-### 6.2 SKS Conversion & Export
+* [ ] **Daily Log Entry:** Mahasiswa menginput tanggal, jam, draf mentah kegiatan, dan lampiran.
+* *Schema Ref:* Insert `public.activity_logs` (mengisi `description_raw`).
+* [ ] **[AI] Log Enhancer Worker:** Menyunting tata bahasa draf kegiatan menjadi struktur bahasa profesional secara asinkron.
+* *Tech:* Agno Agent membaca `description_raw` -> Output -> Update `public.activity_logs.description_ai_enhanced`.
 
-* [ ] **Activity to Course Mapping:** Mahasiswa memilih mata kuliah untuk dikonversi dari magang.
-* *Schema Ref:* Insert `placement_course_conversions`.
+### 5.3 Auto-Report Generator
 
-* [ ] **SKS Calculation Engine:** Agregasi jam logbook vs bobot SKS mata kuliah.
-* *Schema Ref:* Validasi `sum(duration)` vs `master_courses.sks_weight`.
+* [ ] **Generate Final Report:** Agregasi seluruh logbook yang telah disempurnakan AI menjadi satu dokumen siap cetak.
+* *Tech:* Python Pandas + ReportLab (mengonversi data SQL ke PDF/Excel template kampus).
+* *Schema Ref:* Caching URL di `public.placements.auto_generated_report_url`.
 
-* [ ] **Logbook Export (CSV/Excel):** Konversi data logbook ke format Portal Kampus Merdeka.
-* *Tech:* Pandas DataFrame -> Excel Stream.
+---
+
+## 6. Analytics & Utilities -> **@Insan**
+
+*Fitur pendukung administratif dan eksplorasi data.*
+
+### 6.1 Internship Distribution
+
+* [ ] **Alumni Distribution Dashboard:** Menampilkan perusahaan mana yang paling banyak menerima mahasiswa dari prodi terkait.
+* *Schema Ref:* Query view `public.view_internship_distribution`.
+
+### 6.2 Document Requests
+
+* [ ] **Request Surat Pengantar:** Formulir permohonan surat rekomendasi kampus untuk keperluan pelamaran.
+* *Schema Ref:* Insert `public.document_requests`.
+* [ ] **PDF Surat Generator:** Script mengonversi permohonan menjadi surat resmi ber-kop, mengunggah ke penyimpanan, dan mengembalikan tautan unduh.
+* *Schema Ref:* Update `public.document_requests.generated_url`.
 
 ---
 
 ## 7. Notification System -> **@Peka**
 
-*Sistem komunikasi terpusat.*
+*Sistem komunikasi asinkron.*
 
 ### 7.1 Queue Management
 
-* [ ] **Create Notification:** Service internal membuat notifikasi (misal: Status berubah).
-* *Schema Ref:* Insert `notification_queue` (Status: `QUEUED`).
-
-* [ ] **In-App Inbox:** API untuk list notifikasi user.
-* *Schema Ref:* Query `notification_queue`.
+* [ ] **Create Notification:** Menampung antrean pesan notifikasi (misal: "Laporan otomatis Anda sudah siap diunduh").
+* *Schema Ref:* Insert `public.notification_queue` (Status: `QUEUED`).
+* [ ] **In-App Inbox:** API membaca daftar notifikasi aktif untuk pengguna.
+* *Schema Ref:* Query `public.notification_queue`.
 
 ### 7.2 Workers
 
-* [ ] **Email Sender Worker:** Background task membaca queue -> kirim email (SMTP) -> update status `SENT`.
-* [ ] **Daily Reminder:** Cron job cek deadline milestone -> buat notifikasi H-1.
-* *Logic:* Query `placement_milestones` due date.
+* [ ] **Email Sender Worker:** Background task membaca antrean, mengirimkan email via SMTP, dan mengubah status ke `SENT`.
+* [ ] **Garbage Collector Worker:** Cron job membersihkan token kedaluwarsa secara berkala.
+* *Schema Ref:* Delete pada `auth.user_refresh_tokens` dan `auth.auth_action_tokens` (berdasarkan Index Parsial).

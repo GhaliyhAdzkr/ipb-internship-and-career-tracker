@@ -1,22 +1,37 @@
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import Column, String, text, PrimaryKeyConstraint, UniqueConstraint
-from sqlalchemy.orm import relationship
+"""
+Model: public.master_skills
+Pustaka keahlian terstandarisasi untuk Matching Engine.
+"""
 
-from app_backend.shared.database import Base
+from __future__ import annotations
+
+import uuid
+from typing import TYPE_CHECKING, Optional
+
+from sqlalchemy import String, UniqueConstraint, Uuid, text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app_backend.models.base import Base
+
+if TYPE_CHECKING:
+    from app_backend.models.student_skills import StudentSkills
+    from app_backend.models.vacancy_skills import VacancySkills
 
 
 class MasterSkills(Base):
-    """ORM Model for master_skills table"""
-    
-    __tablename__ = 'master_skills'
-    __table_args__ = (
-        PrimaryKeyConstraint('id', name='master_skills_pkey'),
-        UniqueConstraint('name', name='master_skills_name_key')
+    __tablename__ = "master_skills"
+    __table_args__ = (UniqueConstraint("name", name="master_skills_name_key"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, primary_key=True, server_default=text("public.gen_random_uuid()")
     )
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    category: Mapped[Optional[str]] = mapped_column(String(50))
 
-    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text('gen_random_uuid()'))
-    name = Column(String(100), nullable=False)
-    category = Column(String(50))
-
-    student_skills = relationship('StudentSkills', back_populates='skill')
-    vacancy_skills = relationship('VacancySkills', back_populates='skill')
+    # Relationships
+    student_skills: Mapped[list["StudentSkills"]] = relationship(
+        "StudentSkills", back_populates="skill"
+    )
+    vacancy_skills: Mapped[list["VacancySkills"]] = relationship(
+        "VacancySkills", back_populates="skill"
+    )

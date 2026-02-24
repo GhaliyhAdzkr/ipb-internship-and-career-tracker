@@ -2,15 +2,15 @@
 Load Fixtures Script
 Script untuk populate database dengan data dummy untuk testing
 """
+
 import uuid
 
 import click
+from faker import Faker
 
 from app_backend.models.user import UserModel
-from app_backend.shared.database import Base, engine, SessionLocal
+from app_backend.shared.database import Base, SessionLocal, engine
 from app_backend.shared.security import hash_password
-
-from faker import Faker
 
 fake = Faker()
 
@@ -18,16 +18,16 @@ fake = Faker()
 @click.command()
 def load_fixtures():
     """Load fixtures ke database"""
-    click.echo('Load fixtures dimulai')
+    click.echo("Load fixtures dimulai")
     Base.metadata.drop_all(bind=engine)
-    click.echo('Semua tabel berhasil dihapus')
+    click.echo("Semua tabel berhasil dihapus")
     Base.metadata.create_all(bind=engine)
-    click.echo('Semua tabel berhasil dibuat')
+    click.echo("Semua tabel berhasil dibuat")
 
     try:
         with SessionLocal.begin() as db:
-            click.echo('Mulai seeding database dengan data dummy')
-            
+            click.echo("Mulai seeding database dengan data dummy")
+
             # Buat test users
             for i in range(5):
                 db.add(
@@ -41,7 +41,7 @@ def load_fixtures():
                         is_verified=fake.boolean(),
                     )
                 )
-            
+
             # Buat default test user
             db.add(
                 UserModel(
@@ -54,20 +54,20 @@ def load_fixtures():
                     is_verified=True,
                 )
             )
-            
-            click.echo('Selesai seeding database dengan data dummy')
+
+            click.echo("Selesai seeding database dengan data dummy")
             db.commit()
-            click.echo('Fixture berhasil dimuat')
-            click.echo('\nKredensial untuk testing:')
-            click.echo('Email: test@example.com')
-            click.echo('Password: Password123')
+            click.echo("Fixture berhasil dimuat")
+            click.echo("\nKredensial untuk testing:")
+            click.echo("Email: test@example.com")
+            click.echo("Password: Password123")
     except Exception as e:
-        click.echo(f'Error: {e}')
+        click.echo(f"Error: {e}")
         db.rollback()
-        click.echo('Error saat load fixtures!!!')
+        click.echo("Error saat load fixtures!!!")
     finally:
         db.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     load_fixtures()

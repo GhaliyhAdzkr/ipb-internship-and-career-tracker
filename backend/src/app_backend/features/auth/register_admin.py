@@ -1,6 +1,8 @@
 """
-Register Student Feature – Command Handler.
-Registrasi mahasiswa: buat auth.users + public.profiles_student dalam satu transaksi.
+Register Admin Feature – Command Handler.
+Registrasi fasilitator/admin: buat auth.users + public.profiles_admin dalam satu transaksi.
+Endpoint ini sebaiknya hanya dipanggil oleh super-admin yang sudah login,
+atau dari internal script seeding.
 """
 
 from __future__ import annotations
@@ -13,23 +15,23 @@ from typing import Optional
 from sqlalchemy.orm import Session
 
 from app_backend.domain.user import UserRole
-from app_backend.models.profiles_student import ProfilesStudent
+from app_backend.models.profiles_admin import ProfilesAdmin
 from app_backend.models.users import Users
-from app_backend.schemas.user import StudentRegister, UserResponse
+from app_backend.schemas.user import AdminRegister, UserResponse
 from app_backend.shared.security import hash_password
 
 
-class RegisterStudentException(Exception):
+class RegisterAdminException(Exception):
     pass
 
 
 @dataclass
-class RegisterStudentCommand:
-    payload: StudentRegister
+class RegisterAdminCommand:
+    payload: AdminRegister
 
 
 @dataclass
-class RegisterStudentResult:
+class RegisterAdminResult:
     user: Optional[UserResponse] = None
     error_message: Optional[str] = None
 
@@ -37,26 +39,27 @@ class RegisterStudentResult:
         return self.error_message is not None
 
 
-def register_student_command_handler(
-    command: RegisterStudentCommand,
+def register_admin_command_handler(
+    command: RegisterAdminCommand,
     session: Session,
-) -> RegisterStudentResult:
+) -> RegisterAdminResult:
     """
     Business Rules:
     1. Email harus unik (cek auth.users).
-    2. NIM harus unik (cek profiles_student).
-    3. Role di-hardcode ke STUDENT – tidak bisa diubah dari client.
-    4. user dan profile_student dibuat dalam satu transaksi atomik.
+    2. NIP boleh None; jika diisi harus unik.
+    3. Role di-hardcode ke ADMIN – tidak bisa diubah dari client.
+    4. users dan profiles_admin dibuat dalam satu transaksi atomik.
     """
     if session.query(Users).filter(Users.email == command.payload.email).first():
-        return RegisterStudentResult(error_message="Email sudah terdaftar")
+        return RegisterAdminResult(error_message="Email sudah terdaftar")
 
-    if (
-        session.query(ProfilesStudent)
-        .filter(ProfilesStudent.nim == command.payload.nim)
-        .first()
-    ):
-        return RegisterStudentResult(error_message="NIM sudah terdaftar")
+    if command.payload.nip:
+        if (
+            session.query(ProfilesAdmin)
+            .filter(ProfilesAdmin.nip == command.payload.nip)
+            .first()
+        ):
+            return RegisterAdminResult(error_message="NIP sudah terdaftar")
 
     try:
         now = datetime.now(timezone.utc)
@@ -66,18 +69,17 @@ def register_student_command_handler(
             id=user_id,
             email=command.payload.email,
             password_hash=hash_password(command.payload.password),
-            role=UserRole.STUDENT.value,  # HARDCODED – tidak bisa dari client
+            role=UserRole.ADMIN.value,  # HARDCODED
             is_active=True,
             created_at=now,
             updated_at=now,
         )
 
-        profile = ProfilesStudent(
+        profile = ProfilesAdmin(
             user_id=user_id,
-            nim=command.payload.nim,
             full_name=command.payload.full_name,
-            semester=command.payload.semester,
-            is_mbkm_eligible=True,
+            unit_name=command.payload.unit_name,
+            nip=command.payload.nip,
             updated_at=now,
         )
 
@@ -87,7 +89,7 @@ def register_student_command_handler(
         session.commit()
         session.refresh(user)
 
-        return RegisterStudentResult(
+        return RegisterAdminResult(
             user=UserResponse(
                 id=user.id,
                 email=user.email,
@@ -101,7 +103,7 @@ def register_student_command_handler(
 
     except ValueError as exc:
         session.rollback()
-        return RegisterStudentResult(error_message=str(exc))
+        return RegisterAdminResult(error_message=str(exc))
     except Exception as exc:
         session.rollback()
-        return RegisterStudentResult(error_message=f"Registrasi gagal: {exc}")
+        return RegisterAdminResult(error_message=f"Registrasi admin gagal: {exc}")
