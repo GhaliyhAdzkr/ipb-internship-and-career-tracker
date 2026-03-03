@@ -4,23 +4,29 @@ Konfigurasi koneksi database dan session SQLAlchemy
 """
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 from app_backend.conf.settings import settings
+from app_backend.models.base import Base
+
 
 SQLALCHEMY_DATABASE_URL = settings.db_url
 SQLALCHEMY_DATABASE_TEST_URL = settings.db_test_url
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+# Use SQLAlchemy 2.0 style engine (future flag is optional but explicit)
+engine = create_engine(SQLALCHEMY_DATABASE_URL, future=True)
 
 SessionLocal = sessionmaker(
     autocommit=settings.session_auto_commit,
     autoflush=settings.session_auto_flush,
     bind=engine,
+    future=True,
 )
 
-Base = declarative_base()
+# Re-use the project's Declarative Base (defined in app_backend.models.base)
+# This prevents having two different Base classes which can confuse Alembic
+# and model imports.
+# Base is imported above from app_backend.models.base
 
 
 def get_session():

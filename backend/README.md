@@ -2,7 +2,7 @@
 
 ## Deskripsi
 
-Backend API untuk aplikasi IPB Internship and Career Tracker menggunakan FastAPI dengan Vertical Slice Architecture dan pemisahan ORM Models dan Domain Models.
+Backend API untuk aplikasi IPB Internship and Career Tracker menggunakan FastAPI dengan Vertical Slice Architecture (Domain Driven Design).
 
 ## Struktur Lengkap
 
@@ -11,27 +11,27 @@ backend/
 ├── src/
 │   └── app_backend/
 │       ├── conf/              # Konfigurasi aplikasi
-│       ├── domain/            # Domain models dan business logic
+│       ├── domain/            # Model domain dan business logic
 │       ├── features/          # Fitur-fitur aplikasi (vertical slices)
-│       ├── models/            # ORM models (database)
-│       ├── routers/           # API endpoints
-│       ├── schemas/           # Pydantic schemas (request/response)
-│       ├── scripts/           # Script utility
-│       ├── shared/            # Shared utilities dan helpers
+│       ├── models/            # Model ORM (database)
+│       ├── routers/           # Endpoint API
+│       ├── schemas/           # Schema Pydantic (request/response)
+│       ├── scripts/           # Script utilitas
+│       ├── shared/            # Utilitas bersama dan helper
 │       └── main.py            # Entry point aplikasi
 └── tests/                     # Unit dan integration tests
 ```
 
 ## Cara Menjalankan
 
-### Pre-requisites
+### Prasyarat
 
 - Python 3.11+
 - Poetry 1.2+
 - Docker & Docker Compose
 - PostgreSQL 15
 
-### Environment Variables
+### Variabel Lingkungan
 
 ```env
 DB_URL=postgresql://user:password@localhost:5432/internship_career_tracker
@@ -43,28 +43,23 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 
 ### Menjalankan Aplikasi
 
-Jalankan container Docker:
+Instal dependensi:
 
 ```bash
-make up
+make install
 ```
 
-Hentikan container Docker:
-
-```bash
-make down
-```
-
-Jalankan server lokal:
+Jalankan server lokal (development):
 
 ```bash
 make dev
 ```
 
-Isi database dengan data palsu:
+Jalankan formator dan linter:
 
 ```bash
-make load-fixtures
+make format
+make lint
 ```
 
 Jalankan tes:
@@ -79,23 +74,42 @@ Jalankan tes dengan coverage:
 make coverage
 ```
 
-Jalankan tes dengan coverage fitur:
+Server: <http://localhost:8000>
+Dokumentasi API: <http://localhost:8000/docs>
+
+## Database & Migrasi
+
+- Model ORM SQLAlchemy di `src/app_backend/models` adalah sumber kebenaran tunggal untuk skema.
+- Migrasi Alembic tersimpan di `backend/alembic/versions`.
+
+Perintah umum (jalankan di `backend/`):
 
 ```bash
-make coverage-features
+# buat migrasi baru dari perubahan model
+poetry run alembic revision --autogenerate -m "deskripsi perubahan"
+
+# terapkan migrasi ke DATABASE_URL yang dikonfigurasi
+poetry run alembic upgrade head
+
+# tandai database yang sudah ada sesuai head saat ini (hanya gunakan di production)
+poetry run alembic stamp 0001_models_initial
 ```
 
-Server: <http://localhost:8000>
-API Docs: <http://localhost:8000/docs>
+Untuk pengembangan, kami merekomendasikan menjalankan aplikasi dengan Poetry (Docker tidak diperlukan):
+
+```bash
+poetry install
+export DATABASE_URL="<url database lokal atau server Anda>"
+poetry run uvicorn app_backend.main:app --reload
+```
 
 ## Prinsip Desain Sistem
 
-1. Vertical Slice Architecture
-2. Domain-Driven Design
-3. CQRS Pattern
-4. Dependency Injection
+1. Vertical Slice Architecture [Referensi](https://www.jimmybogard.com/vertical-slice-architecture/)
+2. Domain-Driven Design (Object-Oriented Domain Modeling) [Referensi](https://en.wikipedia.org/wiki/Domain-driven_design)
+3. CQRS Pattern [Referensi](https://learn.microsoft.com/en-us/azure/architecture/patterns/cqrs)
 
-## Dependencies
+## Dependensi
 
 - FastAPI
 - SQLAlchemy
@@ -105,3 +119,4 @@ API Docs: <http://localhost:8000/docs>
 - python-jose[cryptography]
 - email-validator
 - psycopg2-binary
+
