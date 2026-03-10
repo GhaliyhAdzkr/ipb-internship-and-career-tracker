@@ -1,12 +1,48 @@
-*venv/
-*__pycache__/
+# Frontend
+node_modules/
+dist/
+build/
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+bun.lockb
 
-*.DS_Store
-
+# Backend
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+.env
+.pytest_cache/
+htmlcov/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
 *.ruff_cache
 *.mypy_cache
 
+# IDEs
 .factory
 .trae
 .vscode
-,idea
+.idea
+.project
+.settings
+.classpath
+*.swp
+*.swo
+
+# OS generated files
+*.DS_Store
+*__MACOSX
+*Thumbs.db
