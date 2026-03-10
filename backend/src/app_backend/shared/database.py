@@ -36,3 +36,8 @@ def get_session():
         yield session
     finally:
         session.close()
+
+
+def get_database_url() -> str:
+    """Get database URL untuk task workers"""
+    return SQLALCHEMY_DATABASE_URL

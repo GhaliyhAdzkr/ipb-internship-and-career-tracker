@@ -5,3 +5,8 @@
 
 *.ruff_cache
 *.mypy_cache
+
+.factory
+.trae
+.vscode
+,idea

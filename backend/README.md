@@ -33,13 +33,11 @@ backend/
 
 ### Variabel Lingkungan
 
-```env
-DB_URL=postgresql://user:password@localhost:5432/internship_career_tracker
-DB_TEST_URL=postgresql://user:password@localhost:5432/internship_career_tracker_test
-SECRET_KEY=your-secret-key-here-change-in-production
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
+```bash
+cp .env.example .env
 ```
+
+Edit `.env` sesuai kebutuhan.
 
 ### Menjalankan Aplikasi
 

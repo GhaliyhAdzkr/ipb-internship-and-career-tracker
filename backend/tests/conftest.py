@@ -22,11 +22,13 @@ from fastapi.testclient import TestClient
 
 from app_backend.domain.user import User as DomainUser
 from app_backend.domain.user import UserRole
+from app_backend.domain.student import Student as DomainStudent
 from app_backend.main import app
 from app_backend.shared.database import get_session
-from app_backend.shared.dependencies import (get_current_active_user,
-                                             get_current_user, require_admin,
-                                             require_student)
+from app_backend.shared.dependencies import (get_current_active_student,
+                                             get_current_active_user,
+                                             get_current_user, get_current_student,
+                                             require_admin, require_student)
 
 # ─── Fixed IDs used across tests ─────────────────────────────────────────────
 
@@ -51,6 +53,23 @@ def make_student_user() -> DomainUser:
         is_active=True,
         last_login_at=NOW,
         created_at=NOW,
+        updated_at=NOW,
+    )
+
+
+def make_student_domain() -> DomainStudent:
+    """Create Student domain object for wishlist tests."""
+    return DomainStudent(
+        user_id=STUDENT_USER_ID,
+        nim="G1234567890",
+        full_name="Budi Santoso",
+        semester=5,
+        department_id=DEPT_ID,
+        gpa=None,
+        phone_number="+6281234567890",
+        linkedin_url="https://linkedin.com/in/budi",
+        cv_url="https://example.com/cv.pdf",
+        is_mbkm_eligible=True,
         updated_at=NOW,
     )
 
@@ -111,9 +130,12 @@ def client_no_auth(mock_session) -> Generator[TestClient, None, None]:
 def client_as_student(mock_session) -> Generator[TestClient, None, None]:
     """TestClient authenticated as a STUDENT."""
     student = make_student_user()
+    student_domain = make_student_domain()
     app.dependency_overrides[get_session] = lambda: mock_session
     app.dependency_overrides[get_current_user] = lambda: student
     app.dependency_overrides[get_current_active_user] = lambda: student
+    app.dependency_overrides[get_current_student] = lambda: student_domain
+    app.dependency_overrides[get_current_active_student] = lambda: student_domain
     app.dependency_overrides[require_student] = lambda: student
     with TestClient(app) as c:
         yield c
