@@ -462,8 +462,8 @@ def test_add_wishlist_success(client_as_student):
     assert resp.json()["vacancy_id"] == str(VACANCY_ID)
 
 
-def test_add_wishlist_as_admin_forbidden(client_as_admin):
-    resp = client_as_admin.post("/api/v1/wishlist", json=WISHLIST_PAYLOAD)
+def test_add_wishlist_as_admin_forbidden(client_as_admin_for_student_only):
+    resp = client_as_admin_for_student_only.post("/api/v1/wishlist", json=WISHLIST_PAYLOAD)
     assert resp.status_code == 403
 
 
@@ -504,8 +504,8 @@ def test_list_wishlist_success(client_as_student):
     assert "items" in resp.json()
 
 
-def test_list_wishlist_as_admin_forbidden(client_as_admin):
-    resp = client_as_admin.get("/api/v1/wishlist")
+def test_list_wishlist_as_admin_forbidden(client_as_admin_for_student_only):
+    resp = client_as_admin_for_student_only.get("/api/v1/wishlist")
     assert resp.status_code == 403
 
 

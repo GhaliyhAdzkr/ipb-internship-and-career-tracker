@@ -17,6 +17,7 @@ from unittest.mock import MagicMock
 # Harus di-set SEBELUM import app agar lifespan tidak memanggil create_all
 os.environ["TESTING"] = "1"
 
+from fastapi import HTTPException, status
 import pytest
 from fastapi.testclient import TestClient
 
@@ -150,6 +151,26 @@ def client_as_admin(mock_session) -> Generator[TestClient, None, None]:
     app.dependency_overrides[get_current_user] = lambda: admin
     app.dependency_overrides[get_current_active_user] = lambda: admin
     app.dependency_overrides[require_admin] = lambda: admin
+    with TestClient(app) as c:
+        yield c
+    app.dependency_overrides.clear()
+
+@pytest.fixture
+def client_as_admin_for_student_only(mock_session):
+    admin = make_admin_user()
+
+    async def _forbidden_student_dep():
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Akses ditolak. Hanya STUDENT.",
+        )
+
+    app.dependency_overrides[get_session] = lambda: mock_session
+    app.dependency_overrides[get_current_user] = lambda: admin
+    app.dependency_overrides[get_current_active_user] = lambda: admin
+    app.dependency_overrides[require_admin] = lambda: admin
+    app.dependency_overrides[get_current_active_student] = _forbidden_student_dep
+
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()
