@@ -41,7 +41,7 @@ from tests.conftest import (
 #  Test Data
 # ════════════════════════════════════════════════════════════════════════════
 
-VACANCY_ID = uuid.UUID("fffffff-ffff-ffff-ffff-ffffffffffff")
+VACANCY_ID = uuid.UUID("ffffffff-ffff-ffff-ffff-ffffffffffff")
 
 
 VACANCY_PAYLOAD = {
@@ -426,7 +426,7 @@ def test_delete_vacancy_not_found(client_as_admin):
 # ════════════════════════════════════════════════════════════════════════════
 
 
-WISHLIST_ID = uuid.UUID("ggggggg-gggg-gggg-gggg-gggggggggggg")
+WISHLIST_ID = uuid.UUID("99999999-9999-9999-9999-999999999999")
 
 
 def _make_wishlist_orm(wishlist_id=WISHLIST_ID, student_id=STUDENT_USER_ID):
