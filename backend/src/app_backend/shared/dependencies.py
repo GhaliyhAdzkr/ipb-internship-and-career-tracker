@@ -71,8 +71,14 @@ async def get_current_student(
 
     # Get user and check role
     user = session.query(Users).filter(Users.id == user_id).first()
-    if user is None or user.role != "STUDENT":
+    if user is None:
         raise credentials_exception
+
+    if user.role != "STUDENT":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Akses ditolak. Hanya STUDENT.",
+        )
 
     # Get student profile
     profile = session.query(ProfilesStudent).filter(ProfilesStudent.user_id == user_id).first()

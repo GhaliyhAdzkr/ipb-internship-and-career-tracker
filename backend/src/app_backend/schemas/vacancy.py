@@ -188,15 +188,13 @@ class VacancyListResponse(BaseModel):
 
 class VacancySearchFilter(BaseModel):
     """Filter untuk pencarian vacancy"""
+    model_config = ConfigDict(populate_by_name=True, validate_by_name=True)
 
     query: Optional[str] = Field(None, description="Kata kunci pencarian")
     location: Optional[str] = Field(None, description="Filter lokasi")
     vacancy_type: Optional[VacancyType] = Field(None, alias="type")
     payment_type: Optional[PaymentType] = Field(None, alias="payment_type")
     is_active: bool = Field(True, description="Hanya lowongan aktif")
-
-    class Config:
-        populate_by_name = True
 
 
 # ─────────────────────────────────────────────
