@@ -90,7 +90,7 @@
 
 ### 4.1 Application Initialization
 
-* [ ] **Initialize External Apply:** Menekan tombol lamar untuk mengunci CV dan mencatat niat pelamaran sebelum dialihkan ke situs eksternal.
+* [x] **Initialize External Apply:** Menekan tombol lamar untuk mengunci CV dan mencatat niat pelamaran sebelum dialihkan ke situs eksternal.
 * *Schema Ref:* Insert `public.applications` (copy `cv_url` ke `cv_snapshot_url`).
 
 ### 4.2 Self-Reporting Pipeline
