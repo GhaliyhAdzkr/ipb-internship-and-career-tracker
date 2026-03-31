@@ -4,16 +4,14 @@ Script untuk populate database dengan data dummy untuk testing
 """
 
 import uuid
-
 import click
 from faker import Faker
 
-from app_backend.models.user import UserModel
+from app_backend.models.users import Users
 from app_backend.shared.database import Base, SessionLocal, engine
 from app_backend.shared.security import hash_password
 
 fake = Faker()
-
 
 @click.command()
 def load_fixtures():
@@ -28,46 +26,41 @@ def load_fixtures():
         with SessionLocal.begin() as db:
             click.echo("Mulai seeding database dengan data dummy")
 
-            # Buat test users
+            # Buat test students
             for i in range(5):
                 db.add(
-                    UserModel(
+                    Users(
                         id=uuid.uuid4(),
                         email=fake.email(),
-                        username=f"user{i}_{fake.user_name()}",
-                        full_name=fake.name(),
-                        hashed_password=hash_password("Password123"),
-                        is_active=True,
-                        is_verified=fake.boolean(),
+                        password_hash=hash_password("Password123!"),
+                        role="STUDENT",
+                        is_active=True
                     )
                 )
 
-            # Buat default test user
+            # Buat default initial Admin account
             db.add(
-                UserModel(
+                Users(
                     id=uuid.uuid4(),
-                    email="test@example.com",
-                    username="testuser",
-                    full_name="Test User",
-                    hashed_password=hash_password("Password123"),
-                    is_active=True,
-                    is_verified=True,
+                    email="admin@example.com",
+                    password_hash=hash_password("Password123!"),
+                    role="ADMIN",
+                    is_active=True
                 )
             )
 
             click.echo("Selesai seeding database dengan data dummy")
             db.commit()
             click.echo("Fixture berhasil dimuat")
-            click.echo("\nKredensial untuk testing:")
-            click.echo("Email: test@example.com")
-            click.echo("Password: Password123")
+            click.echo("\nKredensial Admin untuk testing:")
+            click.echo("Email: admin@example.com")
+            click.echo("Password: Password123!")
     except Exception as e:
         click.echo(f"Error: {e}")
         db.rollback()
         click.echo("Error saat load fixtures!!!")
     finally:
         db.close()
-
 
 if __name__ == "__main__":
     load_fixtures()

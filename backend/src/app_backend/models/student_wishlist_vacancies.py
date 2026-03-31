@@ -47,7 +47,7 @@ class StudentWishlistVacancies(Base):
     )
     student_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
     vacancy_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
-    note: Mapped[Optional[str]] = mapped_column(Text)
+    notes: Mapped[Optional[str]] = mapped_column("note", Text)
     created_at: Mapped[Optional[datetime.datetime]] = mapped_column(
         DateTime(True), server_default=text("CURRENT_TIMESTAMP")
     )
