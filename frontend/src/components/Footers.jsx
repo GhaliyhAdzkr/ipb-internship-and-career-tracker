@@ -1,3 +1,5 @@
+import { FaInstagram, FaLinkedin, FaWhatsapp, FaYoutube } from "react-icons/fa";
+
 function Footers() {
 	return (
 		<div className="text-black bg-[#D9D9D9] h-auto py-10  flex flex-col items-center">
@@ -27,10 +29,10 @@ function Footers() {
                     <div>laras@apps.ipb.ac.id</div>
                     <div>larasipb@apps.ipb.ac.id</div>
                     <div className="flex gap-3.5 mt-2">
-                        <img src="src\assets\instagram.svg" alt="" />
-                        <img src="src\assets\linkedin.svg" alt="" />
-                        <img src="src\assets\whatsapp.svg" alt="" />
-                        <img src="src\assets\youtube.svg" alt="" />
+						<FaInstagram size={30} />
+						<FaLinkedin size={30} />
+						<FaWhatsapp size={30} />
+						<FaYoutube size={30} />
                     </div>
 				</div>
 			</div>

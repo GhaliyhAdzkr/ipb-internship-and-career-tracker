@@ -10,21 +10,21 @@
 
 ### 1.1 Authentication & Security (Schema: auth)
 
-* [ ] **Register (Sign Up):** Pendaftaran user baru dengan hashing password (bcrypt).
+* [x] **Register (Sign Up):** Pendaftaran user baru dengan hashing password (bcrypt).
 * *Schema Ref:* Insert ke `auth.users`.
-* [ ] **JWT Login (Sign In):** Autentikasi kredensial. Menghasilkan Stateless Access Token dan Stateful Refresh Token.
+* [x] **JWT Login (Sign In):** Autentikasi kredensial. Menghasilkan Stateless Access Token dan Stateful Refresh Token.
 * *Schema Ref:* Read `auth.users`, insert `auth.user_refresh_tokens`, update `last_login_at`.
-* [ ] **Token Rotation & Refresh:** Endpoint untuk memperbarui Access Token menggunakan Refresh Token.
+* [x] **Token Rotation & Refresh:** Endpoint untuk memperbarui Access Token menggunakan Refresh Token.
 * *Schema Ref:* Query & Update `auth.user_refresh_tokens`.
-* [ ] **Role-Based Access Control (RBAC):** Middleware membatasi endpoint secara ketat hanya untuk `ADMIN` dan `STUDENT`.
-* [ ] **Device Session Logout:** Mencabut (revoke) sesi perangkat spesifik atau seluruh perangkat.
+* [x] **Role-Based Access Control (RBAC):** Middleware membatasi endpoint secara ketat hanya untuk `ADMIN` dan `STUDENT`.
+* [x] **Device Session Logout:** Mencabut (revoke) sesi perangkat spesifik atau seluruh perangkat.
 * *Schema Ref:* Update `auth.user_refresh_tokens.is_revoked`.
 
 ### 1.2 User Utilities
 
-* [ ] **Password Reset (Action Tokens):** Mekanisme reset sandi menggunakan token sekali pakai yang dikirim via email.
+* [x] **Password Reset (Action Tokens):** Mekanisme reset sandi menggunakan token sekali pakai yang dikirim via email.
 * *Schema Ref:* Insert/Update `auth.auth_action_tokens`.
-* [ ] **Account Activation:** Admin dapat menonaktifkan pengguna bermasalah.
+* [x] **Account Activation:** Admin dapat menonaktifkan pengguna bermasalah.
 * *Schema Ref:* Update `auth.users.is_active`.
 
 ---
@@ -35,27 +35,27 @@
 
 ### 2.1 Master Data (Admin)
 
-* [ ] **Manage Departments:** CRUD data Program Studi dan Fakultas.
+* [x] **Manage Departments:** CRUD data Program Studi dan Fakultas.
 * *Schema Ref:* `public.master_departments`.
-* [ ] **Manage External Companies:** Katalogisasi perusahaan untuk referensi lowongan (Middleman data).
+* [x] **Manage External Companies:** Katalogisasi perusahaan untuk referensi lowongan (Middleman data).
 * *Schema Ref:* `public.master_external_companies`.
-* [ ] **Manage Master Skills:** Standarisasi pustaka keahlian untuk *Matching Engine*.
+* [x] **Manage Master Skills:** Standarisasi pustaka keahlian untuk *Matching Engine*.
 * *Schema Ref:* `public.master_skills`.
 
 ### 2.2 Student Profile (Mahasiswa)
 
-* [ ] **Basic Setup & Academic Sync:** Input NIM, Nama, Semester, dan relasi ke Prodi.
+* [x] **Basic Setup & Academic Sync:** Input NIM, Nama, Semester, dan relasi ke Prodi.
 * *Schema Ref:* `public.profiles_student`.
-* [ ] **CV Upload:** Upload dokumen ke Object Storage, simpan URL.
+* [x] **CV Upload:** Upload dokumen ke Object Storage, simpan URL.
 * *Schema Ref:* Update `public.profiles_student.cv_url`.
-* [ ] **Manage Skills:** Penandaan (*tagging*) keahlian teknis/non-teknis yang dimiliki mahasiswa.
+* [x] **Manage Skills:** Penandaan (*tagging*) keahlian teknis/non-teknis yang dimiliki mahasiswa.
 * *Schema Ref:* `public.student_skills`.
 * [ ] **[AI] CV Parser:** Ekstrak keahlian otomatis dari file PDF CV mahasiswa.
 * *Tech:* Agno Agent membaca PDF -> Output JSON Skills -> Insert `public.student_skills`.
 
 ### 2.3 Admin Profile (Fasilitator)
 
-* [ ] **Admin Setup:** Input NIP, Nama Lengkap, dan Unit Kerja (contoh: CDA IPB).
+* [x] **Admin Setup:** Input NIP, Nama Lengkap, dan Unit Kerja (contoh: CDA IPB).
 * *Schema Ref:* `public.profiles_admin`.
 
 ---
@@ -66,20 +66,20 @@
 
 ### 3.1 Vacancy Management (Admin)
 
-* [ ] **Post External Vacancy:** Posting lowongan yang ditemukan di internet ke dalam sistem (termasuk tipe kompensasi `PAID`/`UNPAID`).
+* [x] **Post External Vacancy:** Posting lowongan yang ditemukan di internet ke dalam sistem (termasuk tipe kompensasi `PAID`/`UNPAID`).
 * *Schema Ref:* Insert `public.vacancies` & `public.vacancy_skills`.
 * [ ] **Vacancy Scraper Worker:** Background task yang menarik metadata lowongan dari portal publik secara otomatis.
 * *Schema Ref:* Insert `public.vacancies` (is_scraped = TRUE).
-* [ ] **Auto-Close Scheduler:** Pekerja latar belakang menutup lowongan yang melewati `close_date`.
+* [x] **Auto-Close Scheduler:** Pekerja latar belakang menutup lowongan yang melewati `close_date`.
 * *Schema Ref:* Update `public.vacancies.is_active`.
 
 ### 3.2 Student Discovery
 
-* [ ] **Advanced Job Search:** Filter lowongan berdasarkan Lokasi, Tipe, dan Kompensasi.
+* [x] **Advanced Job Search:** Filter lowongan berdasarkan Lokasi, Tipe, dan Kompensasi.
 * *Schema Ref:* Query `public.vacancies`.
-* [ ] **Save Job (Wishlist):** Menyimpan lowongan incaran beserta catatan pengingat pribadi.
+* [x] **Save Job (Wishlist):** Menyimpan lowongan incaran beserta catatan pengingat pribadi.
 * *Schema Ref:* Insert `public.student_wishlist_vacancies`.
-* [ ] **[AI] Job Matching:** Menghitung persentase kecocokan profil pelamar dengan prasyarat lowongan.
+* [x] **[AI] Job Matching:** Menghitung persentase kecocokan profil pelamar dengan prasyarat lowongan.
 * *Logic:* Bandingkan `student_skills` vs `vacancy_skills`.
 
 ---
