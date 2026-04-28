@@ -37,6 +37,7 @@ RUN groupadd -g 1000 app && useradd -r -u 1000 -g app -m -d /home/app app
 
 ENV VIRTUAL_ENV=/opt/venv
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+ENV PYTHONPATH=/app/src
 ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app

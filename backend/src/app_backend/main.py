@@ -67,6 +67,15 @@ async def root():
     }
 
 
+@app.get("/api/v1", tags=["root"])
+async def api_v1_root():
+    """API V1 Root endpoint"""
+    return {
+        "message": "IPB Internship and Career Tracker API V1",
+        "version": "1.0.0",
+    }
+
+
 @app.get("/health", tags=["health"])
 async def health_check():
     """Health check endpoint"""
