@@ -411,14 +411,14 @@ Setiap worker didaftarkan di `app/workers/` sebagai Celery task dengan signature
 
 ### Internship Distribution Dashboard
 
-- [ ] Endpoint `GET /analytics/distribution`: Return data distribusi penempatan magang
-- [ ] Query menggunakan view atau agregasi SQL di `public.placements` JOIN `public.master_external_companies` JOIN `public.profiles_student` JOIN `public.master_departments`
-- [ ] Response berisi:
-  - [ ] Top 10 perusahaan berdasarkan jumlah mahasiswa yang diterima
-  - [ ] Breakdown per Program Studi: berapa mahasiswa yang magang di tiap perusahaan
-  - [ ] Breakdown per tipe kompensasi: PAID vs UNPAID
-  - [ ] Tren per semester (berdasarkan `placement.start_date`)
-- [ ] Endpoint mendukung filter `?department_id=` dan `?year=`
+- [x] Endpoint `GET /analytics/distribution`: Return data distribusi penempatan magang
+- [x] Query menggunakan view atau agregasi SQL di `public.placements` JOIN `public.master_external_companies` JOIN `public.profiles_student` JOIN `public.master_departments`
+- [x] Response berisi:
+  - [x] Top 10 perusahaan berdasarkan jumlah mahasiswa yang diterima
+  - [x] Breakdown per Program Studi: berapa mahasiswa yang magang di tiap perusahaan
+  - [x] Breakdown per tipe kompensasi: PAID vs UNPAID
+  - [x] Tren per semester (berdasarkan `placement.start_date`)
+- [x] Endpoint mendukung filter `?department_id=` dan `?year=`
 
 
 ### Admin Reporting Utilities
