@@ -21,21 +21,10 @@ Covers:
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 from unittest.mock import MagicMock, patch
 
-import pytest
-
-from tests.conftest import (
-    ADMIN_USER_ID,
-    COMPANY_ID,
-    NOW,
-    SKILL_ID,
-    STUDENT_USER_ID,
-    make_admin_user,
-    make_mock_session,
-    make_student_user,
-)
+from tests.conftest import COMPANY_ID, NOW, SKILL_ID, STUDENT_USER_ID
 
 # ════════════════════════════════════════════════════════════════════════════
 #  Test Data
@@ -56,9 +45,7 @@ VACANCY_PAYLOAD = {
     "compensation_min": 1000000,
     "compensation_max": 2000000,
     "source_url": "https://example.com/job/123",
-    "skills": [
-        {"skill_id": str(SKILL_ID), "is_mandatory": True}
-    ],
+    "skills": [{"skill_id": str(SKILL_ID), "is_mandatory": True}],
 }
 
 
@@ -286,7 +273,8 @@ def test_get_vacancy_detail_success(client_as_student):
     with patch(
         "app_backend.routers.api.vacancy.get_vacancy_command_handler"
     ) as mock_handler:
-        from app_backend.schemas.vacancy import CompanyInfo, VacancyDetailResponse
+        from app_backend.schemas.vacancy import (CompanyInfo,
+                                                 VacancyDetailResponse)
 
         mock_handler.return_value = MagicMock(
             got_error=lambda: False,
@@ -463,7 +451,9 @@ def test_add_wishlist_success(client_as_student):
 
 
 def test_add_wishlist_as_admin_forbidden(client_as_admin_for_student_only):
-    resp = client_as_admin_for_student_only.post("/api/v1/wishlist", json=WISHLIST_PAYLOAD)
+    resp = client_as_admin_for_student_only.post(
+        "/api/v1/wishlist", json=WISHLIST_PAYLOAD
+    )
     assert resp.status_code == 403
 
 
@@ -518,10 +508,8 @@ def test_get_wishlist_detail_success(client_as_student):
     with patch(
         "app_backend.routers.api.vacancy.get_wishlist_command_handler"
     ) as mock_handler:
-        from app_backend.schemas.wishlist import (
-            VacancySummary,
-            WishlistDetailResponse,
-        )
+        from app_backend.schemas.wishlist import (VacancySummary,
+                                                  WishlistDetailResponse)
 
         mock_handler.return_value = MagicMock(
             got_error=lambda: False,

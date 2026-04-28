@@ -58,6 +58,13 @@ from app_backend.features.admin import (CreateCompanyCommand,
                                         update_company_command_handler,
                                         update_department_command_handler,
                                         update_skill_command_handler)
+from app_backend.features.application import (
+    ListPendingVerificationCommand, RejectApplicationProofCommand,
+    VerifyApplicationCommand, list_pending_verification_command_handler,
+    reject_application_proof_command_handler,
+    verify_application_command_handler)
+from app_backend.features.placement import (
+    ListAdminPlacementsCommand, list_admin_placements_command_handler)
 from app_backend.models.profiles_admin import ProfilesAdmin
 from app_backend.schemas.admin import (AdminProfileResponse,
                                        AdminProfileUpdate, CompanyCreate,
@@ -65,20 +72,13 @@ from app_backend.schemas.admin import (AdminProfileResponse,
                                        DepartmentCreate, DepartmentResponse,
                                        DepartmentUpdate, SkillCreate,
                                        SkillResponse, SkillUpdate)
-from app_backend.schemas.user import UserResponse
-from app_backend.schemas.application import (ApplicationResponse, ApplicationVerifyPayload, ApplicationRejectPayload)
+from app_backend.schemas.application import (ApplicationRejectPayload,
+                                             ApplicationResponse,
+                                             ApplicationVerifyPayload)
 from app_backend.schemas.placement import PlacementResponse
-from app_backend.features.application import (
-    ListPendingVerificationCommand, list_pending_verification_command_handler,
-    VerifyApplicationCommand, verify_application_command_handler,
-    RejectApplicationProofCommand, reject_application_proof_command_handler
-)
-from app_backend.features.placement import (
-    ListAdminPlacementsCommand, list_admin_placements_command_handler
-)
+from app_backend.schemas.user import UserResponse
 from app_backend.shared.database import get_session
-from app_backend.shared.dependencies import (get_current_active_user,
-                                             require_admin)
+from app_backend.shared.dependencies import require_admin
 
 router = APIRouter(
     prefix="/api/v1/admin",
@@ -166,8 +166,6 @@ async def update_admin_profile(
 ) -> AdminProfileResponse:
     """Update nama, unit kerja, atau NIP admin yang sedang login."""
     from sqlalchemy.exc import IntegrityError
-
-    from app_backend.models.users import Users
 
     profile = (
         session.query(ProfilesAdmin)
@@ -461,9 +459,11 @@ async def delete_company(
         )
         raise HTTPException(status_code=status, detail=result.error_message)
 
+
 # ──────────────────────────────────────────────────────────────────────────────
 # Manage Applications (Section 4)
 # ──────────────────────────────────────────────────────────────────────────────
+
 
 @router.get(
     "/applications/pending-verification",
@@ -474,10 +474,15 @@ async def list_pending_verification(
     session=Depends(get_session),
     _: DomainUser = Depends(require_admin),
 ) -> List[ApplicationResponse]:
-    result = list_pending_verification_command_handler(ListPendingVerificationCommand(), session)
+    result = list_pending_verification_command_handler(
+        ListPendingVerificationCommand(), session
+    )
     if result.got_error():
-        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=result.error_message)
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST, detail=result.error_message
+        )
     return result.items
+
 
 @router.post(
     "/applications/{application_id}/verify",
@@ -491,16 +496,19 @@ async def verify_application(
 ):
     result = verify_application_command_handler(
         VerifyApplicationCommand(
-            application_id=application_id, 
+            application_id=application_id,
             admin_id=current_admin.id,
             start_date=payload.start_date,
-            end_date=payload.end_date
-        ), 
-        session
+            end_date=payload.end_date,
+        ),
+        session,
     )
     if result.got_error():
-        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=result.error_message)
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST, detail=result.error_message
+        )
     return {"message": "Placement berhasil dibuat", "placement_id": result.placement.id}
+
 
 @router.post(
     "/applications/{application_id}/reject-proof",
@@ -515,19 +523,23 @@ async def reject_application_proof(
 ):
     result = reject_application_proof_command_handler(
         RejectApplicationProofCommand(
-            application_id=application_id, 
+            application_id=application_id,
             admin_id=current_admin.id,
-            reason=payload.reason
-        ), 
-        session
+            reason=payload.reason,
+        ),
+        session,
     )
     if result.got_error():
-        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=result.error_message)
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST, detail=result.error_message
+        )
     return result.application
+
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Manage Placements (Section 5)
 # ──────────────────────────────────────────────────────────────────────────────
+
 
 @router.get(
     "/placements",
@@ -538,7 +550,11 @@ async def list_admin_placements(
     session=Depends(get_session),
     _: DomainUser = Depends(require_admin),
 ) -> List[PlacementResponse]:
-    result = list_admin_placements_command_handler(ListAdminPlacementsCommand(), session)
+    result = list_admin_placements_command_handler(
+        ListAdminPlacementsCommand(), session
+    )
     if result.got_error():
-        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=result.error_message)
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST, detail=result.error_message
+        )
     return result.placements

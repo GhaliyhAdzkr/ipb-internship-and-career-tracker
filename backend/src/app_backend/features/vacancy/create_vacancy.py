@@ -12,7 +12,8 @@ from typing import Optional
 
 from sqlalchemy.orm import Session
 
-from app_backend.models.master_external_companies import MasterExternalCompanies
+from app_backend.models.master_external_companies import \
+    MasterExternalCompanies
 from app_backend.models.vacancies import Vacancies
 from app_backend.models.vacancy_skills import VacancySkills
 from app_backend.schemas.vacancy import VacancyCreate, VacancyResponse
@@ -81,7 +82,9 @@ def create_vacancy_command_handler(
             open_date=payload.open_date,
             close_date=payload.close_date,
             location=payload.location,
-            payment_type=payload.payment_type.value if payload.payment_type else "UNPAID",
+            payment_type=(
+                payload.payment_type.value if payload.payment_type else "UNPAID"
+            ),
             compensation_min=payload.compensation_min,
             compensation_max=payload.compensation_max,
             compensation_note=payload.compensation_note,

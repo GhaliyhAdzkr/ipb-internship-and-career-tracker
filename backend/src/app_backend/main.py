@@ -3,22 +3,24 @@ FastAPI Application
 Entry point aplikasi FastAPI
 """
 
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-import os
 
 import app_backend.models  # noqa: F401 – registrasi semua tabel ke metadata
 from app_backend.models.base import Base
-from app_backend.routers.api import admin, application, auth, profile, vacancy, placement
+from app_backend.routers.api import (admin, application, auth, placement,
+                                     profile, vacancy)
 from app_backend.shared.database import engine
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     import os
+
     # Buat semua tabel saat server start; dilewati ketika TESTING=1
     if not os.environ.get("TESTING"):
         Base.metadata.create_all(bind=engine)

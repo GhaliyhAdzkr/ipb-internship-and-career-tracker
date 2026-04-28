@@ -4,7 +4,6 @@ Menggunakan auth.auth_action_tokens (stateful, one-time token) bukan JWT
 agar token bisa di-invalidate secara eksplisit dan dicegah re-use.
 """
 
-import uuid
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Optional

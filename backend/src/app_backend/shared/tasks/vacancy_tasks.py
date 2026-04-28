@@ -10,7 +10,6 @@ from celery import shared_task
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app_backend.models.base import Base
 from app_backend.models.vacancies import Vacancies
 from app_backend.shared.database import get_database_url
 
@@ -74,11 +73,13 @@ def scrape_vacancies(source_urls: list) -> Dict:
         for url in source_urls:
             # Placeholder: Scrape vacancy dari URL
             # Extract: title, description, company, location, etc.
-            results.append({
-                "source_url": url,
-                "status": "pending",
-                "message": "Scraper not implemented",
-            })
+            results.append(
+                {
+                    "source_url": url,
+                    "status": "pending",
+                    "message": "Scraper not implemented",
+                }
+            )
 
         return {
             "status": "completed",
@@ -104,6 +105,7 @@ def cleanup_old_vacancies(days: int = 90) -> Dict:
 
     try:
         from datetime import timedelta
+
         cutoff_date = datetime.now(timezone.utc) - timedelta(days=days)
 
         # Find old inactive vacancies

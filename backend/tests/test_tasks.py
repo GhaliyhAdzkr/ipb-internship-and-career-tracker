@@ -19,13 +19,10 @@ Covers:
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timedelta, timezone
-from unittest.mock import MagicMock, patch
-
-import pytest
+from datetime import timedelta
+from unittest.mock import patch
 
 from tests.conftest import NOW, STUDENT_USER_ID
-
 
 # ════════════════════════════════════════════════════════════════════════════
 #  AI Tasks Tests
@@ -34,10 +31,9 @@ from tests.conftest import NOW, STUDENT_USER_ID
 
 def test_parse_cv_skills_task():
     """Test CV parsing task returns proper result structure."""
-    from app_backend.shared.tasks.ai_tasks import parse_cv_skills, TaskResult
+    from app_backend.shared.tasks.ai_tasks import TaskResult
 
     student_id = str(STUDENT_USER_ID)
-    cv_url = "https://example.com/cv.pdf"
 
     # Execute task synchronously (celery task delay not needed for testing)
     with patch("app_backend.shared.tasks.ai_tasks.get_llm") as mock_llm:
@@ -61,7 +57,7 @@ def test_parse_cv_skills_task():
 
 def test_enhance_log_description_task():
     """Test log enhancement task improves raw text."""
-    from app_backend.shared.tasks.ai_tasks import enhance_log_description, TaskResult
+    from app_backend.shared.tasks.ai_tasks import TaskResult
 
     log_id = str(uuid.uuid4())
     raw_description = "hari ini saya bantu coding website"
@@ -82,7 +78,7 @@ def test_enhance_log_description_task():
 
 def test_match_job_skills_task():
     """Test job matching calculates correct percentage."""
-    from app_backend.shared.tasks.ai_tasks import match_job_skills, TaskResult
+    from app_backend.shared.tasks.ai_tasks import TaskResult
 
     student_id = str(STUDENT_USER_ID)
     vacancy_id = str(uuid.uuid4())
@@ -111,8 +107,10 @@ def test_match_job_skills_task():
 
 def test_auto_close_expired_vacancies_task():
     """Test auto-close task closes expired vacancies."""
-    from app_backend.shared.tasks.vacancy_tasks import auto_close_expired_vacancies
     from unittest.mock import MagicMock
+
+    from app_backend.shared.tasks.vacancy_tasks import \
+        auto_close_expired_vacancies
 
     # Create mock vacancy
     mock_vacancy = MagicMock()
@@ -120,8 +118,10 @@ def test_auto_close_expired_vacancies_task():
     mock_vacancy.is_auto_close = True
     mock_vacancy.close_date = NOW - timedelta(days=1)  # Expired yesterday
 
-    with patch("app_backend.shared.tasks.vacancy_tasks.create_engine") as mock_engine:
-        with patch("app_backend.shared.tasks.vacancy_tasks.sessionmaker") as mock_sessionmaker:
+    with patch("app_backend.shared.tasks.vacancy_tasks.create_engine") as _:
+        with patch(
+            "app_backend.shared.tasks.vacancy_tasks.sessionmaker"
+        ) as mock_sessionmaker:
             mock_session = MagicMock()
             mock_session.query.return_value.filter.return_value.all.return_value = [
                 mock_vacancy
@@ -157,7 +157,8 @@ def test_scrape_vacancies_task():
 
 def test_send_email_notification_task():
     """Test email notification task."""
-    from app_backend.shared.tasks.notification_tasks import send_email_notification
+    from app_backend.shared.tasks.notification_tasks import \
+        send_email_notification
 
     result = send_email_notification(
         notification_id=str(uuid.uuid4()),
@@ -172,8 +173,10 @@ def test_send_email_notification_task():
 
 def test_cleanup_expired_tokens_task():
     """Test token cleanup task."""
-    from app_backend.shared.tasks.notification_tasks import cleanup_expired_tokens
     from unittest.mock import MagicMock
+
+    from app_backend.shared.tasks.notification_tasks import \
+        cleanup_expired_tokens
 
     # Create mock tokens
     mock_refresh = MagicMock()
@@ -183,8 +186,10 @@ def test_cleanup_expired_tokens_task():
     mock_action = MagicMock()
     mock_action.expires_at = NOW - timedelta(days=1)
 
-    with patch("app_backend.shared.tasks.notification_tasks.create_engine") as mock_engine:
-        with patch("app_backend.shared.tasks.notification_tasks.sessionmaker") as mock_sessionmaker:
+    with patch("app_backend.shared.tasks.notification_tasks.create_engine") as _:
+        with patch(
+            "app_backend.shared.tasks.notification_tasks.sessionmaker"
+        ) as mock_sessionmaker:
             mock_session = MagicMock()
 
             # Setup query chains for refresh tokens
@@ -203,8 +208,10 @@ def test_cleanup_expired_tokens_task():
 
 def test_process_notification_queue_task():
     """Test notification queue processor."""
-    from app_backend.shared.tasks.notification_tasks import process_notification_queue
     from unittest.mock import MagicMock
+
+    from app_backend.shared.tasks.notification_tasks import \
+        process_notification_queue
 
     # Create mock notification
     mock_notif = MagicMock()
@@ -212,8 +219,10 @@ def test_process_notification_queue_task():
     mock_notif.title = "Test"
     mock_notif.message = "Message"
 
-    with patch("app_backend.shared.tasks.notification_tasks.create_engine") as mock_engine:
-        with patch("app_backend.shared.tasks.notification_tasks.sessionmaker") as mock_sessionmaker:
+    with patch("app_backend.shared.tasks.notification_tasks.create_engine") as _:
+        with patch(
+            "app_backend.shared.tasks.notification_tasks.sessionmaker"
+        ) as mock_sessionmaker:
             mock_session = MagicMock()
             mock_session.query.return_value.filter.return_value.limit.return_value.all.return_value = [
                 mock_notif

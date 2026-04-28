@@ -1,8 +1,11 @@
-from dataclasses import dataclass
 import uuid
+from dataclasses import dataclass
 from typing import Optional
+
 from sqlalchemy.orm import Session
+
 from app_backend.models.applications import Applications
+
 
 @dataclass
 class UpdateApplicationStatusCommand:
@@ -12,6 +15,7 @@ class UpdateApplicationStatusCommand:
     proof_url: Optional[str] = None
     reason: Optional[str] = None
 
+
 @dataclass
 class UpdateApplicationStatusResult:
     application: Optional[Applications] = None
@@ -20,16 +24,25 @@ class UpdateApplicationStatusResult:
     def got_error(self) -> bool:
         return self.error_message is not None
 
+
 def update_application_status_command_handler(
     command: UpdateApplicationStatusCommand,
     session: Session,
 ) -> UpdateApplicationStatusResult:
     # Validate transition
-    valid_statuses = ["APPLIED", "SCREENING", "INTERVIEW", "OFFERED", "ACCEPTED", "REJECTED", "WITHDRAWN"]
-    
+    valid_statuses = [
+        "APPLIED",
+        "SCREENING",
+        "INTERVIEW",
+        "OFFERED",
+        "ACCEPTED",
+        "REJECTED",
+        "WITHDRAWN",
+    ]
+
     if command.new_status not in valid_statuses:
         return UpdateApplicationStatusResult(error_message="Status tidak valid")
-        
+
     status_order = {
         "APPLIED": 0,
         "SCREENING": 1,
@@ -37,11 +50,15 @@ def update_application_status_command_handler(
         "OFFERED": 3,
         "ACCEPTED": 4,
         "REJECTED": 4,
-        "WITHDRAWN": 4
+        "WITHDRAWN": 4,
     }
 
-    application = session.query(Applications).filter_by(id=command.application_id, student_id=command.student_id).first()
-    
+    application = (
+        session.query(Applications)
+        .filter_by(id=command.application_id, student_id=command.student_id)
+        .first()
+    )
+
     if not application:
         return UpdateApplicationStatusResult(error_message="Lamaran tidak ditemukan")
 
@@ -58,8 +75,8 @@ def update_application_status_command_handler(
     application._changed_by = command.student_id
     application._reason = command.reason
     application._proof_url = command.proof_url
-    
+
     session.commit()
     session.refresh(application)
-    
+
     return UpdateApplicationStatusResult(application=application)

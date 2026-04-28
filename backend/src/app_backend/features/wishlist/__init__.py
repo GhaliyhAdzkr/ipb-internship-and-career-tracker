@@ -3,30 +3,17 @@ Wishlist Feature Package – Command Handlers untuk student wishlist.
 """
 
 from app_backend.features.wishlist.add_wishlist import (
-    AddWishlistCommand,
-    AddWishlistResult,
-    add_wishlist_command_handler,
-)
+    AddWishlistCommand, AddWishlistResult, add_wishlist_command_handler)
 from app_backend.features.wishlist.delete_wishlist import (
-    DeleteWishlistCommand,
-    DeleteWishlistResult,
-    delete_wishlist_command_handler,
-)
+    DeleteWishlistCommand, DeleteWishlistResult,
+    delete_wishlist_command_handler)
 from app_backend.features.wishlist.get_wishlist import (
-    GetWishlistCommand,
-    GetWishlistResult,
-    get_wishlist_command_handler,
-)
+    GetWishlistCommand, GetWishlistResult, get_wishlist_command_handler)
 from app_backend.features.wishlist.list_wishlist import (
-    ListWishlistCommand,
-    ListWishlistResult,
-    list_wishlist_command_handler,
-)
+    ListWishlistCommand, ListWishlistResult, list_wishlist_command_handler)
 from app_backend.features.wishlist.update_wishlist import (
-    UpdateWishlistCommand,
-    UpdateWishlistResult,
-    update_wishlist_command_handler,
-)
+    UpdateWishlistCommand, UpdateWishlistResult,
+    update_wishlist_command_handler)
 
 __all__ = [
     # Commands

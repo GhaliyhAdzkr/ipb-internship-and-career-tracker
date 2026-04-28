@@ -29,15 +29,12 @@ celery_app.conf.update(
     task_track_started=True,
     task_time_limit=30 * 60,  # 30 minutes max
     task_soft_time_limit=25 * 60,  # 25 minutes soft limit
-    
     # Worker settings
     worker_prefetch_multiplier=4,
     worker_max_tasks_per_child=1000,
-    
     # Result backend settings
     result_expires=3600,  # 1 hour
     result_persistent=True,
-    
     # Task routing
     task_routes={
         "app_backend.shared.tasks.ai_tasks.*": {"queue": "ai"},
@@ -50,10 +47,8 @@ celery_app.conf.update(
 @worker_init.connect
 def init_worker(*args, **kwargs):
     """Initialize worker connections."""
-    pass
 
 
 @worker_shutdown.connect
 def shutdown_worker(*args, **kwargs):
     """Cleanup worker connections."""
-    pass

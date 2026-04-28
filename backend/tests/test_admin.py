@@ -13,10 +13,7 @@ Covers:
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
-from unittest.mock import MagicMock, PropertyMock, patch
-
-import pytest
+from unittest.mock import MagicMock, patch
 
 from tests.conftest import (ADMIN_USER_ID, COMPANY_ID, DEPT_ID, NOW, SKILL_ID,
                             STUDENT_USER_ID)
@@ -389,9 +386,7 @@ def test_list_skills(client_as_admin):
     from app_backend.schemas.admin import SkillResponse
 
     fake = SkillResponse(id=SKILL_ID, name="Python", category="Programming")
-    with patch(
-        "app_backend.routers.api.admin.list_skills_command_handler"
-    ) as mock_h:
+    with patch("app_backend.routers.api.admin.list_skills_command_handler") as mock_h:
         mock_h.return_value = MagicMock(items=[fake])
         resp = client_as_admin.get("/api/v1/admin/skills")
 
@@ -403,9 +398,7 @@ def test_create_skill_success(client_as_admin):
     from app_backend.schemas.admin import SkillResponse
 
     fake = SkillResponse(id=SKILL_ID, name="Python", category="Programming")
-    with patch(
-        "app_backend.routers.api.admin.create_skill_command_handler"
-    ) as mock_h:
+    with patch("app_backend.routers.api.admin.create_skill_command_handler") as mock_h:
         mock_h.return_value = MagicMock(got_error=lambda: False, item=fake)
         resp = client_as_admin.post(
             "/api/v1/admin/skills", json={"name": "Python", "category": "Programming"}
@@ -416,9 +409,7 @@ def test_create_skill_success(client_as_admin):
 
 
 def test_create_skill_conflict(client_as_admin):
-    with patch(
-        "app_backend.routers.api.admin.create_skill_command_handler"
-    ) as mock_h:
+    with patch("app_backend.routers.api.admin.create_skill_command_handler") as mock_h:
         mock_h.return_value = MagicMock(
             got_error=lambda: True,
             error_message="Skill 'Python' sudah terdaftar",
@@ -439,9 +430,7 @@ def test_update_skill_success(client_as_admin):
     from app_backend.schemas.admin import SkillResponse
 
     fake = SkillResponse(id=SKILL_ID, name="Python 3", category="Programming")
-    with patch(
-        "app_backend.routers.api.admin.update_skill_command_handler"
-    ) as mock_h:
+    with patch("app_backend.routers.api.admin.update_skill_command_handler") as mock_h:
         mock_h.return_value = MagicMock(got_error=lambda: False, item=fake)
         resp = client_as_admin.patch(
             f"/api/v1/admin/skills/{SKILL_ID}", json={"name": "Python 3"}
@@ -452,9 +441,7 @@ def test_update_skill_success(client_as_admin):
 
 
 def test_update_skill_not_found(client_as_admin):
-    with patch(
-        "app_backend.routers.api.admin.update_skill_command_handler"
-    ) as mock_h:
+    with patch("app_backend.routers.api.admin.update_skill_command_handler") as mock_h:
         mock_h.return_value = MagicMock(
             got_error=lambda: True,
             error_message="Skill tidak ditemukan",
@@ -467,9 +454,7 @@ def test_update_skill_not_found(client_as_admin):
 
 
 def test_delete_skill_success(client_as_admin):
-    with patch(
-        "app_backend.routers.api.admin.delete_skill_command_handler"
-    ) as mock_h:
+    with patch("app_backend.routers.api.admin.delete_skill_command_handler") as mock_h:
         mock_h.return_value = MagicMock(got_error=lambda: False)
         resp = client_as_admin.delete(f"/api/v1/admin/skills/{SKILL_ID}")
 
@@ -477,9 +462,7 @@ def test_delete_skill_success(client_as_admin):
 
 
 def test_delete_skill_not_found(client_as_admin):
-    with patch(
-        "app_backend.routers.api.admin.delete_skill_command_handler"
-    ) as mock_h:
+    with patch("app_backend.routers.api.admin.delete_skill_command_handler") as mock_h:
         mock_h.return_value = MagicMock(
             got_error=lambda: True,
             error_message="Skill tidak ditemukan",
@@ -647,28 +630,41 @@ def test_company_endpoints_unauthenticated(client_no_auth):
     resp = client_no_auth.get("/api/v1/admin/companies")
     assert resp.status_code == 401
 
+
 # ════════════════════════════════════════════════════════════════════════════
 #  Applications Admin (Phase 4)
 # ════════════════════════════════════════════════════════════════════════════
 
+
 def test_list_pending_verification(client_as_admin):
-    with patch("app_backend.routers.api.admin.list_pending_verification_command_handler") as mock_h:
+    with patch(
+        "app_backend.routers.api.admin.list_pending_verification_command_handler"
+    ) as mock_h:
         mock_h.return_value = MagicMock(got_error=lambda: False, items=[])
         resp = client_as_admin.get("/api/v1/admin/applications/pending-verification")
     assert resp.status_code == 200
 
+
 def test_verify_application_success(client_as_admin):
-    with patch("app_backend.routers.api.admin.verify_application_command_handler") as mock_h:
-        mock_h.return_value = MagicMock(got_error=lambda: False, placement=MagicMock(id=uuid.uuid4()))
+    with patch(
+        "app_backend.routers.api.admin.verify_application_command_handler"
+    ) as mock_h:
+        mock_h.return_value = MagicMock(
+            got_error=lambda: False, placement=MagicMock(id=uuid.uuid4())
+        )
         resp = client_as_admin.post(
             f"/api/v1/admin/applications/{uuid.uuid4()}/verify",
-            json={"start_date": "2026-06-01", "end_date": "2026-08-31"}
+            json={"start_date": "2026-06-01", "end_date": "2026-08-31"},
         )
     assert resp.status_code == 200
 
+
 def test_reject_application_proof_success(client_as_admin):
-    with patch("app_backend.routers.api.admin.reject_application_proof_command_handler") as mock_h:
+    with patch(
+        "app_backend.routers.api.admin.reject_application_proof_command_handler"
+    ) as mock_h:
         from app_backend.schemas.application import ApplicationResponse
+
         mock_h.return_value = MagicMock(
             got_error=lambda: False,
             application=ApplicationResponse(
@@ -676,11 +672,11 @@ def test_reject_application_proof_success(client_as_admin):
                 vacancy_id=uuid.uuid4(),
                 student_id=STUDENT_USER_ID,
                 cv_snapshot_url="https://example.com/cv.pdf",
-                status="OFFERED"
-            )
+                status="OFFERED",
+            ),
         )
         resp = client_as_admin.post(
             f"/api/v1/admin/applications/{uuid.uuid4()}/reject-proof",
-            json={"reason": "Bukti tidak valid"}
+            json={"reason": "Bukti tidak valid"},
         )
     assert resp.status_code == 200

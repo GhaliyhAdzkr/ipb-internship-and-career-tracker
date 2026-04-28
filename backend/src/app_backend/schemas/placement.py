@@ -1,7 +1,9 @@
-import uuid
 import datetime
+import uuid
+from typing import Optional
+
 from pydantic import BaseModel, ConfigDict
-from typing import List, Optional
+
 
 class PlacementResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -15,17 +17,20 @@ class PlacementResponse(BaseModel):
     external_supervisor_name: Optional[str] = None
     status: Optional[str] = None
 
+
 class ActivityLogCreate(BaseModel):
     log_date: datetime.date
     start_time: datetime.time
     end_time: datetime.time
     description_raw: str
 
+
 class ActivityLogUpdate(BaseModel):
     log_date: Optional[datetime.date] = None
     start_time: Optional[datetime.time] = None
     end_time: Optional[datetime.time] = None
     description_raw: Optional[str] = None
+
 
 class ActivityLogResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)

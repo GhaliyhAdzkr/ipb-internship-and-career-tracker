@@ -3,19 +3,19 @@ AI Tasks – Background tasks untuk fitur AI menggunakan LangChain/LangGraph.
 Berjalan di queue terpisah untuk tidak blocking main API.
 """
 
-import uuid
 from typing import Dict, List, Optional
 
 from celery import shared_task
 from langchain.prompts import PromptTemplate
-from langchain.schema import HumanMessage, SystemMessage
 from pydantic import BaseModel
 
 # Simple in-memory LLM (bisa diganti dengan API key untuk production)
 # Untuk production, gunakan: from langchain.chat_models import ChatOpenAI
 
+
 class TaskResult(BaseModel):
     """Result model untuk task"""
+
     success: bool
     result: Optional[Dict] = None
     error: Optional[str] = None
@@ -51,12 +51,16 @@ def parse_cv_skills(
         # 1. Download PDF dari URL
         # 2. Extract text menggunakan pypdf
         # 3. Parse dengan LLM
-        
+
         # Placeholder implementation
         result = {
             "student_id": student_id,
             "extracted_skills": [
-                {"name": "Python", "category": "Programming Language", "confidence": 0.9},
+                {
+                    "name": "Python",
+                    "category": "Programming Language",
+                    "confidence": 0.9,
+                },
                 {"name": "SQL", "category": "Database", "confidence": 0.85},
             ],
             "status": "completed",
@@ -84,7 +88,7 @@ def enhance_log_description(
             return TaskResult(success=False, error="Invalid inputs").dict()
 
         # Prompt untuk enhancement
-        enhance_prompt = PromptTemplate(
+        _ = PromptTemplate(
             input_variables=["raw_text"],
             template="""
 Teks berikut adalah draf kegiatan magang. 
@@ -94,7 +98,7 @@ Tetap jaga makna asli dan pastikan hasil teksnya tidak terlalu panjang, cukup ri
 Draf: {raw_text}
 
 Teks yang sudah diperbaiki:
-"""
+""",
         )
 
         # For now, return placeholder
@@ -155,11 +159,13 @@ def batch_process_cv_parsing(student_ids: List[str]) -> Dict:
     for student_id in student_ids:
         # Get student profile untuk dapat CV URL
         # Process CV dan simpan skills
-        results.append({
-            "student_id": student_id,
-            "status": "queued",
-        })
-    
+        results.append(
+            {
+                "student_id": student_id,
+                "status": "queued",
+            }
+        )
+
     return {
         "total": len(student_ids),
         "processed": 0,

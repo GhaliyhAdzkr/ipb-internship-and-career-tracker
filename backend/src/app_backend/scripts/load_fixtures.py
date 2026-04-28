@@ -4,6 +4,7 @@ Script untuk populate database dengan data dummy untuk testing
 """
 
 import uuid
+
 import click
 from faker import Faker
 
@@ -12,6 +13,7 @@ from app_backend.shared.database import Base, SessionLocal, engine
 from app_backend.shared.security import hash_password
 
 fake = Faker()
+
 
 @click.command()
 def load_fixtures():
@@ -34,7 +36,7 @@ def load_fixtures():
                         email=fake.email(),
                         password_hash=hash_password("Password123!"),
                         role="STUDENT",
-                        is_active=True
+                        is_active=True,
                     )
                 )
 
@@ -45,7 +47,7 @@ def load_fixtures():
                     email="admin@example.com",
                     password_hash=hash_password("Password123!"),
                     role="ADMIN",
-                    is_active=True
+                    is_active=True,
                 )
             )
 
@@ -61,6 +63,7 @@ def load_fixtures():
         click.echo("Error saat load fixtures!!!")
     finally:
         db.close()
+
 
 if __name__ == "__main__":
     load_fixtures()

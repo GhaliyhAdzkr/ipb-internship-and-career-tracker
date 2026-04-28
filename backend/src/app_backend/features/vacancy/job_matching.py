@@ -12,10 +12,8 @@ from typing import List, Optional
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app_backend.models.profiles_student import ProfilesStudent
-from app_backend.models.student_skills import StudentSkills
 from app_backend.models.vacancies import Vacancies
 from app_backend.models.vacancy_skills import VacancySkills
-from app_backend.schemas.vacancy import JobMatchResult
 
 
 class JobMatchingException(Exception):
@@ -25,6 +23,7 @@ class JobMatchingException(Exception):
 @dataclass
 class JobMatchCommand:
     """Command untuk matching single vacancy dengan student."""
+
     student_id: uuid.UUID
     vacancy_id: uuid.UUID
 
@@ -41,6 +40,7 @@ class JobMatchResult:
 @dataclass
 class JobMatchListCommand:
     """Command untuk matching semua vacancy aktif dengan student."""
+
     student_id: uuid.UUID
     page: int = 1
     per_page: int = 10
@@ -159,7 +159,8 @@ def job_match_command_handler(
     # Calculate match
     match_data = _calculate_match(student_skill_ids, vacancy.vacancy_skills)
 
-    from app_backend.schemas.vacancy import JobMatchResult as JobMatchResultSchema
+    from app_backend.schemas.vacancy import \
+        JobMatchResult as JobMatchResultSchema
 
     return JobMatchResult(
         result=JobMatchResultSchema(
@@ -207,7 +208,8 @@ def job_match_list_command_handler(
     )
 
     # Calculate match for each vacancy
-    from app_backend.schemas.vacancy import JobMatchResult as JobMatchResultSchema
+    from app_backend.schemas.vacancy import \
+        JobMatchResult as JobMatchResultSchema
 
     results = []
     for vacancy in vacancies:

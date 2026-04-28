@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 
 from app_backend.models.vacancies import Vacancies
 from app_backend.models.vacancy_skills import VacancySkills
-from app_backend.schemas.vacancy import VacancyUpdate, VacancyResponse
+from app_backend.schemas.vacancy import VacancyResponse, VacancyUpdate
 
 
 class UpdateVacancyException(Exception):
@@ -116,7 +116,11 @@ def update_vacancy_command_handler(
                 vacancy_skill = VacancySkills(
                     vacancy_id=vacancy.id,
                     skill_id=skill_item.skill_id,
-                    is_mandatory=skill_item.is_mandatory if skill_item.is_mandatory is not None else True,
+                    is_mandatory=(
+                        skill_item.is_mandatory
+                        if skill_item.is_mandatory is not None
+                        else True
+                    ),
                 )
                 session.add(vacancy_skill)
 

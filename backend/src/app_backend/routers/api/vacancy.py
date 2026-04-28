@@ -24,73 +24,45 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
-from app_backend.domain.user import User as DomainUser
 from app_backend.domain.student import Student as DomainStudent
-from app_backend.features.vacancy import (
-    CreateVacancyCommand,
-    CreateVacancyResult,
-    DeleteVacancyCommand,
-    DeleteVacancyResult,
-    GetVacancyCommand,
-    GetVacancyResult,
-    ListVacanciesCommand,
-    ListVacanciesResult,
-    SearchVacanciesCommand,
-    SearchVacanciesResult,
-    UpdateVacancyCommand,
-    UpdateVacancyResult,
-    JobMatchCommand,
-    JobMatchListCommand,
-    create_vacancy_command_handler,
-    delete_vacancy_command_handler,
-    get_vacancy_command_handler,
-    list_vacancies_command_handler,
-    search_vacancies_command_handler,
-    update_vacancy_command_handler,
-    job_match_command_handler,
-    job_match_list_command_handler,
-)
-from app_backend.features.wishlist import (
-    AddWishlistCommand,
-    AddWishlistResult,
-    DeleteWishlistCommand,
-    DeleteWishlistResult,
-    GetWishlistCommand,
-    GetWishlistResult,
-    ListWishlistCommand,
-    ListWishlistResult,
-    UpdateWishlistCommand,
-    UpdateWishlistResult,
-    add_wishlist_command_handler,
-    delete_wishlist_command_handler,
-    get_wishlist_command_handler,
-    list_wishlist_command_handler,
-    update_wishlist_command_handler,
-)
-from app_backend.schemas.vacancy import (
-    VacancyCreate,
-    VacancyDetailResponse,
-    VacancyListResponse,
-    VacancyResponse,
-    VacancySearchFilter,
-    VacancyUpdate,
-    VacancyType,
-    PaymentType,
-    JobMatchResult,
-)
-from app_backend.schemas.wishlist import (
-    WishlistCreate,
-    WishlistDetailResponse,
-    WishlistListResponse,
-    WishlistResponse,
-    WishlistUpdate,
-)
+from app_backend.domain.user import User as DomainUser
+from app_backend.features.vacancy import (CreateVacancyCommand,
+                                          DeleteVacancyCommand,
+                                          GetVacancyCommand, JobMatchCommand,
+                                          JobMatchListCommand,
+                                          ListVacanciesCommand,
+                                          SearchVacanciesCommand,
+                                          UpdateVacancyCommand,
+                                          create_vacancy_command_handler,
+                                          delete_vacancy_command_handler,
+                                          get_vacancy_command_handler,
+                                          job_match_command_handler,
+                                          job_match_list_command_handler,
+                                          list_vacancies_command_handler,
+                                          search_vacancies_command_handler,
+                                          update_vacancy_command_handler)
+from app_backend.features.wishlist import (AddWishlistCommand,
+                                           DeleteWishlistCommand,
+                                           GetWishlistCommand,
+                                           ListWishlistCommand,
+                                           UpdateWishlistCommand,
+                                           add_wishlist_command_handler,
+                                           delete_wishlist_command_handler,
+                                           get_wishlist_command_handler,
+                                           list_wishlist_command_handler,
+                                           update_wishlist_command_handler)
+from app_backend.schemas.vacancy import (JobMatchResult, PaymentType,
+                                         VacancyCreate, VacancyDetailResponse,
+                                         VacancyListResponse, VacancyResponse,
+                                         VacancyType, VacancyUpdate)
+from app_backend.schemas.wishlist import (WishlistCreate,
+                                          WishlistDetailResponse,
+                                          WishlistListResponse,
+                                          WishlistResponse, WishlistUpdate)
 from app_backend.shared.database import get_session
-from app_backend.shared.dependencies import (
-    get_current_active_student,
-    get_current_active_user,
-    require_admin,
-)
+from app_backend.shared.dependencies import (get_current_active_student,
+                                             get_current_active_user,
+                                             require_admin)
 
 router = APIRouter(
     prefix="/api/v1",
@@ -170,8 +142,12 @@ async def list_vacancies(
 async def search_vacancies(
     query: Optional[str] = Query(None, description="Kata kunci pencarian"),
     location: Optional[str] = Query(None, description="Filter lokasi"),
-    type: Optional[VacancyType] = Query(None, alias="type", description="Tipe lowongan"),
-    payment_type: Optional[PaymentType] = Query(None, alias="payment_type", description="Tipe pembayaran"),
+    type: Optional[VacancyType] = Query(
+        None, alias="type", description="Tipe lowongan"
+    ),
+    payment_type: Optional[PaymentType] = Query(
+        None, alias="payment_type", description="Tipe pembayaran"
+    ),
     is_active: bool = Query(True, description="Hanya lowongan aktif"),
     page: int = Query(1, ge=1, description="Halaman"),
     per_page: int = Query(10, ge=1, le=100, description="Item per halaman"),
@@ -438,6 +414,7 @@ async def delete_wishlist(
 
 class JobMatchListResponse(BaseModel):
     """Response untuk list job matching dengan pagination"""
+
     items: List[JobMatchResult]
     total: int
     page: int
@@ -453,7 +430,9 @@ class JobMatchListResponse(BaseModel):
 async def list_job_matching(
     page: int = Query(1, ge=1, description="Halaman"),
     per_page: int = Query(10, ge=1, le=100, description="Item per halaman"),
-    min_match: float = Query(0.0, ge=0, le=100, description="Minimum persentase kecocokan"),
+    min_match: float = Query(
+        0.0, ge=0, le=100, description="Minimum persentase kecocokan"
+    ),
     session=Depends(get_session),
     current_student: DomainStudent = Depends(get_current_active_student),
 ) -> JobMatchListResponse:

@@ -11,13 +11,12 @@ from typing import Optional
 
 from sqlalchemy.orm import Session, joinedload
 
-from app_backend.models.student_wishlist_vacancies import StudentWishlistVacancies
+from app_backend.models.student_wishlist_vacancies import \
+    StudentWishlistVacancies
 from app_backend.models.vacancies import Vacancies
-from app_backend.schemas.wishlist import (
-    WishlistDetailResponse,
-    WishlistListResponse,
-    WishlistSummary,
-)
+from app_backend.schemas.wishlist import (WishlistDetailResponse,
+                                          WishlistListResponse,
+                                          WishlistSummary)
 
 
 class ListWishlistException(Exception):
@@ -55,8 +54,7 @@ def list_wishlist_command_handler(
     query = (
         session.query(StudentWishlistVacancies)
         .options(
-            joinedload(StudentWishlistVacancies.vacancy)
-            .joinedload(Vacancies.company)
+            joinedload(StudentWishlistVacancies.vacancy).joinedload(Vacancies.company)
         )
         .filter(StudentWishlistVacancies.student_id == command.student_id)
     )
@@ -65,7 +63,12 @@ def list_wishlist_command_handler(
     total = query.count()
 
     # Get paginated results
-    wishlists = query.order_by(StudentWishlistVacancies.created_at.desc()).offset(offset).limit(per_page).all()
+    wishlists = (
+        query.order_by(StudentWishlistVacancies.created_at.desc())
+        .offset(offset)
+        .limit(per_page)
+        .all()
+    )
 
     # Build response
     items = []

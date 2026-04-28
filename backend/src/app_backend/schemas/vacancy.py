@@ -75,8 +75,12 @@ class VacancyCreate(BaseModel):
     close_date: datetime
     location: Optional[str] = Field(None, max_length=150)
     payment_type: PaymentType = PaymentType.UNPAID
-    compensation_min: Optional[Decimal] = Field(None, ge=0, description="Kompensasi minimum")
-    compensation_max: Optional[Decimal] = Field(None, ge=0, description="Kompensasi maksimum")
+    compensation_min: Optional[Decimal] = Field(
+        None, ge=0, description="Kompensasi minimum"
+    )
+    compensation_max: Optional[Decimal] = Field(
+        None, ge=0, description="Kompensasi maksimum"
+    )
     compensation_note: Optional[str] = None
     source_url: Optional[HttpUrl] = None
     skills: Optional[List[VacancySkillCreate]] = Field(
@@ -188,6 +192,7 @@ class VacancyListResponse(BaseModel):
 
 class VacancySearchFilter(BaseModel):
     """Filter untuk pencarian vacancy"""
+
     model_config = ConfigDict(populate_by_name=True, validate_by_name=True)
 
     query: Optional[str] = Field(None, description="Kata kunci pencarian")
@@ -208,7 +213,9 @@ class JobMatchResult(BaseModel):
     vacancy_id: UUID
     vacancy_title: str
     company_name: str
-    match_percentage: float = Field(..., ge=0, le=100, description="Persentase kecocokan")
+    match_percentage: float = Field(
+        ..., ge=0, le=100, description="Persentase kecocokan"
+    )
     matched_skills: List[str] = []
     missing_mandatory_skills: List[str] = []
     total_required_skills: int

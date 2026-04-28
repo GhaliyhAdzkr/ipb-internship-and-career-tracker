@@ -15,15 +15,9 @@ Covers:
 
 from __future__ import annotations
 
-import uuid
-from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
-import pytest
-
-from tests.conftest import (ADMIN_USER_ID, NOW, STUDENT_USER_ID,
-                            make_admin_user, make_mock_session,
-                            make_student_user)
+from tests.conftest import ADMIN_USER_ID, NOW, STUDENT_USER_ID
 
 # ════════════════════════════════════════════════════════════════════════════
 #  Sanity checks
@@ -72,7 +66,7 @@ def test_register_student_success(client_no_auth, mock_session):
     # No duplicate found → both .first() return None
     mock_session.query.return_value.filter.return_value.first.return_value = None
 
-    created_user = _make_user_orm(STUDENT_USER_ID, STUDENT_PAYLOAD["email"], "STUDENT")
+    _make_user_orm(STUDENT_USER_ID, STUDENT_PAYLOAD["email"], "STUDENT")
     mock_session.refresh.side_effect = lambda obj: None
 
     with patch(
@@ -331,9 +325,7 @@ def test_refresh_token_invalid(client_no_auth):
 
 
 def test_logout_success(client_no_auth):
-    with patch(
-        "app_backend.routers.api.auth.logout_command_handler"
-    ) as mock_handler:
+    with patch("app_backend.routers.api.auth.logout_command_handler") as mock_handler:
         mock_handler.return_value = MagicMock(success=True)
         resp = client_no_auth.post(
             "/api/v1/auth/logout",
@@ -345,9 +337,7 @@ def test_logout_success(client_no_auth):
 
 def test_logout_idempotent_already_revoked(client_no_auth):
     """Logout pada token yang sudah di-revoke tetap 204."""
-    with patch(
-        "app_backend.routers.api.auth.logout_command_handler"
-    ) as mock_handler:
+    with patch("app_backend.routers.api.auth.logout_command_handler") as mock_handler:
         mock_handler.return_value = MagicMock(success=True)
         resp = client_no_auth.post(
             "/api/v1/auth/logout",

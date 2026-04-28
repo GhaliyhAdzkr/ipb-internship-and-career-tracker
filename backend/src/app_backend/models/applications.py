@@ -11,7 +11,7 @@ import uuid
 from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import (DateTime, Enum, ForeignKeyConstraint, Index, Numeric,
-                        Text, UniqueConstraint, Uuid, text, event)
+                        Text, UniqueConstraint, Uuid, event, text)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.orm.attributes import get_history
 
@@ -88,17 +88,17 @@ class Applications(Base):
     )
 
 
-@event.listens_for(Applications, 'after_update')
+@event.listens_for(Applications, "after_update")
 def receive_after_update(mapper, connection, target):
-    hist = get_history(target, 'status')
+    hist = get_history(target, "status")
     if hist.has_changes():
         old_status = hist.deleted[0] if hist.deleted else None
         new_status = hist.added[0] if hist.added else target.status
-        
-        changed_by = getattr(target, '_changed_by', None)
-        proof_url = getattr(target, '_proof_url', None)
-        reason = getattr(target, '_reason', None)
-        
+
+        changed_by = getattr(target, "_changed_by", None)
+        proof_url = getattr(target, "_proof_url", None)
+        reason = getattr(target, "_reason", None)
+
         connection.execute(
             text("""
             INSERT INTO application_logs (id, application_id, previous_status, new_status, changed_by, proof_url, reason)
@@ -110,14 +110,15 @@ def receive_after_update(mapper, connection, target):
                 "new": new_status,
                 "by": changed_by,
                 "proof": proof_url,
-                "reason": reason
-            }
+                "reason": reason,
+            },
         )
 
-@event.listens_for(Applications, 'after_insert')
+
+@event.listens_for(Applications, "after_insert")
 def receive_after_insert(mapper, connection, target):
-    changed_by = getattr(target, '_changed_by', target.student_id)
-    
+    changed_by = getattr(target, "_changed_by", target.student_id)
+
     connection.execute(
         text("""
         INSERT INTO application_logs (id, application_id, previous_status, new_status, changed_by)
@@ -127,6 +128,5 @@ def receive_after_insert(mapper, connection, target):
             "app_id": target.id,
             "new": target.status,
             "by": changed_by,
-        }
+        },
     )
-

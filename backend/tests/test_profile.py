@@ -8,11 +8,8 @@ Covers:
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 from decimal import Decimal
 from unittest.mock import MagicMock, patch
-
-import pytest
 
 from tests.conftest import DEPT_ID, NOW, SKILL_ID, STUDENT_USER_ID
 
@@ -247,6 +244,7 @@ def test_update_cv_data_unauthenticated(client_no_auth):
 #  POST /profile/student/cv
 # ════════════════════════════════════════════════════════════════════════════
 
+
 def test_upload_cv_success(client_as_student):
     with patch(
         "app_backend.routers.api.profile.upload_cv_command_handler"
@@ -254,13 +252,13 @@ def test_upload_cv_success(client_as_student):
         mock_handler.return_value = MagicMock(
             got_error=lambda: False,
             message="CV berhasil diupload",
-            cv_url="/uploads/cv/dummy.pdf"
+            cv_url="/uploads/cv/dummy.pdf",
         )
-        
+
         file_content = b"%PDF-1.4 dummy content"
         files = {"file": ("dummy.pdf", file_content, "application/pdf")}
         resp = client_as_student.post("/api/v1/profile/student/cv", files=files)
-        
+
     assert resp.status_code == 200
     assert resp.json()["message"] == "CV berhasil diupload"
     assert "cv_url" in resp.json()
@@ -275,10 +273,10 @@ def test_upload_cv_not_pdf(client_as_student):
             got_error=lambda: True,
             error_message="File harus berformat PDF",
         )
-        
+
         file_content = b"Not a PDF"
         files = {"file": ("dummy.txt", file_content, "text/plain")}
         resp = client_as_student.post("/api/v1/profile/student/cv", files=files)
-        
+
     assert resp.status_code == 400
     assert "File harus berformat PDF" in resp.json()["detail"]

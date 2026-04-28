@@ -94,14 +94,16 @@ class CVDataUpdate(BaseModel):
         default=None, description="Daftar skills dengan level"
     )
 
-    model_config = ConfigDict(json_schema_extra={
-        "example": {
-            "phone_number": "+6281234567890",
-            "linkedin_url": "https://linkedin.com/in/johndoe",
-            "cv_url": "https://drive.google.com/file/d/abc123/view",
-            "skills": [
-                {"skill_id": "550e8400-e29b-41d4-a716-446655440000", "level": 4},
-                {"skill_id": "660e8400-e29b-41d4-a716-446655440001", "level": 3},
-            ],
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "phone_number": "+6281234567890",
+                "linkedin_url": "https://linkedin.com/in/johndoe",
+                "cv_url": "https://drive.google.com/file/d/abc123/view",
+                "skills": [
+                    {"skill_id": "550e8400-e29b-41d4-a716-446655440000", "level": 4},
+                    {"skill_id": "660e8400-e29b-41d4-a716-446655440001", "level": 3},
+                ],
+            }
         }
-    })
+    )

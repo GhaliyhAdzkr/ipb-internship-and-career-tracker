@@ -8,7 +8,6 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
-
 # ─────────────────────────────────────────────
 # Nested Schemas
 # ─────────────────────────────────────────────
@@ -27,8 +26,10 @@ class VacancySummary(BaseModel):
     open_date: datetime
     close_date: datetime
 
+
 class WishlistSummary(VacancySummary):
     """Backward-compatible alias for wishlist vacancy summary payloads."""
+
     id: UUID
     title: str
     location: Optional[str] = None

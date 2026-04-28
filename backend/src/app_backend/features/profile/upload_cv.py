@@ -6,18 +6,18 @@ Upload file CV PDF dan simpan URL ke database.
 from __future__ import annotations
 
 import os
-import shutil
 import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Optional
 
-from sqlalchemy.orm import Session
 from fastapi import UploadFile
+from sqlalchemy.orm import Session
 
 from app_backend.models.profiles_student import ProfilesStudent
 
 UPLOAD_DIR = "uploads/cv"
+
 
 @dataclass
 class UploadCVCommand:
@@ -62,7 +62,7 @@ def upload_cv_command_handler(
 
     # Ensure upload directory exists
     os.makedirs(UPLOAD_DIR, exist_ok=True)
-    
+
     # Generate unique filename
     file_ext = ".pdf"
     unique_filename = f"{command.user_id}_{uuid.uuid4().hex[:8]}{file_ext}"
@@ -71,20 +71,24 @@ def upload_cv_command_handler(
     try:
         MAX_SIZE = 10 * 1024 * 1024  # 10MB
         size = 0
-        
+
         with open(file_path, "wb") as buffer:
-            while chunk := command.file.file.read(1024 * 1024):  # Batching 1MB per iterasi
+            while chunk := command.file.file.read(
+                1024 * 1024
+            ):  # Batching 1MB per iterasi
                 size += len(chunk)
                 if size > MAX_SIZE:
                     buffer.close()
                     os.remove(file_path)
-                    return UploadCVResult(error_message="Ukuran file melebihi batas maksimal 15MB")
+                    return UploadCVResult(
+                        error_message="Ukuran file melebihi batas maksimal 15MB"
+                    )
                 buffer.write(chunk)
-            
+
         cv_url = f"/uploads/cv/{unique_filename}"
         profile.cv_url = cv_url
         profile.updated_at = datetime.now(timezone.utc)
-        
+
         session.commit()
         return UploadCVResult(cv_url=cv_url, message="CV berhasil diupload")
 

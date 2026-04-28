@@ -3,17 +3,16 @@ Notification Tasks – Background tasks untuk notifikasi dan email.
 Berjalan di queue terpisah untuk email sending dan cleanup.
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from typing import Dict, List
 
 from celery import shared_task
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app_backend.models.base import Base
+from app_backend.models.auth_action_tokens import AuthActionTokens
 from app_backend.models.notification_queue import NotificationQueue
 from app_backend.models.user_refresh_tokens import UserRefreshTokens
-from app_backend.models.auth_action_tokens import AuthActionTokens
 from app_backend.shared.database import get_database_url
 
 

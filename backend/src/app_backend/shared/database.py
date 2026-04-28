@@ -7,8 +7,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app_backend.conf.settings import settings
-from app_backend.models.base import Base
-
 
 SQLALCHEMY_DATABASE_URL = settings.db_url
 SQLALCHEMY_DATABASE_TEST_URL = settings.db_test_url

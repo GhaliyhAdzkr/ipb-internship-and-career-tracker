@@ -81,7 +81,11 @@ async def get_current_student(
         )
 
     # Get student profile
-    profile = session.query(ProfilesStudent).filter(ProfilesStudent.user_id == user_id).first()
+    profile = (
+        session.query(ProfilesStudent)
+        .filter(ProfilesStudent.user_id == user_id)
+        .first()
+    )
     if profile is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -98,7 +102,9 @@ async def get_current_student(
         phone_number=profile.phone_number,
         linkedin_url=profile.linkedin_url,
         cv_url=profile.cv_url,
-        is_mbkm_eligible=profile.is_mbkm_eligible if profile.is_mbkm_eligible else False,
+        is_mbkm_eligible=(
+            profile.is_mbkm_eligible if profile.is_mbkm_eligible else False
+        ),
         updated_at=profile.updated_at,
     )
 
@@ -181,7 +187,11 @@ async def get_current_active_student(
         )
 
     # Get student profile
-    profile = session.query(ProfilesStudent).filter(ProfilesStudent.user_id == user_id).first()
+    profile = (
+        session.query(ProfilesStudent)
+        .filter(ProfilesStudent.user_id == user_id)
+        .first()
+    )
     if profile is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -198,7 +208,9 @@ async def get_current_active_student(
         phone_number=profile.phone_number,
         linkedin_url=profile.linkedin_url,
         cv_url=profile.cv_url,
-        is_mbkm_eligible=profile.is_mbkm_eligible if profile.is_mbkm_eligible else False,
+        is_mbkm_eligible=(
+            profile.is_mbkm_eligible if profile.is_mbkm_eligible else False
+        ),
         updated_at=profile.updated_at,
     )
 

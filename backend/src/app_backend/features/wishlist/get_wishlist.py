@@ -11,10 +11,11 @@ from typing import Optional
 
 from sqlalchemy.orm import Session, joinedload
 
-from app_backend.models.student_wishlist_vacancies import StudentWishlistVacancies
+from app_backend.models.student_wishlist_vacancies import \
+    StudentWishlistVacancies
 from app_backend.models.vacancies import Vacancies
-from app_backend.models.master_external_companies import MasterExternalCompanies
-from app_backend.schemas.wishlist import WishlistDetailResponse, WishlistSummary
+from app_backend.schemas.wishlist import (WishlistDetailResponse,
+                                          WishlistSummary)
 
 
 class GetWishlistException(Exception):
@@ -46,8 +47,7 @@ def get_wishlist_command_handler(
     wishlist = (
         session.query(StudentWishlistVacancies)
         .options(
-            joinedload(StudentWishlistVacancies.vacancy)
-            .joinedload(Vacancies.company)
+            joinedload(StudentWishlistVacancies.vacancy).joinedload(Vacancies.company)
         )
         .filter(StudentWishlistVacancies.id == command.wishlist_id)
         .first()

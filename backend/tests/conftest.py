@@ -17,19 +17,20 @@ from unittest.mock import MagicMock
 # Harus di-set SEBELUM import app agar lifespan tidak memanggil create_all
 os.environ["TESTING"] = "1"
 
-from fastapi import HTTPException, status
 import pytest
+from fastapi import HTTPException, status
 from fastapi.testclient import TestClient
 
+from app_backend.domain.student import Student as DomainStudent
 from app_backend.domain.user import User as DomainUser
 from app_backend.domain.user import UserRole
-from app_backend.domain.student import Student as DomainStudent
 from app_backend.main import app
 from app_backend.shared.database import get_session
 from app_backend.shared.dependencies import (get_current_active_student,
                                              get_current_active_user,
-                                             get_current_user, get_current_student,
-                                             require_admin, require_student)
+                                             get_current_student,
+                                             get_current_user, require_admin,
+                                             require_student)
 
 # ─── Fixed IDs used across tests ─────────────────────────────────────────────
 
@@ -154,6 +155,7 @@ def client_as_admin(mock_session) -> Generator[TestClient, None, None]:
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()
+
 
 @pytest.fixture
 def client_as_admin_for_student_only(mock_session):

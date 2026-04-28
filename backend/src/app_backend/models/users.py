@@ -71,7 +71,6 @@ class Users(Base):
     def to_domain(self):
         """Convert ke domain model User"""
         from app_backend.domain.user import User as DomainUser
-        from app_backend.domain.user import UserRole
 
         return DomainUser(
             id=self.id,

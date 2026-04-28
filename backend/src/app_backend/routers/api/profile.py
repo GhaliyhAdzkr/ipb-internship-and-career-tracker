@@ -10,12 +10,11 @@ from __future__ import annotations
 
 from http import HTTPStatus
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
 from app_backend.domain.user import User as DomainUser
 from app_backend.features.profile import (GetStudentProfileCommand,
-                                          UpdateCVDataCommand,
-                                          UploadCVCommand,
+                                          UpdateCVDataCommand, UploadCVCommand,
                                           get_student_profile_command_handler,
                                           update_cv_data_command_handler,
                                           upload_cv_command_handler)
@@ -124,4 +123,3 @@ async def upload_cv(
             detail=result.error_message,
         )
     return {"message": result.message, "cv_url": result.cv_url}
-

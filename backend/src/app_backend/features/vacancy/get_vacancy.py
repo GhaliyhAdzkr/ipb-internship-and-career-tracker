@@ -11,16 +11,10 @@ from typing import Optional
 
 from sqlalchemy.orm import Session, joinedload
 
-from app_backend.models.master_external_companies import MasterExternalCompanies
-from app_backend.models.master_skills import MasterSkills
 from app_backend.models.vacancies import Vacancies
 from app_backend.models.vacancy_skills import VacancySkills
-from app_backend.schemas.vacancy import (
-    CompanyInfo,
-    SkillRequirement,
-    VacancyDetailResponse,
-    VacancyResponse,
-)
+from app_backend.schemas.vacancy import (CompanyInfo, SkillRequirement,
+                                         VacancyDetailResponse)
 
 
 class GetVacancyException(Exception):

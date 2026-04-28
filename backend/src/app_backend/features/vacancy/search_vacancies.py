@@ -13,12 +13,9 @@ from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app_backend.models.vacancies import Vacancies
 from app_backend.models.vacancy_skills import VacancySkills
-from app_backend.schemas.vacancy import (
-    CompanyInfo,
-    SkillRequirement,
-    VacancyDetailResponse,
-    VacancyListResponse,
-)
+from app_backend.schemas.vacancy import (CompanyInfo, SkillRequirement,
+                                         VacancyDetailResponse,
+                                         VacancyListResponse)
 
 
 class SearchVacanciesException(Exception):
@@ -89,7 +86,9 @@ def search_vacancies_command_handler(
         query = query.filter(Vacancies.payment_type == command.payment_type)
 
     # Get total count (tanpa eager loading untuk efisiensi)
-    count_query = session.query(Vacancies).filter(Vacancies.is_active == command.is_active)
+    count_query = session.query(Vacancies).filter(
+        Vacancies.is_active == command.is_active
+    )
     if command.query:
         search_term = f"%{command.query}%"
         count_query = count_query.filter(
@@ -99,7 +98,9 @@ def search_vacancies_command_handler(
             )
         )
     if command.location:
-        count_query = count_query.filter(Vacancies.location.ilike(f"%{command.location}%"))
+        count_query = count_query.filter(
+            Vacancies.location.ilike(f"%{command.location}%")
+        )
     if command.vacancy_type:
         count_query = count_query.filter(Vacancies.type == command.vacancy_type)
     if command.payment_type:
@@ -107,7 +108,9 @@ def search_vacancies_command_handler(
     total = count_query.count()
 
     # Get paginated results dengan eager loading
-    vacancies = query.order_by(Vacancies.created_at.desc()).offset(offset).limit(per_page).all()
+    vacancies = (
+        query.order_by(Vacancies.created_at.desc()).offset(offset).limit(per_page).all()
+    )
 
     # Build response - skills sudah di-load via eager loading
     items = []

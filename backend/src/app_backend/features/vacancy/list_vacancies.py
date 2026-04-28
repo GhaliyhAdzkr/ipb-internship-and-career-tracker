@@ -10,15 +10,11 @@ from typing import Optional
 
 from sqlalchemy.orm import Session, joinedload
 
-from app_backend.models.master_external_companies import MasterExternalCompanies
 from app_backend.models.vacancies import Vacancies
 from app_backend.models.vacancy_skills import VacancySkills
-from app_backend.schemas.vacancy import (
-    CompanyInfo,
-    SkillRequirement,
-    VacancyDetailResponse,
-    VacancyListResponse,
-)
+from app_backend.schemas.vacancy import (CompanyInfo, SkillRequirement,
+                                         VacancyDetailResponse,
+                                         VacancyListResponse)
 
 
 class ListVacanciesException(Exception):
@@ -63,7 +59,9 @@ def list_vacancies_command_handler(
     total = query.count()
 
     # Get paginated results
-    vacancies = query.order_by(Vacancies.created_at.desc()).offset(offset).limit(per_page).all()
+    vacancies = (
+        query.order_by(Vacancies.created_at.desc()).offset(offset).limit(per_page).all()
+    )
 
     # Build response with skills
     items = []
