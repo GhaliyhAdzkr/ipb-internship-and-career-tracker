@@ -142,6 +142,29 @@
         <pre id="log-result">Result will appear here</pre>
     </div>
 
+    <div class="section" id="report-section">
+        <h2>9. Reports & Documents (Phase 6)</h2>
+        <h3>Final Report</h3>
+        <form id="report-gen-form">
+            <label>Placement ID: <input type="text" id="report-placement-id" placeholder="UUID" required></label><br>
+            <button type="submit">Generate Final Report</button>
+        </form>
+        <button id="btn-check-report">Check Report Status</button>
+        <input type="text" id="check-report-placement-id" placeholder="Placement UUID">
+        <pre id="report-result">Result will appear here</pre>
+        
+        <hr>
+        <h3>Document Requests (Cover Letter)</h3>
+        <form id="doc-request-form">
+            <label>Type: <input type="text" id="doc-type" value="COVER_LETTER" required></label><br>
+            <label>Purpose: <input type="text" id="doc-purpose" placeholder="e.g. Melamar Magang di Google" required></label><br>
+            <label>Vacancy ID (Opt): <input type="text" id="doc-vacancy-id" placeholder="UUID"></label><br>
+            <button type="submit">Request Document</button>
+        </form>
+        <button id="btn-list-docs">List My Documents</button>
+        <pre id="doc-result">Result will appear here</pre>
+    </div>
+
     <script>
         const API_BASE = 'http://localhost:8000/api/v1';
         let accessToken = '';
@@ -416,6 +439,73 @@
                     headers: getHeaders(false),
                     body: formData
                 });
+                const data = await res.json();
+                resEl.textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                resEl.textContent = 'Error: ' + err.message;
+            }
+        });
+
+        // 9. Reports & Documents
+        document.getElementById('report-gen-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const pid = document.getElementById('report-placement-id').value;
+            const resEl = document.getElementById('report-result');
+            resEl.textContent = 'Triggering report generation...';
+            try {
+                const res = await fetch(`${API_BASE}/placements/${pid}/report/generate`, {
+                    method: 'POST',
+                    headers: getHeaders()
+                });
+                const data = await res.json();
+                resEl.textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                resEl.textContent = 'Error: ' + err.message;
+            }
+        });
+
+        document.getElementById('btn-check-report').addEventListener('click', async () => {
+            const pid = document.getElementById('check-report-placement-id').value;
+            const resEl = document.getElementById('report-result');
+            if (!pid) return alert('Placement ID required');
+            resEl.textContent = 'Checking report status...';
+            try {
+                const res = await fetch(`${API_BASE}/placements/${pid}/report`, { headers: getHeaders() });
+                const data = await res.json();
+                resEl.textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                resEl.textContent = 'Error: ' + err.message;
+            }
+        });
+
+        document.getElementById('doc-request-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const type = document.getElementById('doc-type').value;
+            const purpose = document.getElementById('doc-purpose').value;
+            const vid = document.getElementById('doc-vacancy-id').value;
+            const resEl = document.getElementById('doc-result');
+            const body = { document_type: type, purpose: purpose };
+            if (vid) body.reference_vacancy_id = vid;
+            
+            resEl.textContent = 'Submitting document request...';
+            try {
+                const res = await fetch(`${API_BASE}/document-requests`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                resEl.textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                resEl.textContent = 'Error: ' + err.message;
+            }
+        });
+
+        document.getElementById('btn-list-docs').addEventListener('click', async () => {
+            const resEl = document.getElementById('doc-result');
+            resEl.textContent = 'Loading my documents...';
+            try {
+                const res = await fetch(`${API_BASE}/document-requests`, { headers: getHeaders() });
                 const data = await res.json();
                 resEl.textContent = JSON.stringify(data, null, 2);
             } catch (err) {
