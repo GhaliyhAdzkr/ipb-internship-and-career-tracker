@@ -423,11 +423,11 @@ Setiap worker didaftarkan di `app/workers/` sebagai Celery task dengan signature
 
 ### Admin Reporting Utilities
 
-- [ ] Endpoint `GET /admin/analytics/applications`: Statistik lamaran keseluruhan
-- [ ] Response: total lamaran, breakdown per status, conversion rate (apply → accepted)
-- [ ] Endpoint `GET /admin/analytics/vacancies`: Statistik lowongan
-- [ ] Response: total lowongan aktif, rata-rata jumlah pelamar per lowongan, lowongan paling diminati (top 5 berdasarkan jumlah apply)
-- [ ] Semua endpoint analytics hanya bisa diakses ADMIN (RBAC middleware)
+- [x] Endpoint `GET /admin/analytics/applications`: Statistik lamaran keseluruhan
+- [x] Response: total lamaran, breakdown per status, conversion rate (apply → accepted)
+- [x] Endpoint `GET /admin/analytics/vacancies`: Statistik lowongan
+- [x] Response: total lowongan aktif, rata-rata jumlah pelamar per lowongan, lowongan paling diminati (top 5 berdasarkan jumlah apply)
+- [x] Semua endpoint analytics hanya bisa diakses ADMIN (RBAC middleware)
 
 ### Test Gate Phase 7
 

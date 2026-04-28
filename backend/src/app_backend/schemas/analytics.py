@@ -38,3 +38,27 @@ class DistributionResponse(BaseModel):
     compensation_breakdown: List[CompensationBreakdownItem]
     semester_trends: List[SemesterTrendItem]
     applied_filters: dict
+
+
+class StatusBreakdownItem(BaseModel):
+    status: str
+    total: int
+
+
+class ApplicationStatsResponse(BaseModel):
+    total_applications: int
+    status_breakdown: List[StatusBreakdownItem]
+    conversion_rate: float
+
+
+class TopVacancyItem(BaseModel):
+    vacancy_id: uuid.UUID
+    title: str
+    company_id: uuid.UUID
+    total_applicants: int
+
+
+class VacancyStatsResponse(BaseModel):
+    total_active_vacancies: int
+    avg_applicants_per_vacancy: float
+    top_vacancies: List[TopVacancyItem]
