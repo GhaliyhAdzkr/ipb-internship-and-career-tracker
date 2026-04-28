@@ -11,6 +11,10 @@ from app_backend.features.placement import (
     delete_activity_log_command_handler, get_my_placements_command_handler,
     list_activity_logs_command_handler, update_activity_log_command_handler,
     upload_activity_log_attachment_command_handler)
+from app_backend.features.placement.generate_report import (
+    GenerateReportCommand, generate_report_command_handler)
+from app_backend.features.placement.get_report import (
+    GetReportCommand, get_report_command_handler)
 from app_backend.schemas.placement import (ActivityLogCreate,
                                            ActivityLogResponse,
                                            ActivityLogUpdate,
@@ -184,3 +188,42 @@ def upload_activity_log_attachment(
             status_code=status.HTTP_400_BAD_REQUEST, detail=result.error_message
         )
     return {"message": result.message, "attachment_url": result.attachment_url}
+
+
+@router.post("/{placement_id}/report/generate", status_code=status.HTTP_202_ACCEPTED)
+def generate_report(
+    placement_id: uuid.UUID,
+    current_user=Depends(require_student),
+    session: Session = Depends(get_session),
+):
+    result = generate_report_command_handler(
+        command=GenerateReportCommand(
+            placement_id=placement_id, student_id=current_user.id
+        ),
+        session=session,
+    )
+    if result.got_error():
+        raise HTTPException(
+            status_code=result.error_status_code, detail=result.error_message
+        )
+    return {"message": result.message}
+
+
+@router.get("/{placement_id}/report")
+def get_report(
+    placement_id: uuid.UUID,
+    current_user=Depends(require_student),
+    session: Session = Depends(get_session),
+):
+    result = get_report_command_handler(
+        command=GetReportCommand(placement_id=placement_id, student_id=current_user.id),
+        session=session,
+    )
+    if result.got_error():
+        raise HTTPException(
+            status_code=result.error_status_code, detail=result.error_message
+        )
+    return {
+        "status": result.status,
+        "auto_generated_report_url": result.auto_generated_report_url,
+    }

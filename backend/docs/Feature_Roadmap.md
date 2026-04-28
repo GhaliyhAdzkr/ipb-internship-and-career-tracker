@@ -1,9 +1,9 @@
 # IPB Internship & Career Tracker — Development Roadmap
 
-**Document Version**: 1.0
-**Last Updated**: April 28, 2026
-**Project**: IPB Internship & Career Tracker (Middleman Model)
-**Authors**: Raihan Putra Kirana, Insan Anshary Rasul
+- **Document Version**: 1.0
+- **Last Updated**: April 28, 2026
+- **Project**: IPB Internship & Career Tracker (Middleman Model)
+- **Authors**: Raihan Putra Kirana, Insan Anshary Rasul
 
 ---
 
@@ -316,10 +316,10 @@ Setiap worker didaftarkan di `app/workers/` sebagai Celery task dengan signature
 
 ---
 
-## Phase 5 Placement dan Activity Tracker (🟢 COMPLETE)
+## Phase 5 Placement dan Activity Tracker
 
 **Objective**: Menghadirkan manajemen penempatan magang dan pencatatan aktivitas harian mahasiswa.
-**Owner**: @Insan
+**Owner**: @Peka
 
 ### Placement Activation
 
@@ -364,41 +364,41 @@ Setiap worker didaftarkan di `app/workers/` sebagai Celery task dengan signature
 ## Phase 6 Auto-Report Automation
 
 **Objective**: Menghadirkan pembuatan laporan otomatis dari seluruh logbook mahasiswa siap cetak dalam format kampus.
-**Owner**: @Insan
+**Owner**: @Peka
 
 ### Report Generation
 
-- [ ] Endpoint `POST /placements/:id/report/generate`: Trigger pembuatan laporan akhir
-- [ ] Guard: laporan hanya bisa digenerate jika `placement.end_date <= TODAY()`
-- [ ] Celery task `generate_final_report(placement_id)`:
-  - [ ] Fetch semua `activity_logs` untuk placement tersebut, urut berdasarkan `log_date` ASC
-  - [ ] Gunakan `description_raw` sebagai konten log
-  - [ ] Agregasi menggunakan Python Pandas: ringkasan per minggu, total jam, distribusi kegiatan
-  - [ ] Render ke PDF template kampus menggunakan ReportLab (kop surat, tanda tangan, format PPKI)
-  - [ ] Upload PDF hasil ke Object Storage lokal
-  - [ ] Update `public.placements.auto_generated_report_url` dengan URL PDF yang dihasilkan
-- [ ] Endpoint `GET /placements/:id/report`: Return `auto_generated_report_url` jika sudah tersedia, atau status `generating` / `not_generated`
+- [x] Endpoint `POST /placements/:id/report/generate`: Trigger pembuatan laporan akhir
+- [x] Guard: laporan hanya bisa digenerate jika `placement.end_date <= TODAY()`
+- [x] Celery task `generate_final_report(placement_id)`:
+  - [x] Fetch semua `activity_logs` untuk placement tersebut, urut berdasarkan `log_date` ASC
+  - [x] Gunakan `description_raw` sebagai konten log
+  - [x] Agregasi menggunakan Python Pandas: ringkasan per minggu, total jam, distribusi kegiatan
+  - [x] Render ke PDF template kampus menggunakan ReportLab (kop surat, tanda tangan, format PPKI)
+  - [x] Upload PDF hasil ke Object Storage lokal
+  - [x] Update `public.placements.auto_generated_report_url` dengan URL PDF yang dihasilkan
+- [x] Endpoint `GET /placements/:id/report`: Return `auto_generated_report_url` jika sudah tersedia, atau status `generating` / `not_generated`
 
 ### Surat Pengantar Generator
 
-- [ ] Endpoint `POST /document-requests`: Mahasiswa mengajukan permohonan surat pengantar untuk keperluan pelamaran
-- [ ] Field: `vacancy_id` (nullable), `purpose` (TEXT), `requested_at` (auto)
-- [ ] Schema Ref: Insert `public.document_requests`
-- [ ] Celery task `generate_cover_letter(request_id)`:
-  - [ ] Fetch data mahasiswa dan tujuan permohonan
-  - [ ] Render ke PDF surat resmi dengan kop IPB menggunakan ReportLab
-  - [ ] Upload PDF ke Object Storage
-  - [ ] Update `public.document_requests.generated_url`
-- [ ] Endpoint `GET /document-requests/:id`: Return status permohonan dan `generated_url` jika sudah siap
-- [ ] Endpoint `GET /document-requests`: Riwayat semua permohonan surat mahasiswa yang sedang login
+- [x] Endpoint `POST /document-requests`: Mahasiswa mengajukan permohonan surat pengantar untuk keperluan pelamaran
+- [x] Field: `vacancy_id` (nullable), `purpose` (TEXT), `requested_at` (auto)
+- [x] Schema Ref: Insert `public.document_requests`
+- [x] Celery task `generate_cover_letter(request_id)`:
+  - [x] Fetch data mahasiswa dan tujuan permohonan
+  - [x] Render ke PDF surat resmi dengan kop IPB menggunakan ReportLab
+  - [x] Upload PDF ke Object Storage
+  - [x] Update `public.document_requests.generated_url`
+- [x] Endpoint `GET /document-requests/:id`: Return status permohonan dan `generated_url` jika sudah siap
+- [x] Endpoint `GET /document-requests`: Riwayat semua permohonan surat mahasiswa yang sedang login
 
 ### Test Gate Phase 6
 
-- [ ] Integration test: trigger generate report → PDF tersedia di URL
-- [ ] Test: generate report dengan placement yang belum berakhir harus return 400
-- [ ] Test: generate report tanpa log sama sekali harus return 400
-- [ ] Test: surat generator menghasilkan PDF dengan kop dan data mahasiswa yang benar
-- [ ] Test: `auto_generated_report_url` ter-update setelah task selesai
+- [x] Integration test: trigger generate report → PDF tersedia di URL
+- [x] Test: generate report dengan placement yang belum berakhir harus return 400
+- [x] Test: generate report tanpa log sama sekali harus return 400
+- [x] Test: surat generator menghasilkan PDF dengan kop dan data mahasiswa yang benar
+- [x] Test: `auto_generated_report_url` ter-update setelah task selesai
 
 **Exit Criteria**: Laporan akhir dapat digenerate dan diunduh. Surat pengantar dapat dipesan dan diterima dalam format PDF resmi.
 
