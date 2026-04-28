@@ -1,6 +1,23 @@
-# LARAS: IPB Internship and Career Tracker Platform
+<div align="center">
+
+<h1>LARAS: IPB Internship and Career Tracker Platform</h1>
+
+Integrated Internship and Career Tracker Platform for **IPB University**, built with **FastAPI** for backend and **React** for frontend.
+
+![LARAS Logo](docs/logo.png)
+
+[![License](https://img.shields.io/badge/License-AFL--3.0-blue)](LICENSE)
+[![Python Version](https://img.shields.io/badge/Python-3.11-blue?logo=python)](https://www.python.org/)
+[![Poetry Version](https://img.shields.io/badge/Poetry-1.2+-red?logo=poetry)](https://python-poetry.org/)
+
+</div>
+
+---
+
+## Tentang Aplikasi Ini
 
 **LARAS (Lintasan Arah dan Rencana Aktualisasi Studi)** adalah platform pelacakan magang dan karir untuk mahasiswa IPB University. Platform ini memfasilitasi pencarian lowongan magang/kerja, pelacakan status lamaran, pencatatan aktivitas harian selama magang, dan pembuatan laporan otomatis. Sistem menggunakan arsitektur Middleman Model di mana admin CDA (Career Development and Alumni) IPB mengkurasi lowongan dari berbagai sumber eksternal.
+
 
 ## Fitur Utama
 
