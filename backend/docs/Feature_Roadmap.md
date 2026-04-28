@@ -411,30 +411,30 @@ Setiap worker didaftarkan di `app/workers/` sebagai Celery task dengan signature
 
 ### Internship Distribution Dashboard
 
-- [ ] Endpoint `GET /analytics/distribution`: Return data distribusi penempatan magang
-- [ ] Query menggunakan view atau agregasi SQL di `public.placements` JOIN `public.master_external_companies` JOIN `public.profiles_student` JOIN `public.master_departments`
-- [ ] Response berisi:
-  - [ ] Top 10 perusahaan berdasarkan jumlah mahasiswa yang diterima
-  - [ ] Breakdown per Program Studi: berapa mahasiswa yang magang di tiap perusahaan
-  - [ ] Breakdown per tipe kompensasi: PAID vs UNPAID
-  - [ ] Tren per semester (berdasarkan `placement.start_date`)
-- [ ] Endpoint mendukung filter `?department_id=` dan `?year=`
+- [x] Endpoint `GET /analytics/distribution`: Return data distribusi penempatan magang
+- [x] Query menggunakan view atau agregasi SQL di `public.placements` JOIN `public.master_external_companies` JOIN `public.profiles_student` JOIN `public.master_departments`
+- [x] Response berisi:
+  - [x] Top 10 perusahaan berdasarkan jumlah mahasiswa yang diterima
+  - [x] Breakdown per Program Studi: berapa mahasiswa yang magang di tiap perusahaan
+  - [x] Breakdown per tipe kompensasi: PAID vs UNPAID
+  - [x] Tren per semester (berdasarkan `placement.start_date`)
+- [x] Endpoint mendukung filter `?department_id=` dan `?year=`
 
 
 ### Admin Reporting Utilities
 
-- [ ] Endpoint `GET /admin/analytics/applications`: Statistik lamaran keseluruhan
-- [ ] Response: total lamaran, breakdown per status, conversion rate (apply → accepted)
-- [ ] Endpoint `GET /admin/analytics/vacancies`: Statistik lowongan
-- [ ] Response: total lowongan aktif, rata-rata jumlah pelamar per lowongan, lowongan paling diminati (top 5 berdasarkan jumlah apply)
-- [ ] Semua endpoint analytics hanya bisa diakses ADMIN (RBAC middleware)
+- [x] Endpoint `GET /admin/analytics/applications`: Statistik lamaran keseluruhan
+- [x] Response: total lamaran, breakdown per status, conversion rate (apply → accepted)
+- [x] Endpoint `GET /admin/analytics/vacancies`: Statistik lowongan
+- [x] Response: total lowongan aktif, rata-rata jumlah pelamar per lowongan, lowongan paling diminati (top 5 berdasarkan jumlah apply)
+- [x] Semua endpoint analytics hanya bisa diakses ADMIN (RBAC middleware)
 
 ### Test Gate Phase 7
 
-- [ ] Unit test: aggregation query mengembalikan hasil yang benar untuk data fixture
-- [ ] Integration test: tambah placement → analytics ter-update setelah cache evict
-- [ ] Test: cache hit dan miss path (verifikasi Redis key ada dan TTL benar)
-- [ ] Test: filter by department menghasilkan subset yang benar
+- [x] Unit test: aggregation query mengembalikan hasil yang benar untuk data fixture
+- [x] Integration test: tambah placement → analytics ter-update setelah cache evict
+- [x] Test: cache hit dan miss path (verifikasi Redis key ada dan TTL benar)
+- [x] Test: filter by department menghasilkan subset yang benar
 
 **Exit Criteria**: Admin memiliki visibilitas distribusi magang dan statistik lamaran yang dapat difilter.
 
