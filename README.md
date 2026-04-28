@@ -2,9 +2,9 @@
 
 <h1>LARAS: IPB Internship and Career Tracker Platform</h1>
 
-Integrated Internship and Career Tracker Platform for **IPB University**, built with **FastAPI** for backend and **React** for frontend.
+Integrated Internship and Career Tracker Platform for **IPB University**, built with **FastAPI** for backend and **React with Vite** for frontend.
 
-![LARAS Logo](./LARAS_Logo.png)
+<img src="./LARAS_Logo.png" alt="LARAS Logo" width="450">
 
 [![License](https://img.shields.io/badge/License-AFL--3.0-blue)](LICENSE)
 [![Python Version](https://img.shields.io/badge/Python-3.11-blue?logo=python)](https://www.python.org/)
