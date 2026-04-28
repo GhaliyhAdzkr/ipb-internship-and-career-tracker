@@ -50,6 +50,11 @@ bandit = "^1.7.4"
 safety = "^2.3.1"
 
 [tool.poetry]
+name = "app-backend"
+version = "1.0.0"
+description = "IPB Internship and Career Tracker Backend"
+authors = ["Raihan Putra Kirana <me@raihanpk.com>"]
+package-mode = false
 packages = [{include = "app_backend", from = "src"}]
 
 [tool.poetry.scripts]
