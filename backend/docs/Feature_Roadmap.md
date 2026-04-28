@@ -431,10 +431,10 @@ Setiap worker didaftarkan di `app/workers/` sebagai Celery task dengan signature
 
 ### Test Gate Phase 7
 
-- [ ] Unit test: aggregation query mengembalikan hasil yang benar untuk data fixture
-- [ ] Integration test: tambah placement → analytics ter-update setelah cache evict
-- [ ] Test: cache hit dan miss path (verifikasi Redis key ada dan TTL benar)
-- [ ] Test: filter by department menghasilkan subset yang benar
+- [x] Unit test: aggregation query mengembalikan hasil yang benar untuk data fixture
+- [x] Integration test: tambah placement → analytics ter-update setelah cache evict
+- [x] Test: cache hit dan miss path (verifikasi Redis key ada dan TTL benar)
+- [x] Test: filter by department menghasilkan subset yang benar
 
 **Exit Criteria**: Admin memiliki visibilitas distribusi magang dan statistik lamaran yang dapat difilter.
 

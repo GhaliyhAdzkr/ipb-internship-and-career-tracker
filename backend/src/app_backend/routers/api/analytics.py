@@ -13,10 +13,16 @@ from app_backend.features.analytics import (GetApplicationStatsCommand,
 from app_backend.schemas.analytics import (ApplicationStatsResponse,
                                            DistributionResponse,
                                            VacancyStatsResponse)
+from app_backend.shared.cache import (ANALYTICS_CACHE_TTL, cache_get,
+                                      cache_set)
 from app_backend.shared.database import get_session
 from app_backend.shared.dependencies import require_admin
 
 router = APIRouter(prefix="/api/v1/analytics", tags=["analytics"])
+
+
+def _distribution_cache_key(department_id: Optional[uuid.UUID], year: Optional[int]) -> str:
+    return f"analytics:distribution:{department_id}:{year}"
 
 
 @router.get(
@@ -30,6 +36,11 @@ def get_distribution(
     current_user=Depends(require_admin),
     session: Session = Depends(get_session),
 ):
+    cache_key = _distribution_cache_key(department_id, year)
+    cached = cache_get(cache_key)
+    if cached:
+        return DistributionResponse(**cached)
+
     result = get_distribution_command_handler(
         command=GetDistributionCommand(department_id=department_id, year=year),
         session=session,
@@ -40,7 +51,7 @@ def get_distribution(
             detail=result.error_message,
         )
 
-    return DistributionResponse(
+    response = DistributionResponse(
         total_placements=result.total_placements,
         top_companies=[
             {
@@ -82,6 +93,8 @@ def get_distribution(
             "year": year,
         },
     )
+    cache_set(cache_key, response.model_dump(), ttl=ANALYTICS_CACHE_TTL)
+    return response
 
 
 @router.get(
@@ -93,6 +106,11 @@ def get_application_stats(
     current_user=Depends(require_admin),
     session: Session = Depends(get_session),
 ):
+    cache_key = "analytics:applications"
+    cached = cache_get(cache_key)
+    if cached:
+        return ApplicationStatsResponse(**cached)
+
     result = get_application_stats_command_handler(
         command=GetApplicationStatsCommand(),
         session=session,
@@ -102,7 +120,8 @@ def get_application_stats(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=result.error_message,
         )
-    return ApplicationStatsResponse(
+
+    response = ApplicationStatsResponse(
         total_applications=result.total_applications,
         status_breakdown=[
             {"status": s.status, "total": s.total}
@@ -110,6 +129,8 @@ def get_application_stats(
         ],
         conversion_rate=result.conversion_rate,
     )
+    cache_set(cache_key, response.model_dump(), ttl=ANALYTICS_CACHE_TTL)
+    return response
 
 
 @router.get(
@@ -121,6 +142,11 @@ def get_vacancy_stats(
     current_user=Depends(require_admin),
     session: Session = Depends(get_session),
 ):
+    cache_key = "analytics:vacancies"
+    cached = cache_get(cache_key)
+    if cached:
+        return VacancyStatsResponse(**cached)
+
     result = get_vacancy_stats_command_handler(
         command=GetVacancyStatsCommand(),
         session=session,
@@ -130,7 +156,8 @@ def get_vacancy_stats(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=result.error_message,
         )
-    return VacancyStatsResponse(
+
+    response = VacancyStatsResponse(
         total_active_vacancies=result.total_active_vacancies,
         avg_applicants_per_vacancy=result.avg_applicants_per_vacancy,
         top_vacancies=[
@@ -143,3 +170,5 @@ def get_vacancy_stats(
             for v in result.top_vacancies
         ],
     )
+    cache_set(cache_key, response.model_dump(), ttl=ANALYTICS_CACHE_TTL)
+    return response
