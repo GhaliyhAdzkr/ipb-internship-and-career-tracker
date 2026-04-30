@@ -1,20 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IPB Internship and Career Tracker - Test Web</title>
     <style>
-        body { font-family: sans-serif; margin: 20px; }
-        .section { margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
-        .token-box { font-family: monospace; word-break: break-all; background: #eee; padding: 5px; }
-        button { margin-top: 5px; }
-        pre { background: #f4f4f4; padding: 10px; border: 1px solid #ddd; max-height: 200px; overflow-y: auto; }
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+        }
+
+        .section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .token-box {
+            font-family: monospace;
+            word-break: break-all;
+            background: #eee;
+            padding: 5px;
+        }
+
+        button {
+            margin-top: 5px;
+        }
+
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border: 1px solid #ddd;
+            max-height: 200px;
+            overflow-y: auto;
+        }
     </style>
 </head>
+
 <body>
     <h1>API Testing Frontend</h1>
-    
+
+    <div class="section" id="register-section">
+        <h2>0. Registration (Student)</h2>
+        <form id="register-form">
+            <label>Email: <input type="email" id="reg-email" value="raihanputrakirana@apps.ipb.ac.id" required></label><br>
+            <label>Password: <input type="password" id="reg-password" value="IpbGanteng123" required></label><br>
+            <label>NIM: <input type="text" id="reg-nim" value="G6401211001" required></label><br>
+            <label>Full Name: <input type="text" id="reg-full-name" value="Raihan Putra Kirana" required></label><br>
+            <label>Semester: <input type="number" id="reg-semester" value="6" required></label><br>
+            <button type="submit">Register Student</button>
+        </form>
+        <p>Status: <span id="reg-status">Ready</span></p>
+    </div>
+
     <div class="section" id="login-section">
         <h2>1. Authentication (Login)</h2>
         <form id="login-form">
@@ -23,14 +63,16 @@
             <button type="submit">Login</button>
         </form>
         <p>Status: <span id="login-status">Not logged in</span></p>
-        <p>Access Token: <div class="token-box" id="token-display">None</div></p>
+        <p>Access Token:
+        <div class="token-box" id="token-display">None</div>
+        </p>
     </div>
 
     <div class="section" id="profile-section">
         <h2>2. Profile Management</h2>
         <button id="btn-get-profile">Get My Profile</button>
         <pre id="profile-result">Result will appear here</pre>
-        
+
         <hr>
         <h3>Upload CV</h3>
         <form id="upload-form">
@@ -44,7 +86,7 @@
         <h2>3. Job Board and Discovery</h2>
         <button id="btn-get-vacancies">List Active Vacancies</button>
         <pre id="vacancies-result">Result will appear here</pre>
-        
+
         <hr>
         <h3>Check Job Match</h3>
         <form id="match-form">
@@ -73,7 +115,7 @@
         <h2>6. Application Tracking (Phase 4)</h2>
         <form id="status-update-form">
             <label>Application ID: <input type="text" id="status-app-id" placeholder="UUID" required></label><br>
-            <label>New Status: 
+            <label>New Status:
                 <select id="new-status">
                     <option value="APPLIED">APPLIED</option>
                     <option value="SCREENING">SCREENING</option>
@@ -142,29 +184,6 @@
         <pre id="log-result">Result will appear here</pre>
     </div>
 
-    <div class="section" id="report-section">
-        <h2>9. Reports & Documents (Phase 6)</h2>
-        <h3>Final Report</h3>
-        <form id="report-gen-form">
-            <label>Placement ID: <input type="text" id="report-placement-id" placeholder="UUID" required></label><br>
-            <button type="submit">Generate Final Report</button>
-        </form>
-        <button id="btn-check-report">Check Report Status</button>
-        <input type="text" id="check-report-placement-id" placeholder="Placement UUID">
-        <pre id="report-result">Result will appear here</pre>
-        
-        <hr>
-        <h3>Document Requests (Cover Letter)</h3>
-        <form id="doc-request-form">
-            <label>Type: <input type="text" id="doc-type" value="COVER_LETTER" required></label><br>
-            <label>Purpose: <input type="text" id="doc-purpose" placeholder="e.g. Melamar Magang di Google" required></label><br>
-            <label>Vacancy ID (Opt): <input type="text" id="doc-vacancy-id" placeholder="UUID"></label><br>
-            <button type="submit">Request Document</button>
-        </form>
-        <button id="btn-list-docs">List My Documents</button>
-        <pre id="doc-result">Result will appear here</pre>
-    </div>
-
     <script>
         const API_BASE = 'http://localhost:8000/api/v1';
         let accessToken = '';
@@ -174,6 +193,40 @@
             if (isJson) headers['Content-Type'] = 'application/json';
             return headers;
         }
+
+        // 0. Registration
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const statusEl = document.getElementById('reg-status');
+            const payload = {
+                email: document.getElementById('reg-email').value,
+                password: document.getElementById('reg-password').value,
+                nim: document.getElementById('reg-nim').value,
+                full_name: document.getElementById('reg-full-name').value,
+                semester: parseInt(document.getElementById('reg-semester').value)
+            };
+            
+            statusEl.textContent = 'Registering...';
+            try {
+                const res = await fetch(`${API_BASE}/auth/register/student`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    statusEl.textContent = 'Success! You can now login.';
+                    // Auto-fill login form
+                    document.getElementById('login-email').value = payload.email;
+                    document.getElementById('login-password').value = payload.password;
+                } else {
+                    const errorMsg = data.detail?.[0]?.msg || JSON.stringify(data.detail) || data.message || 'Unknown error';
+                    statusEl.textContent = 'Failed: ' + errorMsg;
+                }
+            } catch (err) {
+                statusEl.textContent = 'Error: ' + err.message;
+            }
+        });
 
         // 1. Auth
         document.getElementById('login-form').addEventListener('submit', async (e) => {
@@ -445,73 +498,7 @@
                 resEl.textContent = 'Error: ' + err.message;
             }
         });
-
-        // 9. Reports & Documents
-        document.getElementById('report-gen-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const pid = document.getElementById('report-placement-id').value;
-            const resEl = document.getElementById('report-result');
-            resEl.textContent = 'Triggering report generation...';
-            try {
-                const res = await fetch(`${API_BASE}/placements/${pid}/report/generate`, {
-                    method: 'POST',
-                    headers: getHeaders()
-                });
-                const data = await res.json();
-                resEl.textContent = JSON.stringify(data, null, 2);
-            } catch (err) {
-                resEl.textContent = 'Error: ' + err.message;
-            }
-        });
-
-        document.getElementById('btn-check-report').addEventListener('click', async () => {
-            const pid = document.getElementById('check-report-placement-id').value;
-            const resEl = document.getElementById('report-result');
-            if (!pid) return alert('Placement ID required');
-            resEl.textContent = 'Checking report status...';
-            try {
-                const res = await fetch(`${API_BASE}/placements/${pid}/report`, { headers: getHeaders() });
-                const data = await res.json();
-                resEl.textContent = JSON.stringify(data, null, 2);
-            } catch (err) {
-                resEl.textContent = 'Error: ' + err.message;
-            }
-        });
-
-        document.getElementById('doc-request-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const type = document.getElementById('doc-type').value;
-            const purpose = document.getElementById('doc-purpose').value;
-            const vid = document.getElementById('doc-vacancy-id').value;
-            const resEl = document.getElementById('doc-result');
-            const body = { document_type: type, purpose: purpose };
-            if (vid) body.reference_vacancy_id = vid;
-            
-            resEl.textContent = 'Submitting document request...';
-            try {
-                const res = await fetch(`${API_BASE}/document-requests`, {
-                    method: 'POST',
-                    headers: getHeaders(),
-                    body: JSON.stringify(body)
-                });
-                const data = await res.json();
-                resEl.textContent = JSON.stringify(data, null, 2);
-            } catch (err) {
-                resEl.textContent = 'Error: ' + err.message;
-            }
-        });
-
-        document.getElementById('btn-list-docs').addEventListener('click', async () => {
-            const resEl = document.getElementById('doc-result');
-            resEl.textContent = 'Loading my documents...';
-            try {
-                const res = await fetch(`${API_BASE}/document-requests`, { headers: getHeaders() });
-                const data = await res.json();
-                resEl.textContent = JSON.stringify(data, null, 2);
-            } catch (err) {
-                resEl.textContent = 'Error: ' + err.message;
-            }
-        });
     </script>
 </body>
+
 </html>

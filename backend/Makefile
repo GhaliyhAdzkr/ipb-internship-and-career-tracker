@@ -17,9 +17,9 @@ load-fixtures:
 
 test:
 ifdef filter
-	poetry run pytest $(filter) -vv
+	PYTHONPATH=src:. poetry run pytest $(filter) -vv
 else
-	poetry run pytest -vv
+	PYTHONPATH=src:. poetry run pytest -vv
 endif
 
 coverage:
