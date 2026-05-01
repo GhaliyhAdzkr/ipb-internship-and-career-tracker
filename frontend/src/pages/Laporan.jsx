@@ -11,6 +11,7 @@ function Laporan() {
 					<Navbar></Navbar>
 					<div className="flex-1 flex flex-col justify-center items-center text-3xl font-bold font-jakarta text-black">
 						<div>Laporan</div>
+						<Test></Test>
 					</div>
 				</div>
 			</div>
