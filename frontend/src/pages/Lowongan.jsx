@@ -14,8 +14,14 @@ import { LuLeaf } from "react-icons/lu";
 import { BsSuitcaseLg } from "react-icons/bs";
 import { MdOutlineLocationOn } from "react-icons/md";
 import { RiShapesLine } from "react-icons/ri";
+import { RiArrowDropDownLine } from "react-icons/ri";
 
 function Lowongan() {
+	// Dropdown
+	const [isOpenDropdown, setIsOpenDropdown] = useState(false);
+	const [sortActive, setSortActive] = useState(0);
+	const sortOption = ["Terbaru", "Terlama"];
+
 	const [currentPage, setCurrentPage] = useState(1);
 	const isXl = useMediaQuery({ query: "(min-width: 1280px)" });
 	const itemsPerPage = isXl ? 9 : 6;
@@ -209,12 +215,66 @@ function Lowongan() {
 											</span>
 										</label>
 									</div>
-									<div className="bg-indigo-100 text-center p-2 rounded">
+									<button className="bg-sky-950 hover:bg-sky-900 text-white  border  text-center p-2 rounded">
 										Terapkan Filter
-									</div>
+									</button>
 								</section>
 								{/* Card Lowongan  */}
-								<section className="flex-1">
+								<section className="flex-1 flex flex-col gap-4">
+									{/* Menampilkan & Urutkan */}
+									<div className="flex justify-between items-center">
+										<div className="text-sm">
+											Menampilkan {data.length} lowongan
+										</div>
+										<div className="flex items-center gap-2 text-sm">
+											<div>Urutkan</div>
+											<div className="relative inline-block text-left">
+												{/* Trigger Button */}
+												<button
+													onClick={() =>
+														setIsOpenDropdown(
+															!isOpenDropdown,
+														)
+													}
+													className="w-25 font-bold justify-between px-2 text-sky-950 font-jakarta rounded-md flex items-center gap-2"
+												>
+													{sortOption[sortActive]}
+													<RiArrowDropDownLine
+														className={`size-5 ${isOpenDropdown ? "rotate-180" : ""}`}
+													/>
+												</button>
+
+												{/* Dropdown Menu */}
+												{isOpenDropdown && (
+													<div className="absolute left-0 mt-2 w-fit bg-white border border-gray-200 rounded-md shadow-lg z-10">
+														<ul className="py-1 text-black">
+															{sortOption.map(
+																(
+																	tab,
+																	index,
+																) => (
+																	<li
+																		key={
+																			index
+																		}
+																		className="cursor-default p-2"
+																		onClick={() => {
+																			setSortActive(
+																				index
+																			);
+																			setIsOpenDropdown(!isOpenDropdown)
+																		}}
+																	>
+																		{tab}
+																	</li>
+																),
+															)}
+														</ul>
+													</div>
+												)}
+											</div>
+										</div>
+									</div>
 									<div className="flex-1 grid grid-cols-2 xl:grid-cols-3 content-start gap-5">
 										{currentCards.map((item) => (
 											<div>

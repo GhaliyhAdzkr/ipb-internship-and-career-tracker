@@ -2,6 +2,7 @@
 import Sidebar from "../components/SideNav";
 import Navbar from "../components/NavBar";
 import Test from "../components/Test";
+import TheFooter from "../components/TheFooter";
 
 // PACKAGE
 import { useState } from "react";
@@ -14,6 +15,7 @@ import "react-day-picker/style.css";
 import { PiWarning } from "react-icons/pi";
 import { FaRegClock } from "react-icons/fa";
 import { PiUpload } from "react-icons/pi";
+import { CiTextAlignJustify } from "react-icons/ci";
 
 function Jurnal() {
 	// STATE
@@ -68,12 +70,12 @@ function Jurnal() {
 					<div className="m-5 flex flex-col font-jakarta text-black gap-5">
 						<div className="flex flex-col gap-2">
 							<div className="text-3xl font-bold">
-								Eksplorasi Karirmu
+								Logbook Magang
 							</div>
 							<div className="text-justify w-xl xl:w-full">
-								Temukan peluang magang dan karir profesional
-								yang telah dikurasi khusus untuk mahasiswa dan
-								alumni IPB University.
+								Catat aktivitas harian Anda selama periode
+								magang. Jurnal ini akan ditinjau oleh dosen
+								pembimbing.
 							</div>{" "}
 						</div>
 					</div>
@@ -182,7 +184,7 @@ function Jurnal() {
 												: "None"}
 										</div>
 									</div>
-									<div className="flex gap-2 items-center text-xs px-2 py-1 bg-red-200 text-red-800 rounded-full">
+									<div className="flex gap-2 font-bold items-center text-xs px-2 py-1 bg-red-200 text-red-800 rounded-full">
 										<PiWarning className="size-4" />
 										<div>Belum Terisi</div>
 									</div>
@@ -207,7 +209,7 @@ function Jurnal() {
 															e.target.value,
 														)
 													}
-													class="mt-0.5 pl-10 w-full rounded border-gray-300 bg-zinc-50 shadow-sm sm:text-sm "
+													class="mt-0.5 pl-10 w-full rounded border-gray-300  shadow-sm sm:text-sm "
 												/>
 												<span class="absolute inset-y-0 left-0 grid w-8 place-content-center ">
 													<FaRegClock className="text-black size-5 ml-2 mt-1" />
@@ -229,7 +231,7 @@ function Jurnal() {
 															e.target.value,
 														)
 													}
-													class="mt-0.5 pl-10 w-full rounded border-gray-300 bg-zinc-50 shadow-sm sm:text-sm "
+													class="mt-0.5 pl-10 w-full rounded border-gray-300  shadow-sm sm:text-sm "
 												/>
 
 												<span class="absolute inset-y-0 left-0 grid w-8 place-content-center ">
@@ -266,7 +268,7 @@ function Jurnal() {
 									</span>
 									<textarea
 										placeholder="Jelaskan kegiatan yang dijalankan secara detail"
-										className="mt-0.5 w-full h-50 rounded border-gray-300 bg-zinc-50 shadow-sm sm:text-sm "
+										className="mt-0.5 w-full h-50 rounded border-gray-300  shadow-sm sm:text-sm "
 									/>
 								</div>
 								{/* Upload */}
@@ -277,17 +279,17 @@ function Jurnal() {
 									</span>
 									<label
 										for="File"
-										class="flex flex-col items-center rounded border border-gray-300 bg-zinc-50 p-4 text-gray-900 shadow-sm sm:p-6"
+										class="flex flex-col items-center rounded border border-gray-300  p-10 text-gray-900 shadow-sm"
 									>
-										<PiUpload className="size-10" />
-										<span class="mt-4 font-medium">
-											{" "}
-											Upload your file(s){" "}
-										</span>
-
-										<span class="mt-2 inline-block rounded border border-gray-200 bg-gray-50 px-3 py-1.5 text-center text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-100">
-											Browse files
-										</span>
+										<CiTextAlignJustify className="size-10 outline-2 rounded" />
+										<div class="mt-4 font-medium text-sm text-center">
+											Tekan untuk unggah atau
+											<br />
+											seret dokumen anda ke sini
+										</div>
+										<div class="font-medium text-xs text-slate-400">
+											PDF, JPEG, atau PNG (Maks. 5MB)
+										</div>
 
 										<input
 											multiple=""
@@ -299,12 +301,17 @@ function Jurnal() {
 								</div>
 								{/* Buttons */}
 								<div className="flex w-full gap-5 justify-end text-sm">
-									<button className="rounded font-bold p-3 text-black">Batal</button>
-									<button className="bg-sky-950 rounded  p-3">Simpan Perubahan</button>
+									<button className="rounded font-bold p-3 text-black">
+										Batal
+									</button>
+									<button className="bg-sky-950 hover:bg-sky-900  rounded  p-3">
+										Simpan Perubahan
+									</button>
 								</div>
 							</div>
 						</div>
 					</div>
+					<TheFooter></TheFooter>
 				</div>
 			</div>
 		</>

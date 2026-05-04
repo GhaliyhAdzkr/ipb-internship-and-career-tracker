@@ -9,6 +9,7 @@ import { NavLink } from "react-router-dom";
 // ICONS
 import { FaRegBookmark } from "react-icons/fa6";
 import { MdNotificationsNone } from "react-icons/md";
+import { LuLeaf } from "react-icons/lu";
 
 function Dashboard() {
 	return (
@@ -122,18 +123,18 @@ function Dashboard() {
 									</NavLink>
 								</div>
 								<div className="grid grid-cols-2 gap-5">
-									<div className="self-stretch  p-5 font-jakarta  bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] flex flex-col gap-4">
-										<div className="flex gap-2 justify-between">
-											<div className="bg-sky-200 px-2 py-1 rounded text-xs text-black">
+									<div className="flex-1 text-sm self-stretch  p-5 font-jakarta bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] flex flex-col gap-4">
+										<div className="flex gap-2 justify-between items-center">
+											<LuLeaf className="size-7 text-zinc-700 bg-indigo-100 rounded p-1" />
+											<div className="bg-sky-200 px-2 py-1 h-fit rounded text-[0.6rem] text-black">
 												DIKURASI CDA
 											</div>
-											<FaRegBookmark className="text-zinc-700" />
 										</div>
 										<div className="flex flex-col gap-1">
 											<div className=" text-black text-base font-bold">
-												UI / UX Designer Intern
+												Software Engineer
 											</div>
-											<div className="text-black text-sm">
+											<div className="text-zinc-500 text-sm">
 												Shopee Indonesia
 											</div>
 										</div>
@@ -146,18 +147,18 @@ function Dashboard() {
 											</div>
 										</div>
 									</div>
-									<div className="self-stretch  p-5 font-jakarta  bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] flex flex-col gap-4">
-										<div className="flex gap-2 justify-between">
-											<div className="bg-sky-200 px-2 py-1 rounded text-xs text-black">
+									<div className="flex-1 text-sm self-stretch  p-5 font-jakarta bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] flex flex-col gap-4">
+										<div className="flex gap-2 justify-between items-center">
+											<LuLeaf className="size-7 text-zinc-700 bg-indigo-100 rounded p-1" />
+											<div className="bg-sky-200 px-2 py-1 h-fit rounded text-[0.6rem] text-black">
 												DIKURASI CDA
 											</div>
-											<FaRegBookmark className="text-zinc-700" />
 										</div>
 										<div className="flex flex-col gap-1">
 											<div className=" text-black text-base font-bold">
-												UI / UX Designer Intern
+												Software Engineer
 											</div>
-											<div className="text-black text-sm">
+											<div className="text-zinc-500 text-sm">
 												Shopee Indonesia
 											</div>
 										</div>
