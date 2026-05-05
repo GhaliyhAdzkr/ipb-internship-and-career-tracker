@@ -42,6 +42,7 @@ ipb-internship-and-career-tracker/
 │   │       ├── domain/            # Domain models dan business logic
 │   │       ├── features/          # Fitur aplikasi (vertical slices)
 │   │       ├── models/            # ORM models (database)
+│   │       ├── repositories/      # Layer akses data (Repository Pattern)
 │   │       ├── routers/           # API endpoints
 │   │       ├── schemas/           # Pydantic schemas (request/response)
 │   │       ├── shared/            # Shared utilities
@@ -193,8 +194,11 @@ Setelah backend berjalan, akses dokumentasi API di:
 ## Design Principles
 
 1. **Vertical Slice Architecture** - Setiap fitur diorganisir dalam slice terpisah ([Referensi](https://www.jimmybogard.com/vertical-slice-architecture/))
-2. **Domain-Driven Design** - Object-Oriented Domain Modeling ([Referensi](https://en.wikipedia.org/wiki/Domain-driven_design))
-3. **CQRS Pattern** - Command Query Responsibility Segregation ([Referensi](https://learn.microsoft.com/en-us/azure/architecture/patterns/cqrs))
+2. **Domain-Driven Design** - Logic inti bisnis dan aturan domain dipisahkan dari detail infrastruktur ([Referensi](https://en.wikipedia.org/wiki/Domain-driven_design))
+3. **Command/Handler Pattern** - Pemisahan antara definisi aksi (Command) dan pelaksana logic (Handler).
+4. **Repository Pattern** - Abstraksi akses database untuk memudahkan pengujian dan pemeliharaan.
+5. **Dependency Injection** - Manajemen ketergantungan antar komponen untuk kode yang lebih testable dan modular.
+6. **CQRS Pattern** - Command Query Responsibility Segregation ([Referensi](https://learn.microsoft.com/en-us/azure/architecture/patterns/cqrs))
 
 ---
 

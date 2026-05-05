@@ -207,6 +207,9 @@ async def update_admin_profile(
     )
 
 
+from app_backend.features.admin.master_data_service import MasterDataService
+from app_backend.shared.dependencies_service import get_master_data_service
+
 # ──────────────────────────────────────────────────────────────────────────────
 # Manage Departments (Section 2.1)
 # ──────────────────────────────────────────────────────────────────────────────
@@ -218,11 +221,10 @@ async def update_admin_profile(
     summary="Daftar semua Program Studi",
 )
 async def list_departments(
-    session=Depends(get_session),
+    master_data_service: MasterDataService = Depends(get_master_data_service),
     _: DomainUser = Depends(require_admin),
 ) -> List[DepartmentResponse]:
-    result = list_departments_command_handler(ListDepartmentsCommand(), session)
-    return result.items
+    return master_data_service.list_departments()
 
 
 @router.post(
@@ -233,17 +235,15 @@ async def list_departments(
 )
 async def create_department(
     payload: DepartmentCreate,
-    session=Depends(get_session),
+    master_data_service: MasterDataService = Depends(get_master_data_service),
     _: DomainUser = Depends(require_admin),
 ) -> DepartmentResponse:
-    result = create_department_command_handler(
-        CreateDepartmentCommand(payload=payload), session
-    )
-    if result.got_error():
+    try:
+        return master_data_service.create_department(payload)
+    except Exception as exc:
         raise HTTPException(
-            status_code=HTTPStatus.CONFLICT, detail=result.error_message
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(exc)
         )
-    return result.item
 
 
 @router.patch(
@@ -254,20 +254,17 @@ async def create_department(
 async def update_department(
     dept_id: uuid.UUID,
     payload: DepartmentUpdate,
-    session=Depends(get_session),
+    master_data_service: MasterDataService = Depends(get_master_data_service),
     _: DomainUser = Depends(require_admin),
 ) -> DepartmentResponse:
-    result = update_department_command_handler(
-        UpdateDepartmentCommand(dept_id=dept_id, payload=payload), session
-    )
-    if result.got_error():
-        status = (
-            HTTPStatus.NOT_FOUND
-            if "tidak ditemukan" in result.error_message
-            else HTTPStatus.CONFLICT
+    try:
+        return master_data_service.update_department(dept_id, payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(exc)
         )
-        raise HTTPException(status_code=status, detail=result.error_message)
-    return result.item
 
 
 @router.delete(
@@ -277,19 +274,17 @@ async def update_department(
 )
 async def delete_department(
     dept_id: uuid.UUID,
-    session=Depends(get_session),
+    master_data_service: MasterDataService = Depends(get_master_data_service),
     _: DomainUser = Depends(require_admin),
 ) -> None:
-    result = delete_department_command_handler(
-        DeleteDepartmentCommand(dept_id=dept_id), session
-    )
-    if result.got_error():
-        status = (
-            HTTPStatus.NOT_FOUND
-            if "tidak ditemukan" in result.error_message
-            else HTTPStatus.CONFLICT
+    try:
+        master_data_service.delete_department(dept_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(exc)
         )
-        raise HTTPException(status_code=status, detail=result.error_message)
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -303,11 +298,10 @@ async def delete_department(
     summary="Daftar semua Master Skill",
 )
 async def list_skills(
-    session=Depends(get_session),
+    master_data_service: MasterDataService = Depends(get_master_data_service),
     _: DomainUser = Depends(require_admin),
 ) -> List[SkillResponse]:
-    result = list_skills_command_handler(ListSkillsCommand(), session)
-    return result.items
+    return master_data_service.list_skills()
 
 
 @router.post(
@@ -318,15 +312,15 @@ async def list_skills(
 )
 async def create_skill(
     payload: SkillCreate,
-    session=Depends(get_session),
+    master_data_service: MasterDataService = Depends(get_master_data_service),
     _: DomainUser = Depends(require_admin),
 ) -> SkillResponse:
-    result = create_skill_command_handler(CreateSkillCommand(payload=payload), session)
-    if result.got_error():
+    try:
+        return master_data_service.create_skill(payload)
+    except Exception as exc:
         raise HTTPException(
-            status_code=HTTPStatus.CONFLICT, detail=result.error_message
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(exc)
         )
-    return result.item
 
 
 @router.patch(
@@ -337,20 +331,17 @@ async def create_skill(
 async def update_skill(
     skill_id: uuid.UUID,
     payload: SkillUpdate,
-    session=Depends(get_session),
+    master_data_service: MasterDataService = Depends(get_master_data_service),
     _: DomainUser = Depends(require_admin),
 ) -> SkillResponse:
-    result = update_skill_command_handler(
-        UpdateSkillCommand(skill_id=skill_id, payload=payload), session
-    )
-    if result.got_error():
-        status = (
-            HTTPStatus.NOT_FOUND
-            if "tidak ditemukan" in result.error_message
-            else HTTPStatus.CONFLICT
+    try:
+        return master_data_service.update_skill(skill_id, payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(exc)
         )
-        raise HTTPException(status_code=status, detail=result.error_message)
-    return result.item
 
 
 @router.delete(
@@ -360,19 +351,17 @@ async def update_skill(
 )
 async def delete_skill(
     skill_id: uuid.UUID,
-    session=Depends(get_session),
+    master_data_service: MasterDataService = Depends(get_master_data_service),
     _: DomainUser = Depends(require_admin),
 ) -> None:
-    result = delete_skill_command_handler(
-        DeleteSkillCommand(skill_id=skill_id), session
-    )
-    if result.got_error():
-        status = (
-            HTTPStatus.NOT_FOUND
-            if "tidak ditemukan" in result.error_message
-            else HTTPStatus.CONFLICT
+    try:
+        master_data_service.delete_skill(skill_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(exc)
         )
-        raise HTTPException(status_code=status, detail=result.error_message)
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -386,11 +375,10 @@ async def delete_skill(
     summary="Daftar semua perusahaan eksternal",
 )
 async def list_companies(
-    session=Depends(get_session),
+    master_data_service: MasterDataService = Depends(get_master_data_service),
     _: DomainUser = Depends(require_admin),
 ) -> List[CompanyResponse]:
-    result = list_companies_command_handler(ListCompaniesCommand(), session)
-    return result.items
+    return master_data_service.list_companies()
 
 
 @router.post(
@@ -401,17 +389,15 @@ async def list_companies(
 )
 async def create_company(
     payload: CompanyCreate,
-    session=Depends(get_session),
+    master_data_service: MasterDataService = Depends(get_master_data_service),
     _: DomainUser = Depends(require_admin),
 ) -> CompanyResponse:
-    result = create_company_command_handler(
-        CreateCompanyCommand(payload=payload), session
-    )
-    if result.got_error():
+    try:
+        return master_data_service.create_company(payload)
+    except Exception as exc:
         raise HTTPException(
-            status_code=HTTPStatus.CONFLICT, detail=result.error_message
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(exc)
         )
-    return result.item
 
 
 @router.patch(
@@ -422,20 +408,17 @@ async def create_company(
 async def update_company(
     company_id: uuid.UUID,
     payload: CompanyUpdate,
-    session=Depends(get_session),
+    master_data_service: MasterDataService = Depends(get_master_data_service),
     _: DomainUser = Depends(require_admin),
 ) -> CompanyResponse:
-    result = update_company_command_handler(
-        UpdateCompanyCommand(company_id=company_id, payload=payload), session
-    )
-    if result.got_error():
-        status = (
-            HTTPStatus.NOT_FOUND
-            if "tidak ditemukan" in result.error_message
-            else HTTPStatus.CONFLICT
+    try:
+        return master_data_service.update_company(company_id, payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(exc)
         )
-        raise HTTPException(status_code=status, detail=result.error_message)
-    return result.item
 
 
 @router.delete(
@@ -445,19 +428,17 @@ async def update_company(
 )
 async def delete_company(
     company_id: uuid.UUID,
-    session=Depends(get_session),
+    master_data_service: MasterDataService = Depends(get_master_data_service),
     _: DomainUser = Depends(require_admin),
 ) -> None:
-    result = delete_company_command_handler(
-        DeleteCompanyCommand(company_id=company_id), session
-    )
-    if result.got_error():
-        status = (
-            HTTPStatus.NOT_FOUND
-            if "tidak ditemukan" in result.error_message
-            else HTTPStatus.CONFLICT
+    try:
+        master_data_service.delete_company(company_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(exc)
         )
-        raise HTTPException(status_code=status, detail=result.error_message)
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -504,9 +485,12 @@ async def verify_application(
         session,
     )
     if result.got_error():
-        raise HTTPException(
-            status_code=HTTPStatus.BAD_REQUEST, detail=result.error_message
+        err_status = (
+            result.error_code
+            if hasattr(result, "error_code") and result.error_code
+            else HTTPStatus.BAD_REQUEST
         )
+        raise HTTPException(status_code=err_status, detail=result.error_message)
     return {"message": "Placement berhasil dibuat", "placement_id": result.placement.id}
 
 

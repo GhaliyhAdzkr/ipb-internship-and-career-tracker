@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app_backend.models.vacancies import Vacancies
 from app_backend.models.vacancy_skills import VacancySkills
@@ -49,7 +49,10 @@ def list_vacancies_command_handler(
     offset = (page - 1) * per_page
 
     # Base query
-    query = session.query(Vacancies).options(joinedload(Vacancies.company))
+    query = session.query(Vacancies).options(
+        joinedload(Vacancies.company),
+        selectinload(Vacancies.vacancy_skills).joinedload(VacancySkills.skill),
+    )
 
     # Filter active only
     if command.is_active is not None:
@@ -66,13 +69,8 @@ def list_vacancies_command_handler(
     # Build response with skills
     items = []
     for vacancy in vacancies:
-        # Get skills
-        vacancy_skills = (
-            session.query(VacancySkills)
-            .options(joinedload(VacancySkills.skill))
-            .filter(VacancySkills.vacancy_id == vacancy.id)
-            .all()
-        )
+        # Get skills from eagerly loaded relationship
+        vacancy_skills = vacancy.vacancy_skills
         skills = [
             SkillRequirement(
                 skill_id=vs.skill_id,

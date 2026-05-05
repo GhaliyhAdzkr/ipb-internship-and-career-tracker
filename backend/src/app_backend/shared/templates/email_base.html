@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Manrope:wght@400;500;600&display=swap');
+        
+        body {
+            font-family: 'Manrope', 'Plus Jakarta Sans', Arial, sans-serif;
+            background-color: #f4f7f9;
+            margin: 0;
+            padding: 0;
+            color: #4A6080;
+            -webkit-font-smoothing: antialiased;
+        }
+        .wrapper {
+            background-color: #f4f7f9;
+            padding: 40px 10px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 63, 127, 0.08);
+        }
+        .header {
+            background: linear-gradient(135deg, #003F7F 0%, #1A6FBF 100%);
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .header-content {
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .header img {
+            max-height: 50px;
+            width: auto;
+            margin-bottom: 12px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .header-title {
+            color: #ffffff;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin: 0;
+            text-transform: uppercase;
+        }
+        .header-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+        .content {
+            padding: 45px 40px;
+        }
+        .greeting {
+            font-weight: 600;
+            font-size: 18px;
+            color: #003F7F;
+            margin-bottom: 20px;
+        }
+        .subject-box {
+            background-color: #f0f7ff;
+            border-left: 4px solid #00A8CC;
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+        .subject-text {
+            margin: 0;
+            font-weight: 700;
+            color: #1A6FBF;
+            font-size: 16px;
+        }
+        .message-body {
+            line-height: 1.8;
+            font-size: 15px;
+            color: #4A6080;
+        }
+        .divider {
+            height: 1px;
+            background-color: #edf2f7;
+            margin: 30px 0;
+        }
+        .footer {
+            background-color: #ffffff;
+            padding: 0 40px 40px 40px;
+            text-align: center;
+        }
+        .footer-text {
+            font-size: 12px;
+            color: #94a3b8;
+            line-height: 1.5;
+        }
+        .footer-logo {
+            opacity: 0.5;
+            margin-top: 20px;
+            font-weight: 700;
+            font-size: 14px;
+            color: #4A6080;
+        }
+        .timestamp {
+            font-size: 11px;
+            color: #cbd5e1;
+            margin-top: 20px;
+        }
+        .btn-action {
+            display: inline-block;
+            background-color: #1A6FBF;
+            color: #ffffff !important;
+            padding: 14px 28px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            margin-top: 25px;
+            transition: background-color 0.2s;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="container">
+            <div class="header">
+                <img src="cid:logo" alt="LARAS Logo">
+                <div class="header-title">LARAS Platform</div>
+                <div class="header-subtitle">IPB Internship & Career Tracker</div>
+            </div>
+            
+            <div class="content">
+                <div class="greeting">Halo, {{ user_name }}!</div>
+                
+                <div class="subject-box">
+                    <p class="subject-text">{{ title }}</p>
+                </div>
+                
+                <div class="message-body">
+                    {{ message }}
+                </div>
+                
+                <div class="divider"></div>
+                
+                <div class="footer">
+                    <p class="footer-text">
+                        Pesan ini dikirimkan karena Anda terdaftar pada sistem <strong>IPB Internship & Career Tracker</strong>.<br>
+                        Silakan abaikan email ini jika Anda merasa tidak melakukan aktivitas terkait.
+                    </p>
+                    <div class="footer-logo">LARAS</div>
+                    <div class="footer-text" style="margin-top: 10px;">
+                        &copy; {{ year }} Direktorat Kemahasiswaan & Pengembangan Karir IPB
+                    </div>
+                    <div class="timestamp">
+                        Dikirim pada: {{ timestamp }} WIB
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

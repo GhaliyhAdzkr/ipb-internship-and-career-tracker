@@ -1,6 +1,7 @@
 import os
 import uuid
 from dataclasses import dataclass
+from http import HTTPStatus
 from typing import Optional
 
 from fastapi import UploadFile
@@ -25,6 +26,7 @@ class UploadActivityLogAttachmentResult:
     attachment_url: Optional[str] = None
     message: Optional[str] = None
     error_message: Optional[str] = None
+    error_code: HTTPStatus = HTTPStatus.BAD_REQUEST
 
     def got_error(self) -> bool:
         return self.error_message is not None
@@ -57,21 +59,20 @@ def upload_activity_log_attachment_command_handler(
         )
 
     file = command.file
-    valid_content_types = ["image/jpeg", "image/png", "application/pdf"]
-    if file.content_type not in valid_content_types:
-        return UploadActivityLogAttachmentResult(
-            error_message="File harus berupa image/jpeg, image/png, atau application/pdf"
-        )
-
     filename = file.filename.lower()
-    if not (
-        filename.endswith(".jpg")
-        or filename.endswith(".jpeg")
-        or filename.endswith(".png")
-        or filename.endswith(".pdf")
-    ):
+
+    # Read the first 8 bytes for magic bytes validation
+    header = file.file.read(8)
+    file.file.seek(0)  # Reset pointer
+
+    is_jpeg = header.startswith(b"\xff\xd8\xff")
+    is_png = header.startswith(b"\x89PNG\r\n\x1a\n")
+    is_pdf = header.startswith(b"%PDF-")
+
+    if not (is_jpeg or is_png or is_pdf):
         return UploadActivityLogAttachmentResult(
-            error_message="Ekstensi file tidak valid"
+            error_message="Format file tidak didukung atau terdeteksi sebagai malware. Hanya JPEG, PNG, dan PDF yang diizinkan.",
+            error_code=HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
         )
 
     os.makedirs(UPLOAD_DIR, exist_ok=True)

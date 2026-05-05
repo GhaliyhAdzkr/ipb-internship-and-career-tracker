@@ -3,13 +3,16 @@ Notification Tasks – Background tasks untuk notifikasi dan email.
 Berjalan di queue terpisah untuk email sending dan cleanup.
 """
 
-from datetime import datetime, timezone
+import email.message
+import smtplib
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List
 
 from celery import shared_task
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from app_backend.conf.settings import settings
 from app_backend.models.auth_action_tokens import AuthActionTokens
 from app_backend.models.notification_queue import NotificationQueue
 from app_backend.models.user_refresh_tokens import UserRefreshTokens
@@ -19,18 +22,128 @@ from app_backend.shared.database import get_database_url
 @shared_task
 def send_email_notification(
     notification_id: str,
-    user_email: str,
-    subject: str,
-    message: str,
 ) -> Dict:
     """
-    Task: Send email notification.
-    Placeholder - implementasikan SMTP sending sesuai kebutuhan.
+    Task: Send email notification via SMTP (e.g. Resend).
+    Queries the notification, sends the email using a modular template, and updates the status to SENT.
     """
+    import os
+    from datetime import datetime, timezone
+
+    engine = create_engine(get_database_url())
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
     try:
-        # Placeholder: Send email via SMTP
-        # import smtplib, email
-        # ...
+        from sqlalchemy.orm import joinedload
+
+        notif = (
+            session.query(NotificationQueue)
+            .options(joinedload(NotificationQueue.user))
+            .filter_by(id=notification_id)
+            .first()
+        )
+        if not notif or notif.status != "PROCESSING":
+            return {"status": "skipped", "reason": "Not found or not processing"}
+
+        user_email = notif.user.email if notif.user else None
+        subject = notif.title
+        message = notif.message
+
+        if not user_email:
+            notif.status = "FAILED"
+            session.commit()
+            return {"status": "failed", "error": "No email address"}
+
+        # Fetch User Name
+        from app_backend.models.profiles_admin import ProfilesAdmin
+        from app_backend.models.profiles_student import ProfilesStudent
+
+        user_name = "Pengguna LARAS"
+        user = notif.user
+        if user:
+            if user.role == "STUDENT":
+                student = (
+                    session.query(ProfilesStudent).filter_by(user_id=user.id).first()
+                )
+                if student:
+                    user_name = student.full_name
+            elif user.role == "ADMIN":
+                admin = session.query(ProfilesAdmin).filter_by(user_id=user.id).first()
+                if admin:
+                    user_name = admin.full_name
+
+        # Load Template
+        template_path = os.path.join(
+            os.path.dirname(__file__), "..", "templates", "email_base.html"
+        )
+        logo_path = os.path.join(
+            os.path.dirname(__file__), "..", "templates", "logo.png"
+        )
+
+        if os.path.exists(template_path):
+            with open(template_path, "r") as f:
+                html_content = f.read()
+        else:
+            # Fallback if template missing
+            html_content = (
+                f"<html><body><h2>{subject}</h2><p>{message}</p></body></html>"
+            )
+
+        # Replace Placeholders
+        now = datetime.now()
+        html_content = html_content.replace("{{ user_name }}", user_name)
+        html_content = html_content.replace("{{ title }}", subject)
+        html_content = html_content.replace(
+            "{{ message }}", message.replace("\n", "<br>")
+        )
+        html_content = html_content.replace("{{ year }}", str(now.year))
+        html_content = html_content.replace(
+            "{{ timestamp }}", now.strftime("%d %b %Y, %H:%M")
+        )
+
+        msg = email.message.EmailMessage()
+        msg["Subject"] = subject
+        msg["From"] = f"{settings.smtp_from_name} <{settings.smtp_from_email}>"
+        msg["To"] = user_email
+
+        msg.set_content(message)  # Plain text version
+
+        # Prepare HTML part
+        html_part = email.message.EmailMessage()
+        html_part.set_content(html_content, subtype="html")
+
+        # Add inline logo to HTML part if exists
+        if os.path.exists(logo_path):
+            with open(logo_path, "rb") as f:
+                logo_data = f.read()
+                # add_related transforms the part into multipart/related
+                html_part.add_related(
+                    logo_data, maintype="image", subtype="png", cid="logo"
+                )
+
+        # Add the HTML (with its related images) as an alternative to the plain text
+        if html_part.is_multipart():
+            # If it became multipart/related, we add it as a whole part
+            msg.add_alternative(html_part)
+        else:
+            # If no logo was added, it's just text/html
+            msg.add_alternative(html_content, subtype="html")
+
+        # Connect and send
+        if settings.smtp_port == 465:
+            server = smtplib.SMTP_SSL(settings.smtp_host, settings.smtp_port)
+        else:
+            server = smtplib.SMTP(settings.smtp_host, settings.smtp_port)
+            server.starttls()
+
+        server.login(settings.smtp_user, settings.smtp_password)
+        server.send_message(msg)
+        server.quit()
+
+        notif.status = "SENT"
+        notif.sent_at = datetime.now(timezone.utc)
+        session.commit()
 
         return {
             "status": "sent",
@@ -40,10 +153,15 @@ def send_email_notification(
         }
 
     except Exception as exc:
+        if "notif" in locals() and notif:
+            notif.status = "FAILED"
+            session.commit()
         return {
             "status": "failed",
             "error": str(exc),
         }
+    finally:
+        session.close()
 
 
 @shared_task
@@ -57,33 +175,36 @@ def process_notification_queue() -> Dict:
     session = Session()
 
     try:
-        # Get pending notifications
+        # Get pending notifications with Row Lock (SKIP LOCKED) to prevent concurrent processing
         pending_notifications = (
             session.query(NotificationQueue)
-            .filter(NotificationQueue.status == "QUEUED")
+            .filter(
+                NotificationQueue.status == "QUEUED",
+                NotificationQueue.scheduled_at <= datetime.now(timezone.utc),
+            )
             .limit(100)  # Process max 100 at a time
+            .with_for_update(skip_locked=True)
             .all()
         )
 
         processed = 0
-        failed = 0
 
+        # Mark as processing first
+        notif_ids = []
         for notif in pending_notifications:
-            try:
-                # Send email (placeholder)
-                notif.status = "SENT"
-                notif.sent_at = datetime.now(timezone.utc)
-                processed += 1
-            except Exception:
-                notif.status = "FAILED"
-                failed += 1
+            notif.status = "PROCESSING"
+            notif_ids.append(str(notif.id))
+            processed += 1
 
         session.commit()
 
+        # Dispatch to async child tasks
+        for nid in notif_ids:
+            send_email_notification.delay(notification_id=nid)
+
         return {
             "status": "completed",
-            "processed": processed,
-            "failed": failed,
+            "dispatched": processed,
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
@@ -109,6 +230,7 @@ def cleanup_expired_tokens() -> Dict:
 
     try:
         now = datetime.now(timezone.utc)
+        thirty_days_ago = now - timedelta(days=30)
 
         # Cleanup expired refresh tokens
         expired_refresh = (
@@ -133,12 +255,25 @@ def cleanup_expired_tokens() -> Dict:
         for token in expired_actions:
             session.delete(token)
 
+        old_notifications = (
+            session.query(NotificationQueue)
+            .filter(
+                NotificationQueue.scheduled_at < thirty_days_ago,
+                NotificationQueue.status.in_(["SENT", "DELETED"]),
+            )
+            .all()
+        )
+        notif_deleted = len(old_notifications)
+        for notif in old_notifications:
+            session.delete(notif)
+
         session.commit()
 
         return {
             "status": "completed",
             "refresh_tokens_deleted": refresh_deleted,
             "action_tokens_deleted": action_deleted,
+            "notifications_deleted": notif_deleted,
             "timestamp": now.isoformat(),
         }
 
@@ -173,7 +308,7 @@ def send_bulk_notifications(user_ids: List[str], subject: str, message: str) -> 
                     title=subject,
                     message=message,
                     status="QUEUED",
-                    created_at=datetime.now(timezone.utc),
+                    scheduled_at=datetime.now(timezone.utc),
                 )
                 session.add(notif)
                 queued += 1

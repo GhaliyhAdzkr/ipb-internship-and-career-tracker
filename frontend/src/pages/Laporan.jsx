@@ -1,8 +1,5 @@
-// COMPONENTS
-import Sidebar from "../components/SideNav";
-import Navbar from "../components/NavBar";
-import Test from "../components/Test";
-import TheFooter from "../components/TheFooter";
+import React from "react";
+import { PiFileText, PiCloudArrowUp, PiCheckCircle } from "react-icons/pi";
 
 // ICONS
 import { PiUpload } from "react-icons/pi";
@@ -13,146 +10,78 @@ import { FaRegCircleCheck } from "react-icons/fa6";
 import { TiMessages } from "react-icons/ti";
 function Laporan() {
 	return (
-		<>
-			<div className="flex bg-[#F8F9FF]">
-				<Sidebar></Sidebar>
-				<div className=" flex-1 flex flex-col">
-					<Navbar></Navbar>
-					<div className="flex-1 m-5 flex flex-col font-jakarta text-black gap-5">
-						{/* Header */}
-						<div className="flex flex-col gap-2">
-							{/* Teks */}
-							<div className="text-3xl font-bold">
-								Laporan Akhir Magang
-							</div>
-							<div className="text-justify w-xl xl:w-full">
-								Unggah dan pantau status laporan akhir kegiatan
-								magang Anda.
-							</div>
-						</div>
-						{/* Main */}
-						<div className="flex gap-5">
-							{/* Left Side */}
-							<div className="flex-1 flex flex-col gap-5">
-								{/* Upload */}
-								<div className="flex-1 text-sm self-stretch  p-5 font-jakarta bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] flex flex-col gap-4">
-									<div className="flex justify-between items-center">
-										<div>
-											<div className="font-bold text-xl">
-												Upload Dokumen
-											</div>
-											<div>
-												Format yang diterima : PDF.
-												Maksimal ukuran File : 10MB
-											</div>
-										</div>
-										<AiOutlineCloudUpload className="size-8" />
-									</div>
-									<label
-										for="File"
-										class="flex flex-col items-center justify-center rounded border border-gray-300 h-70  p-4 text-gray-900 shadow-sm sm:p-6"
-									>
-										<CiTextAlignJustify className="size-20 outline-4 rounded" />
-										<div class="mt-4 font-bold text-lg">
-											Tarik dan lepas file di sini
-										</div>
-										<div class="font-medium text-xs">
-											atau klik untuk memilih file dari
-											komputer anda
-										</div>
-
-										<span class="mt-2 inline-block rounded border border-gray-200 bg-gray-50 px-3 py-1.5 text-center text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-100">
-											Pilih File
-										</span>
-
-										<input
-											multiple=""
-											type="file"
-											id="File"
-											class="sr-only "
-										/>
-									</label>
-								</div>
-								{/* Feedback */}
-								<div className="flex-1 text-sm self-stretch  p-5 font-jakarta bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] flex flex-col gap-4">
-									<div className="flex gap-3 items-center">
-										<div className="bg-indigo-50 rounded-full">
-											<TiMessages className="size-10 p-2" />
-										</div>
-										<div className="font-bold text-xl">
-											Feedbacks
-										</div>
-									</div>
-									<div className="flex gap-3">
-										<img
-											src="https://res.cloudinary.com/dhsdxi218/image/upload/v1777055810/samples/man-portrait.jpg"
-											className="size-10 rounded-full object-cover"
-											alt=""
-										/>
-										<div className="flex-1 flex flex-col gap-2 p-4 rounded-lg bg-indigo-50">
-											<div className="flex justify-between items-center">
-												<div>
-													<div className="font-bold">
-														Dr. Ir. Budi Santoso,
-														M.Sc
-													</div>
-													<div className="text-xs">
-														Dosen Pembimbing
-													</div>
-												</div>
-												<div className="text-xs text-slate-500">
-													12 Nov 2026, 15:00
-												</div>
-											</div>
-											<div className="text-justify">
-												Bab 3 perlu diperjelas pada
-												bagian metodologi. Tambahkan
-												sitasi jurnal terbaru untuk
-												mendukung argumen pemilihan alat
-												ukur. Secara keseluruhan sudah
-												cukup baik, mohon segera
-												direvisi.
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-							{/* Right Side */}
-							<div className="w-70 max-w-70">
-								<div className="text-sm h-fit p-5 font-jakarta bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] flex flex-col gap-4">
-									<div className="font-bold">
-										Status Penilaian
-									</div>
-									<div className="flex gap-3 items-center py-3 px-5 rounded-lg bg-indigo-50">
-										<HiOutlineDotsCircleHorizontal className="size-7 bg-yellow-200 text-yellow-800 rounded-full p-1" />
-										<div>
-											<div className="font-bold">
-												Dosen Pembimbing
-											</div>
-											<div className="text-xs">
-												Menunggu Revisi
-											</div>
-										</div>
-									</div>
-									<div className="flex gap-3 items-center py-3 px-5 rounded-lg bg-indigo-50">
-										<FaRegCircleCheck className="size-7 bg-green-200 text-green-800 rounded-full p-1" />
-										<div>
-											<div className="font-bold">
-												Dosen Pembimbing
-											</div>
-											<div className="text-xs">
-												Menunggu Revisi
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
+		<div className="font-jakarta">
+			{/* Banner */}
+			<div className="mb-8 bg-sky-950 p-10 rounded-xl text-white flex justify-between items-center shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)]">
+				<div className="flex flex-col gap-2">
+					<div className="text-3xl font-bold">Laporan Akhir</div>
+					<div className="text-justify max-w-xl text-sm opacity-90">
+						Unggah laporan akhir magang Anda untuk proses penilaian dan verifikasi sertifikat.
 					</div>
 					<TheFooter></TheFooter>
 				</div>
 			</div>
-		</>
+
+			<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+				{/* Left: Requirements */}
+				<div className="lg:col-span-1">
+					<div className="p-6 bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] flex flex-col gap-6">
+						<h3 className="font-bold text-black border-b pb-3">Persyaratan</h3>
+						<ul className="space-y-4">
+							{[
+								"Format file PDF (Maks. 10MB)",
+								"Sudah disetujui pembimbing lapang",
+								"Menggunakan template resmi IPB",
+								"Melampirkan form penilaian"
+							].map((text, i) => (
+								<li key={i} className="flex items-start gap-3">
+									<PiCheckCircle size={20} className="text-emerald-500 mt-0.5" weight="bold" />
+									<span className="text-sm font-medium text-zinc-600">{text}</span>
+								</li>
+							))}
+						</ul>
+						<button className="w-full py-2.5 border-2 border-sky-950 text-sky-950 font-bold rounded hover:bg-sky-50 transition-colors text-sm">
+							Unduh Template
+						</button>
+					</div>
+				</div>
+
+				{/* Right: Upload Area */}
+				<div className="lg:col-span-2">
+					<div className="p-8 bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] flex flex-col gap-8">
+						<div className="flex items-center gap-3 border-b pb-4">
+							<PiFileText size={24} className="text-sky-950" weight="bold" />
+							<h3 className="text-lg font-bold text-black">Unggah Dokumen</h3>
+						</div>
+
+						<div className="flex flex-col gap-6">
+							<div className="p-12 border-2 border-dashed border-zinc-200 rounded-xl bg-zinc-50 flex flex-col items-center justify-center gap-4 hover:bg-zinc-100 transition-colors cursor-pointer group">
+								<PiCloudArrowUp size={48} className="text-zinc-400 group-hover:text-sky-700 transition-colors" />
+								<div className="text-center">
+									<p className="text-base font-bold text-black">Klik atau seret file PDF Anda ke sini</p>
+									<p className="text-xs text-zinc-500 mt-1">Pastikan file sudah ditandatangani dan discan dengan jelas.</p>
+								</div>
+								<input type="file" className="hidden" />
+							</div>
+
+							<div className="flex items-center gap-4 p-4 bg-amber-50 text-amber-800 rounded-lg border border-amber-200">
+								<PiFileText size={24} weight="bold" />
+								<div className="text-xs">
+									<p className="font-bold">Status: Belum Ada File</p>
+									<p className="mt-0.5 opacity-80">Anda belum mengunggah laporan untuk periode ini.</p>
+								</div>
+							</div>
+
+							<div className="flex justify-end pt-4">
+								<button disabled className="px-10 py-2.5 bg-zinc-200 text-zinc-400 font-bold rounded cursor-not-allowed">
+									Kirim Laporan
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 	);
 }
 

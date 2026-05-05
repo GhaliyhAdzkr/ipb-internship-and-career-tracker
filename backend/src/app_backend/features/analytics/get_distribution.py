@@ -7,7 +7,8 @@ from sqlalchemy.orm import Session
 
 from app_backend.models.applications import Applications
 from app_backend.models.master_departments import MasterDepartments
-from app_backend.models.master_external_companies import MasterExternalCompanies
+from app_backend.models.master_external_companies import \
+    MasterExternalCompanies
 from app_backend.models.placements import Placements
 from app_backend.models.profiles_student import ProfilesStudent
 from app_backend.models.vacancies import Vacancies
@@ -54,7 +55,9 @@ class SemesterTrendData:
 class GetDistributionResult:
     top_companies: List[TopCompanyData] = field(default_factory=list)
     department_breakdown: List[DepartmentBreakdownData] = field(default_factory=list)
-    compensation_breakdown: List[CompensationBreakdownData] = field(default_factory=list)
+    compensation_breakdown: List[CompensationBreakdownData] = field(
+        default_factory=list
+    )
     semester_trends: List[SemesterTrendData] = field(default_factory=list)
     total_placements: int = 0
     error_message: Optional[str] = None
@@ -67,9 +70,7 @@ def _apply_filters(query, command: GetDistributionCommand):
     if command.department_id:
         query = query.filter(ProfilesStudent.department_id == command.department_id)
     if command.year:
-        query = query.filter(
-            extract("year", Placements.start_date) == command.year
-        )
+        query = query.filter(extract("year", Placements.start_date) == command.year)
     return query
 
 
@@ -78,9 +79,8 @@ def get_distribution_command_handler(
     session: Session,
 ) -> GetDistributionResult:
     # --- Total placements ---
-    total_query = (
-        session.query(func.count(Placements.id))
-        .join(ProfilesStudent, Placements.student_id == ProfilesStudent.user_id)
+    total_query = session.query(func.count(Placements.id)).join(
+        ProfilesStudent, Placements.student_id == ProfilesStudent.user_id
     )
     total_query = _apply_filters(total_query, command)
     total_placements = total_query.scalar() or 0
@@ -98,8 +98,7 @@ def get_distribution_command_handler(
     )
     top_co_query = _apply_filters(top_co_query, command)
     top_co_rows = (
-        top_co_query
-        .group_by(
+        top_co_query.group_by(
             MasterExternalCompanies.id,
             MasterExternalCompanies.name,
             MasterExternalCompanies.industry,
@@ -134,8 +133,7 @@ def get_distribution_command_handler(
     )
     dept_query = _apply_filters(dept_query, command)
     dept_rows = (
-        dept_query
-        .group_by(
+        dept_query.group_by(
             MasterDepartments.id,
             MasterDepartments.name,
             MasterDepartments.code,
@@ -168,11 +166,7 @@ def get_distribution_command_handler(
         .outerjoin(Vacancies, Applications.vacancy_id == Vacancies.id)
     )
     comp_query = _apply_filters(comp_query, command)
-    comp_rows = (
-        comp_query
-        .group_by(Vacancies.payment_type)
-        .all()
-    )
+    comp_rows = comp_query.group_by(Vacancies.payment_type).all()
     compensation_breakdown = [
         CompensationBreakdownData(
             payment_type=row[0] if row[0] is not None else "UNKNOWN",
@@ -188,18 +182,14 @@ def get_distribution_command_handler(
     )
     year_expr = extract("year", Placements.start_date)
 
-    trend_query = (
-        session.query(
-            year_expr.label("year"),
-            semester_expr.label("semester"),
-            func.count(Placements.id).label("total"),
-        )
-        .join(ProfilesStudent, Placements.student_id == ProfilesStudent.user_id)
-    )
+    trend_query = session.query(
+        year_expr.label("year"),
+        semester_expr.label("semester"),
+        func.count(Placements.id).label("total"),
+    ).join(ProfilesStudent, Placements.student_id == ProfilesStudent.user_id)
     trend_query = _apply_filters(trend_query, command)
     trend_rows = (
-        trend_query
-        .group_by(year_expr, semester_expr)
+        trend_query.group_by(year_expr, semester_expr)
         .order_by(year_expr, semester_expr)
         .all()
     )

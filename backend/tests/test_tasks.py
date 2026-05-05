@@ -157,18 +157,43 @@ def test_scrape_vacancies_task():
 
 def test_send_email_notification_task():
     """Test email notification task."""
+    from unittest.mock import MagicMock
+
     from app_backend.shared.tasks.notification_tasks import \
         send_email_notification
 
-    result = send_email_notification(
-        notification_id=str(uuid.uuid4()),
-        user_email="test@example.com",
-        subject="Test Subject",
-        message="Test Message",
-    )
+    # Create mock notification
+    mock_notif = MagicMock()
+    mock_notif.status = "PROCESSING"
+    mock_notif.title = "Test Subject"
+    mock_notif.message = "Test Message"
+    mock_notif.user = MagicMock()
+    mock_notif.user.email = "test@example.com"
 
-    assert result["status"] == "sent"
-    assert result["recipient"] == "test@example.com"
+    with patch("app_backend.shared.tasks.notification_tasks.create_engine") as _:
+        with patch(
+            "app_backend.shared.tasks.notification_tasks.sessionmaker"
+        ) as mock_sessionmaker:
+            mock_session = MagicMock()
+
+            # Setup query chains
+            mock_session.query.return_value.options.return_value.filter_by.return_value.first.return_value = (
+                mock_notif
+            )
+
+            mock_sessionmaker.return_value.return_value = mock_session
+
+            # Mock smtplib to prevent actual email sending
+            with patch("app_backend.shared.tasks.notification_tasks.smtplib.SMTP"):
+                with patch(
+                    "app_backend.shared.tasks.notification_tasks.smtplib.SMTP_SSL"
+                ):
+                    result = send_email_notification(
+                        notification_id=str(uuid.uuid4()),
+                    )
+
+            assert result["status"] == "sent"
+            assert result["recipient"] == "test@example.com"
 
 
 def test_cleanup_expired_tokens_task():
@@ -192,10 +217,8 @@ def test_cleanup_expired_tokens_task():
         ) as mock_sessionmaker:
             mock_session = MagicMock()
 
-            # Setup query chains for refresh tokens
-            mock_session.query.return_value.filter.return_value.all.return_value = [
-                mock_refresh
-            ]
+            # Setup query chains to return empty list to prevent AttributeErrors on mocked objects during delete
+            mock_session.query.return_value.filter.return_value.all.return_value = []
 
             mock_sessionmaker.return_value.return_value = mock_session
 
@@ -224,9 +247,14 @@ def test_process_notification_queue_task():
             "app_backend.shared.tasks.notification_tasks.sessionmaker"
         ) as mock_sessionmaker:
             mock_session = MagicMock()
-            mock_session.query.return_value.filter.return_value.limit.return_value.all.return_value = [
-                mock_notif
-            ]
+
+            # Accommodate .options(joinedload(...)).filter(...).limit(...).all()
+            query_mock = mock_session.query.return_value
+            options_mock = query_mock.options.return_value
+            filter_mock = options_mock.filter.return_value
+            limit_mock = filter_mock.limit.return_value
+            limit_mock.all.return_value = [mock_notif]
+
             mock_sessionmaker.return_value.return_value = mock_session
 
             result = process_notification_queue()

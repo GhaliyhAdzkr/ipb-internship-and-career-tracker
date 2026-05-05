@@ -20,29 +20,31 @@ from app_backend.shared.dependencies import require_student
 router = APIRouter(prefix="/api/v1/applications", tags=["applications"])
 
 
+from app_backend.features.application.application_service import \
+    ApplicationService
+from app_backend.shared.dependencies_service import get_application_service
+
+
 @router.post(
     "", response_model=ApplicationResponse, status_code=status.HTTP_201_CREATED
 )
 def initialize_apply(
     payload: ApplicationCreate,
     current_user=Depends(require_student),
-    session: Session = Depends(get_session),
+    app_service: ApplicationService = Depends(get_application_service),
 ):
-    result = initialize_apply_command_handler(
-        command=InitializeApplyCommand(
-            payload=payload,
-            student_id=current_user.id,
-        ),
-        session=session,
-    )
-
-    if result.error_message:
+    try:
+        return app_service.apply(current_user.id, payload)
+    except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=result.error_message,
+            detail=str(exc),
         )
-
-    return result.application
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Gagal melamar lowongan: {exc}",
+        )
 
 
 @router.patch(
@@ -54,25 +56,19 @@ def update_application_status(
     application_id: uuid.UUID,
     payload: ApplicationUpdateStatus,
     current_user=Depends(require_student),
-    session: Session = Depends(get_session),
+    app_service: ApplicationService = Depends(get_application_service),
 ):
-    result = update_application_status_command_handler(
-        command=UpdateApplicationStatusCommand(
-            application_id=application_id,
-            student_id=current_user.id,
-            new_status=payload.status,
-            proof_url=payload.proof_url,
-            reason=payload.reason,
-        ),
-        session=session,
-    )
-
-    if result.got_error():
+    try:
+        return app_service.update_status(application_id, current_user.id, payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
+    except PermissionError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    except Exception as exc:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=result.error_message
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Gagal memperbarui status: {exc}",
         )
-
-    return result.application
 
 
 @router.post("/{application_id}/proof", summary="Upload bukti screenshot LoA")
@@ -80,7 +76,9 @@ def upload_application_proof(
     application_id: uuid.UUID,
     file: UploadFile = File(...),
     current_user=Depends(require_student),
-    session: Session = Depends(get_session),
+    session: Session = Depends(
+        get_session
+    ),  # Proof upload involves S3, leaving as is for now or moving to service later
 ):
     result = upload_application_proof_command_handler(
         command=UploadApplicationProofCommand(
@@ -107,19 +105,16 @@ def upload_application_proof(
 def get_application_history(
     application_id: uuid.UUID,
     current_user=Depends(require_student),
-    session: Session = Depends(get_session),
+    app_service: ApplicationService = Depends(get_application_service),
 ):
-    result = get_application_history_command_handler(
-        command=GetApplicationHistoryCommand(
-            application_id=application_id,
-            student_id=current_user.id,
-        ),
-        session=session,
-    )
-
-    if result.got_error():
+    try:
+        return app_service.get_history(application_id, current_user.id)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except PermissionError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    except Exception as exc:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=result.error_message
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Gagal mengambil riwayat: {exc}",
         )
-
-    return result.logs

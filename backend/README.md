@@ -15,11 +15,12 @@ backend/
 │       ├── features/          # Fitur aplikasi (vertical slices)
 │       │   ├── auth/          # Authentication (login, register, reset password)
 │       │   ├── admin/         # Admin management (departments, skills, companies)
-│       │   ├── profile/       # Student & Admin profile management
+│       │   ├── profile/        # Student & Admin profile management
 │       │   ├── vacancy/       # Job vacancies & job matching
 │       │   ├── wishlist/      # Student wishlist
 │       │   └── application/   # Application tracking (Self-Reported ATS)
-│       ├── models/            # SQLAlchemy ORM models
+│       ├── models/            # Database ORM models
+│       ├── repositories/      # Layer akses data (Repository Pattern)
 │       ├── routers/           # FastAPI endpoint routers
 │       ├── schemas/           # Pydantic schemas (request/response)
 │       ├── shared/            # Shared utilities (security, database, dependencies)
@@ -29,6 +30,16 @@ backend/
 ├── docs/                      # Feature documentation
 └── scripts/                   # Utility scripts
 ```
+
+## Prinsip Desain & Arsitektur
+
+Project ini menggunakan pendekatan modern untuk menjaga skalabilitas dan maintainability:
+
+1. **Vertical Slice Architecture** - Setiap fitur (seperti `auth`, `vacancy`, `application`) diorganisir dalam satu folder `features`. Setiap slice berisi logic spesifik untuk fitur tersebut, mengurangi ketergantungan antar modul.
+2. **Command/Handler Pattern** - Logic bisnis kompleks diimplementasikan menggunakan Command (data) dan Handler (logic). Ini memisahkan *apa yang ingin dilakukan* dengan *bagaimana cara melakukannya*.
+3. **Repository Pattern** - Abstraksi akses database berada di folder `repositories`. Ini memudahkan unit testing dan memungkinkan penggantian implementasi database tanpa menyentuh business logic.
+4. **Dependency Injection (DI)** - Menggunakan sistem DI bawaan FastAPI. Semua Service dan Repository dikelola melalui `shared/dependencies_service.py` untuk memastikan manajemen instance yang bersih dan testable.
+5. **Domain-Driven Design (DDD)** - Logic inti bisnis dan aturan domain diletakkan di folder `domain`, terpisah dari detail infrastruktur (database/API).
 
 ## Tech Stack
 
@@ -175,13 +186,6 @@ poetry run alembic history
 
 ### Applications (`/api/v1/applications`)
 - `POST /applications/initialize` - Initialize external application
-
-## Prinsip Desain
-
-1. **Vertical Slice Architecture** - Setiap fitur diorganisir dalam folder terpisah dengan command handler pattern
-2. **Domain-Driven Design** - Business logic dipisahkan ke domain layer
-3. **CQRS Pattern** - Command dan Query dipisahkan untuk scalability
-4. **Repository Pattern** - Data access layer terenkapsulasi
 
 ## Testing
 

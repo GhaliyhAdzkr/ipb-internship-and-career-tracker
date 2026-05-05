@@ -1,8 +1,6 @@
-// COMPONENTS
-import Sidebar from "../components/SideNav";
-import Navbar from "../components/NavBar";
-import Test from "../components/Test";
-import TheFooter from "../components/TheFooter";
+import React from "react";
+import { useAuth } from "../hooks/useAuth";
+import { PiUserCircle, PiIdentificationCard, PiEnvelope, PiBuildings, PiGraduationCap, PiCamera } from "react-icons/pi";
 
 // PACKAGE
 import React, { useState } from "react";
@@ -16,250 +14,106 @@ import { FaRegCircleCheck } from "react-icons/fa6";
 import { TiMessages } from "react-icons/ti";
 
 function Profil() {
-	const [activeTab, setActiveTab] = useState(0);
-	const tabs = ["Data Personal", "Data Akademik", "Dokumen"];
+	const { user } = useAuth();
+
 	return (
-		<>
-			<div className="flex bg-[#F8F9FF]">
-				<Sidebar></Sidebar>
-				<div className=" flex-1 flex flex-col">
-					<Navbar></Navbar>
-					<div className="flex-1 m-5 flex flex-col font-jakarta text-black gap-5">
-						{/* Header */}
-						<div className="flex flex-col gap-2">
-							{/* Teks */}
-							<div className="text-3xl font-bold">
-								Pengaturan Profil{" "}
-							</div>
-							<div className="text-justify w-xl xl:w-full">
-								Kelola informasi personal, data akademik, dan
-								dokumen pendukung Anda
-							</div>
-						</div>
-						{/* Profile Cards */}
-						<div className="flex gap-4 items-center text-sm self-stretch  p-10 font-jakarta bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] ">
-							<img
-								src="https://res.cloudinary.com/dhsdxi218/image/upload/v1777055810/samples/man-portrait.jpg"
-								className="size-25 rounded-full object-cover"
-								alt=""
-							/>
-							<div className="flex flex-col gap-4">
-								<div className="text-2xl font-bold">
-									Budi Santoso
-								</div>
-								<div className="flex gap-5">
-									<div>
-										<div className="tracking-widest text-xs text-slate-600">
-											NIM
-										</div>
-										<div>G6401231001</div>
-									</div>
-									<div>
-										<div className="tracking-widest text-xs text-slate-600">
-											PROGRAM STUDI
-										</div>
-										<div>Ilmu Komputer</div>
-									</div>
-									<div>
-										<div className="tracking-widest text-xs text-slate-600">
-											FAKULTAS
-										</div>
-										<div>SSMI</div>
-									</div>
-								</div>
-							</div>
-						</div>
-						{/* Tabs */}
-						<div className="flex gap-2 p-1 w-fit text-sm font-jakarta rounded ">
-							{tabs.map((tab, index) => (
-								<button
-									key={index}
-									onClick={() => setActiveTab(index)}
-									className={`px-4 py-2 rounded transition-colors ${
-										activeTab === index
-											? "text-black bg-white font-bold shadow-sm"
-											: "text-black hover:bg-gray-100"
-									}`}
-								>
-									{tab}
-								</button>
-							))}
-						</div>
-						<div
-							className={`${activeTab == 0 ? "block" : "hidden"}`}
-						>
-							<div className="grid grid-cols-2 gap-4 items-start text-sm self-stretch  p-5 font-jakarta bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] ">
-								<div>
-									<div>Nama Lengkap</div>
-									<input
-										type="text"
-										placeholder="Budi Santoso"
-										className="mt-2 w-full text-black rounded border-gray-300 shadow-sm"
-									/>
-								</div>
-								<div>
-									<div>Email Universitas</div>
-									<input
-										type="text"
-										placeholder="BudiSant0s0@apps.ipb.ac.id"
-										className="mt-2 w-full text-black rounded border-gray-300 shadow-sm"
-									/>
-								</div>
-								<div>
-									<div>Nomor Telepon</div>
-									<input
-										type="text"
-										placeholder="+62 811-1704-2204"
-										className="mt-2 w-full text-black rounded border-gray-300 shadow-sm"
-									/>
-								</div>
-								<div>
-									<div>Alamat Domisili</div>
-									<textarea
-										type="text"
-										placeholder="Komplek MPR, DPR, DPD Jl. Jend. Gatot Subroto, Senayan, Jakarta Pusat 10270"
-										className="mt-2 w-full h-30 text-black rounded border-gray-300 shadow-sm"
-									/>
-								</div>
-								<div>
-									<div>Tautan Linkedin</div>
-									<input
-										type="text"
-										placeholder="linkedin.com/in/ghaliyhra/"
-										className="mt-2 w-full text-black rounded border-gray-300 shadow-sm"
-									/>
-								</div>
-								<div>
-									<div>Tautan Portofolio / GitHub</div>
-									<input
-										type="text"
-										placeholder="github.com/GhaliyhAdzkr"
-										className="mt-2 w-full text-black rounded border-gray-300 shadow-sm"
-									/>
-								</div>
-								<div></div>
-								<div className="flex gap-4 justify-end">
-									<button className=" py-3 px-6 rounded font-bold">
-										Batal
-									</button>
-									<button className="bg-sky-950 text-white py-3 px-6 rounded font-bold">
-										Simpan Perubahan
-									</button>
-								</div>
-							</div>
-						</div>
-						<div
-							className={`${activeTab == 1 ? "block" : "hidden"}`}
-						>
-							<div className="grid grid-cols-2 gap-4 items-center text-sm self-stretch  p-5 font-jakarta bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] ">
-								<div>
-									<div>NIM</div>
-									<input
-										type="text"
-										placeholder="G6401231001"
-										className="mt-2 w-full text-black rounded border-gray-300 shadow-sm"
-									/>
-								</div>
-								<div>
-									<div>IPK</div>
-									<input
-										type="text"
-										placeholder="3.99"
-										className="mt-2 w-full text-black rounded border-gray-300 shadow-sm"
-									/>
-								</div>
-								<div>
-									<div>Program Studi</div>
-									<input
-										type="text"
-										placeholder="Ilmu Komputer"
-										className="mt-2 w-full text-black rounded border-gray-300 shadow-sm"
-									/>
-								</div>
-								<div>
-									<div>Fakultas</div>
-									<input
-										type="text"
-										placeholder="SSMI"
-										className="mt-2 w-full text-black rounded border-gray-300 shadow-sm"
-									/>
-								</div>
-								<div>
-									<div>Tahun Masuk</div>
-									<input
-										type="text"
-										placeholder="2023"
-										className="mt-2 w-full text-black rounded border-gray-300 shadow-sm"
-									/>
-								</div>
-								<div>
-									<div>Status</div>
-									<input
-										type="text"
-										placeholder="Mahasiswa Aktif"
-										className="mt-2 w-full text-black rounded border-gray-300 shadow-sm"
-									/>
-								</div>
-								<div></div>
-								<div className="flex gap-4 justify-end">
-									<button className=" py-3 px-6 rounded font-bold">
-										Batal
-									</button>
-									<button className="bg-sky-950 text-white py-3 px-6 rounded font-bold">
-										Simpan Perubahan
-									</button>
-								</div>
-							</div>
-						</div>
-						<div
-							className={`${activeTab == 2 ? "block" : "hidden"}`}
-						>
-							<div className="flex-1 text-sm self-stretch  p-5 font-jakarta bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] flex flex-col gap-4">
-								<div className="flex justify-between items-center">
-									<div>
-										<div className="font-bold text-xl">
-											Upload Dokumen
-										</div>
-										<div>
-											Format yang diterima : PDF. Maksimal
-											ukuran File : 10MB
-										</div>
-									</div>
-									<AiOutlineCloudUpload className="size-8" />
-								</div>
-								<label
-									for="File"
-									class="flex flex-col items-center justify-center rounded border border-gray-300 h-70  p-4 text-gray-900 shadow-sm sm:p-6"
-								>
-									<CiTextAlignJustify className="size-20 outline-4 rounded" />
-									<div class="mt-4 font-bold text-lg">
-										Tarik dan lepas file di sini
-									</div>
-									<div class="font-medium text-xs">
-										atau klik untuk memilih file dari
-										komputer anda
-									</div>
-
-									<span class="mt-2 inline-block rounded border border-gray-200 bg-gray-50 px-3 py-1.5 text-center text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-100">
-										Pilih File
-									</span>
-
-									<input
-										multiple=""
-										type="file"
-										id="File"
-										class="sr-only "
-									/>
-								</label>
-							</div>
-						</div>
+		<div className="font-jakarta">
+			{/* Banner */}
+			<div className="mb-8 bg-sky-950 p-10 rounded-xl text-white flex justify-between items-center shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)]">
+				<div className="flex flex-col gap-2">
+					<div className="text-3xl font-bold">Profil Saya</div>
+					<div className="text-justify max-w-xl">
+						Kelola informasi pribadi dan akademik Anda untuk verifikasi internship.
 					</div>
-					{/* Main */}
-					<TheFooter></TheFooter>
 				</div>
 			</div>
-		</>
+
+			<div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+				{/* Avatar Card */}
+				<div className="lg:col-span-4">
+					<div className="p-8 bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] flex flex-col items-center text-center gap-6">
+						<div className="relative">
+							<div className="w-32 h-32 bg-zinc-100 rounded-full flex items-center justify-center border-4 border-white shadow-sm overflow-hidden">
+								<PiUserCircle size={100} className="text-zinc-400" />
+							</div>
+							<button className="absolute bottom-0 right-0 p-2 bg-sky-950 text-white rounded-full shadow-lg hover:bg-sky-900 transition-all">
+								<PiCamera size={20} weight="bold" />
+							</button>
+						</div>
+						<div>
+							<h3 className="text-xl font-bold text-black">{user?.email?.split('@')[0] || 'User'}</h3>
+							<p className="text-xs font-bold text-sky-700 uppercase tracking-widest mt-1">{user?.role || 'STUDENT'}</p>
+						</div>
+					</div>
+				</div>
+
+				{/* Info Card */}
+				<div className="lg:col-span-8">
+					<div className="p-8 bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] flex flex-col gap-8">
+						<div className="flex items-center gap-3 border-b pb-4">
+							<PiIdentificationCard size={24} className="text-sky-950" weight="bold" />
+							<h3 className="text-lg font-bold text-black">Informasi Pribadi</h3>
+						</div>
+
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+							<div className="flex flex-col gap-1.5">
+								<label className="text-xs font-bold text-zinc-500 uppercase">Nama Lengkap</label>
+								<div className="relative">
+									<PiUserCircle size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+									<input
+										type="text"
+										defaultValue={user?.email?.split('@')[0]}
+										className="pl-10 w-full py-2.5 bg-zinc-50 border border-zinc-200 rounded text-sm focus:ring-2 focus:ring-sky-500 outline-none"
+									/>
+								</div>
+							</div>
+							<div className="flex flex-col gap-1.5">
+								<label className="text-xs font-bold text-zinc-500 uppercase">Email</label>
+								<div className="relative">
+									<PiEnvelope size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+									<input
+										type="email"
+										disabled
+										value={user?.email}
+										className="pl-10 w-full py-2.5 bg-zinc-200 border border-zinc-200 rounded text-sm text-zinc-500 cursor-not-allowed"
+									/>
+								</div>
+							</div>
+							<div className="flex flex-col gap-1.5">
+								<label className="text-xs font-bold text-zinc-500 uppercase">Departemen</label>
+								<div className="relative">
+									<PiBuildings size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+									<input
+										type="text"
+										defaultValue="Ilmu Komputer"
+										className="pl-10 w-full py-2.5 bg-zinc-50 border border-zinc-200 rounded text-sm focus:ring-2 focus:ring-sky-500 outline-none"
+									/>
+								</div>
+							</div>
+							<div className="flex flex-col gap-1.5">
+								<label className="text-xs font-bold text-zinc-500 uppercase">Angkatan</label>
+								<div className="relative">
+									<PiGraduationCap size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+									<input
+										type="text"
+										defaultValue="Batch 59"
+										className="pl-10 w-full py-2.5 bg-zinc-50 border border-zinc-200 rounded text-sm focus:ring-2 focus:ring-sky-500 outline-none"
+									/>
+								</div>
+							</div>
+						</div>
+
+						<div className="flex justify-end mt-4">
+							<button className="px-8 py-2.5 bg-sky-950 text-white font-bold rounded hover:bg-sky-900 transition-colors">
+								Simpan Perubahan
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 	);
 }
 
 export default Profil;
+

@@ -25,6 +25,10 @@ from app_backend.shared.dependencies import require_student
 router = APIRouter(prefix="/api/v1/placements", tags=["placements"])
 
 
+from app_backend.features.placement.placement_service import PlacementService
+from app_backend.shared.dependencies_service import get_placement_service
+
+
 @router.get(
     "/me",
     response_model=List[PlacementResponse],
@@ -32,17 +36,9 @@ router = APIRouter(prefix="/api/v1/placements", tags=["placements"])
 )
 def get_my_placements(
     current_user=Depends(require_student),
-    session: Session = Depends(get_session),
+    placement_service: PlacementService = Depends(get_placement_service),
 ):
-    result = get_my_placements_command_handler(
-        command=GetMyPlacementsCommand(student_id=current_user.id),
-        session=session,
-    )
-    if result.got_error():
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=result.error_message
-        )
-    return result.placements
+    return placement_service.get_my_placements(current_user.id)
 
 
 @router.get(
@@ -53,19 +49,14 @@ def get_my_placements(
 def list_activity_logs(
     placement_id: uuid.UUID,
     current_user=Depends(require_student),
-    session: Session = Depends(get_session),
+    placement_service: PlacementService = Depends(get_placement_service),
 ):
-    result = list_activity_logs_command_handler(
-        command=ListActivityLogsCommand(
-            placement_id=placement_id, student_id=current_user.id
-        ),
-        session=session,
-    )
-    if result.got_error():
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=result.error_message
-        )
-    return result.logs
+    try:
+        return placement_service.list_activity_logs(placement_id, current_user.id)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    except PermissionError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
 
 
 @router.post(
@@ -78,27 +69,21 @@ def create_activity_log(
     placement_id: uuid.UUID,
     payload: ActivityLogCreate,
     current_user=Depends(require_student),
-    session: Session = Depends(get_session),
+    placement_service: PlacementService = Depends(get_placement_service),
 ):
-    result = create_activity_log_command_handler(
-        command=CreateActivityLogCommand(
-            placement_id=placement_id,
-            student_id=current_user.id,
-            log_date=payload.log_date,
-            start_time=payload.start_time,
-            end_time=payload.end_time,
-            description_raw=payload.description_raw,
-        ),
-        session=session,
-    )
-    if result.got_error():
-        err_status = (
-            status.HTTP_400_BAD_REQUEST
-            if result.error_code == 400
-            else result.error_code
+    try:
+        return placement_service.create_activity_log(
+            current_user.id, placement_id, payload
         )
-        raise HTTPException(status_code=err_status, detail=result.error_message)
-    return result.log
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
+    except PermissionError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Gagal membuat log: {exc}",
+        )
 
 
 @router.patch(
@@ -184,9 +169,12 @@ def upload_activity_log_attachment(
         session=session,
     )
     if result.got_error():
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=result.error_message
+        err_status = (
+            result.error_code
+            if hasattr(result, "error_code") and result.error_code
+            else status.HTTP_400_BAD_REQUEST
         )
+        raise HTTPException(status_code=err_status, detail=result.error_message)
     return {"message": result.message, "attachment_url": result.attachment_url}
 
 

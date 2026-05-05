@@ -1,5 +1,6 @@
 import uuid
 from dataclasses import dataclass
+from http import HTTPStatus
 from typing import Optional
 
 from sqlalchemy.orm import Session
@@ -18,7 +19,7 @@ class GetDocumentCommand:
 class GetDocumentResult:
     document: Optional[DocumentResponse] = None
     error_message: Optional[str] = None
-    error_status_code: int = 404
+    error_status_code: HTTPStatus = HTTPStatus.BAD_REQUEST
 
     def got_error(self) -> bool:
         return self.error_message is not None

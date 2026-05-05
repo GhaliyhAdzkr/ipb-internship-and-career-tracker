@@ -26,10 +26,10 @@
 
 ### Global Flow
 
-- [ ] Setiap card memiliki scope jelas, acceptance criteria, dan owner yang ditentukan
-- [ ] Setiap card memiliki implementation checklist dan test checklist terpisah
-- [ ] Tidak ada card yang pindah ke Done tanpa bukti review kode dan QA
-- [ ] Tidak ada phase baru dimulai sebelum test gate phase sebelumnya green
+- [x] Setiap card memiliki scope jelas, acceptance criteria, dan owner yang ditentukan
+- [x] Setiap card memiliki implementation checklist dan test checklist terpisah
+- [x] Tidak ada card yang pindah ke Done tanpa bukti review kode dan QA
+- [x] Tidak ada phase baru dimulai sebelum test gate phase sebelumnya green
 
 ### Panduan Background Workers dan Scheduled Jobs
 
@@ -447,45 +447,45 @@ Setiap worker didaftarkan di `app/workers/` sebagai Celery task dengan signature
 
 ### Notification Queue Management
 
-- [ ] Endpoint `GET /notifications`: Daftar notifikasi aktif untuk user yang sedang login, urut `created_at` DESC
-- [ ] Schema Ref: Query `public.notification_queue` WHERE `user_id = current_user AND status != DELETED`
-- [ ] Endpoint `PATCH /notifications/:id/read`: Tandai notifikasi sebagai sudah dibaca
-- [ ] Endpoint `DELETE /notifications/:id`: Soft-delete notifikasi dari inbox
-- [ ] Endpoint `GET /notifications/unread-count`: Return jumlah notifikasi belum dibaca (untuk badge UI)
+- [x] Endpoint `GET /notifications`: Daftar notifikasi aktif untuk user yang sedang login, urut `created_at` DESC
+- [x] Schema Ref: Query `public.notification_queue` WHERE `user_id = current_user AND status != DELETED`
+- [x] Endpoint `PATCH /notifications/:id/read`: Tandai notifikasi sebagai sudah dibaca
+- [x] Endpoint `DELETE /notifications/:id`: Soft-delete notifikasi dari inbox
+- [x] Endpoint `GET /notifications/unread-count`: Return jumlah notifikasi belum dibaca (untuk badge UI)
 
 
 ### Notification Trigger Events
 
-- [ ] Notifikasi dikirim ke `notification_queue` pada event berikut:
-  - [ ] **Laporan siap**: saat `generate_final_report` task selesai → notifikasi ke mahasiswa yang bersangkutan
-  - [ ] **Surat siap**: saat `generate_cover_letter` task selesai → notifikasi ke mahasiswa yang bersangkutan
-  - [ ] **Lamaran diverifikasi**: saat admin menyetujui bukti penerimaan → notifikasi ke mahasiswa
-  - [ ] **Lamaran ditolak buktinya**: saat admin menolak proof → notifikasi ke mahasiswa dengan catatan alasan
-  - [ ] **Lowongan wishlist akan tutup**: H-3 sebelum `close_date` lowongan yang ada di wishlist mahasiswa
-  - [ ] **Placement diaktifkan**: saat placement record pertama dibuat untuk mahasiswa
+- [x] Notifikasi dikirim ke `notification_queue` pada event berikut:
+  - [x] **Laporan siap**: saat `generate_final_report` task selesai → notifikasi ke mahasiswa yang bersangkutan
+  - [x] **Surat siap**: saat `generate_cover_letter` task selesai → notifikasi ke mahasiswa yang bersangkutan
+  - [x] **Lamaran diverifikasi**: saat admin menyetujui bukti penerimaan → notifikasi ke mahasiswa
+  - [x] **Lamaran ditolak buktinya**: saat admin menolak proof → notifikasi ke mahasiswa dengan catatan alasan
+  - [x] **Lowongan wishlist akan tutup**: H-3 sebelum `close_date` lowongan yang ada di wishlist mahasiswa
+  - [x] **Placement diaktifkan**: saat placement record pertama dibuat untuk mahasiswa
 
 ### Email Sender Worker
 
-- [ ] Celery task `send_email_notification(notification_id)`: membaca antrean `QUEUED`, kirim email via SMTP
-- [ ] Setelah email berhasil terkirim: update `notification_queue.status = SENT`, isi `sent_at`
-- [ ] Jika gagal setelah 3 retry: update status ke `FAILED`, log error
-- [ ] Email template HTML minimal: kop IPB, nama penerima, pesan notifikasi, CTA button
+- [x] Celery task `send_email_notification(notification_id)`: membaca antrean `QUEUED`, kirim email via SMTP
+- [x] Setelah email berhasil terkirim: update `notification_queue.status = SENT`, isi `sent_at`
+- [x] Jika gagal setelah 3 retry: update status ke `FAILED`, log error
+- [x] Email template HTML minimal: kop IPB, nama penerima, pesan notifikasi, CTA button
 
 ### Garbage Collector Worker
 
-- [ ] Celery Beat cron setiap hari 03:00 UTC+7 menjalankan task `cleanup_expired_tokens`
-- [ ] Task 1 — Hapus Refresh Token kadaluarsa: `DELETE FROM auth.user_refresh_tokens WHERE expires_at < NOW() - INTERVAL '1 day'` (memanfaatkan Partial Index `is_revoked = FALSE`)
-- [ ] Task 2 — Hapus Action Token kadaluarsa: `DELETE FROM auth.auth_action_tokens WHERE expires_at < NOW()`
-- [ ] Task 3 — Hapus notifikasi lama: `DELETE FROM public.notification_queue WHERE created_at < NOW() - INTERVAL '30 days' AND status IN ('SENT', 'DELETED')`
-- [ ] Log jumlah baris yang dihapus ke structured logger setelah setiap task selesai
+- [x] Celery Beat cron setiap hari 03:00 UTC+7 menjalankan task `cleanup_expired_tokens`
+- [x] Task 1 — Hapus Refresh Token kadaluarsa: `DELETE FROM auth.user_refresh_tokens WHERE expires_at < NOW() - INTERVAL '1 day'` (memanfaatkan Partial Index `is_revoked = FALSE`)
+- [x] Task 2 — Hapus Action Token kadaluarsa: `DELETE FROM auth.auth_action_tokens WHERE expires_at < NOW()`
+- [x] Task 3 — Hapus notifikasi lama: `DELETE FROM public.notification_queue WHERE created_at < NOW() - INTERVAL '30 days' AND status IN ('SENT', 'DELETED')`
+- [x] Log jumlah baris yang dihapus ke structured logger setelah setiap task selesai
 
 ### Test Gate Phase 8
 
-- [ ] Unit test: notification trigger kondisi (event → payload yang benar)
-- [ ] Integration test: generate report selesai → notifikasi masuk ke inbox → email terkirim
-- [ ] Test: unread count ter-update saat notifikasi baru masuk
-- [ ] Test: garbage collector tidak menghapus token yang masih valid
-- [ ] Test: email worker retry behavior saat SMTP gagal
+- [x] Unit test: notification trigger kondisi (event → payload yang benar)
+- [x] Integration test: generate report selesai → notifikasi masuk ke inbox → email terkirim
+- [x] Test: unread count ter-update saat notifikasi baru masuk
+- [x] Test: garbage collector tidak menghapus token yang masih valid
+- [x] Test: email worker retry behavior saat SMTP gagal
 
 **Exit Criteria**: Mahasiswa dan admin menerima notifikasi in-app dan email untuk semua event penting. Queue bersih dari data sampah secara periodik.
 

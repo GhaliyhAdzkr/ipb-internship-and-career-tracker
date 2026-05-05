@@ -43,6 +43,14 @@ class Settings(BaseSettings):
         os.getenv("RESET_PASSWORD_TOKEN_EXPIRE_MINUTES", "15")
     )
 
+    # SMTP / Resend Settings
+    smtp_host: str = os.getenv("SMTP_HOST", "smtp.resend.com")
+    smtp_port: int = int(os.getenv("SMTP_PORT", "465"))
+    smtp_user: str = os.getenv("SMTP_USER", "resend")
+    smtp_password: str = os.getenv("SMTP_PASSWORD", "")
+    smtp_from_email: str = os.getenv("SMTP_FROM_EMAIL", "noreply@yourdomain.com")
+    smtp_from_name: str = os.getenv("SMTP_FROM_NAME", "IPB Career Tracker")
+
     # API Versioning
     api_version: str = "v1"
 
