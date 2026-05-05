@@ -1,8 +1,10 @@
+from http import HTTPStatus
 import datetime
 import uuid
 from dataclasses import dataclass
 from typing import Optional
 
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app_backend.models.applications import Applications
@@ -22,6 +24,7 @@ class VerifyApplicationCommand:
 class VerifyApplicationResult:
     placement: Optional[Placements] = None
     error_message: Optional[str] = None
+    error_code: HTTPStatus = HTTPStatus.BAD_REQUEST
 
     def got_error(self) -> bool:
         return self.error_message is not None
@@ -69,10 +72,25 @@ def verify_application_command_handler(
 
     session.add(placement)
 
-    # We could also add a log to application_logs saying verified, but changing status is easier.
-    # The prompt doesn't specify changing status from ACCEPTED to VERIFIED, it just says "trigger pembuatan Placement record".
+    # Trigger Notification: Lamaran diverifikasi
+    from app_backend.models.notification_queue import NotificationQueue
+    notif = NotificationQueue(
+        title="Lamaran Disetujui",
+        message=f"Bukti penerimaan Anda untuk lowongan '{vacancy.title}' telah diverifikasi. Placement telah aktif.",
+        user_id=application.student_id,
+        channel="ALL",
+        status="QUEUED"
+    )
+    session.add(notif)
 
-    session.commit()
-    session.refresh(placement)
+    try:
+        session.commit()
+        session.refresh(placement)
+    except IntegrityError:
+        session.rollback()
+        return VerifyApplicationResult(
+            error_message="Penempatan ganda terdeteksi akibat percobaan paralel. Permintaan ditolak.",
+            error_code=HTTPStatus.CONFLICT
+        )
 
     return VerifyApplicationResult(placement=placement)

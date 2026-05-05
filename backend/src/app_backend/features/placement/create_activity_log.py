@@ -1,3 +1,4 @@
+from http import HTTPStatus
 import datetime
 import uuid
 from dataclasses import dataclass
@@ -24,7 +25,7 @@ class CreateActivityLogCommand:
 class CreateActivityLogResult:
     log: Optional[ActivityLogs] = None
     error_message: Optional[str] = None
-    error_code: int = 400
+    error_code: HTTPStatus = HTTPStatus.BAD_REQUEST
 
     def got_error(self) -> bool:
         return self.error_message is not None
@@ -42,7 +43,7 @@ def create_activity_log_command_handler(
     )
     if not placement:
         return CreateActivityLogResult(
-            error_message="Placement tidak ditemukan", error_code=404
+            error_message="Placement tidak ditemukan", error_code=HTTPStatus.NOT_FOUND
         )
 
     # Validasi log_date tidak boleh di masa depan
@@ -65,7 +66,7 @@ def create_activity_log_command_handler(
     )
     if existing_log:
         return CreateActivityLogResult(
-            error_message="Log untuk tanggal ini sudah ada", error_code=409
+            error_message="Log untuk tanggal ini sudah ada", error_code=HTTPStatus.CONFLICT
         )
 
     # Kalkulasi durasi

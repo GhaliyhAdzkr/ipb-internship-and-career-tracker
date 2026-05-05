@@ -184,8 +184,9 @@ def upload_activity_log_attachment(
         session=session,
     )
     if result.got_error():
+        err_status = result.error_code if hasattr(result, 'error_code') and result.error_code else status.HTTP_400_BAD_REQUEST
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=result.error_message
+            status_code=err_status, detail=result.error_message
         )
     return {"message": result.message, "attachment_url": result.attachment_url}
 

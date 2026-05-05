@@ -1,3 +1,4 @@
+from http import HTTPStatus
 import uuid
 from dataclasses import dataclass
 from typing import Optional
@@ -18,7 +19,7 @@ class GetReportResult:
     auto_generated_report_url: Optional[str] = None
     status: Optional[str] = None
     error_message: Optional[str] = None
-    error_status_code: int = 404
+    error_status_code: HTTPStatus = HTTPStatus.BAD_REQUEST
 
     def got_error(self) -> bool:
         return self.error_message is not None

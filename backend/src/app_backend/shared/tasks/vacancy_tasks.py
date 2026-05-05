@@ -61,6 +61,66 @@ def auto_close_expired_vacancies() -> Dict:
     finally:
         session.close()
 
+@shared_task
+def notify_expiring_wishlists() -> Dict:
+    """
+    Task: Notify students if a vacancy in their wishlist is closing in 3 days.
+    """
+    engine = create_engine(get_database_url())
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    try:
+        from datetime import timedelta
+        from app_backend.models.student_wishlist_vacancies import StudentWishlistVacancies
+        from app_backend.models.notification_queue import NotificationQueue
+
+        now = datetime.now(timezone.utc)
+        target_close_date_start = now + timedelta(days=2)
+        target_close_date_end = now + timedelta(days=3)
+
+        # Get vacancies closing in 3 days that are in wishlists
+        expiring_wishlists = (
+            session.query(StudentWishlistVacancies)
+            .join(Vacancies)
+            .filter(
+                Vacancies.is_active == True,
+                Vacancies.close_date >= target_close_date_start,
+                Vacancies.close_date < target_close_date_end,
+            )
+            .all()
+        )
+
+        notified_count = 0
+        for wishlist in expiring_wishlists:
+            vacancy = wishlist.vacancy
+            notif = NotificationQueue(
+                title="Lowongan Wishlist Segera Tutup",
+                message=f"Lowongan '{vacancy.title}' dari {vacancy.company.name} yang ada di wishlist Anda akan ditutup dalam 3 hari.",
+                user_id=wishlist.student.user_id if hasattr(wishlist, 'student') and wishlist.student else wishlist.student_id,
+                channel="ALL",
+                status="QUEUED"
+            )
+            session.add(notif)
+            notified_count += 1
+
+        session.commit()
+
+        return {
+            "status": "completed",
+            "notified_count": notified_count,
+            "timestamp": now.isoformat(),
+        }
+
+    except Exception as exc:
+        session.rollback()
+        return {
+            "status": "failed",
+            "error": str(exc),
+        }
+    finally:
+        session.close()
+
 
 @shared_task
 def scrape_vacancies(source_urls: list) -> Dict:

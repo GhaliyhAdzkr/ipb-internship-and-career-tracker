@@ -42,6 +42,16 @@ def reject_application_proof_command_handler(
     application._changed_by = command.admin_id
     application._reason = command.reason
 
+    from app_backend.models.notification_queue import NotificationQueue
+    notif = NotificationQueue(
+        title="Bukti Lamaran Ditolak",
+        message=f"Admin menolak bukti penerimaan Anda. Alasan: {command.reason}. Status lamaran kembali menjadi OFFERED.",
+        user_id=application.student_id,
+        channel="ALL",
+        status="QUEUED"
+    )
+    session.add(notif)
+
     session.commit()
     session.refresh(application)
 

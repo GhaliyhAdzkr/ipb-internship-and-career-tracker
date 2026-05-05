@@ -1,3 +1,4 @@
+from http import HTTPStatus
 import uuid
 from dataclasses import dataclass
 from typing import Optional
@@ -21,7 +22,7 @@ class RequestDocumentResult:
     document_id: Optional[uuid.UUID] = None
     message: Optional[str] = None
     error_message: Optional[str] = None
-    error_status_code: int = 400
+    error_status_code: HTTPStatus = HTTPStatus.BAD_REQUEST
 
     def got_error(self) -> bool:
         return self.error_message is not None
@@ -30,6 +31,26 @@ class RequestDocumentResult:
 def request_document_command_handler(
     command: RequestDocumentCommand, session: Session
 ) -> RequestDocumentResult:
+    from datetime import datetime, timezone, timedelta
+
+    # Rate Limiting: 1 request per 5 minutes per document type
+    five_minutes_ago = datetime.now(timezone.utc) - timedelta(minutes=5)
+    recent_request = (
+        session.query(DocumentRequests)
+        .filter(
+            DocumentRequests.student_id == command.student_id,
+            DocumentRequests.document_type == command.document_type,
+            DocumentRequests.created_at >= five_minutes_ago,
+        )
+        .first()
+    )
+
+    if recent_request:
+        return RequestDocumentResult(
+            error_message="Harap tunggu 5 menit sebelum mengajukan permohonan surat baru.",
+            error_status_code=HTTPStatus.TOO_MANY_REQUESTS,
+        )
+
     doc_req = DocumentRequests(
         student_id=command.student_id,
         document_type=command.document_type,

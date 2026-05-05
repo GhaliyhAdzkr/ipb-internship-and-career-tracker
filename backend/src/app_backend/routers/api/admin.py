@@ -504,8 +504,9 @@ async def verify_application(
         session,
     )
     if result.got_error():
+        err_status = result.error_code if hasattr(result, 'error_code') and result.error_code else HTTPStatus.BAD_REQUEST
         raise HTTPException(
-            status_code=HTTPStatus.BAD_REQUEST, detail=result.error_message
+            status_code=err_status, detail=result.error_message
         )
     return {"message": "Placement berhasil dibuat", "placement_id": result.placement.id}
 

@@ -224,9 +224,14 @@ def test_process_notification_queue_task():
             "app_backend.shared.tasks.notification_tasks.sessionmaker"
         ) as mock_sessionmaker:
             mock_session = MagicMock()
-            mock_session.query.return_value.filter.return_value.limit.return_value.all.return_value = [
-                mock_notif
-            ]
+            
+            # Accommodate .options(joinedload(...)).filter(...).limit(...).all()
+            query_mock = mock_session.query.return_value
+            options_mock = query_mock.options.return_value
+            filter_mock = options_mock.filter.return_value
+            limit_mock = filter_mock.limit.return_value
+            limit_mock.all.return_value = [mock_notif]
+            
             mock_sessionmaker.return_value.return_value = mock_session
 
             result = process_notification_queue()

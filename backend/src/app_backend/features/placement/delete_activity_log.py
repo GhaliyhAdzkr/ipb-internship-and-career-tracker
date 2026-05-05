@@ -1,3 +1,4 @@
+from http import HTTPStatus
 import uuid
 from dataclasses import dataclass
 from typing import Optional
@@ -18,7 +19,7 @@ class DeleteActivityLogCommand:
 @dataclass
 class DeleteActivityLogResult:
     error_message: Optional[str] = None
-    error_code: int = 400
+    error_code: HTTPStatus = HTTPStatus.BAD_REQUEST
 
     def got_error(self) -> bool:
         return self.error_message is not None
@@ -35,7 +36,7 @@ def delete_activity_log_command_handler(
     )
     if not placement:
         return DeleteActivityLogResult(
-            error_message="Placement tidak ditemukan", error_code=404
+            error_message="Placement tidak ditemukan", error_code=HTTPStatus.NOT_FOUND
         )
 
     log = (
@@ -45,7 +46,7 @@ def delete_activity_log_command_handler(
     )
     if not log:
         return DeleteActivityLogResult(
-            error_message="Activity log tidak ditemukan", error_code=404
+            error_message="Activity log tidak ditemukan", error_code=HTTPStatus.NOT_FOUND
         )
 
     session.delete(log)

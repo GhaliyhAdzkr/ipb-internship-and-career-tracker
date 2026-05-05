@@ -1,3 +1,4 @@
+from http import HTTPStatus
 import datetime
 import uuid
 from dataclasses import dataclass
@@ -25,7 +26,7 @@ class UpdateActivityLogCommand:
 class UpdateActivityLogResult:
     log: Optional[ActivityLogs] = None
     error_message: Optional[str] = None
-    error_code: int = 400
+    error_code: HTTPStatus = HTTPStatus.BAD_REQUEST
 
     def got_error(self) -> bool:
         return self.error_message is not None
@@ -42,7 +43,7 @@ def update_activity_log_command_handler(
     )
     if not placement:
         return UpdateActivityLogResult(
-            error_message="Placement tidak ditemukan", error_code=404
+            error_message="Placement tidak ditemukan", error_code=HTTPStatus.NOT_FOUND
         )
 
     log = (
@@ -52,7 +53,7 @@ def update_activity_log_command_handler(
     )
     if not log:
         return UpdateActivityLogResult(
-            error_message="Activity log tidak ditemukan", error_code=404
+            error_message="Activity log tidak ditemukan", error_code=HTTPStatus.NOT_FOUND
         )
 
     new_date = command.log_date if command.log_date is not None else log.activity_date
@@ -75,7 +76,7 @@ def update_activity_log_command_handler(
         )
         if existing_log:
             return UpdateActivityLogResult(
-                error_message="Log untuk tanggal ini sudah ada", error_code=409
+                error_message="Log untuk tanggal ini sudah ada", error_code=HTTPStatus.CONFLICT
             )
 
     # Note: Since start_time and end_time are not stored directly, if the user wants to update them,
