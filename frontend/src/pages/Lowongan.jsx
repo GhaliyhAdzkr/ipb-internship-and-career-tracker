@@ -13,6 +13,11 @@ import {
 } from "react-icons/pi";
 
 function Lowongan() {
+	// Dropdown
+	const [isOpenDropdown, setIsOpenDropdown] = useState(false);
+	const [sortActive, setSortActive] = useState(0);
+	const sortOption = ["Terbaru", "Terlama"];
+
 	const [currentPage, setCurrentPage] = useState(1);
 	const isXl = useMediaQuery({ query: "(min-width: 1280px)" });
 	const itemsPerPage = isXl ? 9 : 6;

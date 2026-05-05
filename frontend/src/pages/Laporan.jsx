@@ -1,6 +1,13 @@
 import React from "react";
 import { PiFileText, PiCloudArrowUp, PiCheckCircle } from "react-icons/pi";
 
+// ICONS
+import { PiUpload } from "react-icons/pi";
+import { AiOutlineCloudUpload } from "react-icons/ai";
+import { HiOutlineDotsCircleHorizontal } from "react-icons/hi";
+import { CiTextAlignJustify } from "react-icons/ci";
+import { FaRegCircleCheck } from "react-icons/fa6";
+import { TiMessages } from "react-icons/ti";
 function Laporan() {
 	return (
 		<div className="font-jakarta">
@@ -11,6 +18,7 @@ function Laporan() {
 					<div className="text-justify max-w-xl text-sm opacity-90">
 						Unggah laporan akhir magang Anda untuk proses penilaian dan verifikasi sertifikat.
 					</div>
+					<TheFooter></TheFooter>
 				</div>
 			</div>
 

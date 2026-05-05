@@ -2,6 +2,17 @@ import React from "react";
 import { useAuth } from "../hooks/useAuth";
 import { PiUserCircle, PiIdentificationCard, PiEnvelope, PiBuildings, PiGraduationCap, PiCamera } from "react-icons/pi";
 
+// PACKAGE
+import React, { useState } from "react";
+
+// ICONS
+import { PiUpload } from "react-icons/pi";
+import { AiOutlineCloudUpload } from "react-icons/ai";
+import { HiOutlineDotsCircleHorizontal } from "react-icons/hi";
+import { CiTextAlignJustify } from "react-icons/ci";
+import { FaRegCircleCheck } from "react-icons/fa6";
+import { TiMessages } from "react-icons/ti";
+
 function Profil() {
 	const { user } = useAuth();
 

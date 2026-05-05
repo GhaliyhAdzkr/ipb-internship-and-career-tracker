@@ -179,6 +179,7 @@ function Jurnal() {
 							</button>
 						</div>
 					</div>
+					<TheFooter></TheFooter>
 				</div>
 			</div>
 		</div>
