@@ -1,7 +1,7 @@
-from http import HTTPStatus
 import datetime
 import uuid
 from dataclasses import dataclass
+from http import HTTPStatus
 from typing import Optional
 
 from sqlalchemy.exc import IntegrityError
@@ -74,12 +74,13 @@ def verify_application_command_handler(
 
     # Trigger Notification: Lamaran diverifikasi
     from app_backend.models.notification_queue import NotificationQueue
+
     notif = NotificationQueue(
         title="Lamaran Disetujui",
         message=f"Bukti penerimaan Anda untuk lowongan '{vacancy.title}' telah diverifikasi. Placement telah aktif.",
         user_id=application.student_id,
         channel="ALL",
-        status="QUEUED"
+        status="QUEUED",
     )
     session.add(notif)
 
@@ -90,7 +91,7 @@ def verify_application_command_handler(
         session.rollback()
         return VerifyApplicationResult(
             error_message="Penempatan ganda terdeteksi akibat percobaan paralel. Permintaan ditolak.",
-            error_code=HTTPStatus.CONFLICT
+            error_code=HTTPStatus.CONFLICT,
         )
 
     return VerifyApplicationResult(placement=placement)

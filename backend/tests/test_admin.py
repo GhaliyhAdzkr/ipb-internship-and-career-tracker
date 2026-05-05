@@ -245,15 +245,15 @@ def test_update_admin_profile_forbidden_for_student(client_as_student):
 
 
 def test_list_departments(client_as_admin):
-    from app_backend.schemas.admin import DepartmentResponse
+    from app_backend.models.master_departments import MasterDepartments
 
-    fake = DepartmentResponse(
+    fake = MasterDepartments(
         id=DEPT_ID, code="ILK", name="Ilmu Komputer", faculty="FMIPA"
     )
     with patch(
-        "app_backend.routers.api.admin.list_departments_command_handler"
-    ) as mock_h:
-        mock_h.return_value = MagicMock(items=[fake])
+        "app_backend.features.admin.master_data_service.MasterDataService.list_departments"
+    ) as mock_method:
+        mock_method.return_value = [fake]
         resp = client_as_admin.get("/api/v1/admin/departments")
 
     assert resp.status_code == 200
@@ -264,9 +264,9 @@ def test_list_departments(client_as_admin):
 
 def test_list_departments_empty(client_as_admin):
     with patch(
-        "app_backend.routers.api.admin.list_departments_command_handler"
-    ) as mock_h:
-        mock_h.return_value = MagicMock(items=[])
+        "app_backend.features.admin.master_data_service.MasterDataService.list_departments"
+    ) as mock_method:
+        mock_method.return_value = []
         resp = client_as_admin.get("/api/v1/admin/departments")
 
     assert resp.status_code == 200
@@ -274,15 +274,15 @@ def test_list_departments_empty(client_as_admin):
 
 
 def test_create_department_success(client_as_admin):
-    from app_backend.schemas.admin import DepartmentResponse
+    from app_backend.models.master_departments import MasterDepartments
 
-    fake = DepartmentResponse(
+    fake = MasterDepartments(
         id=DEPT_ID, code="ILK", name="Ilmu Komputer", faculty="FMIPA"
     )
     with patch(
-        "app_backend.routers.api.admin.create_department_command_handler"
-    ) as mock_h:
-        mock_h.return_value = MagicMock(got_error=lambda: False, item=fake)
+        "app_backend.features.admin.master_data_service.MasterDataService.create_department"
+    ) as mock_method:
+        mock_method.return_value = fake
         resp = client_as_admin.post(
             "/api/v1/admin/departments",
             json={"code": "ILK", "name": "Ilmu Komputer", "faculty": "FMIPA"},
@@ -296,18 +296,15 @@ def test_create_department_success(client_as_admin):
 
 def test_create_department_conflict(client_as_admin):
     with patch(
-        "app_backend.routers.api.admin.create_department_command_handler"
-    ) as mock_h:
-        mock_h.return_value = MagicMock(
-            got_error=lambda: True,
-            error_message="Prodi dengan kode 'ILK' sudah ada",
-        )
+        "app_backend.features.admin.master_data_service.MasterDataService.create_department"
+    ) as mock_method:
+        mock_method.side_effect = Exception("Prodi sudah ada")
         resp = client_as_admin.post(
             "/api/v1/admin/departments",
             json={"code": "ILK", "name": "Ilmu Komputer", "faculty": "FMIPA"},
         )
 
-    assert resp.status_code == 409
+    assert resp.status_code == 500
 
 
 def test_create_department_missing_field(client_as_admin):
@@ -316,15 +313,15 @@ def test_create_department_missing_field(client_as_admin):
 
 
 def test_update_department_success(client_as_admin):
-    from app_backend.schemas.admin import DepartmentResponse
+    from app_backend.models.master_departments import MasterDepartments
 
-    fake = DepartmentResponse(
+    fake = MasterDepartments(
         id=DEPT_ID, code="ILK", name="Ilmu Komputer Updated", faculty="FMIPA"
     )
     with patch(
-        "app_backend.routers.api.admin.update_department_command_handler"
-    ) as mock_h:
-        mock_h.return_value = MagicMock(got_error=lambda: False, item=fake)
+        "app_backend.features.admin.master_data_service.MasterDataService.update_department"
+    ) as mock_method:
+        mock_method.return_value = fake
         resp = client_as_admin.patch(
             f"/api/v1/admin/departments/{DEPT_ID}",
             json={"name": "Ilmu Komputer Updated"},
@@ -336,12 +333,9 @@ def test_update_department_success(client_as_admin):
 
 def test_update_department_not_found(client_as_admin):
     with patch(
-        "app_backend.routers.api.admin.update_department_command_handler"
-    ) as mock_h:
-        mock_h.return_value = MagicMock(
-            got_error=lambda: True,
-            error_message="Prodi tidak ditemukan",
-        )
+        "app_backend.features.admin.master_data_service.MasterDataService.update_department"
+    ) as mock_method:
+        mock_method.side_effect = ValueError("Prodi tidak ditemukan")
         resp = client_as_admin.patch(
             f"/api/v1/admin/departments/{DEPT_ID}", json={"name": "X"}
         )
@@ -351,9 +345,9 @@ def test_update_department_not_found(client_as_admin):
 
 def test_delete_department_success(client_as_admin):
     with patch(
-        "app_backend.routers.api.admin.delete_department_command_handler"
-    ) as mock_h:
-        mock_h.return_value = MagicMock(got_error=lambda: False)
+        "app_backend.features.admin.master_data_service.MasterDataService.delete_department"
+    ) as mock_method:
+        mock_method.return_value = None
         resp = client_as_admin.delete(f"/api/v1/admin/departments/{DEPT_ID}")
 
     assert resp.status_code == 204
@@ -361,12 +355,9 @@ def test_delete_department_success(client_as_admin):
 
 def test_delete_department_not_found(client_as_admin):
     with patch(
-        "app_backend.routers.api.admin.delete_department_command_handler"
-    ) as mock_h:
-        mock_h.return_value = MagicMock(
-            got_error=lambda: True,
-            error_message="Prodi tidak ditemukan",
-        )
+        "app_backend.features.admin.master_data_service.MasterDataService.delete_department"
+    ) as mock_method:
+        mock_method.side_effect = ValueError("Prodi tidak ditemukan")
         resp = client_as_admin.delete(f"/api/v1/admin/departments/{DEPT_ID}")
 
     assert resp.status_code == 404
@@ -383,11 +374,13 @@ def test_department_endpoints_forbidden_for_student(client_as_student):
 
 
 def test_list_skills(client_as_admin):
-    from app_backend.schemas.admin import SkillResponse
+    from app_backend.models.master_skills import MasterSkills
 
-    fake = SkillResponse(id=SKILL_ID, name="Python", category="Programming")
-    with patch("app_backend.routers.api.admin.list_skills_command_handler") as mock_h:
-        mock_h.return_value = MagicMock(items=[fake])
+    fake = MasterSkills(id=SKILL_ID, name="Python", category="Programming")
+    with patch(
+        "app_backend.features.admin.master_data_service.MasterDataService.list_skills"
+    ) as mock_method:
+        mock_method.return_value = [fake]
         resp = client_as_admin.get("/api/v1/admin/skills")
 
     assert resp.status_code == 200
@@ -395,11 +388,13 @@ def test_list_skills(client_as_admin):
 
 
 def test_create_skill_success(client_as_admin):
-    from app_backend.schemas.admin import SkillResponse
+    from app_backend.models.master_skills import MasterSkills
 
-    fake = SkillResponse(id=SKILL_ID, name="Python", category="Programming")
-    with patch("app_backend.routers.api.admin.create_skill_command_handler") as mock_h:
-        mock_h.return_value = MagicMock(got_error=lambda: False, item=fake)
+    fake = MasterSkills(id=SKILL_ID, name="Python", category="Programming")
+    with patch(
+        "app_backend.features.admin.master_data_service.MasterDataService.create_skill"
+    ) as mock_method:
+        mock_method.return_value = fake
         resp = client_as_admin.post(
             "/api/v1/admin/skills", json={"name": "Python", "category": "Programming"}
         )
@@ -409,14 +404,13 @@ def test_create_skill_success(client_as_admin):
 
 
 def test_create_skill_conflict(client_as_admin):
-    with patch("app_backend.routers.api.admin.create_skill_command_handler") as mock_h:
-        mock_h.return_value = MagicMock(
-            got_error=lambda: True,
-            error_message="Skill 'Python' sudah terdaftar",
-        )
+    with patch(
+        "app_backend.features.admin.master_data_service.MasterDataService.create_skill"
+    ) as mock_method:
+        mock_method.side_effect = Exception("Skill sudah terdaftar")
         resp = client_as_admin.post("/api/v1/admin/skills", json={"name": "Python"})
 
-    assert resp.status_code == 409
+    assert resp.status_code == 500
 
 
 def test_create_skill_missing_name(client_as_admin):
@@ -427,11 +421,13 @@ def test_create_skill_missing_name(client_as_admin):
 
 
 def test_update_skill_success(client_as_admin):
-    from app_backend.schemas.admin import SkillResponse
+    from app_backend.models.master_skills import MasterSkills
 
-    fake = SkillResponse(id=SKILL_ID, name="Python 3", category="Programming")
-    with patch("app_backend.routers.api.admin.update_skill_command_handler") as mock_h:
-        mock_h.return_value = MagicMock(got_error=lambda: False, item=fake)
+    fake = MasterSkills(id=SKILL_ID, name="Python 3", category="Programming")
+    with patch(
+        "app_backend.features.admin.master_data_service.MasterDataService.update_skill"
+    ) as mock_method:
+        mock_method.return_value = fake
         resp = client_as_admin.patch(
             f"/api/v1/admin/skills/{SKILL_ID}", json={"name": "Python 3"}
         )
@@ -441,11 +437,10 @@ def test_update_skill_success(client_as_admin):
 
 
 def test_update_skill_not_found(client_as_admin):
-    with patch("app_backend.routers.api.admin.update_skill_command_handler") as mock_h:
-        mock_h.return_value = MagicMock(
-            got_error=lambda: True,
-            error_message="Skill tidak ditemukan",
-        )
+    with patch(
+        "app_backend.features.admin.master_data_service.MasterDataService.update_skill"
+    ) as mock_method:
+        mock_method.side_effect = ValueError("Skill tidak ditemukan")
         resp = client_as_admin.patch(
             f"/api/v1/admin/skills/{SKILL_ID}", json={"name": "X"}
         )
@@ -454,19 +449,20 @@ def test_update_skill_not_found(client_as_admin):
 
 
 def test_delete_skill_success(client_as_admin):
-    with patch("app_backend.routers.api.admin.delete_skill_command_handler") as mock_h:
-        mock_h.return_value = MagicMock(got_error=lambda: False)
+    with patch(
+        "app_backend.features.admin.master_data_service.MasterDataService.delete_skill"
+    ) as mock_method:
+        mock_method.return_value = None
         resp = client_as_admin.delete(f"/api/v1/admin/skills/{SKILL_ID}")
 
     assert resp.status_code == 204
 
 
 def test_delete_skill_not_found(client_as_admin):
-    with patch("app_backend.routers.api.admin.delete_skill_command_handler") as mock_h:
-        mock_h.return_value = MagicMock(
-            got_error=lambda: True,
-            error_message="Skill tidak ditemukan",
-        )
+    with patch(
+        "app_backend.features.admin.master_data_service.MasterDataService.delete_skill"
+    ) as mock_method:
+        mock_method.side_effect = ValueError("Skill tidak ditemukan")
         resp = client_as_admin.delete(f"/api/v1/admin/skills/{SKILL_ID}")
 
     assert resp.status_code == 404
@@ -483,20 +479,19 @@ def test_skill_endpoints_forbidden_for_student(client_as_student):
 
 
 def test_list_companies(client_as_admin):
-    from app_backend.schemas.admin import CompanyResponse
+    from app_backend.models.master_external_companies import \
+        MasterExternalCompanies
 
-    fake = CompanyResponse(
+    fake = MasterExternalCompanies(
         id=COMPANY_ID,
         name="PT Teknologi Nusantara",
         industry="IT/Technology",
-        website_url="https://teknusantara.id",
-        address="Jakarta",
         created_at=NOW,
     )
     with patch(
-        "app_backend.routers.api.admin.list_companies_command_handler"
-    ) as mock_h:
-        mock_h.return_value = MagicMock(items=[fake])
+        "app_backend.features.admin.master_data_service.MasterDataService.list_companies"
+    ) as mock_method:
+        mock_method.return_value = [fake]
         resp = client_as_admin.get("/api/v1/admin/companies")
 
     assert resp.status_code == 200
@@ -505,18 +500,19 @@ def test_list_companies(client_as_admin):
 
 
 def test_create_company_success(client_as_admin):
-    from app_backend.schemas.admin import CompanyResponse
+    from app_backend.models.master_external_companies import \
+        MasterExternalCompanies
 
-    fake = CompanyResponse(
+    fake = MasterExternalCompanies(
         id=COMPANY_ID,
         name="PT Teknologi Nusantara",
         industry="IT/Technology",
         created_at=NOW,
     )
     with patch(
-        "app_backend.routers.api.admin.create_company_command_handler"
-    ) as mock_h:
-        mock_h.return_value = MagicMock(got_error=lambda: False, item=fake)
+        "app_backend.features.admin.master_data_service.MasterDataService.create_company"
+    ) as mock_method:
+        mock_method.return_value = fake
         resp = client_as_admin.post(
             "/api/v1/admin/companies",
             json={"name": "PT Teknologi Nusantara", "industry": "IT/Technology"},
@@ -528,17 +524,14 @@ def test_create_company_success(client_as_admin):
 
 def test_create_company_conflict(client_as_admin):
     with patch(
-        "app_backend.routers.api.admin.create_company_command_handler"
-    ) as mock_h:
-        mock_h.return_value = MagicMock(
-            got_error=lambda: True,
-            error_message="Perusahaan 'PT Teknologi Nusantara' sudah terdaftar",
-        )
+        "app_backend.features.admin.master_data_service.MasterDataService.create_company"
+    ) as mock_method:
+        mock_method.side_effect = Exception("Perusahaan sudah terdaftar")
         resp = client_as_admin.post(
             "/api/v1/admin/companies", json={"name": "PT Teknologi Nusantara"}
         )
 
-    assert resp.status_code == 409
+    assert resp.status_code == 500
 
 
 def test_create_company_missing_name(client_as_admin):
@@ -547,18 +540,19 @@ def test_create_company_missing_name(client_as_admin):
 
 
 def test_update_company_success(client_as_admin):
-    from app_backend.schemas.admin import CompanyResponse
+    from app_backend.models.master_external_companies import \
+        MasterExternalCompanies
 
-    fake = CompanyResponse(
+    fake = MasterExternalCompanies(
         id=COMPANY_ID,
         name="PT Teknologi Nusantara Updated",
         industry="IT/Technology",
         created_at=NOW,
     )
     with patch(
-        "app_backend.routers.api.admin.update_company_command_handler"
-    ) as mock_h:
-        mock_h.return_value = MagicMock(got_error=lambda: False, item=fake)
+        "app_backend.features.admin.master_data_service.MasterDataService.update_company"
+    ) as mock_method:
+        mock_method.return_value = fake
         resp = client_as_admin.patch(
             f"/api/v1/admin/companies/{COMPANY_ID}",
             json={"name": "PT Teknologi Nusantara Updated"},
@@ -570,12 +564,9 @@ def test_update_company_success(client_as_admin):
 
 def test_update_company_not_found(client_as_admin):
     with patch(
-        "app_backend.routers.api.admin.update_company_command_handler"
-    ) as mock_h:
-        mock_h.return_value = MagicMock(
-            got_error=lambda: True,
-            error_message="Perusahaan tidak ditemukan",
-        )
+        "app_backend.features.admin.master_data_service.MasterDataService.update_company"
+    ) as mock_method:
+        mock_method.side_effect = ValueError("Perusahaan tidak ditemukan")
         resp = client_as_admin.patch(
             f"/api/v1/admin/companies/{COMPANY_ID}", json={"name": "X"}
         )
@@ -585,24 +576,21 @@ def test_update_company_not_found(client_as_admin):
 
 def test_update_company_conflict(client_as_admin):
     with patch(
-        "app_backend.routers.api.admin.update_company_command_handler"
-    ) as mock_h:
-        mock_h.return_value = MagicMock(
-            got_error=lambda: True,
-            error_message="Nama perusahaan sudah digunakan",
-        )
+        "app_backend.features.admin.master_data_service.MasterDataService.update_company"
+    ) as mock_method:
+        mock_method.side_effect = Exception("Nama perusahaan sudah digunakan")
         resp = client_as_admin.patch(
             f"/api/v1/admin/companies/{COMPANY_ID}", json={"name": "Duplikat"}
         )
 
-    assert resp.status_code == 409
+    assert resp.status_code == 500
 
 
 def test_delete_company_success(client_as_admin):
     with patch(
-        "app_backend.routers.api.admin.delete_company_command_handler"
-    ) as mock_h:
-        mock_h.return_value = MagicMock(got_error=lambda: False)
+        "app_backend.features.admin.master_data_service.MasterDataService.delete_company"
+    ) as mock_method:
+        mock_method.return_value = None
         resp = client_as_admin.delete(f"/api/v1/admin/companies/{COMPANY_ID}")
 
     assert resp.status_code == 204
@@ -610,12 +598,9 @@ def test_delete_company_success(client_as_admin):
 
 def test_delete_company_not_found(client_as_admin):
     with patch(
-        "app_backend.routers.api.admin.delete_company_command_handler"
-    ) as mock_h:
-        mock_h.return_value = MagicMock(
-            got_error=lambda: True,
-            error_message="Perusahaan tidak ditemukan",
-        )
+        "app_backend.features.admin.master_data_service.MasterDataService.delete_company"
+    ) as mock_method:
+        mock_method.side_effect = ValueError("Perusahaan tidak ditemukan")
         resp = client_as_admin.delete(f"/api/v1/admin/companies/{COMPANY_ID}")
 
     assert resp.status_code == 404

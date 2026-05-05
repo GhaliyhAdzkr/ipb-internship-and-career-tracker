@@ -3,10 +3,10 @@ Celery Configuration untuk Background Tasks.
 Mendefinisikan task queue dengan Redis sebagai message broker.
 """
 
+import os
+
 from celery import Celery
 from celery.signals import worker_init, worker_shutdown
-
-import os
 
 # Celery app instance
 celery_app = Celery(

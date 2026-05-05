@@ -27,8 +27,8 @@ OTHER_COMPANY_ID = uuid.UUID("66666666-6666-6666-6666-666666666666")
 def _distribution_result(dept_id=None):
     """Buat fake GetDistributionResult yang sesuai dengan dept_id yang diminta."""
     from app_backend.features.analytics.get_distribution import (
-        CompensationBreakdownData, DepartmentBreakdownData, GetDistributionResult,
-        SemesterTrendData, TopCompanyData)
+        CompensationBreakdownData, DepartmentBreakdownData,
+        GetDistributionResult, SemesterTrendData, TopCompanyData)
 
     return GetDistributionResult(
         total_placements=3 if dept_id is None else 1,
@@ -112,9 +112,7 @@ class TestGetDistributionCommandHandler:
             "app_backend.features.analytics.get_distribution.get_distribution_command_handler",
             return_value=expected,
         ) as mock_h:
-            result = mock_h(
-                command=GetDistributionCommand(), session=mock_session
-            )
+            result = mock_h(command=GetDistributionCommand(), session=mock_session)
 
         assert result.total_placements == 3
         assert len(result.top_companies) == 1
@@ -196,7 +194,9 @@ class TestDistributionCaching:
     def test_cache_miss_calls_handler_and_writes_cache(self, client_as_admin):
         """Saat cache miss, handler dipanggil dan hasilnya disimpan ke cache."""
         with (
-            patch("app_backend.routers.api.analytics.cache_get", return_value=None) as mock_get,
+            patch(
+                "app_backend.routers.api.analytics.cache_get", return_value=None
+            ) as mock_get,
             patch("app_backend.routers.api.analytics.cache_set") as mock_set,
             patch(
                 "app_backend.routers.api.analytics.get_distribution_command_handler",
@@ -224,7 +224,10 @@ class TestDistributionCaching:
             "applied_filters": {"department_id": None, "year": None},
         }
         with (
-            patch("app_backend.routers.api.analytics.cache_get", return_value=cached_payload),
+            patch(
+                "app_backend.routers.api.analytics.cache_get",
+                return_value=cached_payload,
+            ),
             patch("app_backend.routers.api.analytics.cache_set") as mock_set,
             patch(
                 "app_backend.routers.api.analytics.get_distribution_command_handler"
@@ -240,7 +243,9 @@ class TestDistributionCaching:
     def test_cache_key_encodes_filters(self, client_as_admin):
         """Cache key harus menyertakan department_id dan year."""
         with (
-            patch("app_backend.routers.api.analytics.cache_get", return_value=None) as mock_get,
+            patch(
+                "app_backend.routers.api.analytics.cache_get", return_value=None
+            ) as mock_get,
             patch("app_backend.routers.api.analytics.cache_set"),
             patch(
                 "app_backend.routers.api.analytics.get_distribution_command_handler",
@@ -346,7 +351,10 @@ class TestCacheEviction:
             "applied_filters": {"department_id": None, "year": None},
         }
         with (
-            patch("app_backend.routers.api.analytics.cache_get", return_value=stale_payload),
+            patch(
+                "app_backend.routers.api.analytics.cache_get",
+                return_value=stale_payload,
+            ),
             patch(
                 "app_backend.routers.api.analytics.get_distribution_command_handler"
             ) as mock_h,
@@ -422,17 +430,23 @@ class TestDistributionFilters:
     def test_filter_department_not_affecting_other_dept(self, client_as_admin):
         """Department A dan Department B menghasilkan cache key berbeda."""
         with (
-            patch("app_backend.routers.api.analytics.cache_get", return_value=None) as mock_get_a,
+            patch(
+                "app_backend.routers.api.analytics.cache_get", return_value=None
+            ) as mock_get_a,
             patch("app_backend.routers.api.analytics.cache_set"),
             patch(
                 "app_backend.routers.api.analytics.get_distribution_command_handler",
                 return_value=_distribution_result(dept_id=DEPT_ID),
             ),
         ):
-            client_as_admin.get(f"/api/v1/analytics/distribution?department_id={DEPT_ID}")
+            client_as_admin.get(
+                f"/api/v1/analytics/distribution?department_id={DEPT_ID}"
+            )
 
         with (
-            patch("app_backend.routers.api.analytics.cache_get", return_value=None) as mock_get_b,
+            patch(
+                "app_backend.routers.api.analytics.cache_get", return_value=None
+            ) as mock_get_b,
             patch("app_backend.routers.api.analytics.cache_set"),
             patch(
                 "app_backend.routers.api.analytics.get_distribution_command_handler",

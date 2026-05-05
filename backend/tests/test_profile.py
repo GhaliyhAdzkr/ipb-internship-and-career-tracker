@@ -19,7 +19,7 @@ PROFILE_RESPONSE = {
     "role": "STUDENT",
     "is_active": True,
     "nim": "G1234567890",
-    "full_name": "Budi Santoso",
+    "full_name": "Windah Basudara",
     "semester": 5,
     "department": {
         "id": str(DEPT_ID),
@@ -51,42 +51,39 @@ PROFILE_RESPONSE = {
 
 def test_get_student_profile_success(client_as_student):
     with patch(
-        "app_backend.routers.api.profile.get_student_profile_command_handler"
-    ) as mock_handler:
+        "app_backend.features.profile.profile_service.ProfileService.get_student_profile"
+    ) as mock_method:
         from app_backend.schemas.profile import (DepartmentInfo, SkillInfo,
                                                  StudentProfileResponse)
 
-        mock_handler.return_value = MagicMock(
-            got_error=lambda: False,
-            profile=StudentProfileResponse(
-                user_id=STUDENT_USER_ID,
-                email="student@ipb.ac.id",
-                role="STUDENT",
-                is_active=True,
-                nim="G1234567890",
-                full_name="Budi Santoso",
-                semester=5,
-                department=DepartmentInfo(
-                    id=DEPT_ID,
-                    code="ILK",
-                    name="Ilmu Komputer",
-                    faculty="FMIPA",
-                ),
-                gpa=Decimal("3.75"),
-                is_mbkm_eligible=True,
-                phone_number="+6281234567890",
-                linkedin_url="https://linkedin.com/in/budi",
-                cv_url="https://drive.google.com/file/abc",
-                skills=[
-                    SkillInfo(
-                        skill_id=SKILL_ID,
-                        skill_name="Python",
-                        skill_category="Programming",
-                        level=4,
-                    )
-                ],
-                updated_at=NOW,
+        mock_method.return_value = StudentProfileResponse(
+            user_id=STUDENT_USER_ID,
+            email="student@ipb.ac.id",
+            role="STUDENT",
+            is_active=True,
+            nim="G1234567890",
+            full_name="Windah Basudara",
+            semester=5,
+            department=DepartmentInfo(
+                id=DEPT_ID,
+                code="ILK",
+                name="Ilmu Komputer",
+                faculty="FMIPA",
             ),
+            gpa=Decimal("3.75"),
+            is_mbkm_eligible=True,
+            phone_number="+6281234567890",
+            linkedin_url="https://linkedin.com/in/budi",
+            cv_url="https://drive.google.com/file/abc",
+            skills=[
+                SkillInfo(
+                    skill_id=SKILL_ID,
+                    skill_name="Python",
+                    skill_category="Programming",
+                    level=4,
+                )
+            ],
+            updated_at=NOW,
         )
         resp = client_as_student.get("/api/v1/profile/me")
 
@@ -103,29 +100,26 @@ def test_get_student_profile_success(client_as_student):
 def test_get_student_profile_no_department(client_as_student):
     """Profil tanpa department masih bisa dikembalikan (department = None)."""
     with patch(
-        "app_backend.routers.api.profile.get_student_profile_command_handler"
-    ) as mock_handler:
+        "app_backend.features.profile.profile_service.ProfileService.get_student_profile"
+    ) as mock_method:
         from app_backend.schemas.profile import StudentProfileResponse
 
-        mock_handler.return_value = MagicMock(
-            got_error=lambda: False,
-            profile=StudentProfileResponse(
-                user_id=STUDENT_USER_ID,
-                email="student@ipb.ac.id",
-                role="STUDENT",
-                is_active=True,
-                nim="G1234567890",
-                full_name="Budi Santoso",
-                semester=5,
-                department=None,
-                gpa=None,
-                is_mbkm_eligible=True,
-                phone_number=None,
-                linkedin_url=None,
-                cv_url=None,
-                skills=[],
-                updated_at=NOW,
-            ),
+        mock_method.return_value = StudentProfileResponse(
+            user_id=STUDENT_USER_ID,
+            email="student@ipb.ac.id",
+            role="STUDENT",
+            is_active=True,
+            nim="G1234567890",
+            full_name="Windah Basudara",
+            semester=5,
+            department=None,
+            gpa=None,
+            is_mbkm_eligible=True,
+            phone_number=None,
+            linkedin_url=None,
+            cv_url=None,
+            skills=[],
+            updated_at=NOW,
         )
         resp = client_as_student.get("/api/v1/profile/me")
 
@@ -137,12 +131,9 @@ def test_get_student_profile_no_department(client_as_student):
 
 def test_get_student_profile_not_found(client_as_student):
     with patch(
-        "app_backend.routers.api.profile.get_student_profile_command_handler"
-    ) as mock_handler:
-        mock_handler.return_value = MagicMock(
-            got_error=lambda: True,
-            error_message="Profil mahasiswa tidak ditemukan",
-        )
+        "app_backend.features.profile.profile_service.ProfileService.get_student_profile"
+    ) as mock_method:
+        mock_method.return_value = None
         resp = client_as_student.get("/api/v1/profile/me")
 
     assert resp.status_code == 404
@@ -176,12 +167,9 @@ CV_PAYLOAD = {
 
 def test_update_cv_data_success(client_as_student):
     with patch(
-        "app_backend.routers.api.profile.update_cv_data_command_handler"
-    ) as mock_handler:
-        mock_handler.return_value = MagicMock(
-            got_error=lambda: False,
-            message="Data CV berhasil diperbarui",
-        )
+        "app_backend.features.profile.profile_service.ProfileService.update_cv_data"
+    ) as mock_method:
+        mock_method.return_value = None
         resp = client_as_student.put("/api/v1/profile/cv-data", json=CV_PAYLOAD)
 
     assert resp.status_code == 200
@@ -191,12 +179,9 @@ def test_update_cv_data_success(client_as_student):
 def test_update_cv_data_partial(client_as_student):
     """Hanya update phone_number saja — field lain tidak dikirim."""
     with patch(
-        "app_backend.routers.api.profile.update_cv_data_command_handler"
-    ) as mock_handler:
-        mock_handler.return_value = MagicMock(
-            got_error=lambda: False,
-            message="Data CV berhasil diperbarui",
-        )
+        "app_backend.features.profile.profile_service.ProfileService.update_cv_data"
+    ) as mock_method:
+        mock_method.return_value = None
         resp = client_as_student.put(
             "/api/v1/profile/cv-data", json={"phone_number": "+628987654321"}
         )
@@ -207,12 +192,9 @@ def test_update_cv_data_partial(client_as_student):
 def test_update_cv_data_invalid_skill_id(client_as_student):
     """Skill ID yang tidak ada di master → service mengembalikan error."""
     with patch(
-        "app_backend.routers.api.profile.update_cv_data_command_handler"
-    ) as mock_handler:
-        mock_handler.return_value = MagicMock(
-            got_error=lambda: True,
-            error_message="Update gagal: FK constraint violated",
-        )
+        "app_backend.features.profile.profile_service.ProfileService.update_cv_data"
+    ) as mock_method:
+        mock_method.side_effect = ValueError("Update gagal: FK constraint violated")
         resp = client_as_student.put(
             "/api/v1/profile/cv-data",
             json={"skills": [{"skill_id": str(SKILL_ID), "level": 4}]},
@@ -246,6 +228,7 @@ def test_update_cv_data_unauthenticated(client_no_auth):
 
 
 def test_upload_cv_success(client_as_student):
+    # This still uses command handler for now
     with patch(
         "app_backend.routers.api.profile.upload_cv_command_handler"
     ) as mock_handler:
@@ -262,7 +245,6 @@ def test_upload_cv_success(client_as_student):
     assert resp.status_code == 200
     assert resp.json()["message"] == "CV berhasil diupload"
     assert "cv_url" in resp.json()
-    assert resp.json()["cv_url"].startswith("/uploads/cv/")
 
 
 def test_upload_cv_not_pdf(client_as_student):

@@ -11,25 +11,22 @@ LOG_ID = uuid.UUID("44444444-4444-4444-4444-444444444444")
 
 def test_get_my_placements(client_as_student):
     with patch(
-        "app_backend.routers.api.placement.get_my_placements_command_handler"
-    ) as mock_handler:
+        "app_backend.features.placement.placement_service.PlacementService.get_my_placements"
+    ) as mock_method:
         import datetime
 
         from app_backend.schemas.placement import PlacementResponse
 
-        mock_handler.return_value = MagicMock(
-            got_error=lambda: False,
-            placements=[
-                PlacementResponse(
-                    id=PLACEMENT_ID,
-                    student_id=STUDENT_USER_ID,
-                    company_id=uuid.uuid4(),
-                    start_date=datetime.date(2026, 1, 1),
-                    end_date=datetime.date(2026, 6, 30),
-                    status="ACTIVE",
-                )
-            ],
-        )
+        mock_method.return_value = [
+            PlacementResponse(
+                id=PLACEMENT_ID,
+                student_id=STUDENT_USER_ID,
+                company_id=uuid.uuid4(),
+                start_date=datetime.date(2026, 1, 1),
+                end_date=datetime.date(2026, 6, 30),
+                status="ACTIVE",
+            )
+        ]
         resp = client_as_student.get("/api/v1/placements/me")
     assert resp.status_code == 200
     assert len(resp.json()) == 1
@@ -38,21 +35,18 @@ def test_get_my_placements(client_as_student):
 
 def test_create_activity_log_success(client_as_student):
     with patch(
-        "app_backend.routers.api.placement.create_activity_log_command_handler"
-    ) as mock_handler:
+        "app_backend.features.placement.placement_service.PlacementService.create_activity_log"
+    ) as mock_method:
         import datetime
 
         from app_backend.schemas.placement import ActivityLogResponse
 
-        mock_handler.return_value = MagicMock(
-            got_error=lambda: False,
-            log=ActivityLogResponse(
-                id=LOG_ID,
-                placement_id=PLACEMENT_ID,
-                activity_date=datetime.date(2026, 2, 1),
-                duration_hours=8.0,
-                description_raw="Worked on feature X",
-            ),
+        mock_method.return_value = ActivityLogResponse(
+            id=LOG_ID,
+            placement_id=PLACEMENT_ID,
+            activity_date=datetime.date(2026, 2, 1),
+            duration_hours=8.0,
+            description_raw="Worked on feature X",
         )
         resp = client_as_student.post(
             f"/api/v1/placements/{PLACEMENT_ID}/logs",
@@ -69,12 +63,10 @@ def test_create_activity_log_success(client_as_student):
 
 def test_create_activity_log_out_of_bounds(client_as_student):
     with patch(
-        "app_backend.routers.api.placement.create_activity_log_command_handler"
-    ) as mock_handler:
-        mock_handler.return_value = MagicMock(
-            got_error=lambda: True,
-            error_message="log_date harus dalam rentang periode magang",
-            error_code=400,
+        "app_backend.features.placement.placement_service.PlacementService.create_activity_log"
+    ) as mock_method:
+        mock_method.side_effect = ValueError(
+            "log_date harus dalam rentang periode magang"
         )
         resp = client_as_student.post(
             f"/api/v1/placements/{PLACEMENT_ID}/logs",
@@ -91,13 +83,9 @@ def test_create_activity_log_out_of_bounds(client_as_student):
 
 def test_create_activity_log_duplicate(client_as_student):
     with patch(
-        "app_backend.routers.api.placement.create_activity_log_command_handler"
-    ) as mock_handler:
-        mock_handler.return_value = MagicMock(
-            got_error=lambda: True,
-            error_message="Log untuk tanggal ini sudah ada",
-            error_code=409,
-        )
+        "app_backend.features.placement.placement_service.PlacementService.create_activity_log"
+    ) as mock_method:
+        mock_method.side_effect = ValueError("Log untuk tanggal ini sudah ada")
         resp = client_as_student.post(
             f"/api/v1/placements/{PLACEMENT_ID}/logs",
             json={
@@ -107,7 +95,7 @@ def test_create_activity_log_duplicate(client_as_student):
                 "description_raw": "Duplicate",
             },
         )
-    assert resp.status_code == 409
+    assert resp.status_code == 400
     assert "sudah ada" in resp.json()["detail"]
 
 

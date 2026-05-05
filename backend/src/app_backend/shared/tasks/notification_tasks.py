@@ -36,14 +36,20 @@ def send_email_notification(
 
     try:
         from sqlalchemy.orm import joinedload
-        notif = session.query(NotificationQueue).options(joinedload(NotificationQueue.user)).filter_by(id=notification_id).first()
+
+        notif = (
+            session.query(NotificationQueue)
+            .options(joinedload(NotificationQueue.user))
+            .filter_by(id=notification_id)
+            .first()
+        )
         if not notif or notif.status != "PROCESSING":
             return {"status": "skipped", "reason": "Not found or not processing"}
-            
+
         user_email = notif.user.email if notif.user else None
         subject = notif.title
         message = notif.message
-        
+
         if not user_email:
             notif.status = "FAILED"
             session.commit()
@@ -52,12 +58,14 @@ def send_email_notification(
         # Fetch User Name
         from app_backend.models.profiles_admin import ProfilesAdmin
         from app_backend.models.profiles_student import ProfilesStudent
-        
+
         user_name = "Pengguna LARAS"
         user = notif.user
         if user:
             if user.role == "STUDENT":
-                student = session.query(ProfilesStudent).filter_by(user_id=user.id).first()
+                student = (
+                    session.query(ProfilesStudent).filter_by(user_id=user.id).first()
+                )
                 if student:
                     user_name = student.full_name
             elif user.role == "ADMIN":
@@ -66,54 +74,61 @@ def send_email_notification(
                     user_name = admin.full_name
 
         # Load Template
-        template_path = os.path.join(os.path.dirname(__file__), "..", "templates", "email_base.html")
-        logo_path = os.path.join(os.path.dirname(__file__), "..", "templates", "logo.png")
-        
+        template_path = os.path.join(
+            os.path.dirname(__file__), "..", "templates", "email_base.html"
+        )
+        logo_path = os.path.join(
+            os.path.dirname(__file__), "..", "templates", "logo.png"
+        )
+
         if os.path.exists(template_path):
             with open(template_path, "r") as f:
                 html_content = f.read()
         else:
             # Fallback if template missing
-            html_content = f"<html><body><h2>{subject}</h2><p>{message}</p></body></html>"
+            html_content = (
+                f"<html><body><h2>{subject}</h2><p>{message}</p></body></html>"
+            )
 
         # Replace Placeholders
         now = datetime.now()
         html_content = html_content.replace("{{ user_name }}", user_name)
         html_content = html_content.replace("{{ title }}", subject)
-        html_content = html_content.replace("{{ message }}", message.replace("\n", "<br>"))
+        html_content = html_content.replace(
+            "{{ message }}", message.replace("\n", "<br>")
+        )
         html_content = html_content.replace("{{ year }}", str(now.year))
-        html_content = html_content.replace("{{ timestamp }}", now.strftime("%d %b %Y, %H:%M"))
+        html_content = html_content.replace(
+            "{{ timestamp }}", now.strftime("%d %b %Y, %H:%M")
+        )
 
         msg = email.message.EmailMessage()
         msg["Subject"] = subject
         msg["From"] = f"{settings.smtp_from_name} <{settings.smtp_from_email}>"
         msg["To"] = user_email
-        
-        msg.set_content(message) # Plain text version
-        
+
+        msg.set_content(message)  # Plain text version
+
         # Prepare HTML part
         html_part = email.message.EmailMessage()
-        html_part.set_content(html_content, subtype='html')
-        
+        html_part.set_content(html_content, subtype="html")
+
         # Add inline logo to HTML part if exists
         if os.path.exists(logo_path):
             with open(logo_path, "rb") as f:
                 logo_data = f.read()
                 # add_related transforms the part into multipart/related
                 html_part.add_related(
-                    logo_data, 
-                    maintype='image', 
-                    subtype='png', 
-                    cid='logo'
+                    logo_data, maintype="image", subtype="png", cid="logo"
                 )
-        
+
         # Add the HTML (with its related images) as an alternative to the plain text
         if html_part.is_multipart():
             # If it became multipart/related, we add it as a whole part
             msg.add_alternative(html_part)
         else:
             # If no logo was added, it's just text/html
-            msg.add_alternative(html_content, subtype='html')
+            msg.add_alternative(html_content, subtype="html")
 
         # Connect and send
         if settings.smtp_port == 465:
@@ -121,11 +136,11 @@ def send_email_notification(
         else:
             server = smtplib.SMTP(settings.smtp_host, settings.smtp_port)
             server.starttls()
-            
+
         server.login(settings.smtp_user, settings.smtp_password)
         server.send_message(msg)
         server.quit()
-        
+
         notif.status = "SENT"
         notif.sent_at = datetime.now(timezone.utc)
         session.commit()
@@ -138,7 +153,7 @@ def send_email_notification(
         }
 
     except Exception as exc:
-        if 'notif' in locals() and notif:
+        if "notif" in locals() and notif:
             notif.status = "FAILED"
             session.commit()
         return {
@@ -165,7 +180,7 @@ def process_notification_queue() -> Dict:
             session.query(NotificationQueue)
             .filter(
                 NotificationQueue.status == "QUEUED",
-                NotificationQueue.scheduled_at <= datetime.now(timezone.utc)
+                NotificationQueue.scheduled_at <= datetime.now(timezone.utc),
             )
             .limit(100)  # Process max 100 at a time
             .with_for_update(skip_locked=True)
@@ -182,7 +197,7 @@ def process_notification_queue() -> Dict:
             processed += 1
 
         session.commit()
-        
+
         # Dispatch to async child tasks
         for nid in notif_ids:
             send_email_notification.delay(notification_id=nid)
@@ -244,7 +259,7 @@ def cleanup_expired_tokens() -> Dict:
             session.query(NotificationQueue)
             .filter(
                 NotificationQueue.scheduled_at < thirty_days_ago,
-                NotificationQueue.status.in_(["SENT", "DELETED"])
+                NotificationQueue.status.in_(["SENT", "DELETED"]),
             )
             .all()
         )

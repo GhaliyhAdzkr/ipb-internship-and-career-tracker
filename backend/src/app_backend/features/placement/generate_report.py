@@ -1,13 +1,13 @@
 import uuid
 from dataclasses import dataclass
 from datetime import date
+from http import HTTPStatus
 from typing import Optional
 
 from sqlalchemy.orm import Session
 
 from app_backend.models.placements import Placements
 from app_backend.shared.tasks.report_tasks import generate_final_report
-from http import HTTPStatus
 
 
 @dataclass
@@ -38,12 +38,13 @@ def generate_report_command_handler(
         .first()
     )
 
+    from datetime import datetime, timedelta, timezone
     from http import HTTPStatus
-    from datetime import datetime, timezone, timedelta
 
     if not placement:
         return GenerateReportResult(
-            error_message="Placement tidak ditemukan", error_status_code=HTTPStatus.NOT_FOUND
+            error_message="Placement tidak ditemukan",
+            error_status_code=HTTPStatus.NOT_FOUND,
         )
 
     if placement.end_date > date.today():

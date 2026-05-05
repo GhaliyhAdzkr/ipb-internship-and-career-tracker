@@ -1,6 +1,6 @@
-from http import HTTPStatus
 import uuid
 from dataclasses import dataclass
+from http import HTTPStatus
 from typing import Optional
 
 from sqlalchemy.orm import Session
@@ -46,7 +46,8 @@ def delete_activity_log_command_handler(
     )
     if not log:
         return DeleteActivityLogResult(
-            error_message="Activity log tidak ditemukan", error_code=HTTPStatus.NOT_FOUND
+            error_message="Activity log tidak ditemukan",
+            error_code=HTTPStatus.NOT_FOUND,
         )
 
     session.delete(log)

@@ -64,7 +64,7 @@ def make_student_domain() -> DomainStudent:
     return DomainStudent(
         user_id=STUDENT_USER_ID,
         nim="G1234567890",
-        full_name="Budi Santoso",
+        full_name="Windah Basudara",
         semester=5,
         department_id=DEPT_ID,
         gpa=None,

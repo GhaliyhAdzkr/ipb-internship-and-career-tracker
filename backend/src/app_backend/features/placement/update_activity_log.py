@@ -1,8 +1,8 @@
-from http import HTTPStatus
 import datetime
 import uuid
 from dataclasses import dataclass
 from decimal import Decimal
+from http import HTTPStatus
 from typing import Optional
 
 from sqlalchemy.orm import Session
@@ -53,7 +53,8 @@ def update_activity_log_command_handler(
     )
     if not log:
         return UpdateActivityLogResult(
-            error_message="Activity log tidak ditemukan", error_code=HTTPStatus.NOT_FOUND
+            error_message="Activity log tidak ditemukan",
+            error_code=HTTPStatus.NOT_FOUND,
         )
 
     new_date = command.log_date if command.log_date is not None else log.activity_date
@@ -76,7 +77,8 @@ def update_activity_log_command_handler(
         )
         if existing_log:
             return UpdateActivityLogResult(
-                error_message="Log untuk tanggal ini sudah ada", error_code=HTTPStatus.CONFLICT
+                error_message="Log untuk tanggal ini sudah ada",
+                error_code=HTTPStatus.CONFLICT,
             )
 
     # Note: Since start_time and end_time are not stored directly, if the user wants to update them,

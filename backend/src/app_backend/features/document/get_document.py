@@ -1,6 +1,6 @@
-from http import HTTPStatus
 import uuid
 from dataclasses import dataclass
+from http import HTTPStatus
 from typing import Optional
 
 from sqlalchemy.orm import Session

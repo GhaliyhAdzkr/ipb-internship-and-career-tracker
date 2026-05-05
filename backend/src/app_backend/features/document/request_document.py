@@ -1,6 +1,6 @@
-from http import HTTPStatus
 import uuid
 from dataclasses import dataclass
+from http import HTTPStatus
 from typing import Optional
 
 from sqlalchemy.orm import Session
@@ -31,7 +31,7 @@ class RequestDocumentResult:
 def request_document_command_handler(
     command: RequestDocumentCommand, session: Session
 ) -> RequestDocumentResult:
-    from datetime import datetime, timezone, timedelta
+    from datetime import datetime, timedelta, timezone
 
     # Rate Limiting: 1 request per 5 minutes per document type
     five_minutes_ago = datetime.now(timezone.utc) - timedelta(minutes=5)

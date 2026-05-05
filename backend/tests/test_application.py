@@ -20,19 +20,16 @@ APPLY_PAYLOAD = {
 
 def test_initialize_apply_success(client_as_student):
     with patch(
-        "app_backend.routers.api.application.initialize_apply_command_handler"
-    ) as mock_handler:
+        "app_backend.features.application.application_service.ApplicationService.apply"
+    ) as mock_method:
         from app_backend.schemas.application import ApplicationResponse
 
-        mock_handler.return_value = MagicMock(
-            error_message=None,
-            application=ApplicationResponse(
-                id=APPLICATION_ID,
-                vacancy_id=VACANCY_ID,
-                student_id=STUDENT_USER_ID,
-                cv_snapshot_url="https://example.com/cv.pdf",
-                status="APPLIED",
-            ),
+        mock_method.return_value = ApplicationResponse(
+            id=APPLICATION_ID,
+            vacancy_id=VACANCY_ID,
+            student_id=STUDENT_USER_ID,
+            cv_snapshot_url="https://example.com/cv.pdf",
+            status="APPLIED",
         )
         resp = client_as_student.post("/api/v1/applications", json=APPLY_PAYLOAD)
 
@@ -50,11 +47,10 @@ def test_initialize_apply_success(client_as_student):
 def test_initialize_apply_no_cv(client_as_student):
     """Student has no CV uploaded yet."""
     with patch(
-        "app_backend.routers.api.application.initialize_apply_command_handler"
-    ) as mock_handler:
-        mock_handler.return_value = MagicMock(
-            error_message="You must upload a CV before applying to a vacancy.",
-            application=None,
+        "app_backend.features.application.application_service.ApplicationService.apply"
+    ) as mock_method:
+        mock_method.side_effect = ValueError(
+            "Anda harus mengunggah CV sebelum melamar lowongan"
         )
         resp = client_as_student.post("/api/v1/applications", json=APPLY_PAYLOAD)
 
@@ -65,16 +61,13 @@ def test_initialize_apply_no_cv(client_as_student):
 def test_initialize_apply_duplicate(client_as_student):
     """Student already applied to this vacancy."""
     with patch(
-        "app_backend.routers.api.application.initialize_apply_command_handler"
-    ) as mock_handler:
-        mock_handler.return_value = MagicMock(
-            error_message="You have already applied to this vacancy.",
-            application=None,
-        )
+        "app_backend.features.application.application_service.ApplicationService.apply"
+    ) as mock_method:
+        mock_method.side_effect = ValueError("Anda sudah melamar ke lowongan ini")
         resp = client_as_student.post("/api/v1/applications", json=APPLY_PAYLOAD)
 
     assert resp.status_code == 400
-    assert "already applied" in resp.json()["detail"]
+    assert "sudah melamar" in resp.json()["detail"]
 
 
 # ─── Validation errors ────────────────────────────────────────────────────────
@@ -120,19 +113,16 @@ def test_initialize_apply_unauthenticated(client_no_auth):
 
 def test_update_application_status_success(client_as_student):
     with patch(
-        "app_backend.routers.api.application.update_application_status_command_handler"
-    ) as mock_handler:
+        "app_backend.features.application.application_service.ApplicationService.update_status"
+    ) as mock_method:
         from app_backend.schemas.application import ApplicationResponse
 
-        mock_handler.return_value = MagicMock(
-            got_error=lambda: False,
-            application=ApplicationResponse(
-                id=APPLICATION_ID,
-                vacancy_id=VACANCY_ID,
-                student_id=STUDENT_USER_ID,
-                cv_snapshot_url="https://example.com/cv.pdf",
-                status="INTERVIEW",
-            ),
+        mock_method.return_value = ApplicationResponse(
+            id=APPLICATION_ID,
+            vacancy_id=VACANCY_ID,
+            student_id=STUDENT_USER_ID,
+            cv_snapshot_url="https://example.com/cv.pdf",
+            status="INTERVIEW",
         )
         resp = client_as_student.patch(
             f"/api/v1/applications/{APPLICATION_ID}/status",
@@ -143,6 +133,7 @@ def test_update_application_status_success(client_as_student):
 
 
 def test_upload_application_proof_success(client_as_student):
+    # This still uses command handler because I haven't refactored the file upload logic yet
     with patch(
         "app_backend.routers.api.application.upload_application_proof_command_handler"
     ) as mock_handler:
@@ -161,8 +152,8 @@ def test_upload_application_proof_success(client_as_student):
 
 def test_get_application_history_success(client_as_student):
     with patch(
-        "app_backend.routers.api.application.get_application_history_command_handler"
-    ) as mock_handler:
-        mock_handler.return_value = MagicMock(got_error=lambda: False, logs=[])
+        "app_backend.features.application.application_service.ApplicationService.get_history"
+    ) as mock_method:
+        mock_method.return_value = []
         resp = client_as_student.get(f"/api/v1/applications/{APPLICATION_ID}/history")
     assert resp.status_code == 200

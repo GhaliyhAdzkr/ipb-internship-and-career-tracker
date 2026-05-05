@@ -44,7 +44,7 @@ STUDENT_PAYLOAD = {
     "email": "mahasiswa@ipb.ac.id",
     "password": "Password123",
     "nim": "G1234567890",
-    "full_name": "Budi Santoso",
+    "full_name": "Windah Basudara",
     "semester": 5,
 }
 
@@ -70,21 +70,18 @@ def test_register_student_success(client_no_auth, mock_session):
     mock_session.refresh.side_effect = lambda obj: None
 
     with patch(
-        "app_backend.routers.api.auth.register_student_command_handler"
-    ) as mock_handler:
+        "app_backend.features.auth.auth_service.AuthService.register_student"
+    ) as mock_method:
         from app_backend.schemas.user import UserResponse
 
-        mock_handler.return_value = MagicMock(
-            got_error=lambda: False,
-            user=UserResponse(
-                id=STUDENT_USER_ID,
-                email=STUDENT_PAYLOAD["email"],
-                role="STUDENT",
-                is_active=True,
-                last_login_at=NOW,
-                created_at=NOW,
-                updated_at=NOW,
-            ),
+        mock_method.return_value = UserResponse(
+            id=STUDENT_USER_ID,
+            email=STUDENT_PAYLOAD["email"],
+            role="STUDENT",
+            is_active=True,
+            last_login_at=NOW,
+            created_at=NOW,
+            updated_at=NOW,
         )
         resp = client_no_auth.post(
             "/api/v1/auth/register/student", json=STUDENT_PAYLOAD
@@ -98,12 +95,9 @@ def test_register_student_success(client_no_auth, mock_session):
 
 def test_register_student_duplicate_email(client_no_auth):
     with patch(
-        "app_backend.routers.api.auth.register_student_command_handler"
-    ) as mock_handler:
-        mock_handler.return_value = MagicMock(
-            got_error=lambda: True,
-            error_message="Email sudah terdaftar",
-        )
+        "app_backend.features.auth.auth_service.AuthService.register_student"
+    ) as mock_method:
+        mock_method.side_effect = ValueError("Email sudah terdaftar")
         resp = client_no_auth.post(
             "/api/v1/auth/register/student", json=STUDENT_PAYLOAD
         )
@@ -114,12 +108,9 @@ def test_register_student_duplicate_email(client_no_auth):
 
 def test_register_student_duplicate_nim(client_no_auth):
     with patch(
-        "app_backend.routers.api.auth.register_student_command_handler"
-    ) as mock_handler:
-        mock_handler.return_value = MagicMock(
-            got_error=lambda: True,
-            error_message="NIM sudah terdaftar",
-        )
+        "app_backend.features.auth.auth_service.AuthService.register_student"
+    ) as mock_method:
+        mock_method.side_effect = ValueError("NIM sudah terdaftar")
         resp = client_no_auth.post(
             "/api/v1/auth/register/student", json=STUDENT_PAYLOAD
         )
@@ -150,21 +141,18 @@ ADMIN_PAYLOAD = {
 
 def test_register_admin_success(client_as_admin):
     with patch(
-        "app_backend.routers.api.auth.register_admin_command_handler"
-    ) as mock_handler:
+        "app_backend.features.auth.auth_service.AuthService.register_admin"
+    ) as mock_method:
         from app_backend.schemas.user import UserResponse
 
-        mock_handler.return_value = MagicMock(
-            got_error=lambda: False,
-            user=UserResponse(
-                id=ADMIN_USER_ID,
-                email=ADMIN_PAYLOAD["email"],
-                role="ADMIN",
-                is_active=True,
-                last_login_at=NOW,
-                created_at=NOW,
-                updated_at=NOW,
-            ),
+        mock_method.return_value = UserResponse(
+            id=ADMIN_USER_ID,
+            email=ADMIN_PAYLOAD["email"],
+            role="ADMIN",
+            is_active=True,
+            last_login_at=NOW,
+            created_at=NOW,
+            updated_at=NOW,
         )
         resp = client_as_admin.post("/api/v1/auth/register/admin", json=ADMIN_PAYLOAD)
 
@@ -179,12 +167,9 @@ def test_register_admin_forbidden_for_student(client_as_student):
 
 def test_register_admin_duplicate(client_as_admin):
     with patch(
-        "app_backend.routers.api.auth.register_admin_command_handler"
-    ) as mock_handler:
-        mock_handler.return_value = MagicMock(
-            got_error=lambda: True,
-            error_message="Email sudah terdaftar",
-        )
+        "app_backend.features.auth.auth_service.AuthService.register_admin"
+    ) as mock_method:
+        mock_method.side_effect = ValueError("Email sudah terdaftar")
         resp = client_as_admin.post("/api/v1/auth/register/admin", json=ADMIN_PAYLOAD)
 
     assert resp.status_code == 409
@@ -197,26 +182,23 @@ def test_register_admin_duplicate(client_as_admin):
 
 def test_login_success(client_no_auth):
     with patch(
-        "app_backend.routers.api.auth.login_user_command_handler"
-    ) as mock_handler:
+        "app_backend.features.auth.auth_service.AuthService.login"
+    ) as mock_method:
         from app_backend.schemas.user import LoginResponse, UserResponse
 
-        mock_handler.return_value = MagicMock(
-            got_error=lambda: False,
-            data=LoginResponse(
-                access_token="access.jwt.token",
-                refresh_token="refresh.jwt.token",
-                token_type="bearer",
-                expires_in=1800,
-                user=UserResponse(
-                    id=STUDENT_USER_ID,
-                    email="student@ipb.ac.id",
-                    role="STUDENT",
-                    is_active=True,
-                    last_login_at=NOW,
-                    created_at=NOW,
-                    updated_at=NOW,
-                ),
+        mock_method.return_value = LoginResponse(
+            access_token="access.jwt.token",
+            refresh_token="refresh.jwt.token",
+            token_type="bearer",
+            expires_in=1800,
+            user=UserResponse(
+                id=STUDENT_USER_ID,
+                email="student@ipb.ac.id",
+                role="STUDENT",
+                is_active=True,
+                last_login_at=NOW,
+                created_at=NOW,
+                updated_at=NOW,
             ),
         )
         resp = client_no_auth.post(
@@ -234,12 +216,9 @@ def test_login_success(client_no_auth):
 
 def test_login_wrong_password(client_no_auth):
     with patch(
-        "app_backend.routers.api.auth.login_user_command_handler"
-    ) as mock_handler:
-        mock_handler.return_value = MagicMock(
-            got_error=lambda: True,
-            error_message="Email atau password salah",
-        )
+        "app_backend.features.auth.auth_service.AuthService.login"
+    ) as mock_method:
+        mock_method.side_effect = ValueError("Email atau password salah")
         resp = client_no_auth.post(
             "/api/v1/auth/login",
             json={"email": "student@ipb.ac.id", "password": "wrong"},
@@ -251,12 +230,9 @@ def test_login_wrong_password(client_no_auth):
 
 def test_login_inactive_account(client_no_auth):
     with patch(
-        "app_backend.routers.api.auth.login_user_command_handler"
-    ) as mock_handler:
-        mock_handler.return_value = MagicMock(
-            got_error=lambda: True,
-            error_message="Akun dinonaktifkan. Hubungi admin.",
-        )
+        "app_backend.features.auth.auth_service.AuthService.login"
+    ) as mock_method:
+        mock_method.side_effect = PermissionError("Akun dinonaktifkan. Hubungi admin.")
         resp = client_no_auth.post(
             "/api/v1/auth/login",
             json={"email": "student@ipb.ac.id", "password": "Password123"},

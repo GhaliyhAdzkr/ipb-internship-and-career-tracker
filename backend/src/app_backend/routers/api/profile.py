@@ -28,13 +28,17 @@ router = APIRouter(
 )
 
 
+from app_backend.features.profile.profile_service import ProfileService
+from app_backend.shared.dependencies_service import get_profile_service
+
+
 @router.get(
     "/me",
     response_model=StudentProfileResponse,
     summary="Profil lengkap mahasiswa yang sedang login",
 )
 async def get_my_profile(
-    session=Depends(get_session),
+    profile_service: ProfileService = Depends(get_profile_service),
     current_user: DomainUser = Depends(require_student),
 ) -> StudentProfileResponse:
     """
@@ -45,16 +49,13 @@ async def get_my_profile(
 
     Hanya dapat diakses oleh **STUDENT**.
     """
-    result = get_student_profile_command_handler(
-        command=GetStudentProfileCommand(user_id=current_user.id),
-        session=session,
-    )
-    if result.got_error():
+    profile = profile_service.get_student_profile(current_user.id)
+    if not profile:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail=result.error_message,
+            detail="Profil mahasiswa tidak ditemukan",
         )
-    return result.profile
+    return profile
 
 
 @router.put(
@@ -64,7 +65,7 @@ async def get_my_profile(
 )
 async def update_cv_data(
     cv_data: CVDataUpdate,
-    session=Depends(get_session),
+    profile_service: ProfileService = Depends(get_profile_service),
     current_user: DomainUser = Depends(require_student),
 ) -> dict:
     """
@@ -81,19 +82,19 @@ async def update_cv_data(
 
     Hanya dapat diakses oleh **STUDENT**.
     """
-    result = update_cv_data_command_handler(
-        command=UpdateCVDataCommand(
-            user_id=current_user.id,
-            payload=cv_data,
-        ),
-        session=session,
-    )
-    if result.got_error():
+    try:
+        profile_service.update_cv_data(current_user.id, cv_data)
+        return {"message": "Data CV berhasil diperbarui"}
+    except ValueError as exc:
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
-            detail=result.error_message,
+            detail=str(exc),
         )
-    return {"message": result.message}
+    except Exception as exc:
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail=f"Update gagal: {exc}",
+        )
 
 
 @router.post(

@@ -60,19 +60,19 @@ def upload_activity_log_attachment_command_handler(
 
     file = command.file
     filename = file.filename.lower()
-    
+
     # Read the first 8 bytes for magic bytes validation
     header = file.file.read(8)
     file.file.seek(0)  # Reset pointer
-    
-    is_jpeg = header.startswith(b'\xff\xd8\xff')
-    is_png = header.startswith(b'\x89PNG\r\n\x1a\n')
-    is_pdf = header.startswith(b'%PDF-')
-    
+
+    is_jpeg = header.startswith(b"\xff\xd8\xff")
+    is_png = header.startswith(b"\x89PNG\r\n\x1a\n")
+    is_pdf = header.startswith(b"%PDF-")
+
     if not (is_jpeg or is_png or is_pdf):
         return UploadActivityLogAttachmentResult(
             error_message="Format file tidak didukung atau terdeteksi sebagai malware. Hanya JPEG, PNG, dan PDF yang diizinkan.",
-            error_code=HTTPStatus.UNSUPPORTED_MEDIA_TYPE
+            error_code=HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
         )
 
     os.makedirs(UPLOAD_DIR, exist_ok=True)

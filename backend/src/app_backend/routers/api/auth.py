@@ -51,6 +51,10 @@ router = APIRouter(
 # ─────────────────────────────────────────────
 
 
+from app_backend.features.auth.auth_service import AuthService
+from app_backend.shared.dependencies_service import get_auth_service
+
+
 @router.post(
     "/register/student",
     response_model=UserResponse,
@@ -59,7 +63,7 @@ router = APIRouter(
 )
 async def register_student(
     student_data: StudentRegister,
-    session=Depends(get_session),
+    auth_service: AuthService = Depends(get_auth_service),
 ) -> UserResponse:
     """
     Daftarkan mahasiswa baru. Role otomatis **STUDENT**.
@@ -70,15 +74,15 @@ async def register_student(
     - **full_name**: Nama lengkap
     - **semester**: Semester aktif (1–14)
     """
-    result = register_student_command_handler(
-        command=RegisterStudentCommand(payload=student_data),
-        session=session,
-    )
-    if result.got_error():
+    try:
+        return auth_service.register_student(student_data)
+    except ValueError as exc:
+        raise HTTPException(status_code=HTTPStatus.CONFLICT, detail=str(exc))
+    except Exception as exc:
         raise HTTPException(
-            status_code=HTTPStatus.CONFLICT, detail=result.error_message
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail=f"Registrasi gagal: {exc}",
         )
-    return result.user
 
 
 @router.post(
@@ -89,7 +93,7 @@ async def register_student(
 )
 async def register_admin(
     admin_data: AdminRegister,
-    session=Depends(get_session),
+    auth_service: AuthService = Depends(get_auth_service),
     _: DomainUser = Depends(require_admin),  # hanya ADMIN yang bisa buat admin baru
 ) -> UserResponse:
     """
@@ -102,15 +106,15 @@ async def register_admin(
     - **unit_name**: Unit kerja (contoh: CDA IPB)
     - **nip**: NIP (opsional, harus unik jika diisi)
     """
-    result = register_admin_command_handler(
-        command=RegisterAdminCommand(payload=admin_data),
-        session=session,
-    )
-    if result.got_error():
+    try:
+        return auth_service.register_admin(admin_data)
+    except ValueError as exc:
+        raise HTTPException(status_code=HTTPStatus.CONFLICT, detail=str(exc))
+    except Exception as exc:
         raise HTTPException(
-            status_code=HTTPStatus.CONFLICT, detail=result.error_message
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail=f"Registrasi gagal: {exc}",
         )
-    return result.user
 
 
 # ─────────────────────────────────────────────
@@ -126,7 +130,7 @@ async def register_admin(
 async def login(
     credentials: UserLogin,
     request: Request,
-    session=Depends(get_session),
+    auth_service: AuthService = Depends(get_auth_service),
 ) -> LoginResponse:
     """
     Autentikasi email + password.
@@ -135,21 +139,25 @@ async def login(
     ip_address: Optional[str] = request.client.host if request.client else None
     user_agent: Optional[str] = request.headers.get("user-agent")
 
-    result = login_user_command_handler(
-        command=LoginUserCommand(
-            payload=credentials,
-            device_info=user_agent,
-            ip_address=ip_address,
-        ),
-        session=session,
-    )
-    if result.got_error():
+    try:
+        return auth_service.login(credentials, user_agent, ip_address)
+    except ValueError as exc:
         raise HTTPException(
             status_code=HTTPStatus.UNAUTHORIZED,
-            detail=result.error_message,
+            detail=str(exc),
             headers={"WWW-Authenticate": "Bearer"},
         )
-    return result.data
+    except PermissionError as exc:
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED,
+            detail=str(exc),
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail=f"Login gagal: {exc}",
+        )
 
 
 @router.post(

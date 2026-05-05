@@ -125,17 +125,21 @@ def generate_final_report(self, placement_id: str) -> Dict:
         # Update Database
         placement.auto_generated_report_url = public_url
         placement.last_report_generated_at = datetime.datetime.now()
-        
+
         # Trigger Notification
         notif = NotificationQueue(
             title="Laporan Akhir Siap",
             message=f"Laporan akhir magang Anda telah selesai di-generate. Silakan unduh dari dashboard.",
-            user_id=placement.student.user_id if hasattr(placement, 'student') and placement.student else placement.student_id,
+            user_id=(
+                placement.student.user_id
+                if hasattr(placement, "student") and placement.student
+                else placement.student_id
+            ),
             channel="ALL",
-            status="QUEUED"
+            status="QUEUED",
         )
         session.add(notif)
-        
+
         session.commit()
 
         return {"status": "completed", "url": public_url, "total_hours": total_hours}
@@ -217,9 +221,13 @@ def generate_cover_letter(self, request_id: str) -> Dict:
         notif = NotificationQueue(
             title="Surat Pengantar Selesai",
             message=f"Surat pengantar untuk keperluan '{req.purpose}' telah diterbitkan.",
-            user_id=req.student.user_id if hasattr(req, 'student') and req.student else req.student_id,
+            user_id=(
+                req.student.user_id
+                if hasattr(req, "student") and req.student
+                else req.student_id
+            ),
             channel="ALL",
-            status="QUEUED"
+            status="QUEUED",
         )
         session.add(notif)
 

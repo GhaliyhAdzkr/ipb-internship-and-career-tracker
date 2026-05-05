@@ -61,6 +61,7 @@ def auto_close_expired_vacancies() -> Dict:
     finally:
         session.close()
 
+
 @shared_task
 def notify_expiring_wishlists() -> Dict:
     """
@@ -72,8 +73,10 @@ def notify_expiring_wishlists() -> Dict:
 
     try:
         from datetime import timedelta
-        from app_backend.models.student_wishlist_vacancies import StudentWishlistVacancies
+
         from app_backend.models.notification_queue import NotificationQueue
+        from app_backend.models.student_wishlist_vacancies import \
+            StudentWishlistVacancies
 
         now = datetime.now(timezone.utc)
         target_close_date_start = now + timedelta(days=2)
@@ -97,9 +100,13 @@ def notify_expiring_wishlists() -> Dict:
             notif = NotificationQueue(
                 title="Lowongan Wishlist Segera Tutup",
                 message=f"Lowongan '{vacancy.title}' dari {vacancy.company.name} yang ada di wishlist Anda akan ditutup dalam 3 hari.",
-                user_id=wishlist.student.user_id if hasattr(wishlist, 'student') and wishlist.student else wishlist.student_id,
+                user_id=(
+                    wishlist.student.user_id
+                    if hasattr(wishlist, "student") and wishlist.student
+                    else wishlist.student_id
+                ),
                 channel="ALL",
-                status="QUEUED"
+                status="QUEUED",
             )
             session.add(notif)
             notified_count += 1

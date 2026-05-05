@@ -158,7 +158,9 @@ def test_scrape_vacancies_task():
 def test_send_email_notification_task():
     """Test email notification task."""
     from unittest.mock import MagicMock
-    from app_backend.shared.tasks.notification_tasks import send_email_notification
+
+    from app_backend.shared.tasks.notification_tasks import \
+        send_email_notification
 
     # Create mock notification
     mock_notif = MagicMock()
@@ -169,17 +171,23 @@ def test_send_email_notification_task():
     mock_notif.user.email = "test@example.com"
 
     with patch("app_backend.shared.tasks.notification_tasks.create_engine") as _:
-        with patch("app_backend.shared.tasks.notification_tasks.sessionmaker") as mock_sessionmaker:
+        with patch(
+            "app_backend.shared.tasks.notification_tasks.sessionmaker"
+        ) as mock_sessionmaker:
             mock_session = MagicMock()
-            
+
             # Setup query chains
-            mock_session.query.return_value.options.return_value.filter_by.return_value.first.return_value = mock_notif
-            
+            mock_session.query.return_value.options.return_value.filter_by.return_value.first.return_value = (
+                mock_notif
+            )
+
             mock_sessionmaker.return_value.return_value = mock_session
 
             # Mock smtplib to prevent actual email sending
             with patch("app_backend.shared.tasks.notification_tasks.smtplib.SMTP"):
-                with patch("app_backend.shared.tasks.notification_tasks.smtplib.SMTP_SSL"):
+                with patch(
+                    "app_backend.shared.tasks.notification_tasks.smtplib.SMTP_SSL"
+                ):
                     result = send_email_notification(
                         notification_id=str(uuid.uuid4()),
                     )
@@ -239,14 +247,14 @@ def test_process_notification_queue_task():
             "app_backend.shared.tasks.notification_tasks.sessionmaker"
         ) as mock_sessionmaker:
             mock_session = MagicMock()
-            
+
             # Accommodate .options(joinedload(...)).filter(...).limit(...).all()
             query_mock = mock_session.query.return_value
             options_mock = query_mock.options.return_value
             filter_mock = options_mock.filter.return_value
             limit_mock = filter_mock.limit.return_value
             limit_mock.all.return_value = [mock_notif]
-            
+
             mock_sessionmaker.return_value.return_value = mock_session
 
             result = process_notification_queue()

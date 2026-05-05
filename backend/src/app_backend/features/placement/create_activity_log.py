@@ -1,8 +1,8 @@
-from http import HTTPStatus
 import datetime
 import uuid
 from dataclasses import dataclass
 from decimal import Decimal
+from http import HTTPStatus
 from typing import Optional
 
 from sqlalchemy.orm import Session
@@ -66,7 +66,8 @@ def create_activity_log_command_handler(
     )
     if existing_log:
         return CreateActivityLogResult(
-            error_message="Log untuk tanggal ini sudah ada", error_code=HTTPStatus.CONFLICT
+            error_message="Log untuk tanggal ini sudah ada",
+            error_code=HTTPStatus.CONFLICT,
         )
 
     # Kalkulasi durasi
