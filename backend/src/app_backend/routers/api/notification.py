@@ -15,7 +15,7 @@ from app_backend.features.notification.read_notification import (
     ReadNotificationCommand, read_notification_command_handler)
 from app_backend.schemas.notification import NotificationResponse
 from app_backend.shared.database import get_session
-from app_backend.shared.dependencies import require_authenticated_user
+from app_backend.shared.dependencies import get_current_active_user
 
 router = APIRouter(prefix="/api/v1/notifications", tags=["notifications"])
 
@@ -26,7 +26,7 @@ router = APIRouter(prefix="/api/v1/notifications", tags=["notifications"])
     summary="Daftar notifikasi aktif untuk user yang sedang login",
 )
 def list_notifications(
-    current_user: DomainUser = Depends(require_authenticated_user),
+    current_user: DomainUser = Depends(get_current_active_user),
     session: Session = Depends(get_session),
 ):
     result = list_notifications_command_handler(
@@ -45,7 +45,7 @@ def list_notifications(
     summary="Return jumlah notifikasi belum dibaca",
 )
 def get_unread_count(
-    current_user: DomainUser = Depends(require_authenticated_user),
+    current_user: DomainUser = Depends(get_current_active_user),
     session: Session = Depends(get_session),
 ):
     result = get_unread_count_command_handler(
@@ -66,7 +66,7 @@ def get_unread_count(
 )
 def read_notification(
     notification_id: uuid.UUID,
-    current_user: DomainUser = Depends(require_authenticated_user),
+    current_user: DomainUser = Depends(get_current_active_user),
     session: Session = Depends(get_session),
 ):
     result = read_notification_command_handler(
@@ -92,7 +92,7 @@ def read_notification(
 )
 def delete_notification(
     notification_id: uuid.UUID,
-    current_user: DomainUser = Depends(require_authenticated_user),
+    current_user: DomainUser = Depends(get_current_active_user),
     session: Session = Depends(get_session),
 ):
     result = delete_notification_command_handler(

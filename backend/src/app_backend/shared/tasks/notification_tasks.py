@@ -25,8 +25,11 @@ def send_email_notification(
 ) -> Dict:
     """
     Task: Send email notification via SMTP (e.g. Resend).
-    Queries the notification, sends the email, and updates the status to SENT.
+    Queries the notification, sends the email using a modular template, and updates the status to SENT.
     """
+    import os
+    from datetime import datetime, timezone
+
     engine = create_engine(get_database_url())
     Session = sessionmaker(bind=engine)
     session = Session()
@@ -46,41 +49,71 @@ def send_email_notification(
             session.commit()
             return {"status": "failed", "error": "No email address"}
 
+        # Fetch User Name
+        from app_backend.models.profiles_admin import ProfilesAdmin
+        from app_backend.models.profiles_student import ProfilesStudent
+        
+        user_name = "Pengguna LARAS"
+        user = notif.user
+        if user:
+            if user.role == "STUDENT":
+                student = session.query(ProfilesStudent).filter_by(user_id=user.id).first()
+                if student:
+                    user_name = student.full_name
+            elif user.role == "ADMIN":
+                admin = session.query(ProfilesAdmin).filter_by(user_id=user.id).first()
+                if admin:
+                    user_name = admin.full_name
+
+        # Load Template
+        template_path = os.path.join(os.path.dirname(__file__), "..", "templates", "email_base.html")
+        logo_path = os.path.join(os.path.dirname(__file__), "..", "templates", "logo.png")
+        
+        if os.path.exists(template_path):
+            with open(template_path, "r") as f:
+                html_content = f.read()
+        else:
+            # Fallback if template missing
+            html_content = f"<html><body><h2>{subject}</h2><p>{message}</p></body></html>"
+
+        # Replace Placeholders
+        now = datetime.now()
+        html_content = html_content.replace("{{ user_name }}", user_name)
+        html_content = html_content.replace("{{ title }}", subject)
+        html_content = html_content.replace("{{ message }}", message.replace("\n", "<br>"))
+        html_content = html_content.replace("{{ year }}", str(now.year))
+        html_content = html_content.replace("{{ timestamp }}", now.strftime("%d %b %Y, %H:%M"))
+
         msg = email.message.EmailMessage()
         msg["Subject"] = subject
         msg["From"] = f"{settings.smtp_from_name} <{settings.smtp_from_email}>"
         msg["To"] = user_email
         
-        # Build minimal HTML email template
-        html_content = f"""
-        <html>
-            <head>
-                <style>
-                    body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
-                    .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-                    .header {{ background-color: #0c2340; color: #fff; padding: 15px; text-align: center; border-radius: 5px 5px 0 0; }}
-                    .content {{ padding: 20px; border: 1px solid #ddd; border-top: none; border-radius: 0 0 5px 5px; }}
-                    .footer {{ margin-top: 20px; font-size: 0.8em; color: #777; text-align: center; }}
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <div class="header">
-                        <h2>IPB Internship & Career Tracker</h2>
-                    </div>
-                    <div class="content">
-                        <p>Halo,</p>
-                        <p>{message}</p>
-                    </div>
-                    <div class="footer">
-                        <p>Notifikasi ini dikirim secara otomatis oleh sistem. Mohon tidak membalas email ini.</p>
-                    </div>
-                </div>
-            </body>
-        </html>
-        """
-        msg.set_content(message)
-        msg.add_alternative(html_content, subtype='html')
+        msg.set_content(message) # Plain text version
+        
+        # Prepare HTML part
+        html_part = email.message.EmailMessage()
+        html_part.set_content(html_content, subtype='html')
+        
+        # Add inline logo to HTML part if exists
+        if os.path.exists(logo_path):
+            with open(logo_path, "rb") as f:
+                logo_data = f.read()
+                # add_related transforms the part into multipart/related
+                html_part.add_related(
+                    logo_data, 
+                    maintype='image', 
+                    subtype='png', 
+                    cid='logo'
+                )
+        
+        # Add the HTML (with its related images) as an alternative to the plain text
+        if html_part.is_multipart():
+            # If it became multipart/related, we add it as a whole part
+            msg.add_alternative(html_part)
+        else:
+            # If no logo was added, it's just text/html
+            msg.add_alternative(html_content, subtype='html')
 
         # Connect and send
         if settings.smtp_port == 465:
@@ -207,11 +240,10 @@ def cleanup_expired_tokens() -> Dict:
         for token in expired_actions:
             session.delete(token)
 
-        # Cleanup old notifications
         old_notifications = (
             session.query(NotificationQueue)
             .filter(
-                NotificationQueue.created_at < thirty_days_ago,
+                NotificationQueue.scheduled_at < thirty_days_ago,
                 NotificationQueue.status.in_(["SENT", "DELETED"])
             )
             .all()
@@ -261,7 +293,7 @@ def send_bulk_notifications(user_ids: List[str], subject: str, message: str) -> 
                     title=subject,
                     message=message,
                     status="QUEUED",
-                    created_at=datetime.now(timezone.utc),
+                    scheduled_at=datetime.now(timezone.utc),
                 )
                 session.add(notif)
                 queued += 1

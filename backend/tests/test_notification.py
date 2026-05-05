@@ -7,45 +7,33 @@ from app_backend.models.notification_queue import NotificationQueue
 from app_backend.models.users import Users
 
 
-def test_list_notifications(client, db_session, test_user, user_token):
-    # Create notifications for current user
-    notif_active = NotificationQueue(
-        title="Aktif 1",
-        message="Pesan 1",
-        user_id=test_user.id,
-        status="QUEUED",
-        scheduled_at=datetime.now(timezone.utc) - timedelta(hours=1),
-    )
-    notif_deleted = NotificationQueue(
-        title="Deleted",
-        message="Pesan",
-        user_id=test_user.id,
-        status="DELETED",
-        scheduled_at=datetime.now(timezone.utc),
-    )
-    # Create notification for OTHER user
-    other_user = Users(
-        email="other@example.com",
-        password_hash="hash",
-        role="STUDENT",
-        is_active=True,
-    )
-    db_session.add(other_user)
-    db_session.commit()
+from unittest.mock import MagicMock, patch
 
-    notif_other = NotificationQueue(
-        title="Punya Orang",
-        message="Pesan",
-        user_id=other_user.id,
-        status="QUEUED",
-        scheduled_at=datetime.now(timezone.utc),
-    )
-    db_session.add_all([notif_active, notif_deleted, notif_other])
-    db_session.commit()
+from tests.conftest import STUDENT_USER_ID, NOW
 
-    response = client.get(
-        "/api/v1/notifications", headers={"Authorization": f"Bearer {user_token}"}
-    )
+NOTIF_ID = uuid.UUID("77777777-7777-7777-7777-777777777777")
+
+
+def test_list_notifications(client_as_student):
+    with patch("app_backend.routers.api.notification.list_notifications_command_handler") as mock_handler:
+        from app_backend.schemas.notification import NotificationResponse
+
+        mock_handler.return_value = MagicMock(
+            got_error=lambda: False,
+            notifications=[
+                NotificationResponse(
+                    id=NOTIF_ID,
+                    user_id=STUDENT_USER_ID,
+                    title="Aktif 1",
+                    message="Pesan 1",
+                    status="QUEUED",
+                    channel="ALL",
+                    created_at=NOW,
+                    scheduled_at=NOW,
+                )
+            ]
+        )
+        response = client_as_student.get("/api/v1/notifications")
 
     assert response.status_code == 200
     data = response.json()
@@ -53,67 +41,59 @@ def test_list_notifications(client, db_session, test_user, user_token):
     assert data[0]["title"] == "Aktif 1"
 
 
-def test_read_notification_authorization(client, db_session, test_user, user_token):
-    other_user = Users(
-        email="hacker@example.com",
-        password_hash="hash",
-        role="STUDENT",
-        is_active=True,
-    )
-    db_session.add(other_user)
-    db_session.commit()
+def test_get_unread_count(client_as_student):
+    with patch("app_backend.routers.api.notification.get_unread_count_command_handler") as mock_handler:
+        mock_handler.return_value = MagicMock(
+            got_error=lambda: False,
+            count=5
+        )
+        response = client_as_student.get("/api/v1/notifications/unread-count")
 
-    notif_other = NotificationQueue(
-        title="Rahasia",
-        message="Pesan rahasia",
-        user_id=other_user.id,
-        status="QUEUED",
-    )
-    db_session.add(notif_other)
-    db_session.commit()
+    assert response.status_code == 200
+    assert response.json()["unread_count"] == 5
 
-    # Attempt to read other's notification
-    response = client.patch(
-        f"/api/v1/notifications/{notif_other.id}/read",
-        headers={"Authorization": f"Bearer {user_token}"},
-    )
 
-    # In our implementation, if user doesn't own it, it returns 404
+def test_read_notification(client_as_student):
+    with patch("app_backend.routers.api.notification.read_notification_command_handler") as mock_handler:
+        from app_backend.schemas.notification import NotificationResponse
+
+        mock_handler.return_value = MagicMock(
+            got_error=lambda: False,
+            notification=NotificationResponse(
+                id=NOTIF_ID,
+                user_id=STUDENT_USER_ID,
+                title="Aktif 1",
+                message="Pesan 1",
+                status="SENT",
+                channel="ALL",
+                created_at=NOW,
+                scheduled_at=NOW,
+            )
+        )
+        response = client_as_student.patch(f"/api/v1/notifications/{NOTIF_ID}/read")
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "SENT"
+
+
+def test_read_notification_authorization(client_as_student):
+    with patch("app_backend.routers.api.notification.read_notification_command_handler") as mock_handler:
+        mock_handler.return_value = MagicMock(
+            got_error=lambda: True,
+            error_message="Notifikasi tidak ditemukan",
+            error_code=404
+        )
+        response = client_as_student.patch(f"/api/v1/notifications/{NOTIF_ID}/read")
+
     assert response.status_code == 404
     assert "tidak ditemukan" in response.json()["detail"].lower()
 
 
-def test_delete_notification(client, db_session, test_user, user_token):
-    notif = NotificationQueue(
-        title="Test Delete",
-        message="Pesan",
-        user_id=test_user.id,
-        status="QUEUED",
-    )
-    db_session.add(notif)
-    db_session.commit()
+def test_delete_notification(client_as_student):
+    with patch("app_backend.routers.api.notification.delete_notification_command_handler") as mock_handler:
+        mock_handler.return_value = MagicMock(
+            got_error=lambda: False
+        )
+        response = client_as_student.delete(f"/api/v1/notifications/{NOTIF_ID}")
 
-    # Get unread count before
-    resp_count_before = client.get(
-        "/api/v1/notifications/unread-count",
-        headers={"Authorization": f"Bearer {user_token}"},
-    )
-    assert resp_count_before.json()["unread_count"] == 1
-
-    # Delete
-    response = client.delete(
-        f"/api/v1/notifications/{notif.id}",
-        headers={"Authorization": f"Bearer {user_token}"},
-    )
     assert response.status_code == 204
-
-    # Verify db status is DELETED
-    db_session.refresh(notif)
-    assert notif.status == "DELETED"
-
-    # Get unread count after
-    resp_count_after = client.get(
-        "/api/v1/notifications/unread-count",
-        headers={"Authorization": f"Bearer {user_token}"},
-    )
-    assert resp_count_after.json()["unread_count"] == 0

@@ -6,11 +6,13 @@ Mendefinisikan task queue dengan Redis sebagai message broker.
 from celery import Celery
 from celery.signals import worker_init, worker_shutdown
 
+import os
+
 # Celery app instance
 celery_app = Celery(
     "app_backend",
-    broker="redis://localhost:6379/0",
-    backend="redis://localhost:6379/1",
+    broker=os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0"),
+    backend=os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/1"),
     include=[
         "app_backend.shared.tasks.ai_tasks",
         "app_backend.shared.tasks.vacancy_tasks",

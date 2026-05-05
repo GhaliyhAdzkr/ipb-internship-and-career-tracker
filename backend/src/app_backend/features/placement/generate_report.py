@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app_backend.models.placements import Placements
 from app_backend.shared.tasks.report_tasks import generate_final_report
+from http import HTTPStatus
 
 
 @dataclass
