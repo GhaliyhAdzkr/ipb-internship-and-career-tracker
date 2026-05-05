@@ -1,313 +1,187 @@
-// COMPONENTS
-import Sidebar from "../components/SideNav";
-import Navbar from "../components/NavBar";
-import Test from "../components/Test";
-
-// PACKAGE
 import { useState } from "react";
 import { DayPicker } from "react-day-picker";
-import { parse, differenceInMinutes, format, isBefore } from "date-fns";
+import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import "react-day-picker/style.css";
-
-// ICONS
-import { PiWarning } from "react-icons/pi";
-import { FaRegClock } from "react-icons/fa";
-import { PiUpload } from "react-icons/pi";
+import { PiWarning, PiClock, PiUpload } from "react-icons/pi";
 
 function Jurnal() {
-	// STATE
 	const [selectedDate, setSelectedDate] = useState(new Date());
-	const [startDate, setStartDate] = useState(new Date(2026, 3, 7));
-	const [startTimeStr, setStartTimeStr] = useState("00:00");
-	const [endTimeStr, setEndTimeStr] = useState("00:00");
+	const [startTimeStr, setStartTimeStr] = useState("08:00");
+	const [endTimeStr, setEndTimeStr] = useState("16:00");
+	
+	const journalStartDate = new Date(2026, 1, 1);
 
-	// function
-	const calculateShift = (selectedDate, startTimeStr, endTimeStr) => {
-		// 1. Merge selectedDate with the time strings
-		// parse() takes the time, the format, and the 'base date' to apply it to
-		const startDateTime = parse(startTimeStr, "HH:mm", selectedDate);
-		const endDateTime = parse(endTimeStr, "HH:mm", selectedDate);
-
-		// 2. Calculate total minutes
-		let diffMinutes = differenceInMinutes(endDateTime, startDateTime);
-
-		if (isBefore(endDateTime, startDateTime)) {
-			return {
-				error: "Waktu selesai tidak boleh lebih awal dari waktu mulai",
-			};
-		}
-
-		// 3. Handle overnight shifts (e.g., 22:00 to 02:00)
-		if (diffMinutes < 0) {
-			diffMinutes += 24 * 60;
-		}
-
-		const hours = Math.floor(diffMinutes / 60);
-		const minutes = diffMinutes % 60;
-
-		return {
-			hours,
-			minutes,
-			totalMinutes: diffMinutes,
-			label: `${hours} Jam ${minutes} Menit`,
-		};
+	const calculateWorkTime = (start, end) => {
+		if (!start || !end) return { label: "0 Jam", error: null };
+		const [sH, sM] = start.split(":").map(Number);
+		const [eH, eM] = end.split(":").map(Number);
+		const sTotal = sH * 60 + sM;
+		const eTotal = eH * 60 + eM;
+		const diff = eTotal - sTotal;
+		if (diff <= 0) return { label: "-", error: "Jam selesai harus setelah jam mulai" };
+		const hours = Math.floor(diff / 60);
+		const minutes = diff % 60;
+		return { label: `${hours} Jam ${minutes} Menit`, error: null };
 	};
-	const selectedDayWorkTime = calculateShift(
-		selectedDate,
-		startTimeStr,
-		endTimeStr,
-	);
+
+	const selectedDayWorkTime = calculateWorkTime(startTimeStr, endTimeStr);
+
 	return (
-		<>
-			<div className="flex bg-[#F8F9FF]">
-				<Sidebar></Sidebar>
-				<div className=" flex-1 flex flex-col">
-					<Navbar></Navbar>
-					{/* Header */}
-					<div className="m-5 flex flex-col font-jakarta text-black gap-5">
-						<div className="flex flex-col gap-2">
-							<div className="text-3xl font-bold">
-								Eksplorasi Karirmu
+		<div className="font-jakarta">
+			{/* Banner */}
+			<div className="mb-5 bg-sky-950 p-10 rounded-xl text-white flex justify-between items-center shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)]">
+				<div className="flex flex-col gap-2">
+					<div className="text-3xl font-bold">Jurnal Harian</div>
+					<div className="text-justify max-w-xl text-sm opacity-90">
+						Catat aktivitas internship harian Anda secara rutin untuk mempermudah penyusunan laporan akhir.
+					</div>
+				</div>
+			</div>
+
+			{/* Main */}
+			<div className="flex flex-col lg:flex-row gap-5">
+				{/* Left Side */}
+				<div className="w-full lg:w-80 flex flex-col gap-5">
+					{/* Status */}
+					<div className="p-5 font-bold bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] flex flex-col gap-1">
+						<div className="text-black text-sm">Status Pengisian</div>
+						<div className="text-black text-2xl flex justify-between items-center">
+							<div>
+								19 <strong className="text-sm text-zinc-500">/ 19 Hari</strong>
 							</div>
-							<div className="text-justify w-xl xl:w-full">
-								Temukan peluang magang dan karir profesional
-								yang telah dikurasi khusus untuk mahasiswa dan
-								alumni IPB University.
-							</div>{" "}
+							<div className="text-xs px-2 py-1 bg-sky-200 text-sky-800 rounded-full">
+								100% Selesai
+							</div>
+						</div>
+						<div className="bg-zinc-300 h-1 rounded mt-1">
+							<div className="bg-blue-400 h-1 w-full rounded"></div>
 						</div>
 					</div>
-					{/* Main */}
-					<div className="flex mx-5 gap-5">
-						{/* Left Side */}
-						<div className="text-black flex flex-col gap-5">
-							{/* Status */}
-							<div className=" self-stretch  p-5 font-jakarta font-bold bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] flex flex-col gap-1">
-								<div className=" text-black text-sm ">
-									Status Pengisian
-								</div>
-								<div className="text-black text-2xl flex justify-between items-center">
-									<div>
-										19{" "}
-										<strong className="text-sm text-zinc-500">
-											/ 19 Hari
-										</strong>
-									</div>
-									<div className="text-xs px-2 py-1 bg-sky-200 text-sky-800 rounded-full">
-										100% Selesai
-									</div>
-								</div>
-								<div className="bg-zinc-300 h-1 rounded">
-									<div className="bg-blue-400 h-1 w-full rounded"></div>
+
+					{/* Calendar */}
+					<div className="bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] overflow-hidden">
+						<DayPicker
+							locale={id}
+							mode="single"
+							selected={selectedDate}
+							onSelect={setSelectedDate}
+							disabled={[{ dayOfWeek: [0] }, { before: journalStartDate }, { after: new Date() }]}
+							classNames={{
+								month: "p-4",
+								caption: "flex justify-center py-2 relative items-center mb-4",
+								caption_label: "text-sm font-bold text-slate-900",
+								nav: "flex items-center",
+								nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 transition-opacity",
+								nav_button_previous: "absolute left-1",
+								nav_button_next: "absolute right-1",
+								table: "w-full border-collapse space-y-1",
+								head_row: "flex w-full mt-2",
+								head_cell: "text-slate-500 rounded-md w-9 font-normal text-[0.8rem]",
+								row: "flex w-full mt-2",
+								cell: "text-center text-sm p-0 relative focus-within:relative focus-within:z-20",
+								day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-slate-100 rounded-full transition-colors",
+								day_selected: "bg-sky-500 text-white hover:bg-sky-500 hover:text-white focus:bg-sky-500 focus:text-white",
+								day_today: "bg-sky-900 text-white font-bold",
+								day_outside: "text-slate-500 opacity-50",
+								day_disabled: "text-slate-500 opacity-50",
+								day_hidden: "invisible",
+							}}
+						/>
+					</div>
+				</div>
+
+				{/* Right Side */}
+				<div className="flex-1 pb-10">
+					<div className="p-5 bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] flex flex-col gap-5">
+						{/* Header Entri */}
+						<div className="text-black flex justify-between items-start border-b pb-4">
+							<div>
+								<div className="font-bold text-black text-xl">Entri Jurnal</div>
+								<div className="text-zinc-500 text-sm">
+									{selectedDate ? format(selectedDate, "EEEE, d MMMM yyyy", { locale: id }) : "Pilih Tanggal"}
 								</div>
 							</div>
-							{/* Calendar */}
-							<DayPicker
-								locale={id}
-								classNames={{
-									month: "p-5 font-jakarta bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)]",
-									button_next: "mt-10 mr-8",
-									button_previous: "mt-10",
-									day_button: "size-7 ",
-									day: "size-5 text-xs ",
-									head_cell: "size-5 font-medium text-xs",
-									month_grid:
-										"size-5 border-separate border-spacing-2",
-									caption_label: "text-xl mt-2 font-bold",
-									nav_button: "h-10 w-10",
-									week_number_header: "text-xs",
-									weekday: "text-sm ",
-									MonthsDropdown: "bg-blue-200",
-								}}
-								captionLayout="label"
-								mode="single"
-								noonSafe
-								fixedWeeks
-								numberOfMonths={1}
-								showOutsideDays
-								timeZone="Asia/Jakarta"
-								weekStartsOn={1}
-								onSelect={setSelectedDate}
-								selected={selectedDate}
-								disabled={[
-									{ dayOfWeek: [0] },
-									{ before: startDate },
-									{ after: new Date() },
-								]}
-								modifiers={{
-									afterStartDate: (date) => {
-										const isAfterStart = date > startDate;
-										const isWeekend = date.getDay() === 0;
-										const isBeforeToday = date < new Date();
-										return (
-											isAfterStart &&
-											isBeforeToday &&
-											!isWeekend
-										);
-									},
-									beforeStartDate: {
-										before: new Date(2026, 1, 1),
-									},
-								}}
-								modifiersClassNames={{
-									selected:
-										"!bg-sky-500 text-white rounded-full",
-									today: "font-bold !bg-sky-900 !text-white ring-3 ring-sky-900 ring-offset-1 ring-offset-white rounded-full underline",
-									beforeStartDate: "text-slate-500",
-									afterStartDate:
-										"bg-slate-200 text-black rounded-full",
-								}}
+							<div className="flex gap-2 items-center text-xs px-3 py-1 bg-red-100 text-red-700 rounded-full font-bold">
+								<PiWarning size={16} />
+								<div>Belum Terisi</div>
+							</div>
+						</div>
+
+						{/* Jam */}
+						<div className="space-y-4">
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+								<div className="flex flex-col gap-1.5">
+									<label className="text-sm font-bold text-black">Jam Mulai</label>
+									<div className="relative">
+										<PiClock className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
+										<input
+											type="time"
+											value={startTimeStr}
+											onChange={(e) => setStartTimeStr(e.target.value)}
+											className="pl-10 w-full py-2.5 bg-zinc-50 border border-zinc-200 rounded text-sm focus:ring-2 focus:ring-sky-500 outline-none"
+										/>
+									</div>
+								</div>
+								<div className="flex flex-col gap-1.5">
+									<label className="text-sm font-bold text-black">Jam Selesai</label>
+									<div className="relative">
+										<PiClock className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
+										<input
+											type="time"
+											value={endTimeStr}
+											onChange={(e) => setEndTimeStr(e.target.value)}
+											className="pl-10 w-full py-2.5 bg-zinc-50 border border-zinc-200 rounded text-sm focus:ring-2 focus:ring-sky-500 outline-none"
+										/>
+									</div>
+								</div>
+							</div>
+
+							{!selectedDayWorkTime.error ? (
+								<div className="text-sky-700 bg-sky-50 px-3 py-2 rounded text-sm font-medium border border-sky-100 w-fit">
+									Durasi Kerja: {selectedDayWorkTime.label}
+								</div>
+							) : (
+								<div className="text-red-700 bg-red-50 px-3 py-2 rounded text-sm font-medium border border-red-100 w-fit flex items-center gap-2">
+									<PiWarning size={16} />
+									{selectedDayWorkTime.error}
+								</div>
+							)}
+						</div>
+
+						{/* Textarea */}
+						<div className="flex flex-col gap-1.5">
+							<label className="text-sm font-bold text-black">Deskripsi Aktivitas</label>
+							<textarea
+								placeholder="Jelaskan kegiatan yang dijalankan secara detail"
+								className="w-full h-40 p-3 bg-zinc-50 border border-zinc-200 rounded text-sm focus:ring-2 focus:ring-sky-500 outline-none resize-none"
 							/>
 						</div>
-						{/* Right Side */}
-						<div className="flex-1 pb-10">
-							<div className=" self-stretch p-5 font-jakarta bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] flex flex-col gap-3">
-								{/* Header Entri */}
-								<div className="text-black flex justify-between items-start">
-									<div>
-										<div className="font-bold text-black text-xl ">
-											Entri Jurnal
-										</div>
-										<div className="text-black">
-											{selectedDate
-												? selectedDate.toLocaleDateString(
-														"id-ID",
-														{
-															weekday: "long",
-															day: "numeric",
-															month: "long",
-															year: "numeric",
-														},
-													)
-												: "None"}
-										</div>
-									</div>
-									<div className="flex gap-2 items-center text-xs px-2 py-1 bg-red-200 text-red-800 rounded-full">
-										<PiWarning className="size-4" />
-										<div>Belum Terisi</div>
-									</div>
-								</div>
-								{/* Jam */}
-								<div>
-									{/* Input */}
-									<div className="grid grid-cols-2 gap-2">
-										<div className="text-black">
-											<span class="text-sm font-bold">
-												{" "}
-												Jam Mulai{" "}
-											</span>
-											<div class="relative ">
-												{" "}
-												<input
-													type="time"
-													id="key"
-													value={startTimeStr}
-													onChange={(e) =>
-														setStartTimeStr(
-															e.target.value,
-														)
-													}
-													class="mt-0.5 pl-10 w-full rounded border-gray-300 bg-zinc-50 shadow-sm sm:text-sm "
-												/>
-												<span class="absolute inset-y-0 left-0 grid w-8 place-content-center ">
-													<FaRegClock className="text-black size-5 ml-2 mt-1" />
-												</span>
-											</div>
-										</div>
-										<div className="text-black">
-											<span class="text-sm font-bold">
-												{" "}
-												Jam Selesai{" "}
-											</span>
-											<div class="relative ">
-												<input
-													type="time"
-													id="key"
-													value={endTimeStr}
-													onChange={(e) =>
-														setEndTimeStr(
-															e.target.value,
-														)
-													}
-													class="mt-0.5 pl-10 w-full rounded border-gray-300 bg-zinc-50 shadow-sm sm:text-sm "
-												/>
 
-												<span class="absolute inset-y-0 left-0 grid w-8 place-content-center ">
-													<FaRegClock className="text-black size-5 ml-2 mt-1" />
-												</span>
-											</div>
-										</div>
-									</div>
-									{/* Output */}
-									<div>
-										{!selectedDayWorkTime?.error && (
-											<div className="text-black flex gap-2 text-sm">
-												<div>Durasi :</div>
-												<div>
-													{selectedDayWorkTime.label}
-												</div>
-											</div>
-										)}
+						{/* Upload */}
+						<div className="flex flex-col gap-1.5">
+							<label className="text-sm font-bold text-black">Lampiran/Dokumen Pendukung</label>
+							<label className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-zinc-200 bg-zinc-50 rounded-xl cursor-pointer hover:bg-zinc-100 transition-colors group">
+								<PiUpload className="text-zinc-400 group-hover:text-sky-600 transition-colors" size={40} />
+								<span className="mt-4 font-bold text-zinc-700">Klik untuk upload file</span>
+								<span className="text-xs text-zinc-500 mt-1">PDF, JPG, PNG (Max 5MB)</span>
+								<input type="file" className="hidden" />
+							</label>
+						</div>
 
-										{/* Show error if invalid */}
-										{selectedDayWorkTime?.error && (
-											<div className="flex gap-2 w-fit items-center text-xs px-2 py-1 bg-red-200 text-red-800 rounded-full">
-												<PiWarning className="size-4" />
-												{selectedDayWorkTime.error}
-											</div>
-										)}
-									</div>
-								</div>
-								{/* Textarea */}
-								<div className="text-black">
-									<span class="text-sm font-bold">
-										{" "}
-										Deskripsi Aktivitas{" "}
-									</span>
-									<textarea
-										placeholder="Jelaskan kegiatan yang dijalankan secara detail"
-										className="mt-0.5 w-full h-50 rounded border-gray-300 bg-zinc-50 shadow-sm sm:text-sm "
-									/>
-								</div>
-								{/* Upload */}
-								<div className="text-black">
-									<span class="text-sm font-bold">
-										{" "}
-										Lampiran/Dokumen Pendukung{" "}
-									</span>
-									<label
-										for="File"
-										class="flex flex-col items-center rounded border border-gray-300 bg-zinc-50 p-4 text-gray-900 shadow-sm sm:p-6"
-									>
-										<PiUpload className="size-10" />
-										<span class="mt-4 font-medium">
-											{" "}
-											Upload your file(s){" "}
-										</span>
-
-										<span class="mt-2 inline-block rounded border border-gray-200 bg-gray-50 px-3 py-1.5 text-center text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-100">
-											Browse files
-										</span>
-
-										<input
-											multiple=""
-											type="file"
-											id="File"
-											class="sr-only"
-										/>
-									</label>
-								</div>
-								{/* Buttons */}
-								<div className="flex w-full gap-5 justify-end text-sm">
-									<button className="rounded font-bold p-3 text-black">Batal</button>
-									<button className="bg-sky-950 rounded  p-3">Simpan Perubahan</button>
-								</div>
-							</div>
+						{/* Buttons */}
+						<div className="flex gap-4 justify-end mt-4 pt-4 border-t">
+							<button className="px-5 py-2.5 font-bold text-zinc-600 hover:bg-zinc-100 rounded transition-colors">
+								Batal
+							</button>
+							<button className="px-6 py-2.5 bg-sky-950 text-white font-bold rounded shadow-lg hover:bg-sky-900 transition-colors">
+								Simpan Perubahan
+							</button>
 						</div>
 					</div>
 				</div>
 			</div>
-		</>
+		</div>
 	);
 }
 

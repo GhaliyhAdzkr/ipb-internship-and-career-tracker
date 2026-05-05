@@ -1,109 +1,162 @@
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
+import { 
+  PiEnvelopeSimple, 
+  PiLockKey, 
+  PiArrowRight, 
+  PiSpinnerGap, 
+  PiEye, 
+  PiEyeSlash, 
+  PiGraduationCap 
+} from "react-icons/pi";
 
 function Login() {
 	const navigate = useNavigate();
-	return (
-		<>
-			<div class="grid min-h-screen bg-white grid-cols-1 md:grid-cols-12">
-				<div
-					class="hidden md:flex md:col-span-7 bg-cover bg-center items-center justify-center  bg-slate-100"
-					// style="background-image: url('src\pics\kabas.png')"
-				>
-					<img
-						src="https://res.cloudinary.com/dhsdxi218/image/upload/v1777055801/samples/landscapes/nature-mountains.jpg"
-						alt="Welcome"
-						class="h-full w-auto object-cover"
-					/>
-				</div>
+	const { login, isLoggingIn, loginError } = useAuth();
+	const [email, setEmail] = useState("");
+	const [password, setPassword] = useState("");
+	const [showPassword, setShowPassword] = useState(false);
 
-				<div class="flex items-center justify-center col-span-1 md:col-span-5 bg-white p-6 md:p-12">
-					<div class="w-full max-w-md">
-						<div className="w-full font-jakarta max-w-96 inline-flex flex-col justify-start items-start gap-8">
-							<div className="self-stretch flex flex-col justify-start items-start gap-2">
-								<div className="self-stretch flex flex-col justify-start items-start">
-									<div className="self-stretch justify-center text-sky-950 text-3xl font-extrabold font-['Plus_Jakarta_Sans'] leading-9">
-										Selamat Datang Kembali
-									</div>
-								</div>
-								<div className="self-stretch flex flex-col justify-start items-start">
-									<div className="self-stretch font-jakarta justify-center text-zinc-700 text-base font-normal  leading-6">
-										Silakan masuk menggunakan akun akademik
-										Anda.
-									</div>
-								</div>
-							</div>
-							<div className="self-stretch pt-2 flex flex-col justify-start items-start gap-6">
-								<div className="self-stretch flex flex-col justify-start items-start gap-2">
-									<div className="self-stretch flex flex-col justify-start items-start">
-										<div className="self-stretch justify-center text-slate-900 text-sm font-semibold  leading-5">
-											Email Akademik
-										</div>
-									</div>
-									<div className="self-stretch relative flex flex-col justify-start items-start">
-										<input
-											type="email"
-											placeholder="Email"
-											id="Email"
-											class="px-5 py-3.5 mt-0.5 bg-blue-100 text-zinc-800 w-full rounded border-gray-300 placeholder:text-zinc-500 sm:text-sm"
-										></input>
-									</div>
-								</div>
-								<div className="self-stretch flex flex-col justify-start items-start gap-2">
-									<div className="self-stretch inline-flex justify-between items-center">
-										<div className="inline-flex flex-col justify-start items-start">
-											<div className="justify-center font text-slate-900 text-sm font-semibold  leading-5">
-												Kata Sandi
-											</div>
-										</div>
-										<div className="inline-flex flex-col justify-start items-start">
-											<a onClick={() => navigate("/forgot-password")} className="cursor-default justify-center text-sky-700 text-sm font-medium  leading-5">
-												Lupa kata sandi?
-											</a>
-										</div>
-									</div>
-									<div className="self-stretch relative flex flex-col justify-start items-start">
-										<input
-											type="password"
-											placeholder="Password"
-											id="Password"
-											class="px-5 py-3.5 mt-0.5 bg-blue-100 text-zinc-800 w-full rounded border-gray-300 placeholder:text-zinc-500 sm:text-sm"
-										></input>
-									</div>
-								</div>
-								<div className="self-stretch pt-4 flex flex-col justify-start items-start">
-									<button onClick={() => navigate("/home")} className="self-stretch py-4 bg-sky-950 hover:bg-sky-900 rounded-lg shadow-[0px_8px_24px_0px_rgba(0,41,87,0.12)] inline-flex justify-center items-center gap-2">
-										<div  className="text-center justify-center text-white text-base font-bold font-['Plus_Jakarta_Sans'] leading-6">
-											Masuk
-										</div>
-									</button>
-								</div>
-							</div>
-							<div className="self-stretch pt-2 inline-flex justify-start items-center">
-								<div className="flex-1 h-px border-t border-zinc-500" />
-								<div className="px-4 inline-flex flex-col justify-start items-start">
-									<div className="justify-center text-zinc-500 text-xs font-normal  uppercase leading-4 tracking-wide">
-										ATAU
-									</div>
-								</div>
-								<div className="flex-1 h-px border-t border-zinc-500" />
-							</div>
-							<div className="self-stretch p-6 bg-indigo-50 rounded-xl flex flex-col justify-start items-center gap-2">
-								<div className="self-stretch flex flex-col justify-start items-center">
-									<div className="text-center justify-center text-zinc-700 text-sm font-normal  leading-5">
-										Belum memiliki akun LARAS?
-									</div>
-								</div>
-								<div className="inline-flex justify-center items-start">
-									<a onClick={() => navigate("/regist")} className="cursor-default text-center justify-center text-sky-950 hover:text-sky-800 text-base font-bold font-['Plus_Jakarta_Sans'] leading-6">
-										Daftar sebagai Mahasiswa/Alumni
-									</a>
-								</div>
-							</div>
-						</div>
+	const handleSubmit = (e) => {
+		e.preventDefault();
+		login({ email, password });
+	};
+
+	return (
+		<div className="grid h-screen bg-white grid-cols-1 md:grid-cols-2 font-jakarta overflow-hidden">
+			{/* Left Side: Hero Artwork Section (RESTORED) */}
+			<div className="hidden md:flex relative flex-col justify-end p-16 overflow-hidden">
+				<img
+					src="/assets/ipb-ahn.png"
+					alt="Welcome"
+					className="absolute inset-0 h-full w-full object-cover opacity-80 blur-[1px]"
+				/>
+				<div className="absolute inset-0 bg-slate-900/20" />
+				
+				<div className="relative z-10 space-y-6">
+					<div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/20 shadow-lg">
+						<PiGraduationCap size={36} className="text-white" />
+					</div>
+					<div className="space-y-4">
+						<h1 className="text-6xl font-extrabold text-white leading-[1.1] tracking-tight">
+							Membangun Masa <br /> Depan Karirmu.
+						</h1>
+						<p className="text-lg font-medium text-white/90 leading-relaxed max-w-lg">
+							Portal karir resmi IPB University. Temukan peluang magang, lowongan pekerjaan, dan kembangkan potensi profesional Anda bersama LARAS.
+						</p>
 					</div>
 				</div>
 			</div>
-		</>
+
+			{/* Right Side: Login Form (Larger Sizing Maintained) */}
+			<div className="flex items-center justify-center bg-white p-8 md:p-20 overflow-y-auto">
+				<div className="w-full max-w-md space-y-10">
+					<div className="space-y-4">
+						<div className="space-y-3">
+							<h2 className="text-4xl font-extrabold text-[#002957] tracking-tight">
+								Selamat Datang Kembali
+							</h2>
+							<p className="text-zinc-500 font-medium text-base">
+								Silakan masuk menggunakan akun akademik Anda.
+							</p>
+						</div>
+					</div>
+
+					<form onSubmit={handleSubmit} className="space-y-6">
+						<div className="space-y-5">
+							{/* Email Input */}
+							<div className="space-y-2">
+								<label className="text-sm font-bold text-[#002957] ml-1 uppercase tracking-wider">Email Akademik</label>
+								<div className="relative group">
+									<PiEnvelopeSimple className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-sky-600 transition-colors" size={20} />
+									<input
+										type="email"
+										required
+										value={email}
+										onChange={(e) => setEmail(e.target.value)}
+										placeholder="nama@apps.ipb.ac.id"
+										className="w-full pl-12 pr-4 py-3.5 bg-[#E8F1FF] border-none rounded-xl focus:ring-2 focus:ring-sky-500 outline-none transition-all font-medium text-sm text-zinc-800"
+									/>
+								</div>
+							</div>
+
+							{/* Password Input */}
+							<div className="space-y-2">
+								<div className="flex justify-between items-center px-1">
+									<label className="text-sm font-bold text-[#002957] uppercase tracking-wider">Kata Sandi</label>
+									<button 
+										type="button"
+										onClick={() => navigate("/forgot-password")}
+										className="text-sm font-bold text-sky-600 hover:underline"
+									>
+										Lupa kata sandi?
+									</button>
+								</div>
+								<div className="relative group">
+									<PiLockKey className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-sky-600 transition-colors" size={20} />
+									<input
+										type={showPassword ? "text" : "password"}
+										required
+										value={password}
+										onChange={(e) => setPassword(e.target.value)}
+										placeholder="••••••••"
+										className="w-full pl-12 pr-12 py-3.5 bg-[#E8F1FF] border-none rounded-xl focus:ring-2 focus:ring-sky-500 outline-none transition-all font-medium text-sm text-zinc-800"
+									/>
+									<button 
+										type="button"
+										onClick={() => setShowPassword(!showPassword)}
+										className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-[#002957] transition-colors"
+									>
+										{showPassword ? <PiEyeSlash size={20} /> : <PiEye size={20} />}
+									</button>
+								</div>
+							</div>
+						</div>
+
+						{loginError && (
+							<div className="p-3 bg-red-50 border border-red-100 rounded-lg text-red-600 text-xs font-bold">
+								Email atau kata sandi yang Anda masukkan salah.
+							</div>
+						)}
+
+						<button
+							type="submit"
+							disabled={isLoggingIn}
+							className="w-full py-4 bg-[#002957] hover:bg-[#001f42] text-white rounded-xl shadow-lg shadow-sky-950/20 font-bold text-base transition-all flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-70"
+						>
+							{isLoggingIn ? (
+								<PiSpinnerGap size={24} className="animate-spin" />
+							) : (
+								<>
+									<span>Masuk ke Dashboard</span>
+									<PiArrowRight size={20} weight="bold" />
+								</>
+							)}
+						</button>
+					</form>
+
+					<div className="relative py-2">
+						<div className="absolute inset-0 flex items-center">
+							<div className="w-full border-t border-zinc-100"></div>
+						</div>
+						<div className="relative flex justify-center text-[10px] uppercase font-bold tracking-[0.2em] text-zinc-300">
+							<span className="bg-white px-4">ATAU</span>
+						</div>
+					</div>
+
+					<div className="p-8 bg-[#F0F5FF] rounded-xl flex flex-col items-center gap-2">
+						<p className="text-sm text-zinc-500 font-medium">Belum memiliki akun LARAS?</p>
+						<button
+							onClick={() => navigate("/registration")}
+							className="text-[#0052CC] font-bold text-lg hover:underline"
+						>
+							Daftar Sekarang
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
 	);
 }
 
