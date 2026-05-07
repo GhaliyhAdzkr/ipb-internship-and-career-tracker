@@ -43,18 +43,16 @@ PROFILE_RESPONSE = {
     "updated_at": NOW.isoformat(),
 }
 
-
-# ════════════════════════════════════════════════════════════════════════════
 #  GET /profile/me
-# ════════════════════════════════════════════════════════════════════════════
 
 
 def test_get_student_profile_success(client_as_student):
-    with patch(
-        "app_backend.features.profile.profile_service.ProfileService.get_student_profile"
-    ) as mock_method:
-        from app_backend.schemas.profile import (DepartmentInfo, SkillInfo,
-                                                 StudentProfileResponse)
+    with patch("app_backend.features.profile.profile_service.ProfileService.get_student_profile") as mock_method:
+        from app_backend.schemas.profile import (
+            DepartmentInfo,
+            SkillInfo,
+            StudentProfileResponse,
+        )
 
         mock_method.return_value = StudentProfileResponse(
             user_id=STUDENT_USER_ID,
@@ -99,9 +97,7 @@ def test_get_student_profile_success(client_as_student):
 
 def test_get_student_profile_no_department(client_as_student):
     """Profil tanpa department masih bisa dikembalikan (department = None)."""
-    with patch(
-        "app_backend.features.profile.profile_service.ProfileService.get_student_profile"
-    ) as mock_method:
+    with patch("app_backend.features.profile.profile_service.ProfileService.get_student_profile") as mock_method:
         from app_backend.schemas.profile import StudentProfileResponse
 
         mock_method.return_value = StudentProfileResponse(
@@ -130,9 +126,7 @@ def test_get_student_profile_no_department(client_as_student):
 
 
 def test_get_student_profile_not_found(client_as_student):
-    with patch(
-        "app_backend.features.profile.profile_service.ProfileService.get_student_profile"
-    ) as mock_method:
+    with patch("app_backend.features.profile.profile_service.ProfileService.get_student_profile") as mock_method:
         mock_method.return_value = None
         resp = client_as_student.get("/api/v1/profile/me")
 
@@ -151,9 +145,7 @@ def test_get_student_profile_unauthenticated(client_no_auth):
     assert resp.status_code == 401
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  PUT /profile/cv-data
-# ════════════════════════════════════════════════════════════════════════════
 
 CV_PAYLOAD = {
     "phone_number": "+6281234567890",
@@ -166,9 +158,7 @@ CV_PAYLOAD = {
 
 
 def test_update_cv_data_success(client_as_student):
-    with patch(
-        "app_backend.features.profile.profile_service.ProfileService.update_cv_data"
-    ) as mock_method:
+    with patch("app_backend.features.profile.profile_service.ProfileService.update_cv_data") as mock_method:
         mock_method.return_value = None
         resp = client_as_student.put("/api/v1/profile/cv-data", json=CV_PAYLOAD)
 
@@ -178,22 +168,16 @@ def test_update_cv_data_success(client_as_student):
 
 def test_update_cv_data_partial(client_as_student):
     """Hanya update phone_number saja — field lain tidak dikirim."""
-    with patch(
-        "app_backend.features.profile.profile_service.ProfileService.update_cv_data"
-    ) as mock_method:
+    with patch("app_backend.features.profile.profile_service.ProfileService.update_cv_data") as mock_method:
         mock_method.return_value = None
-        resp = client_as_student.put(
-            "/api/v1/profile/cv-data", json={"phone_number": "+628987654321"}
-        )
+        resp = client_as_student.put("/api/v1/profile/cv-data", json={"phone_number": "+628987654321"})
 
     assert resp.status_code == 200
 
 
 def test_update_cv_data_invalid_skill_id(client_as_student):
     """Skill ID yang tidak ada di master → service mengembalikan error."""
-    with patch(
-        "app_backend.features.profile.profile_service.ProfileService.update_cv_data"
-    ) as mock_method:
+    with patch("app_backend.features.profile.profile_service.ProfileService.update_cv_data") as mock_method:
         mock_method.side_effect = ValueError("Update gagal: FK constraint violated")
         resp = client_as_student.put(
             "/api/v1/profile/cv-data",
@@ -222,16 +206,12 @@ def test_update_cv_data_unauthenticated(client_no_auth):
     assert resp.status_code == 401
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  POST /profile/student/cv
-# ════════════════════════════════════════════════════════════════════════════
 
 
 def test_upload_cv_success(client_as_student):
     # This still uses command handler for now
-    with patch(
-        "app_backend.routers.api.profile.upload_cv_command_handler"
-    ) as mock_handler:
+    with patch("app_backend.routers.api.profile.upload_cv_command_handler") as mock_handler:
         mock_handler.return_value = MagicMock(
             got_error=lambda: False,
             message="CV berhasil diupload",
@@ -248,9 +228,7 @@ def test_upload_cv_success(client_as_student):
 
 
 def test_upload_cv_not_pdf(client_as_student):
-    with patch(
-        "app_backend.routers.api.profile.upload_cv_command_handler"
-    ) as mock_handler:
+    with patch("app_backend.routers.api.profile.upload_cv_command_handler") as mock_handler:
         mock_handler.return_value = MagicMock(
             got_error=lambda: True,
             error_message="File harus berformat PDF",

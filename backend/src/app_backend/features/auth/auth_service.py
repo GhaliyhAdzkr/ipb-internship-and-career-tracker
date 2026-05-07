@@ -1,8 +1,6 @@
 import uuid
 from datetime import datetime, timedelta, timezone
-from typing import Optional, Protocol
-
-from sqlalchemy.orm import Session
+from typing import Protocol
 
 from app_backend.conf.settings import settings
 from app_backend.domain.user import UserRole
@@ -11,23 +9,17 @@ from app_backend.models.profiles_student import ProfilesStudent
 from app_backend.models.user_refresh_tokens import UserRefreshTokens
 from app_backend.models.users import Users
 from app_backend.repositories.admin_repository import AdminRepository
-from app_backend.repositories.refresh_token_repository import \
-    RefreshTokenRepository
+from app_backend.repositories.refresh_token_repository import RefreshTokenRepository
 from app_backend.repositories.student_repository import StudentRepository
 from app_backend.repositories.user_repository import UserRepository
-from app_backend.schemas.user import (AdminRegister, LoginResponse,
-                                      StudentRegister, UserLogin, UserResponse)
-from app_backend.shared.security import (create_access_token,
-                                         create_refresh_token, hash_password,
-                                         hash_token, verify_password)
+from app_backend.schemas.user import AdminRegister, LoginResponse, StudentRegister, UserLogin, UserResponse
+from app_backend.shared.security import create_access_token, create_refresh_token, hash_password, hash_token, verify_password
 
 
 class IAuthService(Protocol):
     def register_student(self, data: StudentRegister) -> UserResponse: ...
     def register_admin(self, data: AdminRegister) -> UserResponse: ...
-    def login(
-        self, data: UserLogin, device_info: str = None, ip_address: str = None
-    ) -> LoginResponse: ...
+    def login(self, data: UserLogin, device_info: str = None, ip_address: str = None) -> LoginResponse: ...
 
 
 class AuthService:
@@ -113,9 +105,7 @@ class AuthService:
             self.user_repo.rollback()
             raise exc
 
-    def login(
-        self, data: UserLogin, device_info: str = None, ip_address: str = None
-    ) -> LoginResponse:
+    def login(self, data: UserLogin, device_info: str = None, ip_address: str = None) -> LoginResponse:
         user = self.user_repo.get_by_email(data.email)
         if not user or not verify_password(data.password, user.password_hash):
             raise ValueError("Email atau password salah")

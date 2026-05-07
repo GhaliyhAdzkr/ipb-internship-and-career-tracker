@@ -15,13 +15,8 @@ APPLY_PAYLOAD = {
 }
 
 
-# ─── Success ──────────────────────────────────────────────────────────────────
-
-
 def test_initialize_apply_success(client_as_student):
-    with patch(
-        "app_backend.features.application.application_service.ApplicationService.apply"
-    ) as mock_method:
+    with patch("app_backend.features.application.application_service.ApplicationService.apply") as mock_method:
         from app_backend.schemas.application import ApplicationResponse
 
         mock_method.return_value = ApplicationResponse(
@@ -41,17 +36,10 @@ def test_initialize_apply_success(client_as_student):
     assert data["status"] == "APPLIED"
 
 
-# ─── Business logic errors ────────────────────────────────────────────────────
-
-
 def test_initialize_apply_no_cv(client_as_student):
     """Student has no CV uploaded yet."""
-    with patch(
-        "app_backend.features.application.application_service.ApplicationService.apply"
-    ) as mock_method:
-        mock_method.side_effect = ValueError(
-            "Anda harus mengunggah CV sebelum melamar lowongan"
-        )
+    with patch("app_backend.features.application.application_service.ApplicationService.apply") as mock_method:
+        mock_method.side_effect = ValueError("Anda harus mengunggah CV sebelum melamar lowongan")
         resp = client_as_student.post("/api/v1/applications", json=APPLY_PAYLOAD)
 
     assert resp.status_code == 400
@@ -60,17 +48,12 @@ def test_initialize_apply_no_cv(client_as_student):
 
 def test_initialize_apply_duplicate(client_as_student):
     """Student already applied to this vacancy."""
-    with patch(
-        "app_backend.features.application.application_service.ApplicationService.apply"
-    ) as mock_method:
+    with patch("app_backend.features.application.application_service.ApplicationService.apply") as mock_method:
         mock_method.side_effect = ValueError("Anda sudah melamar ke lowongan ini")
         resp = client_as_student.post("/api/v1/applications", json=APPLY_PAYLOAD)
 
     assert resp.status_code == 400
     assert "sudah melamar" in resp.json()["detail"]
-
-
-# ─── Validation errors ────────────────────────────────────────────────────────
 
 
 def test_initialize_apply_missing_vacancy_id(client_as_student):
@@ -82,21 +65,14 @@ def test_initialize_apply_missing_vacancy_id(client_as_student):
 
 def test_initialize_apply_invalid_vacancy_id(client_as_student):
     """vacancy_id is not a valid UUID."""
-    resp = client_as_student.post(
-        "/api/v1/applications", json={"vacancy_id": "not-a-uuid"}
-    )
+    resp = client_as_student.post("/api/v1/applications", json={"vacancy_id": "not-a-uuid"})
 
     assert resp.status_code == 422
 
 
-# ─── Authorization ────────────────────────────────────────────────────────────
-
-
 def test_initialize_apply_as_admin_forbidden(client_as_admin_for_student_only):
     """Admin cannot access this student-only endpoint."""
-    resp = client_as_admin_for_student_only.post(
-        "/api/v1/applications", json=APPLY_PAYLOAD
-    )
+    resp = client_as_admin_for_student_only.post("/api/v1/applications", json=APPLY_PAYLOAD)
 
     assert resp.status_code == 403
 
@@ -108,13 +84,8 @@ def test_initialize_apply_unauthenticated(client_no_auth):
     assert resp.status_code == 401
 
 
-# ─── Self-Reporting Pipeline ──────────────────────────────────────────────────
-
-
 def test_update_application_status_success(client_as_student):
-    with patch(
-        "app_backend.features.application.application_service.ApplicationService.update_status"
-    ) as mock_method:
+    with patch("app_backend.features.application.application_service.ApplicationService.update_status") as mock_method:
         from app_backend.schemas.application import ApplicationResponse
 
         mock_method.return_value = ApplicationResponse(
@@ -134,26 +105,20 @@ def test_update_application_status_success(client_as_student):
 
 def test_upload_application_proof_success(client_as_student):
     # This still uses command handler because I haven't refactored the file upload logic yet
-    with patch(
-        "app_backend.routers.api.application.upload_application_proof_command_handler"
-    ) as mock_handler:
+    with patch("app_backend.routers.api.application.upload_application_proof_command_handler") as mock_handler:
         mock_handler.return_value = MagicMock(
             got_error=lambda: False,
             message="Bukti berhasil diunggah",
             proof_url="/uploads/proofs/test.pdf",
         )
         files = {"file": ("test.pdf", b"dummy content", "application/pdf")}
-        resp = client_as_student.post(
-            f"/api/v1/applications/{APPLICATION_ID}/proof", files=files
-        )
+        resp = client_as_student.post(f"/api/v1/applications/{APPLICATION_ID}/proof", files=files)
     assert resp.status_code == 200
     assert resp.json()["proof_url"] == "/uploads/proofs/test.pdf"
 
 
 def test_get_application_history_success(client_as_student):
-    with patch(
-        "app_backend.features.application.application_service.ApplicationService.get_history"
-    ) as mock_method:
+    with patch("app_backend.features.application.application_service.ApplicationService.get_history") as mock_method:
         mock_method.return_value = []
         resp = client_as_student.get(f"/api/v1/applications/{APPLICATION_ID}/history")
     assert resp.status_code == 200

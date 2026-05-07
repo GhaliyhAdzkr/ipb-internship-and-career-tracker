@@ -9,8 +9,7 @@ import datetime
 import uuid
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import (Boolean, DateTime, Enum, String, UniqueConstraint,
-                        Uuid, text)
+from sqlalchemy import Boolean, DateTime, Enum, String, UniqueConstraint, Uuid, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app_backend.models.base import Base
@@ -30,24 +29,14 @@ class Users(Base):
         {"schema": "auth"},
     )
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        Uuid, primary_key=True, server_default=text("public.gen_random_uuid()")
-    )
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, server_default=text("public.gen_random_uuid()"))
     email: Mapped[str] = mapped_column(String(255), nullable=False)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
-    role: Mapped[str] = mapped_column(
-        Enum("ADMIN", "STUDENT", name="user_role_enum", schema="auth"), nullable=False
-    )
-    is_active: Mapped[Optional[bool]] = mapped_column(
-        Boolean, server_default=text("true")
-    )
+    role: Mapped[str] = mapped_column(Enum("ADMIN", "STUDENT", name="user_role_enum", schema="auth"), nullable=False)
+    is_active: Mapped[Optional[bool]] = mapped_column(Boolean, server_default=text("true"))
     last_login_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True))
-    created_at: Mapped[Optional[datetime.datetime]] = mapped_column(
-        DateTime(True), server_default=text("CURRENT_TIMESTAMP")
-    )
-    updated_at: Mapped[Optional[datetime.datetime]] = mapped_column(
-        DateTime(True), server_default=text("CURRENT_TIMESTAMP")
-    )
+    created_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True), server_default=text("CURRENT_TIMESTAMP"))
+    updated_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True), server_default=text("CURRENT_TIMESTAMP"))
 
     # Relationships
     refresh_tokens: Mapped[list["UserRefreshTokens"]] = relationship(
@@ -56,17 +45,9 @@ class Users(Base):
     action_tokens: Mapped[list["AuthActionTokens"]] = relationship(
         "AuthActionTokens", back_populates="user", cascade="all, delete-orphan"
     )
-    notification_queue: Mapped[list["NotificationQueue"]] = relationship(
-        "NotificationQueue", back_populates="user"
-    )
-    vacancies: Mapped[list["Vacancies"]] = relationship(
-        "Vacancies", back_populates="users"
-    )
-    application_logs: Mapped[list["ApplicationLogs"]] = relationship(
-        "ApplicationLogs", back_populates="users"
-    )
-
-    # ---------- Domain helpers ----------
+    notification_queue: Mapped[list["NotificationQueue"]] = relationship("NotificationQueue", back_populates="user")
+    vacancies: Mapped[list["Vacancies"]] = relationship("Vacancies", back_populates="users")
+    application_logs: Mapped[list["ApplicationLogs"]] = relationship("ApplicationLogs", back_populates="users")
 
     def to_domain(self):
         """Convert ke domain model User"""

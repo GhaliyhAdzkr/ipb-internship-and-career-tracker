@@ -9,8 +9,7 @@ import datetime
 import uuid
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import (DateTime, ForeignKeyConstraint, Text, UniqueConstraint,
-                        Uuid, text)
+from sqlalchemy import DateTime, ForeignKeyConstraint, Text, UniqueConstraint, Uuid, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app_backend.models.base import Base
@@ -42,20 +41,12 @@ class StudentWishlistVacancies(Base):
         ),
     )
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        Uuid, primary_key=True, server_default=text("public.gen_random_uuid()")
-    )
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, server_default=text("public.gen_random_uuid()"))
     student_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
     vacancy_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
     notes: Mapped[Optional[str]] = mapped_column("note", Text)
-    created_at: Mapped[Optional[datetime.datetime]] = mapped_column(
-        DateTime(True), server_default=text("CURRENT_TIMESTAMP")
-    )
+    created_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True), server_default=text("CURRENT_TIMESTAMP"))
 
     # Relationships
-    student: Mapped["ProfilesStudent"] = relationship(
-        "ProfilesStudent", back_populates="student_wishlist_vacancies"
-    )
-    vacancy: Mapped["Vacancies"] = relationship(
-        "Vacancies", back_populates="student_wishlist_vacancies"
-    )
+    student: Mapped["ProfilesStudent"] = relationship("ProfilesStudent", back_populates="student_wishlist_vacancies")
+    vacancy: Mapped["Vacancies"] = relationship("Vacancies", back_populates="student_wishlist_vacancies")

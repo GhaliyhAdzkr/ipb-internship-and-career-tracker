@@ -43,11 +43,7 @@ def update_cv_data_command_handler(
     3. Jika `skills` disediakan: full replace (hapus semua, insert baru).
        Skill ID harus valid – FK constraint di DB akan menolak jika tidak ada.
     """
-    profile = (
-        session.query(ProfilesStudent)
-        .filter(ProfilesStudent.user_id == command.user_id)
-        .first()
-    )
+    profile = session.query(ProfilesStudent).filter(ProfilesStudent.user_id == command.user_id).first()
     if not profile:
         return UpdateCVDataResult(error_message="Profil mahasiswa tidak ditemukan")
 
@@ -63,9 +59,7 @@ def update_cv_data_command_handler(
 
         if payload.skills is not None:
             # Full replace – hapus semua skill lama, insert baru
-            session.query(StudentSkills).filter(
-                StudentSkills.student_id == command.user_id
-            ).delete(synchronize_session="fetch")
+            session.query(StudentSkills).filter(StudentSkills.student_id == command.user_id).delete(synchronize_session="fetch")
 
             for skill_data in payload.skills:
                 session.add(

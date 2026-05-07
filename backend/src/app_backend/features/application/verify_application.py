@@ -34,27 +34,15 @@ def verify_application_command_handler(
     command: VerifyApplicationCommand,
     session: Session,
 ) -> VerifyApplicationResult:
-    application = (
-        session.query(Applications)
-        .filter_by(id=command.application_id, status="ACCEPTED")
-        .first()
-    )
+    application = session.query(Applications).filter_by(id=command.application_id, status="ACCEPTED").first()
 
     if not application:
-        return VerifyApplicationResult(
-            error_message="Lamaran tidak ditemukan atau belum ACCEPTED"
-        )
+        return VerifyApplicationResult(error_message="Lamaran tidak ditemukan atau belum ACCEPTED")
 
     # Ensure no placement exists
-    existing = (
-        session.query(Placements)
-        .filter_by(application_id=command.application_id)
-        .first()
-    )
+    existing = session.query(Placements).filter_by(application_id=command.application_id).first()
     if existing:
-        return VerifyApplicationResult(
-            error_message="Penempatan sudah aktif untuk lamaran ini"
-        )
+        return VerifyApplicationResult(error_message="Penempatan sudah aktif untuk lamaran ini")
 
     vacancy = session.query(Vacancies).filter_by(id=application.vacancy_id).first()
     if not vacancy:

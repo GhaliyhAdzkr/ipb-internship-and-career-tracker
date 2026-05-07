@@ -33,10 +33,9 @@ def get_application_stats_command_handler(
     command: GetApplicationStatsCommand,
     session: Session,
 ) -> GetApplicationStatsResult:
-    # --- Total lamaran ---
+
     total = session.query(func.count(Applications.id)).scalar() or 0
 
-    # --- Breakdown per status ---
     rows = (
         session.query(
             Applications.status,
@@ -54,7 +53,6 @@ def get_application_stats_command_handler(
         for row in rows
     ]
 
-    # --- Conversion rate: ACCEPTED / total ---
     accepted = next((s.total for s in status_breakdown if s.status == "ACCEPTED"), 0)
     conversion_rate = round((accepted / total * 100), 2) if total > 0 else 0.0
 

@@ -26,12 +26,11 @@ coverage:
 	poetry run pytest --cov=app_backend --cov-report term-missing --cov-report html -vv
 
 lint:
-	poetry run flake8 src/ tests/
+	poetry run ruff check --fix .
 	poetry run bandit -r src/ -ll
 
 format:
-	poetry run black src/ tests/
-	poetry run isort src/ tests/
+	poetry run ruff format
 
 install:
 	poetry install

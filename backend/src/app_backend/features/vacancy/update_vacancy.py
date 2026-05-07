@@ -58,18 +58,14 @@ def update_vacancy_command_handler(
     close_date = payload.close_date or vacancy.close_date
 
     if close_date <= open_date:
-        return UpdateVacancyResult(
-            error_message="Tanggal tutup harus setelah tanggal buka"
-        )
+        return UpdateVacancyResult(error_message="Tanggal tutup harus setelah tanggal buka")
 
     # Validasi compensation range
     comp_min = payload.compensation_min or vacancy.compensation_min
     comp_max = payload.compensation_max or vacancy.compensation_max
 
     if comp_min and comp_max and comp_min > comp_max:
-        return UpdateVacancyResult(
-            error_message="Kompensasi minimum tidak boleh lebih besar dari maksimum"
-        )
+        return UpdateVacancyResult(error_message="Kompensasi minimum tidak boleh lebih besar dari maksimum")
 
     try:
         now = datetime.now(timezone.utc)
@@ -107,20 +103,14 @@ def update_vacancy_command_handler(
         # Update skills if provided
         if payload.skills is not None:
             # Delete existing skills
-            session.query(VacancySkills).filter(
-                VacancySkills.vacancy_id == vacancy.id
-            ).delete()
+            session.query(VacancySkills).filter(VacancySkills.vacancy_id == vacancy.id).delete()
 
             # Add new skills
             for skill_item in payload.skills:
                 vacancy_skill = VacancySkills(
                     vacancy_id=vacancy.id,
                     skill_id=skill_item.skill_id,
-                    is_mandatory=(
-                        skill_item.is_mandatory
-                        if skill_item.is_mandatory is not None
-                        else True
-                    ),
+                    is_mandatory=(skill_item.is_mandatory if skill_item.is_mandatory is not None else True),
                 )
                 session.add(vacancy_skill)
 

@@ -8,9 +8,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
-# ─────────────────────────────────────────────
 # Nested Schemas
-# ─────────────────────────────────────────────
 
 
 class VacancySummary(BaseModel):
@@ -39,23 +37,17 @@ class WishlistSummary(VacancySummary):
     close_date: datetime
 
 
-# ─────────────────────────────────────────────
 # Create Schemas
-# ─────────────────────────────────────────────
 
 
 class WishlistCreate(BaseModel):
     """Payload untuk menyimpan vacancy ke wishlist"""
 
     vacancy_id: UUID
-    notes: Optional[str] = Field(
-        None, max_length=500, description="Catatan personal untuk lowongan ini"
-    )
+    notes: Optional[str] = Field(None, max_length=500, description="Catatan personal untuk lowongan ini")
 
 
-# ─────────────────────────────────────────────
 # Update Schemas
-# ─────────────────────────────────────────────
 
 
 class WishlistUpdate(BaseModel):
@@ -64,9 +56,7 @@ class WishlistUpdate(BaseModel):
     notes: Optional[str] = Field(None, max_length=500)
 
 
-# ─────────────────────────────────────────────
 # Response Schemas
-# ─────────────────────────────────────────────
 
 
 class WishlistResponse(BaseModel):

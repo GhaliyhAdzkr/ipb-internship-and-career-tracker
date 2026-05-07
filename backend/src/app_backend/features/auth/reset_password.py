@@ -14,10 +14,7 @@ from app_backend.conf.settings import settings
 from app_backend.models.auth_action_tokens import AuthActionTokens
 from app_backend.models.users import Users
 from app_backend.schemas.user import RequestResetPassword, ResetPassword
-from app_backend.shared.security import (generate_secure_token, hash_password,
-                                         hash_token)
-
-# ============ Request Reset Password ============
+from app_backend.shared.security import generate_secure_token, hash_password, hash_token
 
 
 @dataclass
@@ -51,9 +48,7 @@ def request_reset_password_command_handler(
        action_type=RESET_PASSWORD dan simpan hash ke DB.
     3. Kirim raw token via email (stub: kembalikan di response untuk dev).
     """
-    GENERIC_MSG = (
-        "Jika email terdaftar, instruksi reset password akan dikirim ke email Anda"
-    )
+    GENERIC_MSG = "Jika email terdaftar, instruksi reset password akan dikirim ke email Anda"
 
     user = session.query(Users).filter(Users.email == command.payload.email).first()
 
@@ -61,9 +56,7 @@ def request_reset_password_command_handler(
         return RequestResetPasswordResult(message=GENERIC_MSG)
 
     raw_token = generate_secure_token()
-    expires_at = datetime.now(timezone.utc) + timedelta(
-        minutes=settings.reset_password_token_expire_minutes
-    )
+    expires_at = datetime.now(timezone.utc) + timedelta(minutes=settings.reset_password_token_expire_minutes)
 
     action_token = AuthActionTokens(
         user_id=user.id,
@@ -81,9 +74,6 @@ def request_reset_password_command_handler(
         token=raw_token,  # DEV ONLY
         message=GENERIC_MSG,
     )
-
-
-# ============ Reset Password ============
 
 
 @dataclass
@@ -126,9 +116,7 @@ def reset_password_command_handler(
 
     user = session.query(Users).filter(Users.id == action_token.user_id).first()
     if not user or not user.is_active:
-        return ResetPasswordResult(
-            error_message="User tidak ditemukan atau tidak aktif"
-        )
+        return ResetPasswordResult(error_message="User tidak ditemukan atau tidak aktif")
 
     try:
         user.password_hash = hash_password(command.payload.new_password)

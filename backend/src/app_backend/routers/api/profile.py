@@ -13,23 +13,17 @@ from http import HTTPStatus
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
 from app_backend.domain.user import User as DomainUser
-from app_backend.features.profile import (GetStudentProfileCommand,
-                                          UpdateCVDataCommand, UploadCVCommand,
-                                          get_student_profile_command_handler,
-                                          update_cv_data_command_handler,
-                                          upload_cv_command_handler)
+from app_backend.features.profile import UploadCVCommand, upload_cv_command_handler
+from app_backend.features.profile.profile_service import ProfileService
 from app_backend.schemas.profile import CVDataUpdate, StudentProfileResponse
+from app_backend.shared.auth_dependencies import require_student
 from app_backend.shared.database import get_session
-from app_backend.shared.dependencies import require_student
+from app_backend.shared.dependencies import get_profile_service
 
 router = APIRouter(
     prefix="/api/v1/profile",
     tags=["profile"],
 )
-
-
-from app_backend.features.profile.profile_service import ProfileService
-from app_backend.shared.dependencies_service import get_profile_service
 
 
 @router.get(

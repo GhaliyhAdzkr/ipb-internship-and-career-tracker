@@ -1,25 +1,20 @@
 import uuid
 from datetime import datetime, timezone
-from typing import List, Optional, Protocol
+from typing import List, Protocol
 
 from app_backend.models.master_departments import MasterDepartments
-from app_backend.models.master_external_companies import \
-    MasterExternalCompanies
+from app_backend.models.master_external_companies import MasterExternalCompanies
 from app_backend.models.master_skills import MasterSkills
 from app_backend.repositories.company_repository import CompanyRepository
 from app_backend.repositories.department_repository import DepartmentRepository
 from app_backend.repositories.skill_repository import SkillRepository
-from app_backend.schemas.admin import (CompanyCreate, CompanyUpdate,
-                                       DepartmentCreate, DepartmentUpdate,
-                                       SkillCreate, SkillUpdate)
+from app_backend.schemas.admin import CompanyCreate, CompanyUpdate, DepartmentCreate, DepartmentUpdate, SkillCreate, SkillUpdate
 
 
 class IMasterDataService(Protocol):
     def list_departments(self) -> List[MasterDepartments]: ...
     def create_department(self, data: DepartmentCreate) -> MasterDepartments: ...
-    def update_department(
-        self, dept_id: uuid.UUID, data: DepartmentUpdate
-    ) -> MasterDepartments: ...
+    def update_department(self, dept_id: uuid.UUID, data: DepartmentUpdate) -> MasterDepartments: ...
     def delete_department(self, dept_id: uuid.UUID) -> None: ...
 
     def list_skills(self) -> List[MasterSkills]: ...
@@ -29,9 +24,7 @@ class IMasterDataService(Protocol):
 
     def list_companies(self) -> List[MasterExternalCompanies]: ...
     def create_company(self, data: CompanyCreate) -> MasterExternalCompanies: ...
-    def update_company(
-        self, company_id: uuid.UUID, data: CompanyUpdate
-    ) -> MasterExternalCompanies: ...
+    def update_company(self, company_id: uuid.UUID, data: CompanyUpdate) -> MasterExternalCompanies: ...
     def delete_company(self, company_id: uuid.UUID) -> None: ...
 
 
@@ -46,23 +39,16 @@ class MasterDataService:
         self.skill_repo = skill_repo
         self.company_repo = company_repo
 
-    # --- Departments ---
-    def list_departments(
-        self, skip: int = 0, limit: int = 100
-    ) -> List[MasterDepartments]:
+    def list_departments(self, skip: int = 0, limit: int = 100) -> List[MasterDepartments]:
         return self.department_repo.get_all(skip, limit)
 
     def create_department(self, data: DepartmentCreate) -> MasterDepartments:
-        department = MasterDepartments(
-            id=uuid.uuid4(), code=data.code, name=data.name, faculty=data.faculty
-        )
+        department = MasterDepartments(id=uuid.uuid4(), code=data.code, name=data.name, faculty=data.faculty)
         self.department_repo.create(department)
         self.department_repo.save_changes()
         return department
 
-    def update_department(
-        self, dept_id: uuid.UUID, data: DepartmentUpdate
-    ) -> MasterDepartments:
+    def update_department(self, dept_id: uuid.UUID, data: DepartmentUpdate) -> MasterDepartments:
         dept = self.department_repo.get_by_id(dept_id)
         if not dept:
             raise ValueError("Prodi tidak ditemukan")
@@ -82,7 +68,6 @@ class MasterDataService:
         self.department_repo.delete(dept)
         self.department_repo.save_changes()
 
-    # --- Skills ---
     def list_skills(self, skip: int = 0, limit: int = 100) -> List[MasterSkills]:
         return self.skill_repo.get_all(skip, limit)
 
@@ -110,10 +95,7 @@ class MasterDataService:
         self.skill_repo.delete(skill)
         self.skill_repo.save_changes()
 
-    # --- Companies ---
-    def list_companies(
-        self, skip: int = 0, limit: int = 100
-    ) -> List[MasterExternalCompanies]:
+    def list_companies(self, skip: int = 0, limit: int = 100) -> List[MasterExternalCompanies]:
         return self.company_repo.get_all(skip, limit)
 
     def create_company(self, data: CompanyCreate) -> MasterExternalCompanies:
@@ -129,9 +111,7 @@ class MasterDataService:
         self.company_repo.save_changes()
         return company
 
-    def update_company(
-        self, company_id: uuid.UUID, data: CompanyUpdate
-    ) -> MasterExternalCompanies:
+    def update_company(self, company_id: uuid.UUID, data: CompanyUpdate) -> MasterExternalCompanies:
         company = self.company_repo.get_by_id(company_id)
         if not company:
             raise ValueError("Perusahaan tidak ditemukan")

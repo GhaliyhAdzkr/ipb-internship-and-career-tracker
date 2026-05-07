@@ -19,40 +19,36 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 
 from app_backend.conf.settings import settings
 from app_backend.domain.user import User as DomainUser
-from app_backend.features.auth.login_user import (LoginUserCommand,
-                                                  login_user_command_handler)
-from app_backend.features.auth.logout import (LogoutCommand,
-                                              logout_command_handler)
-from app_backend.features.auth.refresh_token import (
-    RefreshTokenCommand, refresh_token_command_handler)
-from app_backend.features.auth.register_admin import (
-    RegisterAdminCommand, register_admin_command_handler)
-from app_backend.features.auth.register_student import (
-    RegisterStudentCommand, register_student_command_handler)
+from app_backend.features.auth.auth_service import AuthService
+from app_backend.features.auth.logout import LogoutCommand, logout_command_handler
+from app_backend.features.auth.refresh_token import RefreshTokenCommand, refresh_token_command_handler
 from app_backend.features.auth.reset_password import (
-    RequestResetPasswordCommand, ResetPasswordCommand,
-    request_reset_password_command_handler, reset_password_command_handler)
-from app_backend.schemas.user import (AdminRegister, LoginResponse,
-                                      LogoutRequest, RefreshTokenRequest,
-                                      RequestResetPassword, ResetPassword,
-                                      StudentRegister, UserLogin, UserResponse)
+    RequestResetPasswordCommand,
+    ResetPasswordCommand,
+    request_reset_password_command_handler,
+    reset_password_command_handler,
+)
+from app_backend.schemas.user import (
+    AdminRegister,
+    LoginResponse,
+    LogoutRequest,
+    RefreshTokenRequest,
+    RequestResetPassword,
+    ResetPassword,
+    StudentRegister,
+    UserLogin,
+    UserResponse,
+)
+from app_backend.shared.auth_dependencies import get_current_active_user, require_admin
 from app_backend.shared.database import get_session
-from app_backend.shared.dependencies import (get_current_active_user,
-                                             require_admin)
+from app_backend.shared.dependencies import get_auth_service
 
 router = APIRouter(
     prefix="/api/v1/auth",
     tags=["authentication"],
 )
 
-
-# ─────────────────────────────────────────────
 # Registration
-# ─────────────────────────────────────────────
-
-
-from app_backend.features.auth.auth_service import AuthService
-from app_backend.shared.dependencies_service import get_auth_service
 
 
 @router.post(
@@ -117,9 +113,7 @@ async def register_admin(
         )
 
 
-# ─────────────────────────────────────────────
 # Session management
-# ─────────────────────────────────────────────
 
 
 @router.post(
@@ -213,9 +207,7 @@ async def logout(
     )
 
 
-# ─────────────────────────────────────────────
 # Password reset
-# ─────────────────────────────────────────────
 
 
 @router.post(
@@ -272,9 +264,7 @@ async def reset_password(
     return {"message": result.message}
 
 
-# ─────────────────────────────────────────────
 # Current user info
-# ─────────────────────────────────────────────
 
 
 @router.get(

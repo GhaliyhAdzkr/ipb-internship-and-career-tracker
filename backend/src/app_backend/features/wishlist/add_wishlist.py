@@ -12,8 +12,7 @@ from typing import Optional
 
 from sqlalchemy.orm import Session
 
-from app_backend.models.student_wishlist_vacancies import \
-    StudentWishlistVacancies
+from app_backend.models.student_wishlist_vacancies import StudentWishlistVacancies
 from app_backend.models.vacancies import Vacancies
 from app_backend.schemas.wishlist import WishlistCreate, WishlistResponse
 

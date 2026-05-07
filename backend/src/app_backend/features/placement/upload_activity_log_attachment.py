@@ -37,26 +37,14 @@ def upload_activity_log_attachment_command_handler(
     session: Session,
 ) -> UploadActivityLogAttachmentResult:
     # Validasi placement exists & belongs to student
-    placement = (
-        session.query(Placements)
-        .filter_by(id=command.placement_id, student_id=command.student_id)
-        .first()
-    )
+    placement = session.query(Placements).filter_by(id=command.placement_id, student_id=command.student_id).first()
     if not placement:
-        return UploadActivityLogAttachmentResult(
-            error_message="Placement tidak ditemukan"
-        )
+        return UploadActivityLogAttachmentResult(error_message="Placement tidak ditemukan")
 
     # Validasi log exists
-    log = (
-        session.query(ActivityLogs)
-        .filter_by(id=command.log_id, placement_id=placement.id)
-        .first()
-    )
+    log = session.query(ActivityLogs).filter_by(id=command.log_id, placement_id=placement.id).first()
     if not log:
-        return UploadActivityLogAttachmentResult(
-            error_message="Activity log tidak ditemukan"
-        )
+        return UploadActivityLogAttachmentResult(error_message="Activity log tidak ditemukan")
 
     file = command.file
     filename = file.filename.lower()
@@ -91,9 +79,7 @@ def upload_activity_log_attachment_command_handler(
                 if size > MAX_SIZE:
                     buffer.close()
                     os.remove(file_path)
-                    return UploadActivityLogAttachmentResult(
-                        error_message="Ukuran file melebihi batas maksimal 15MB"
-                    )
+                    return UploadActivityLogAttachmentResult(error_message="Ukuran file melebihi batas maksimal 15MB")
                 buffer.write(chunk)
 
         attachment_url = f"/uploads/activity_logs/{unique_filename}"
@@ -101,9 +87,7 @@ def upload_activity_log_attachment_command_handler(
         log.attachment_url = attachment_url
         session.commit()
 
-        return UploadActivityLogAttachmentResult(
-            attachment_url=attachment_url, message="Lampiran berhasil diunggah"
-        )
+        return UploadActivityLogAttachmentResult(attachment_url=attachment_url, message="Lampiran berhasil diunggah")
 
     except Exception as exc:
         session.rollback()

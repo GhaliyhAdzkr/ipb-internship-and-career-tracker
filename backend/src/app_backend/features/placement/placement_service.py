@@ -1,18 +1,14 @@
 import uuid
-from datetime import date, datetime, time, timedelta, timezone
-from typing import Any, List, Optional, Protocol
+from datetime import date, datetime, timezone
+from typing import List, Optional, Protocol
 
 from sqlalchemy import select
 
 from app_backend.models.activity_logs import ActivityLogs
 from app_backend.models.placements import Placements
-from app_backend.repositories.activity_log_repository import \
-    ActivityLogRepository
+from app_backend.repositories.activity_log_repository import ActivityLogRepository
 from app_backend.repositories.placement_repository import PlacementRepository
-from app_backend.schemas.placement import (ActivityLogCreate,
-                                           ActivityLogResponse,
-                                           ActivityLogUpdate,
-                                           PlacementResponse)
+from app_backend.schemas.placement import ActivityLogCreate, ActivityLogResponse, PlacementResponse
 
 
 class IPlacementService(Protocol):
@@ -39,9 +35,7 @@ class PlacementService:
         placements = self.placement_repo.session.scalars(query).all()
         return [PlacementResponse.model_validate(p) for p in placements]
 
-    def create_activity_log(
-        self, student_id: uuid.UUID, placement_id: uuid.UUID, data: ActivityLogCreate
-    ) -> ActivityLogResponse:
+    def create_activity_log(self, student_id: uuid.UUID, placement_id: uuid.UUID, data: ActivityLogCreate) -> ActivityLogResponse:
         placement = self.placement_repo.get_by_id(placement_id)
         if not placement:
             raise ValueError("Penempatan tidak ditemukan")
@@ -86,24 +80,16 @@ class PlacementService:
             self.activity_log_repo.rollback()
             raise exc
 
-    def list_activity_logs(
-        self, placement_id: uuid.UUID, student_id: Optional[uuid.UUID] = None
-    ) -> List[ActivityLogResponse]:
+    def list_activity_logs(self, placement_id: uuid.UUID, student_id: Optional[uuid.UUID] = None) -> List[ActivityLogResponse]:
         placement = self.placement_repo.get_by_id(placement_id)
         if not placement:
             raise ValueError("Penempatan tidak ditemukan")
         if student_id and placement.student_id != student_id:
             raise PermissionError("Bukan pemilik penempatan")
 
-        query = (
-            select(ActivityLogs)
-            .where(ActivityLogs.placement_id == placement_id)
-            .order_by(ActivityLogs.activity_date.desc())
-        )
+        query = select(ActivityLogs).where(ActivityLogs.placement_id == placement_id).order_by(ActivityLogs.activity_date.desc())
         logs = self.activity_log_repo.session.scalars(query).all()
-        return [ActivityLogResponse.model_validate(l) for l in logs]
+        return [ActivityLogResponse.model_validate(log) for log in logs]
 
     def list_admin_placements(self) -> List[PlacementResponse]:
-        return [
-            PlacementResponse.model_validate(p) for p in self.placement_repo.get_all()
-        ]
+        return [PlacementResponse.model_validate(p) for p in self.placement_repo.get_all()]

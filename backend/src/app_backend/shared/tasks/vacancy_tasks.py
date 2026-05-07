@@ -31,8 +31,8 @@ def auto_close_expired_vacancies() -> Dict:
         expired_vacancies = (
             session.query(Vacancies)
             .filter(
-                Vacancies.is_active == True,
-                Vacancies.is_auto_close == True,
+                Vacancies.is_active,
+                Vacancies.is_auto_close,
                 Vacancies.close_date < now,
             )
             .all()
@@ -75,8 +75,7 @@ def notify_expiring_wishlists() -> Dict:
         from datetime import timedelta
 
         from app_backend.models.notification_queue import NotificationQueue
-        from app_backend.models.student_wishlist_vacancies import \
-            StudentWishlistVacancies
+        from app_backend.models.student_wishlist_vacancies import StudentWishlistVacancies
 
         now = datetime.now(timezone.utc)
         target_close_date_start = now + timedelta(days=2)
@@ -87,7 +86,7 @@ def notify_expiring_wishlists() -> Dict:
             session.query(StudentWishlistVacancies)
             .join(Vacancies)
             .filter(
-                Vacancies.is_active == True,
+                Vacancies.is_active,
                 Vacancies.close_date >= target_close_date_start,
                 Vacancies.close_date < target_close_date_end,
             )
@@ -100,11 +99,7 @@ def notify_expiring_wishlists() -> Dict:
             notif = NotificationQueue(
                 title="Lowongan Wishlist Segera Tutup",
                 message=f"Lowongan '{vacancy.title}' dari {vacancy.company.name} yang ada di wishlist Anda akan ditutup dalam 3 hari.",
-                user_id=(
-                    wishlist.student.user_id
-                    if hasattr(wishlist, "student") and wishlist.student
-                    else wishlist.student_id
-                ),
+                user_id=(wishlist.student.user_id if hasattr(wishlist, "student") and wishlist.student else wishlist.student_id),
                 channel="ALL",
                 status="QUEUED",
             )
@@ -179,7 +174,7 @@ def cleanup_old_vacancies(days: int = 90) -> Dict:
         old_vacancies = (
             session.query(Vacancies)
             .filter(
-                Vacancies.is_active == False,
+                not Vacancies.is_active,
                 Vacancies.updated_at < cutoff_date,
             )
             .all()

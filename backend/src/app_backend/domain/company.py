@@ -29,10 +29,7 @@ class Company:
 
         # Validasi website URL jika ada
         if self.website_url:
-            if not (
-                self.website_url.startswith("http://")
-                or self.website_url.startswith("https://")
-            ):
+            if not (self.website_url.startswith("http://") or self.website_url.startswith("https://")):
                 raise ValueError("URL website harus valid (http:// atau https://)")
 
         # Set timestamp jika belum ada
@@ -66,9 +63,7 @@ class Company:
             self.industry = industry
 
         if website_url is not None:
-            if not (
-                website_url.startswith("http://") or website_url.startswith("https://")
-            ):
+            if not (website_url.startswith("http://") or website_url.startswith("https://")):
                 raise ValueError("URL website harus valid (http:// atau https://)")
             self.website_url = website_url
 

@@ -16,13 +16,14 @@ class RefreshTokenRepository(BaseRepository[UserRefreshTokens]):
         token_hash = hash_token(token)
         query = select(UserRefreshTokens).where(
             UserRefreshTokens.token_hash == token_hash,
-            UserRefreshTokens.is_revoked == False,
+            not UserRefreshTokens.is_revoked,
         )
         return self.session.scalars(query).first()
 
     def revoke_all_for_user(self, user_id) -> None:
         query = select(UserRefreshTokens).where(
-            UserRefreshTokens.user_id == user_id, UserRefreshTokens.is_revoked == False
+            UserRefreshTokens.user_id == user_id,
+            not UserRefreshTokens.is_revoked,
         )
         tokens = self.session.scalars(query).all()
         for token in tokens:

@@ -14,12 +14,14 @@ from sqlalchemy.orm import Session
 from app_backend.conf.settings import settings
 from app_backend.models.user_refresh_tokens import UserRefreshTokens
 from app_backend.models.users import Users
-from app_backend.schemas.user import (LoginResponse, RefreshTokenRequest,
-                                      UserResponse)
-from app_backend.shared.security import (create_access_token,
-                                         create_refresh_token,
-                                         decode_access_token, hash_token,
-                                         verify_token_type)
+from app_backend.schemas.user import LoginResponse, RefreshTokenRequest, UserResponse
+from app_backend.shared.security import (
+    create_access_token,
+    create_refresh_token,
+    decode_access_token,
+    hash_token,
+    verify_token_type,
+)
 
 
 class RefreshTokenException(Exception):
@@ -69,16 +71,10 @@ def refresh_token_command_handler(
 
     # 2. Cek di DB
     token_hash = hash_token(raw_token)
-    db_token = (
-        session.query(UserRefreshTokens)
-        .filter(UserRefreshTokens.token_hash == token_hash)
-        .first()
-    )
+    db_token = session.query(UserRefreshTokens).filter(UserRefreshTokens.token_hash == token_hash).first()
 
     if not db_token or not db_token.is_valid():
-        return RefreshTokenResult(
-            error_message="Refresh token tidak valid atau sudah di-revoke"
-        )
+        return RefreshTokenResult(error_message="Refresh token tidak valid atau sudah di-revoke")
 
     # 3. Cek user
     user = session.query(Users).filter(Users.id == user_id).first()
@@ -89,9 +85,7 @@ def refresh_token_command_handler(
     db_token.revoke()
 
     # 5. Terbitkan token baru
-    new_access_token = create_access_token(
-        data={"user_id": str(user.id), "email": user.email, "role": user.role}
-    )
+    new_access_token = create_access_token(data={"user_id": str(user.id), "email": user.email, "role": user.role})
     new_raw_refresh = create_refresh_token(data={"user_id": str(user.id)})
 
     new_db_token = UserRefreshTokens(
@@ -99,8 +93,7 @@ def refresh_token_command_handler(
         token_hash=hash_token(new_raw_refresh),
         device_info=command.device_info or db_token.device_info,
         ip_address=command.ip_address or db_token.ip_address,
-        expires_at=datetime.now(timezone.utc)
-        + timedelta(days=settings.refresh_token_expire_days),
+        expires_at=datetime.now(timezone.utc) + timedelta(days=settings.refresh_token_expire_days),
         is_revoked=False,
     )
     session.add(new_db_token)

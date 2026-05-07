@@ -28,9 +28,7 @@ class RequestDocumentResult:
         return self.error_message is not None
 
 
-def request_document_command_handler(
-    command: RequestDocumentCommand, session: Session
-) -> RequestDocumentResult:
+def request_document_command_handler(command: RequestDocumentCommand, session: Session) -> RequestDocumentResult:
     from datetime import datetime, timedelta, timezone
 
     # Rate Limiting: 1 request per 5 minutes per document type

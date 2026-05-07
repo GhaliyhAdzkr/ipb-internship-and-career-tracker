@@ -42,11 +42,7 @@ def logout_command_handler(
     """
     token_hash = hash_token(command.payload.refresh_token)
 
-    db_token = (
-        session.query(UserRefreshTokens)
-        .filter(UserRefreshTokens.token_hash == token_hash)
-        .first()
-    )
+    db_token = session.query(UserRefreshTokens).filter(UserRefreshTokens.token_hash == token_hash).first()
 
     if db_token and not db_token.is_revoked:
         db_token.revoke()

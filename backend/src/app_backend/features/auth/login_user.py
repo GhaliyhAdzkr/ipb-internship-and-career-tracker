@@ -15,9 +15,7 @@ from app_backend.conf.settings import settings
 from app_backend.models.user_refresh_tokens import UserRefreshTokens
 from app_backend.models.users import Users
 from app_backend.schemas.user import LoginResponse, UserLogin, UserResponse
-from app_backend.shared.security import (create_access_token,
-                                         create_refresh_token, hash_token,
-                                         verify_password)
+from app_backend.shared.security import create_access_token, create_refresh_token, hash_token, verify_password
 
 
 class LoginUserException(Exception):
@@ -69,9 +67,7 @@ def login_user_command_handler(
     access_token = create_access_token(data=token_payload)
     raw_refresh_token = create_refresh_token(data={"user_id": str(user.id)})
 
-    expires_at = datetime.now(timezone.utc) + timedelta(
-        days=settings.refresh_token_expire_days
-    )
+    expires_at = datetime.now(timezone.utc) + timedelta(days=settings.refresh_token_expire_days)
 
     db_refresh = UserRefreshTokens(
         user_id=user.id,

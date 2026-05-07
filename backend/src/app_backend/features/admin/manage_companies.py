@@ -13,12 +13,8 @@ from typing import Optional
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app_backend.models.master_external_companies import \
-    MasterExternalCompanies
-from app_backend.schemas.admin import (CompanyCreate, CompanyResponse,
-                                       CompanyUpdate)
-
-# ─── List ────────────────────────────────────────────────────────────────────
+from app_backend.models.master_external_companies import MasterExternalCompanies
+from app_backend.schemas.admin import CompanyCreate, CompanyResponse, CompanyUpdate
 
 
 @dataclass
@@ -39,15 +35,8 @@ def list_companies_command_handler(
     command: ListCompaniesCommand,
     session: Session,
 ) -> ListCompaniesResult:
-    rows = (
-        session.query(MasterExternalCompanies)
-        .order_by(MasterExternalCompanies.name)
-        .all()
-    )
+    rows = session.query(MasterExternalCompanies).order_by(MasterExternalCompanies.name).all()
     return ListCompaniesResult(items=[CompanyResponse.model_validate(r) for r in rows])
-
-
-# ─── Create ──────────────────────────────────────────────────────────────────
 
 
 @dataclass
@@ -83,15 +72,10 @@ def create_company_command_handler(
         return CreateCompanyResult(item=CompanyResponse.model_validate(company))
     except IntegrityError:
         session.rollback()
-        return CreateCompanyResult(
-            error_message=f"Perusahaan '{command.payload.name}' sudah ada"
-        )
+        return CreateCompanyResult(error_message=f"Perusahaan '{command.payload.name}' sudah ada")
     except Exception as exc:
         session.rollback()
         return CreateCompanyResult(error_message=f"Gagal membuat perusahaan: {exc}")
-
-
-# ─── Update ──────────────────────────────────────────────────────────────────
 
 
 @dataclass
@@ -113,11 +97,7 @@ def update_company_command_handler(
     command: UpdateCompanyCommand,
     session: Session,
 ) -> UpdateCompanyResult:
-    company = (
-        session.query(MasterExternalCompanies)
-        .filter(MasterExternalCompanies.id == command.company_id)
-        .first()
-    )
+    company = session.query(MasterExternalCompanies).filter(MasterExternalCompanies.id == command.company_id).first()
     if not company:
         return UpdateCompanyResult(error_message="Perusahaan tidak ditemukan")
 
@@ -135,15 +115,10 @@ def update_company_command_handler(
         return UpdateCompanyResult(item=CompanyResponse.model_validate(company))
     except IntegrityError:
         session.rollback()
-        return UpdateCompanyResult(
-            error_message=f"Nama perusahaan '{command.payload.name}' sudah digunakan"
-        )
+        return UpdateCompanyResult(error_message=f"Nama perusahaan '{command.payload.name}' sudah digunakan")
     except Exception as exc:
         session.rollback()
         return UpdateCompanyResult(error_message=f"Gagal update perusahaan: {exc}")
-
-
-# ─── Delete ──────────────────────────────────────────────────────────────────
 
 
 @dataclass
@@ -163,11 +138,7 @@ def delete_company_command_handler(
     command: DeleteCompanyCommand,
     session: Session,
 ) -> DeleteCompanyResult:
-    company = (
-        session.query(MasterExternalCompanies)
-        .filter(MasterExternalCompanies.id == command.company_id)
-        .first()
-    )
+    company = session.query(MasterExternalCompanies).filter(MasterExternalCompanies.id == command.company_id).first()
     if not company:
         return DeleteCompanyResult(error_message="Perusahaan tidak ditemukan")
 

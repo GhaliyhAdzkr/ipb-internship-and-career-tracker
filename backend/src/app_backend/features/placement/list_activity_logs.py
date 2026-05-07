@@ -27,19 +27,10 @@ def list_activity_logs_command_handler(
     command: ListActivityLogsCommand,
     session: Session,
 ) -> ListActivityLogsResult:
-    placement = (
-        session.query(Placements)
-        .filter_by(id=command.placement_id, student_id=command.student_id)
-        .first()
-    )
+    placement = session.query(Placements).filter_by(id=command.placement_id, student_id=command.student_id).first()
     if not placement:
         return ListActivityLogsResult(error_message="Placement tidak ditemukan")
 
-    logs = (
-        session.query(ActivityLogs)
-        .filter_by(placement_id=placement.id)
-        .order_by(ActivityLogs.activity_date.asc())
-        .all()
-    )
+    logs = session.query(ActivityLogs).filter_by(placement_id=placement.id).order_by(ActivityLogs.activity_date.asc()).all()
 
     return ListActivityLogsResult(logs=logs)

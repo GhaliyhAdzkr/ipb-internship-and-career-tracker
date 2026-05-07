@@ -11,8 +11,7 @@ from celery import shared_task
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
-from reportlab.platypus import (Paragraph, SimpleDocTemplate, Spacer, Table,
-                                TableStyle)
+from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 from sqlalchemy.orm import sessionmaker
 
 from app_backend.models.activity_logs import ActivityLogs
@@ -33,9 +32,7 @@ def generate_final_report(self, placement_id: str) -> Dict:
     """Generate final report PDF from activity logs using pandas and reportlab."""
     session = get_db_session()
     try:
-        placement = (
-            session.query(Placements).filter(Placements.id == placement_id).first()
-        )
+        placement = session.query(Placements).filter(Placements.id == placement_id).first()
         if not placement:
             return {"status": "failed", "error": "Placement not found"}
 
@@ -78,9 +75,7 @@ def generate_final_report(self, placement_id: str) -> Dict:
         elements = []
 
         # Title
-        title_style = ParagraphStyle(
-            "TitleStyle", parent=styles["Heading1"], alignment=1
-        )
+        title_style = ParagraphStyle("TitleStyle", parent=styles["Heading1"], alignment=1)
         elements.append(Paragraph("Laporan Akhir Magang (Format PPKI)", title_style))
         elements.append(Spacer(1, 20))
 
@@ -129,12 +124,8 @@ def generate_final_report(self, placement_id: str) -> Dict:
         # Trigger Notification
         notif = NotificationQueue(
             title="Laporan Akhir Siap",
-            message=f"Laporan akhir magang Anda telah selesai di-generate. Silakan unduh dari dashboard.",
-            user_id=(
-                placement.student.user_id
-                if hasattr(placement, "student") and placement.student
-                else placement.student_id
-            ),
+            message="Laporan akhir magang Anda telah selesai di-generate. Silakan unduh dari dashboard.",
+            user_id=(placement.student.user_id if hasattr(placement, "student") and placement.student else placement.student_id),
             channel="ALL",
             status="QUEUED",
         )
@@ -156,11 +147,7 @@ def generate_cover_letter(self, request_id: str) -> Dict:
     """Generate cover letter PDF for document requests."""
     session = get_db_session()
     try:
-        req = (
-            session.query(DocumentRequests)
-            .filter(DocumentRequests.id == request_id)
-            .first()
-        )
+        req = session.query(DocumentRequests).filter(DocumentRequests.id == request_id).first()
         if not req:
             return {"status": "failed", "error": "Request not found"}
 
@@ -183,9 +170,7 @@ def generate_cover_letter(self, request_id: str) -> Dict:
             fontName="Helvetica-Bold",
         )
         elements.append(Paragraph("INSTITUT PERTANIAN BOGOR", header_style))
-        elements.append(
-            Paragraph("Career Development and Assessment IPB", header_style)
-        )
+        elements.append(Paragraph("Career Development and Assessment IPB", header_style))
         elements.append(Spacer(1, 30))
 
         # Content
@@ -221,11 +206,7 @@ def generate_cover_letter(self, request_id: str) -> Dict:
         notif = NotificationQueue(
             title="Surat Pengantar Selesai",
             message=f"Surat pengantar untuk keperluan '{req.purpose}' telah diterbitkan.",
-            user_id=(
-                req.student.user_id
-                if hasattr(req, "student") and req.student
-                else req.student_id
-            ),
+            user_id=(req.student.user_id if hasattr(req, "student") and req.student else req.student_id),
             channel="ALL",
             status="QUEUED",
         )

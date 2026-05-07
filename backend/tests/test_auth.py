@@ -19,9 +19,7 @@ from unittest.mock import MagicMock, patch
 
 from tests.conftest import ADMIN_USER_ID, NOW, STUDENT_USER_ID
 
-# ════════════════════════════════════════════════════════════════════════════
 #  Sanity checks
-# ════════════════════════════════════════════════════════════════════════════
 
 
 def test_root(client_no_auth):
@@ -36,9 +34,7 @@ def test_health(client_no_auth):
     assert resp.json() == {"status": "healthy"}
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  Register Student
-# ════════════════════════════════════════════════════════════════════════════
 
 STUDENT_PAYLOAD = {
     "email": "mahasiswa@ipb.ac.id",
@@ -69,9 +65,7 @@ def test_register_student_success(client_no_auth, mock_session):
     _make_user_orm(STUDENT_USER_ID, STUDENT_PAYLOAD["email"], "STUDENT")
     mock_session.refresh.side_effect = lambda obj: None
 
-    with patch(
-        "app_backend.features.auth.auth_service.AuthService.register_student"
-    ) as mock_method:
+    with patch("app_backend.features.auth.auth_service.AuthService.register_student") as mock_method:
         from app_backend.schemas.user import UserResponse
 
         mock_method.return_value = UserResponse(
@@ -83,9 +77,7 @@ def test_register_student_success(client_no_auth, mock_session):
             created_at=NOW,
             updated_at=NOW,
         )
-        resp = client_no_auth.post(
-            "/api/v1/auth/register/student", json=STUDENT_PAYLOAD
-        )
+        resp = client_no_auth.post("/api/v1/auth/register/student", json=STUDENT_PAYLOAD)
 
     assert resp.status_code == 201
     data = resp.json()
@@ -94,26 +86,18 @@ def test_register_student_success(client_no_auth, mock_session):
 
 
 def test_register_student_duplicate_email(client_no_auth):
-    with patch(
-        "app_backend.features.auth.auth_service.AuthService.register_student"
-    ) as mock_method:
+    with patch("app_backend.features.auth.auth_service.AuthService.register_student") as mock_method:
         mock_method.side_effect = ValueError("Email sudah terdaftar")
-        resp = client_no_auth.post(
-            "/api/v1/auth/register/student", json=STUDENT_PAYLOAD
-        )
+        resp = client_no_auth.post("/api/v1/auth/register/student", json=STUDENT_PAYLOAD)
 
     assert resp.status_code == 409
     assert "Email sudah terdaftar" in resp.json()["detail"]
 
 
 def test_register_student_duplicate_nim(client_no_auth):
-    with patch(
-        "app_backend.features.auth.auth_service.AuthService.register_student"
-    ) as mock_method:
+    with patch("app_backend.features.auth.auth_service.AuthService.register_student") as mock_method:
         mock_method.side_effect = ValueError("NIM sudah terdaftar")
-        resp = client_no_auth.post(
-            "/api/v1/auth/register/student", json=STUDENT_PAYLOAD
-        )
+        resp = client_no_auth.post("/api/v1/auth/register/student", json=STUDENT_PAYLOAD)
 
     assert resp.status_code == 409
     assert "NIM sudah terdaftar" in resp.json()["detail"]
@@ -126,9 +110,7 @@ def test_register_student_missing_field(client_no_auth):
     assert resp.status_code == 422
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  Register Admin
-# ════════════════════════════════════════════════════════════════════════════
 
 ADMIN_PAYLOAD = {
     "email": "admin2@ipb.ac.id",
@@ -140,9 +122,7 @@ ADMIN_PAYLOAD = {
 
 
 def test_register_admin_success(client_as_admin):
-    with patch(
-        "app_backend.features.auth.auth_service.AuthService.register_admin"
-    ) as mock_method:
+    with patch("app_backend.features.auth.auth_service.AuthService.register_admin") as mock_method:
         from app_backend.schemas.user import UserResponse
 
         mock_method.return_value = UserResponse(
@@ -166,24 +146,18 @@ def test_register_admin_forbidden_for_student(client_as_student):
 
 
 def test_register_admin_duplicate(client_as_admin):
-    with patch(
-        "app_backend.features.auth.auth_service.AuthService.register_admin"
-    ) as mock_method:
+    with patch("app_backend.features.auth.auth_service.AuthService.register_admin") as mock_method:
         mock_method.side_effect = ValueError("Email sudah terdaftar")
         resp = client_as_admin.post("/api/v1/auth/register/admin", json=ADMIN_PAYLOAD)
 
     assert resp.status_code == 409
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  Login
-# ════════════════════════════════════════════════════════════════════════════
 
 
 def test_login_success(client_no_auth):
-    with patch(
-        "app_backend.features.auth.auth_service.AuthService.login"
-    ) as mock_method:
+    with patch("app_backend.features.auth.auth_service.AuthService.login") as mock_method:
         from app_backend.schemas.user import LoginResponse, UserResponse
 
         mock_method.return_value = LoginResponse(
@@ -215,9 +189,7 @@ def test_login_success(client_no_auth):
 
 
 def test_login_wrong_password(client_no_auth):
-    with patch(
-        "app_backend.features.auth.auth_service.AuthService.login"
-    ) as mock_method:
+    with patch("app_backend.features.auth.auth_service.AuthService.login") as mock_method:
         mock_method.side_effect = ValueError("Email atau password salah")
         resp = client_no_auth.post(
             "/api/v1/auth/login",
@@ -229,9 +201,7 @@ def test_login_wrong_password(client_no_auth):
 
 
 def test_login_inactive_account(client_no_auth):
-    with patch(
-        "app_backend.features.auth.auth_service.AuthService.login"
-    ) as mock_method:
+    with patch("app_backend.features.auth.auth_service.AuthService.login") as mock_method:
         mock_method.side_effect = PermissionError("Akun dinonaktifkan. Hubungi admin.")
         resp = client_no_auth.post(
             "/api/v1/auth/login",
@@ -241,15 +211,11 @@ def test_login_inactive_account(client_no_auth):
     assert resp.status_code == 401
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  Refresh Token
-# ════════════════════════════════════════════════════════════════════════════
 
 
 def test_refresh_token_success(client_no_auth):
-    with patch(
-        "app_backend.routers.api.auth.refresh_token_command_handler"
-    ) as mock_handler:
+    with patch("app_backend.routers.api.auth.refresh_token_command_handler") as mock_handler:
         from app_backend.schemas.user import LoginResponse, UserResponse
 
         mock_handler.return_value = MagicMock(
@@ -280,9 +246,7 @@ def test_refresh_token_success(client_no_auth):
 
 
 def test_refresh_token_invalid(client_no_auth):
-    with patch(
-        "app_backend.routers.api.auth.refresh_token_command_handler"
-    ) as mock_handler:
+    with patch("app_backend.routers.api.auth.refresh_token_command_handler") as mock_handler:
         mock_handler.return_value = MagicMock(
             got_error=lambda: True,
             error_message="Refresh token tidak valid atau sudah di-revoke",
@@ -295,9 +259,7 @@ def test_refresh_token_invalid(client_no_auth):
     assert resp.status_code == 401
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  Logout
-# ════════════════════════════════════════════════════════════════════════════
 
 
 def test_logout_success(client_no_auth):
@@ -323,16 +285,12 @@ def test_logout_idempotent_already_revoked(client_no_auth):
     assert resp.status_code == 204
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  Password Reset
-# ════════════════════════════════════════════════════════════════════════════
 
 
 def test_reset_request_always_200(client_no_auth):
     """Endpoint selalu 200 untuk mencegah email enumeration."""
-    with patch(
-        "app_backend.routers.api.auth.request_reset_password_command_handler"
-    ) as mock_handler:
+    with patch("app_backend.routers.api.auth.request_reset_password_command_handler") as mock_handler:
         mock_handler.return_value = MagicMock(
             message="Jika email terdaftar, instruksi reset password akan dikirim ke email Anda",
             token="raw_dev_token_xyz",
@@ -348,9 +306,7 @@ def test_reset_request_always_200(client_no_auth):
 
 
 def test_reset_request_unregistered_email_still_200(client_no_auth):
-    with patch(
-        "app_backend.routers.api.auth.request_reset_password_command_handler"
-    ) as mock_handler:
+    with patch("app_backend.routers.api.auth.request_reset_password_command_handler") as mock_handler:
         mock_handler.return_value = MagicMock(
             message="Jika email terdaftar, instruksi reset password akan dikirim ke email Anda",
             token=None,
@@ -364,9 +320,7 @@ def test_reset_request_unregistered_email_still_200(client_no_auth):
 
 
 def test_reset_password_success(client_no_auth):
-    with patch(
-        "app_backend.routers.api.auth.reset_password_command_handler"
-    ) as mock_handler:
+    with patch("app_backend.routers.api.auth.reset_password_command_handler") as mock_handler:
         mock_handler.return_value = MagicMock(
             got_error=lambda: False,
             message="Password berhasil direset",
@@ -381,9 +335,7 @@ def test_reset_password_success(client_no_auth):
 
 
 def test_reset_password_invalid_token(client_no_auth):
-    with patch(
-        "app_backend.routers.api.auth.reset_password_command_handler"
-    ) as mock_handler:
+    with patch("app_backend.routers.api.auth.reset_password_command_handler") as mock_handler:
         mock_handler.return_value = MagicMock(
             got_error=lambda: True,
             error_message="Token tidak valid atau sudah expired",
@@ -397,9 +349,7 @@ def test_reset_password_invalid_token(client_no_auth):
     assert "Token tidak valid" in resp.json()["detail"]
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  GET /me
-# ════════════════════════════════════════════════════════════════════════════
 
 
 def test_get_me_student(client_as_student):

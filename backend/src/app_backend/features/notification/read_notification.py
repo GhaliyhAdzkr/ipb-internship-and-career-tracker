@@ -38,9 +38,7 @@ def read_notification_command_handler(
     )
 
     if not notification:
-        return ReadNotificationResult(
-            error_message="Notifikasi tidak ditemukan", error_code=HTTPStatus.NOT_FOUND
-        )
+        return ReadNotificationResult(error_message="Notifikasi tidak ditemukan", error_code=HTTPStatus.NOT_FOUND)
 
     if notification.status != "DELETED":
         notification.status = "READ"

@@ -38,9 +38,7 @@ class Placement:
         # Validasi status
         valid_statuses = [s.value for s in PlacementStatus]
         if self.status not in valid_statuses:
-            raise ValueError(
-                f"Status tidak valid. Pilih salah satu: {', '.join(valid_statuses)}"
-            )
+            raise ValueError(f"Status tidak valid. Pilih salah satu: {', '.join(valid_statuses)}")
 
         # Validasi tanggal
         if self.start_date >= self.end_date:
@@ -81,9 +79,7 @@ class Placement:
             PlacementStatus.ACTIVE.value,
             PlacementStatus.EXTENDED.value,
         ]:
-            raise ValueError(
-                "Hanya placement ACTIVE atau EXTENDED yang bisa diperpanjang"
-            )
+            raise ValueError("Hanya placement ACTIVE atau EXTENDED yang bisa diperpanjang")
 
         if new_end_date <= self.end_date:
             raise ValueError("Tanggal selesai baru harus lebih lama dari sekarang")

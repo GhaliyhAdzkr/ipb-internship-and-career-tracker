@@ -37,9 +37,7 @@ def delete_notification_command_handler(
     )
 
     if not notification:
-        return DeleteNotificationResult(
-            error_message="Notifikasi tidak ditemukan", error_code=HTTPStatus.NOT_FOUND
-        )
+        return DeleteNotificationResult(error_message="Notifikasi tidak ditemukan", error_code=HTTPStatus.NOT_FOUND)
 
     # Soft delete
     notification.status = "DELETED"

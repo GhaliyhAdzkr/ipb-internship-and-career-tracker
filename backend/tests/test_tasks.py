@@ -24,9 +24,7 @@ from unittest.mock import patch
 
 from tests.conftest import NOW, STUDENT_USER_ID
 
-# ════════════════════════════════════════════════════════════════════════════
 #  AI Tasks Tests
-# ════════════════════════════════════════════════════════════════════════════
 
 
 def test_parse_cv_skills_task():
@@ -100,17 +98,14 @@ def test_match_job_skills_task():
     assert task_result.result["total_matched"] < task_result.result["total_required"]
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  Vacancy Tasks Tests
-# ════════════════════════════════════════════════════════════════════════════
 
 
 def test_auto_close_expired_vacancies_task():
     """Test auto-close task closes expired vacancies."""
     from unittest.mock import MagicMock
 
-    from app_backend.shared.tasks.vacancy_tasks import \
-        auto_close_expired_vacancies
+    from app_backend.shared.tasks.vacancy_tasks import auto_close_expired_vacancies
 
     # Create mock vacancy
     mock_vacancy = MagicMock()
@@ -119,13 +114,9 @@ def test_auto_close_expired_vacancies_task():
     mock_vacancy.close_date = NOW - timedelta(days=1)  # Expired yesterday
 
     with patch("app_backend.shared.tasks.vacancy_tasks.create_engine") as _:
-        with patch(
-            "app_backend.shared.tasks.vacancy_tasks.sessionmaker"
-        ) as mock_sessionmaker:
+        with patch("app_backend.shared.tasks.vacancy_tasks.sessionmaker") as mock_sessionmaker:
             mock_session = MagicMock()
-            mock_session.query.return_value.filter.return_value.all.return_value = [
-                mock_vacancy
-            ]
+            mock_session.query.return_value.filter.return_value.all.return_value = [mock_vacancy]
             mock_sessionmaker.return_value.return_value = mock_session
 
             result = auto_close_expired_vacancies()
@@ -150,17 +141,14 @@ def test_scrape_vacancies_task():
     assert len(result["results"]) == 2
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  Notification Tasks Tests
-# ════════════════════════════════════════════════════════════════════════════
 
 
 def test_send_email_notification_task():
     """Test email notification task."""
     from unittest.mock import MagicMock
 
-    from app_backend.shared.tasks.notification_tasks import \
-        send_email_notification
+    from app_backend.shared.tasks.notification_tasks import send_email_notification
 
     # Create mock notification
     mock_notif = MagicMock()
@@ -171,23 +159,17 @@ def test_send_email_notification_task():
     mock_notif.user.email = "test@example.com"
 
     with patch("app_backend.shared.tasks.notification_tasks.create_engine") as _:
-        with patch(
-            "app_backend.shared.tasks.notification_tasks.sessionmaker"
-        ) as mock_sessionmaker:
+        with patch("app_backend.shared.tasks.notification_tasks.sessionmaker") as mock_sessionmaker:
             mock_session = MagicMock()
 
             # Setup query chains
-            mock_session.query.return_value.options.return_value.filter_by.return_value.first.return_value = (
-                mock_notif
-            )
+            mock_session.query.return_value.options.return_value.filter_by.return_value.first.return_value = mock_notif
 
             mock_sessionmaker.return_value.return_value = mock_session
 
             # Mock smtplib to prevent actual email sending
             with patch("app_backend.shared.tasks.notification_tasks.smtplib.SMTP"):
-                with patch(
-                    "app_backend.shared.tasks.notification_tasks.smtplib.SMTP_SSL"
-                ):
+                with patch("app_backend.shared.tasks.notification_tasks.smtplib.SMTP_SSL"):
                     result = send_email_notification(
                         notification_id=str(uuid.uuid4()),
                     )
@@ -200,8 +182,7 @@ def test_cleanup_expired_tokens_task():
     """Test token cleanup task."""
     from unittest.mock import MagicMock
 
-    from app_backend.shared.tasks.notification_tasks import \
-        cleanup_expired_tokens
+    from app_backend.shared.tasks.notification_tasks import cleanup_expired_tokens
 
     # Create mock tokens
     mock_refresh = MagicMock()
@@ -212,9 +193,7 @@ def test_cleanup_expired_tokens_task():
     mock_action.expires_at = NOW - timedelta(days=1)
 
     with patch("app_backend.shared.tasks.notification_tasks.create_engine") as _:
-        with patch(
-            "app_backend.shared.tasks.notification_tasks.sessionmaker"
-        ) as mock_sessionmaker:
+        with patch("app_backend.shared.tasks.notification_tasks.sessionmaker") as mock_sessionmaker:
             mock_session = MagicMock()
 
             # Setup query chains to return empty list to prevent AttributeErrors on mocked objects during delete
@@ -233,8 +212,7 @@ def test_process_notification_queue_task():
     """Test notification queue processor."""
     from unittest.mock import MagicMock
 
-    from app_backend.shared.tasks.notification_tasks import \
-        process_notification_queue
+    from app_backend.shared.tasks.notification_tasks import process_notification_queue
 
     # Create mock notification
     mock_notif = MagicMock()
@@ -243,9 +221,7 @@ def test_process_notification_queue_task():
     mock_notif.message = "Message"
 
     with patch("app_backend.shared.tasks.notification_tasks.create_engine") as _:
-        with patch(
-            "app_backend.shared.tasks.notification_tasks.sessionmaker"
-        ) as mock_sessionmaker:
+        with patch("app_backend.shared.tasks.notification_tasks.sessionmaker") as mock_sessionmaker:
             mock_session = MagicMock()
 
             # Accommodate .options(joinedload(...)).filter(...).limit(...).all()
@@ -262,9 +238,7 @@ def test_process_notification_queue_task():
             assert result["status"] == "completed"
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  Celery Configuration Tests
-# ════════════════════════════════════════════════════════════════════════════
 
 
 def test_celery_app_configuration():

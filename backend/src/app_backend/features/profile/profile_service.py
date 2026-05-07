@@ -1,23 +1,19 @@
 import uuid
 from datetime import datetime, timezone
-from typing import List, Optional, Protocol
+from typing import Optional, Protocol
 
-from sqlalchemy.orm import Session, joinedload, selectinload
+from sqlalchemy.orm import joinedload, selectinload
 
 from app_backend.models.profiles_student import ProfilesStudent
 from app_backend.models.student_skills import StudentSkills
 from app_backend.repositories.student_repository import StudentRepository
-from app_backend.repositories.student_skill_repository import \
-    StudentSkillRepository
+from app_backend.repositories.student_skill_repository import StudentSkillRepository
 from app_backend.repositories.user_repository import UserRepository
-from app_backend.schemas.profile import (CVDataUpdate, DepartmentInfo,
-                                         SkillInfo, StudentProfileResponse)
+from app_backend.schemas.profile import CVDataUpdate, DepartmentInfo, SkillInfo, StudentProfileResponse
 
 
 class IProfileService(Protocol):
-    def get_student_profile(
-        self, user_id: uuid.UUID
-    ) -> Optional[StudentProfileResponse]: ...
+    def get_student_profile(self, user_id: uuid.UUID) -> Optional[StudentProfileResponse]: ...
     def update_cv_data(self, user_id: uuid.UUID, data: CVDataUpdate) -> None: ...
 
 
@@ -32,9 +28,7 @@ class ProfileService:
         self.user_repo = user_repo
         self.student_skill_repo = student_skill_repo
 
-    def get_student_profile(
-        self, user_id: uuid.UUID
-    ) -> Optional[StudentProfileResponse]:
+    def get_student_profile(self, user_id: uuid.UUID) -> Optional[StudentProfileResponse]:
         user = self.user_repo.get_by_id(user_id)
         if not user:
             return None
@@ -44,9 +38,7 @@ class ProfileService:
             self.student_repo.session.query(ProfilesStudent)
             .options(
                 joinedload(ProfilesStudent.department),
-                selectinload(ProfilesStudent.student_skills).joinedload(
-                    StudentSkills.skill
-                ),
+                selectinload(ProfilesStudent.student_skills).joinedload(StudentSkills.skill),
             )
             .filter(ProfilesStudent.user_id == user_id)
             .first()
@@ -85,11 +77,7 @@ class ProfileService:
             semester=profile.semester,
             department=dept_info,
             gpa=profile.gpa,
-            is_mbkm_eligible=(
-                profile.is_mbkm_eligible
-                if profile.is_mbkm_eligible is not None
-                else True
-            ),
+            is_mbkm_eligible=(profile.is_mbkm_eligible if profile.is_mbkm_eligible is not None else True),
             phone_number=profile.phone_number,
             linkedin_url=profile.linkedin_url,
             cv_url=profile.cv_url,
@@ -113,11 +101,7 @@ class ProfileService:
             if data.skills is not None:
                 self.student_skill_repo.delete_all_for_student(user_id)
                 for s in data.skills:
-                    self.student_skill_repo.create(
-                        StudentSkills(
-                            student_id=user_id, skill_id=s.skill_id, level=s.level
-                        )
-                    )
+                    self.student_skill_repo.create(StudentSkills(student_id=user_id, skill_id=s.skill_id, level=s.level))
 
             profile.updated_at = datetime.now(timezone.utc)
             self.student_repo.save_changes()

@@ -21,14 +21,10 @@ class MasterDepartments(Base):
     __tablename__ = "master_departments"
     __table_args__ = (UniqueConstraint("code", name="master_departments_code_key"),)
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        Uuid, primary_key=True, server_default=text("public.gen_random_uuid()")
-    )
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, server_default=text("public.gen_random_uuid()"))
     code: Mapped[str] = mapped_column(String(10), nullable=False)
     name: Mapped[str] = mapped_column(String(150), nullable=False)
     faculty: Mapped[str] = mapped_column(String(100), nullable=False)
 
     # Relationships
-    profiles_student: Mapped[list["ProfilesStudent"]] = relationship(
-        "ProfilesStudent", back_populates="department"
-    )
+    profiles_student: Mapped[list["ProfilesStudent"]] = relationship("ProfilesStudent", back_populates="department")

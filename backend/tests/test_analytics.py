@@ -11,24 +11,24 @@ Test Gate Phase 7:
 from __future__ import annotations
 
 import uuid
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import patch
 
-import pytest
-
-from tests.conftest import COMPANY_ID, DEPT_ID, STUDENT_USER_ID
+from tests.conftest import COMPANY_ID, DEPT_ID
 
 VACANCY_ID = uuid.UUID("11111111-1111-1111-1111-111111111111")
 OTHER_DEPT_ID = uuid.UUID("55555555-5555-5555-5555-555555555555")
 OTHER_COMPANY_ID = uuid.UUID("66666666-6666-6666-6666-666666666666")
 
-# ─── Fixture helpers ──────────────────────────────────────────────────────────
-
 
 def _distribution_result(dept_id=None):
     """Buat fake GetDistributionResult yang sesuai dengan dept_id yang diminta."""
     from app_backend.features.analytics.get_distribution import (
-        CompensationBreakdownData, DepartmentBreakdownData,
-        GetDistributionResult, SemesterTrendData, TopCompanyData)
+        CompensationBreakdownData,
+        DepartmentBreakdownData,
+        GetDistributionResult,
+        SemesterTrendData,
+        TopCompanyData,
+    )
 
     return GetDistributionResult(
         total_placements=3 if dept_id is None else 1,
@@ -63,7 +63,9 @@ def _distribution_result(dept_id=None):
 
 def _application_stats_result():
     from app_backend.features.analytics.get_application_stats import (
-        GetApplicationStatsResult, StatusBreakdownData)
+        GetApplicationStatsResult,
+        StatusBreakdownData,
+    )
 
     return GetApplicationStatsResult(
         total_applications=10,
@@ -78,7 +80,9 @@ def _application_stats_result():
 
 def _vacancy_stats_result():
     from app_backend.features.analytics.get_vacancy_stats import (
-        GetVacancyStatsResult, TopVacancyData)
+        GetVacancyStatsResult,
+        TopVacancyData,
+    )
 
     return GetVacancyStatsResult(
         total_active_vacancies=5,
@@ -94,9 +98,7 @@ def _vacancy_stats_result():
     )
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  [1] UNIT TEST – command handler mengembalikan hasil yang benar
-# ════════════════════════════════════════════════════════════════════════════
 
 
 class TestGetDistributionCommandHandler:
@@ -104,8 +106,8 @@ class TestGetDistributionCommandHandler:
 
     def test_returns_top_companies(self, mock_session):
         from app_backend.features.analytics.get_distribution import (
-            GetDistributionCommand, TopCompanyData,
-            get_distribution_command_handler)
+            GetDistributionCommand,
+        )
 
         expected = _distribution_result()
         with patch(
@@ -121,7 +123,8 @@ class TestGetDistributionCommandHandler:
 
     def test_returns_compensation_breakdown(self, mock_session):
         from app_backend.features.analytics.get_distribution import (
-            GetDistributionCommand, get_distribution_command_handler)
+            GetDistributionCommand,
+        )
 
         expected = _distribution_result()
         with patch(
@@ -136,7 +139,8 @@ class TestGetDistributionCommandHandler:
 
     def test_returns_semester_trends(self, mock_session):
         from app_backend.features.analytics.get_distribution import (
-            GetDistributionCommand, get_distribution_command_handler)
+            GetDistributionCommand,
+        )
 
         expected = _distribution_result()
         with patch(
@@ -151,12 +155,12 @@ class TestGetDistributionCommandHandler:
 
     def test_application_stats_conversion_rate(self, mock_session):
         from app_backend.features.analytics.get_application_stats import (
-            GetApplicationStatsCommand, get_application_stats_command_handler)
+            GetApplicationStatsCommand,
+        )
 
         expected = _application_stats_result()
         with patch(
-            "app_backend.features.analytics.get_application_stats"
-            ".get_application_stats_command_handler",
+            "app_backend.features.analytics.get_application_stats.get_application_stats_command_handler",
             return_value=expected,
         ) as mock_h:
             result = mock_h(command=GetApplicationStatsCommand(), session=mock_session)
@@ -168,12 +172,12 @@ class TestGetDistributionCommandHandler:
 
     def test_vacancy_stats_top_vacancies(self, mock_session):
         from app_backend.features.analytics.get_vacancy_stats import (
-            GetVacancyStatsCommand, get_vacancy_stats_command_handler)
+            GetVacancyStatsCommand,
+        )
 
         expected = _vacancy_stats_result()
         with patch(
-            "app_backend.features.analytics.get_vacancy_stats"
-            ".get_vacancy_stats_command_handler",
+            "app_backend.features.analytics.get_vacancy_stats.get_vacancy_stats_command_handler",
             return_value=expected,
         ) as mock_h:
             result = mock_h(command=GetVacancyStatsCommand(), session=mock_session)
@@ -184,19 +188,14 @@ class TestGetDistributionCommandHandler:
         assert result.top_vacancies[0].total_applicants == 8
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  [3] CACHE HIT DAN MISS PATH
-# ════════════════════════════════════════════════════════════════════════════
 
 
 class TestDistributionCaching:
-
     def test_cache_miss_calls_handler_and_writes_cache(self, client_as_admin):
         """Saat cache miss, handler dipanggil dan hasilnya disimpan ke cache."""
         with (
-            patch(
-                "app_backend.routers.api.analytics.cache_get", return_value=None
-            ) as mock_get,
+            patch("app_backend.routers.api.analytics.cache_get", return_value=None) as mock_get,
             patch("app_backend.routers.api.analytics.cache_set") as mock_set,
             patch(
                 "app_backend.routers.api.analytics.get_distribution_command_handler",
@@ -229,9 +228,7 @@ class TestDistributionCaching:
                 return_value=cached_payload,
             ),
             patch("app_backend.routers.api.analytics.cache_set") as mock_set,
-            patch(
-                "app_backend.routers.api.analytics.get_distribution_command_handler"
-            ) as mock_handler,
+            patch("app_backend.routers.api.analytics.get_distribution_command_handler") as mock_handler,
         ):
             resp = client_as_admin.get("/api/v1/analytics/distribution")
 
@@ -243,18 +240,14 @@ class TestDistributionCaching:
     def test_cache_key_encodes_filters(self, client_as_admin):
         """Cache key harus menyertakan department_id dan year."""
         with (
-            patch(
-                "app_backend.routers.api.analytics.cache_get", return_value=None
-            ) as mock_get,
+            patch("app_backend.routers.api.analytics.cache_get", return_value=None) as mock_get,
             patch("app_backend.routers.api.analytics.cache_set"),
             patch(
                 "app_backend.routers.api.analytics.get_distribution_command_handler",
                 return_value=_distribution_result(dept_id=DEPT_ID),
             ),
         ):
-            client_as_admin.get(
-                f"/api/v1/analytics/distribution?department_id={DEPT_ID}&year=2026"
-            )
+            client_as_admin.get(f"/api/v1/analytics/distribution?department_id={DEPT_ID}&year=2026")
 
         used_key = mock_get.call_args[0][0]
         assert str(DEPT_ID) in used_key
@@ -281,9 +274,7 @@ class TestDistributionCaching:
 
         with (
             patch("app_backend.routers.api.analytics.cache_get", return_value=payload),
-            patch(
-                "app_backend.routers.api.analytics.get_application_stats_command_handler"
-            ) as mock_h2,
+            patch("app_backend.routers.api.analytics.get_application_stats_command_handler") as mock_h2,
         ):
             resp2 = client_as_admin.get("/api/v1/analytics/applications")
         assert resp2.status_code == 200
@@ -311,9 +302,7 @@ class TestDistributionCaching:
 
         with (
             patch("app_backend.routers.api.analytics.cache_get", return_value=payload),
-            patch(
-                "app_backend.routers.api.analytics.get_vacancy_stats_command_handler"
-            ) as mock_h2,
+            patch("app_backend.routers.api.analytics.get_vacancy_stats_command_handler") as mock_h2,
         ):
             resp2 = client_as_admin.get("/api/v1/analytics/vacancies")
         assert resp2.status_code == 200
@@ -321,13 +310,10 @@ class TestDistributionCaching:
         mock_h2.assert_not_called()
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  [2] INTEGRATION – cache evict → data terbaru tersedia
-# ════════════════════════════════════════════════════════════════════════════
 
 
 class TestCacheEviction:
-
     def test_after_cache_evict_new_data_returned(self, client_as_admin):
         """
         Simulasi: cache di-evict (cache_get → None), handler dipanggil ulang
@@ -355,9 +341,7 @@ class TestCacheEviction:
                 "app_backend.routers.api.analytics.cache_get",
                 return_value=stale_payload,
             ),
-            patch(
-                "app_backend.routers.api.analytics.get_distribution_command_handler"
-            ) as mock_h,
+            patch("app_backend.routers.api.analytics.get_distribution_command_handler") as mock_h,
         ):
             resp_stale = client_as_admin.get("/api/v1/analytics/distribution")
         assert resp_stale.json()["total_placements"] == 2
@@ -378,13 +362,10 @@ class TestCacheEviction:
         mock_h_fresh.assert_called_once()
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  [4] FILTER BY DEPARTMENT – subset yang benar
-# ════════════════════════════════════════════════════════════════════════════
 
 
 class TestDistributionFilters:
-
     def test_filter_by_department_returns_subset(self, client_as_admin):
         """Dengan department_id, total_placements lebih kecil dari tanpa filter."""
         filtered_result = _distribution_result(dept_id=DEPT_ID)  # total=1
@@ -397,9 +378,7 @@ class TestDistributionFilters:
                 return_value=filtered_result,
             ) as mock_h,
         ):
-            resp = client_as_admin.get(
-                f"/api/v1/analytics/distribution?department_id={DEPT_ID}"
-            )
+            resp = client_as_admin.get(f"/api/v1/analytics/distribution?department_id={DEPT_ID}")
 
         assert resp.status_code == 200
         data = resp.json()
@@ -430,32 +409,24 @@ class TestDistributionFilters:
     def test_filter_department_not_affecting_other_dept(self, client_as_admin):
         """Department A dan Department B menghasilkan cache key berbeda."""
         with (
-            patch(
-                "app_backend.routers.api.analytics.cache_get", return_value=None
-            ) as mock_get_a,
+            patch("app_backend.routers.api.analytics.cache_get", return_value=None) as mock_get_a,
             patch("app_backend.routers.api.analytics.cache_set"),
             patch(
                 "app_backend.routers.api.analytics.get_distribution_command_handler",
                 return_value=_distribution_result(dept_id=DEPT_ID),
             ),
         ):
-            client_as_admin.get(
-                f"/api/v1/analytics/distribution?department_id={DEPT_ID}"
-            )
+            client_as_admin.get(f"/api/v1/analytics/distribution?department_id={DEPT_ID}")
 
         with (
-            patch(
-                "app_backend.routers.api.analytics.cache_get", return_value=None
-            ) as mock_get_b,
+            patch("app_backend.routers.api.analytics.cache_get", return_value=None) as mock_get_b,
             patch("app_backend.routers.api.analytics.cache_set"),
             patch(
                 "app_backend.routers.api.analytics.get_distribution_command_handler",
                 return_value=_distribution_result(dept_id=OTHER_DEPT_ID),
             ),
         ):
-            client_as_admin.get(
-                f"/api/v1/analytics/distribution?department_id={OTHER_DEPT_ID}"
-            )
+            client_as_admin.get(f"/api/v1/analytics/distribution?department_id={OTHER_DEPT_ID}")
 
         key_a = mock_get_a.call_args[0][0]
         key_b = mock_get_b.call_args[0][0]
@@ -479,9 +450,7 @@ class TestDistributionFilters:
         assert filters["year"] is None
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  RBAC – hanya ADMIN yang bisa akses
-# ════════════════════════════════════════════════════════════════════════════
 
 
 def test_distribution_forbidden_for_student(client_as_student):

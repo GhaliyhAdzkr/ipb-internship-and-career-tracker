@@ -7,8 +7,7 @@ from sqlalchemy.orm import Session
 
 from app_backend.models.applications import Applications
 from app_backend.models.master_departments import MasterDepartments
-from app_backend.models.master_external_companies import \
-    MasterExternalCompanies
+from app_backend.models.master_external_companies import MasterExternalCompanies
 from app_backend.models.placements import Placements
 from app_backend.models.profiles_student import ProfilesStudent
 from app_backend.models.vacancies import Vacancies
@@ -55,9 +54,7 @@ class SemesterTrendData:
 class GetDistributionResult:
     top_companies: List[TopCompanyData] = field(default_factory=list)
     department_breakdown: List[DepartmentBreakdownData] = field(default_factory=list)
-    compensation_breakdown: List[CompensationBreakdownData] = field(
-        default_factory=list
-    )
+    compensation_breakdown: List[CompensationBreakdownData] = field(default_factory=list)
     semester_trends: List[SemesterTrendData] = field(default_factory=list)
     total_placements: int = 0
     error_message: Optional[str] = None
@@ -78,14 +75,11 @@ def get_distribution_command_handler(
     command: GetDistributionCommand,
     session: Session,
 ) -> GetDistributionResult:
-    # --- Total placements ---
-    total_query = session.query(func.count(Placements.id)).join(
-        ProfilesStudent, Placements.student_id == ProfilesStudent.user_id
-    )
+
+    total_query = session.query(func.count(Placements.id)).join(ProfilesStudent, Placements.student_id == ProfilesStudent.user_id)
     total_query = _apply_filters(total_query, command)
     total_placements = total_query.scalar() or 0
 
-    # --- Top 10 perusahaan berdasarkan jumlah mahasiswa ---
     top_co_query = (
         session.query(
             MasterExternalCompanies.id,
@@ -117,7 +111,6 @@ def get_distribution_command_handler(
         for row in top_co_rows
     ]
 
-    # --- Breakdown per Program Studi per Perusahaan ---
     dept_query = (
         session.query(
             MasterDepartments.id,
@@ -155,7 +148,6 @@ def get_distribution_command_handler(
         for row in dept_rows
     ]
 
-    # --- Breakdown per tipe kompensasi (PAID / UNPAID / ALLOWANCE_ONLY) ---
     comp_query = (
         session.query(
             Vacancies.payment_type,
@@ -175,7 +167,6 @@ def get_distribution_command_handler(
         for row in comp_rows
     ]
 
-    # --- Tren per semester berdasarkan start_date ---
     semester_expr = case(
         (extract("month", Placements.start_date) <= 6, 1),
         else_=2,
@@ -188,15 +179,8 @@ def get_distribution_command_handler(
         func.count(Placements.id).label("total"),
     ).join(ProfilesStudent, Placements.student_id == ProfilesStudent.user_id)
     trend_query = _apply_filters(trend_query, command)
-    trend_rows = (
-        trend_query.group_by(year_expr, semester_expr)
-        .order_by(year_expr, semester_expr)
-        .all()
-    )
-    semester_trends = [
-        SemesterTrendData(year=int(row[0]), semester=int(row[1]), total=row[2])
-        for row in trend_rows
-    ]
+    trend_rows = trend_query.group_by(year_expr, semester_expr).order_by(year_expr, semester_expr).all()
+    semester_trends = [SemesterTrendData(year=int(row[0]), semester=int(row[1]), total=row[2]) for row in trend_rows]
 
     return GetDistributionResult(
         top_companies=top_companies,

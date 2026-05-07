@@ -27,16 +27,10 @@ def reject_application_proof_command_handler(
     command: RejectApplicationProofCommand,
     session: Session,
 ) -> RejectApplicationProofResult:
-    application = (
-        session.query(Applications)
-        .filter_by(id=command.application_id, status="ACCEPTED")
-        .first()
-    )
+    application = session.query(Applications).filter_by(id=command.application_id, status="ACCEPTED").first()
 
     if not application:
-        return RejectApplicationProofResult(
-            error_message="Lamaran tidak ditemukan atau belum ACCEPTED"
-        )
+        return RejectApplicationProofResult(error_message="Lamaran tidak ditemukan atau belum ACCEPTED")
 
     application.status = "OFFERED"
     application._changed_by = command.admin_id

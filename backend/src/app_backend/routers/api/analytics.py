@@ -5,22 +5,22 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app_backend.features.analytics import (
-    GetApplicationStatsCommand, GetDistributionCommand, GetVacancyStatsCommand,
-    get_application_stats_command_handler, get_distribution_command_handler,
-    get_vacancy_stats_command_handler)
-from app_backend.schemas.analytics import (ApplicationStatsResponse,
-                                           DistributionResponse,
-                                           VacancyStatsResponse)
+    GetApplicationStatsCommand,
+    GetDistributionCommand,
+    GetVacancyStatsCommand,
+    get_application_stats_command_handler,
+    get_distribution_command_handler,
+    get_vacancy_stats_command_handler,
+)
+from app_backend.schemas.analytics import ApplicationStatsResponse, DistributionResponse, VacancyStatsResponse
+from app_backend.shared.auth_dependencies import require_admin
 from app_backend.shared.cache import ANALYTICS_CACHE_TTL, cache_get, cache_set
 from app_backend.shared.database import get_session
-from app_backend.shared.dependencies import require_admin
 
 router = APIRouter(prefix="/api/v1/analytics", tags=["analytics"])
 
 
-def _distribution_cache_key(
-    department_id: Optional[uuid.UUID], year: Optional[int]
-) -> str:
+def _distribution_cache_key(department_id: Optional[uuid.UUID], year: Optional[int]) -> str:
     return f"analytics:distribution:{department_id}:{year}"
 
 
@@ -122,9 +122,7 @@ def get_application_stats(
 
     response = ApplicationStatsResponse(
         total_applications=result.total_applications,
-        status_breakdown=[
-            {"status": s.status, "total": s.total} for s in result.status_breakdown
-        ],
+        status_breakdown=[{"status": s.status, "total": s.total} for s in result.status_breakdown],
         conversion_rate=result.conversion_rate,
     )
     cache_set(cache_key, response.model_dump(), ttl=ANALYTICS_CACHE_TTL)

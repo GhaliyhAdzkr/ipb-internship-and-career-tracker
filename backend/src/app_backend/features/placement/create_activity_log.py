@@ -36,34 +36,20 @@ def create_activity_log_command_handler(
     session: Session,
 ) -> CreateActivityLogResult:
     # Validasi placement exists & belongs to student
-    placement = (
-        session.query(Placements)
-        .filter_by(id=command.placement_id, student_id=command.student_id)
-        .first()
-    )
+    placement = session.query(Placements).filter_by(id=command.placement_id, student_id=command.student_id).first()
     if not placement:
-        return CreateActivityLogResult(
-            error_message="Placement tidak ditemukan", error_code=HTTPStatus.NOT_FOUND
-        )
+        return CreateActivityLogResult(error_message="Placement tidak ditemukan", error_code=HTTPStatus.NOT_FOUND)
 
     # Validasi log_date tidak boleh di masa depan
     if command.log_date > datetime.date.today():
-        return CreateActivityLogResult(
-            error_message="log_date tidak boleh di masa depan"
-        )
+        return CreateActivityLogResult(error_message="log_date tidak boleh di masa depan")
 
     # Validasi log_date harus dalam rentang placement.start_date dan placement.end_date
     if not (placement.start_date <= command.log_date <= placement.end_date):
-        return CreateActivityLogResult(
-            error_message="log_date harus dalam rentang periode magang"
-        )
+        return CreateActivityLogResult(error_message="log_date harus dalam rentang periode magang")
 
     # Validasi duplikasi (hanya 1 log per tanggal per placement)
-    existing_log = (
-        session.query(ActivityLogs)
-        .filter_by(placement_id=placement.id, activity_date=command.log_date)
-        .first()
-    )
+    existing_log = session.query(ActivityLogs).filter_by(placement_id=placement.id, activity_date=command.log_date).first()
     if existing_log:
         return CreateActivityLogResult(
             error_message="Log untuk tanggal ini sudah ada",
@@ -75,17 +61,13 @@ def create_activity_log_command_handler(
     end_dt = datetime.datetime.combine(command.log_date, command.end_time)
 
     if end_dt <= start_dt:
-        return CreateActivityLogResult(
-            error_message="waktu selesai harus lebih besar dari waktu mulai"
-        )
+        return CreateActivityLogResult(error_message="waktu selesai harus lebih besar dari waktu mulai")
 
     delta = end_dt - start_dt
     duration_hours = Decimal(delta.total_seconds() / 3600.0)
 
     if duration_hours <= 0 or duration_hours > 24:
-        return CreateActivityLogResult(
-            error_message="Durasi harus antara 0 hingga 24 jam"
-        )
+        return CreateActivityLogResult(error_message="Durasi harus antara 0 hingga 24 jam")
 
     log = ActivityLogs(
         placement_id=placement.id,

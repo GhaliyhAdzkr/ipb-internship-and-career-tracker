@@ -25,9 +25,7 @@ class GetReportResult:
         return self.error_message is not None
 
 
-def get_report_command_handler(
-    command: GetReportCommand, session: Session
-) -> GetReportResult:
+def get_report_command_handler(command: GetReportCommand, session: Session) -> GetReportResult:
     placement = (
         session.query(Placements)
         .filter(

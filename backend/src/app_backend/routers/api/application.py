@@ -4,30 +4,22 @@ from typing import List
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
-from app_backend.features.application import (
-    GetApplicationHistoryCommand, InitializeApplyCommand,
-    UpdateApplicationStatusCommand, UploadApplicationProofCommand,
-    get_application_history_command_handler, initialize_apply_command_handler,
-    update_application_status_command_handler,
-    upload_application_proof_command_handler)
-from app_backend.schemas.application import (ApplicationCreate,
-                                             ApplicationLogResponse,
-                                             ApplicationResponse,
-                                             ApplicationUpdateStatus)
+from app_backend.features.application import UploadApplicationProofCommand, upload_application_proof_command_handler
+from app_backend.features.application.application_service import ApplicationService
+from app_backend.schemas.application import (
+    ApplicationCreate,
+    ApplicationLogResponse,
+    ApplicationResponse,
+    ApplicationUpdateStatus,
+)
+from app_backend.shared.auth_dependencies import require_student
 from app_backend.shared.database import get_session
-from app_backend.shared.dependencies import require_student
+from app_backend.shared.dependencies import get_application_service
 
 router = APIRouter(prefix="/api/v1/applications", tags=["applications"])
 
 
-from app_backend.features.application.application_service import \
-    ApplicationService
-from app_backend.shared.dependencies_service import get_application_service
-
-
-@router.post(
-    "", response_model=ApplicationResponse, status_code=status.HTTP_201_CREATED
-)
+@router.post("", response_model=ApplicationResponse, status_code=status.HTTP_201_CREATED)
 def initialize_apply(
     payload: ApplicationCreate,
     current_user=Depends(require_student),
@@ -76,9 +68,7 @@ def upload_application_proof(
     application_id: uuid.UUID,
     file: UploadFile = File(...),
     current_user=Depends(require_student),
-    session: Session = Depends(
-        get_session
-    ),  # Proof upload involves S3, leaving as is for now or moving to service later
+    session: Session = Depends(get_session),  # Proof upload involves S3, leaving as is for now or moving to service later
 ):
     result = upload_application_proof_command_handler(
         command=UploadApplicationProofCommand(
@@ -90,9 +80,7 @@ def upload_application_proof(
     )
 
     if result.got_error():
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=result.error_message
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=result.error_message)
 
     return {"message": result.message, "proof_url": result.proof_url}
 

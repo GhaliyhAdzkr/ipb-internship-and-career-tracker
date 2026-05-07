@@ -27,11 +27,7 @@ def get_application_history_command_handler(
     command: GetApplicationHistoryCommand,
     session: Session,
 ) -> GetApplicationHistoryResult:
-    application = (
-        session.query(Applications)
-        .filter_by(id=command.application_id, student_id=command.student_id)
-        .first()
-    )
+    application = session.query(Applications).filter_by(id=command.application_id, student_id=command.student_id).first()
 
     if not application:
         return GetApplicationHistoryResult(error_message="Lamaran tidak ditemukan")

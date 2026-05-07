@@ -53,11 +53,7 @@ def update_application_status_command_handler(
         "WITHDRAWN": 4,
     }
 
-    application = (
-        session.query(Applications)
-        .filter_by(id=command.application_id, student_id=command.student_id)
-        .first()
-    )
+    application = session.query(Applications).filter_by(id=command.application_id, student_id=command.student_id).first()
 
     if not application:
         return UpdateApplicationStatusResult(error_message="Lamaran tidak ditemukan")

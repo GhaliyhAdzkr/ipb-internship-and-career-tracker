@@ -32,63 +32,44 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 
 from app_backend.domain.user import User as DomainUser
-from app_backend.features.admin import (CreateCompanyCommand,
-                                        CreateDepartmentCommand,
-                                        CreateSkillCommand,
-                                        DeleteCompanyCommand,
-                                        DeleteDepartmentCommand,
-                                        DeleteSkillCommand,
-                                        ListCompaniesCommand,
-                                        ListDepartmentsCommand,
-                                        ListSkillsCommand,
-                                        ToggleUserActiveCommand,
-                                        UpdateCompanyCommand,
-                                        UpdateDepartmentCommand,
-                                        UpdateSkillCommand,
-                                        create_company_command_handler,
-                                        create_department_command_handler,
-                                        create_skill_command_handler,
-                                        delete_company_command_handler,
-                                        delete_department_command_handler,
-                                        delete_skill_command_handler,
-                                        list_companies_command_handler,
-                                        list_departments_command_handler,
-                                        list_skills_command_handler,
-                                        toggle_user_active_command_handler,
-                                        update_company_command_handler,
-                                        update_department_command_handler,
-                                        update_skill_command_handler)
+from app_backend.features.admin import ToggleUserActiveCommand, toggle_user_active_command_handler
+from app_backend.features.admin.master_data_service import MasterDataService
 from app_backend.features.application import (
-    ListPendingVerificationCommand, RejectApplicationProofCommand,
-    VerifyApplicationCommand, list_pending_verification_command_handler,
+    ListPendingVerificationCommand,
+    RejectApplicationProofCommand,
+    VerifyApplicationCommand,
+    list_pending_verification_command_handler,
     reject_application_proof_command_handler,
-    verify_application_command_handler)
-from app_backend.features.placement import (
-    ListAdminPlacementsCommand, list_admin_placements_command_handler)
+    verify_application_command_handler,
+)
+from app_backend.features.placement import ListAdminPlacementsCommand, list_admin_placements_command_handler
 from app_backend.models.profiles_admin import ProfilesAdmin
-from app_backend.schemas.admin import (AdminProfileResponse,
-                                       AdminProfileUpdate, CompanyCreate,
-                                       CompanyResponse, CompanyUpdate,
-                                       DepartmentCreate, DepartmentResponse,
-                                       DepartmentUpdate, SkillCreate,
-                                       SkillResponse, SkillUpdate)
-from app_backend.schemas.application import (ApplicationRejectPayload,
-                                             ApplicationResponse,
-                                             ApplicationVerifyPayload)
+from app_backend.schemas.admin import (
+    AdminProfileResponse,
+    AdminProfileUpdate,
+    CompanyCreate,
+    CompanyResponse,
+    CompanyUpdate,
+    DepartmentCreate,
+    DepartmentResponse,
+    DepartmentUpdate,
+    SkillCreate,
+    SkillResponse,
+    SkillUpdate,
+)
+from app_backend.schemas.application import ApplicationRejectPayload, ApplicationResponse, ApplicationVerifyPayload
 from app_backend.schemas.placement import PlacementResponse
 from app_backend.schemas.user import UserResponse
+from app_backend.shared.auth_dependencies import require_admin
 from app_backend.shared.database import get_session
-from app_backend.shared.dependencies import require_admin
+from app_backend.shared.dependencies import get_master_data_service
 
 router = APIRouter(
     prefix="/api/v1/admin",
     tags=["admin"],
 )
 
-
-# ──────────────────────────────────────────────────────────────────────────────
 # User Account Activation (Section 1.2)
-# ──────────────────────────────────────────────────────────────────────────────
 
 
 @router.patch(
@@ -110,15 +91,11 @@ async def toggle_user_active(
         session=session,
     )
     if result.got_error():
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail=result.error_message
-        )
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=result.error_message)
     return result.user
 
 
-# ──────────────────────────────────────────────────────────────────────────────
 # Admin Profile (Section 2.3)
-# ──────────────────────────────────────────────────────────────────────────────
 
 
 @router.get(
@@ -131,11 +108,7 @@ async def get_admin_profile(
     current_user: DomainUser = Depends(require_admin),
 ) -> AdminProfileResponse:
     """Kembalikan data profil admin berdasarkan JWT access token."""
-    profile = (
-        session.query(ProfilesAdmin)
-        .filter(ProfilesAdmin.user_id == current_user.id)
-        .first()
-    )
+    profile = session.query(ProfilesAdmin).filter(ProfilesAdmin.user_id == current_user.id).first()
     if not profile:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
@@ -167,15 +140,9 @@ async def update_admin_profile(
     """Update nama, unit kerja, atau NIP admin yang sedang login."""
     from sqlalchemy.exc import IntegrityError
 
-    profile = (
-        session.query(ProfilesAdmin)
-        .filter(ProfilesAdmin.user_id == current_user.id)
-        .first()
-    )
+    profile = session.query(ProfilesAdmin).filter(ProfilesAdmin.user_id == current_user.id).first()
     if not profile:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail="Profil admin tidak ditemukan"
-        )
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Profil admin tidak ditemukan")
 
     try:
         if payload.full_name is not None:
@@ -207,12 +174,7 @@ async def update_admin_profile(
     )
 
 
-from app_backend.features.admin.master_data_service import MasterDataService
-from app_backend.shared.dependencies_service import get_master_data_service
-
-# ──────────────────────────────────────────────────────────────────────────────
 # Manage Departments (Section 2.1)
-# ──────────────────────────────────────────────────────────────────────────────
 
 
 @router.get(
@@ -241,9 +203,7 @@ async def create_department(
     try:
         return master_data_service.create_department(payload)
     except Exception as exc:
-        raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(exc)
-        )
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(exc))
 
 
 @router.patch(
@@ -262,9 +222,7 @@ async def update_department(
     except ValueError as exc:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(exc))
     except Exception as exc:
-        raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(exc)
-        )
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(exc))
 
 
 @router.delete(
@@ -282,14 +240,10 @@ async def delete_department(
     except ValueError as exc:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(exc))
     except Exception as exc:
-        raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(exc)
-        )
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(exc))
 
 
-# ──────────────────────────────────────────────────────────────────────────────
 # Manage Skills (Section 2.1)
-# ──────────────────────────────────────────────────────────────────────────────
 
 
 @router.get(
@@ -318,9 +272,7 @@ async def create_skill(
     try:
         return master_data_service.create_skill(payload)
     except Exception as exc:
-        raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(exc)
-        )
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(exc))
 
 
 @router.patch(
@@ -339,9 +291,7 @@ async def update_skill(
     except ValueError as exc:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(exc))
     except Exception as exc:
-        raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(exc)
-        )
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(exc))
 
 
 @router.delete(
@@ -359,14 +309,10 @@ async def delete_skill(
     except ValueError as exc:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(exc))
     except Exception as exc:
-        raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(exc)
-        )
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(exc))
 
 
-# ──────────────────────────────────────────────────────────────────────────────
 # Manage External Companies (Section 2.1)
-# ──────────────────────────────────────────────────────────────────────────────
 
 
 @router.get(
@@ -395,9 +341,7 @@ async def create_company(
     try:
         return master_data_service.create_company(payload)
     except Exception as exc:
-        raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(exc)
-        )
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(exc))
 
 
 @router.patch(
@@ -416,9 +360,7 @@ async def update_company(
     except ValueError as exc:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(exc))
     except Exception as exc:
-        raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(exc)
-        )
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(exc))
 
 
 @router.delete(
@@ -436,14 +378,10 @@ async def delete_company(
     except ValueError as exc:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(exc))
     except Exception as exc:
-        raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(exc)
-        )
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(exc))
 
 
-# ──────────────────────────────────────────────────────────────────────────────
 # Manage Applications (Section 4)
-# ──────────────────────────────────────────────────────────────────────────────
 
 
 @router.get(
@@ -455,13 +393,9 @@ async def list_pending_verification(
     session=Depends(get_session),
     _: DomainUser = Depends(require_admin),
 ) -> List[ApplicationResponse]:
-    result = list_pending_verification_command_handler(
-        ListPendingVerificationCommand(), session
-    )
+    result = list_pending_verification_command_handler(ListPendingVerificationCommand(), session)
     if result.got_error():
-        raise HTTPException(
-            status_code=HTTPStatus.BAD_REQUEST, detail=result.error_message
-        )
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=result.error_message)
     return result.items
 
 
@@ -485,11 +419,7 @@ async def verify_application(
         session,
     )
     if result.got_error():
-        err_status = (
-            result.error_code
-            if hasattr(result, "error_code") and result.error_code
-            else HTTPStatus.BAD_REQUEST
-        )
+        err_status = result.error_code if hasattr(result, "error_code") and result.error_code else HTTPStatus.BAD_REQUEST
         raise HTTPException(status_code=err_status, detail=result.error_message)
     return {"message": "Placement berhasil dibuat", "placement_id": result.placement.id}
 
@@ -514,15 +444,11 @@ async def reject_application_proof(
         session,
     )
     if result.got_error():
-        raise HTTPException(
-            status_code=HTTPStatus.BAD_REQUEST, detail=result.error_message
-        )
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=result.error_message)
     return result.application
 
 
-# ──────────────────────────────────────────────────────────────────────────────
 # Manage Placements (Section 5)
-# ──────────────────────────────────────────────────────────────────────────────
 
 
 @router.get(
@@ -534,11 +460,7 @@ async def list_admin_placements(
     session=Depends(get_session),
     _: DomainUser = Depends(require_admin),
 ) -> List[PlacementResponse]:
-    result = list_admin_placements_command_handler(
-        ListAdminPlacementsCommand(), session
-    )
+    result = list_admin_placements_command_handler(ListAdminPlacementsCommand(), session)
     if result.got_error():
-        raise HTTPException(
-            status_code=HTTPStatus.BAD_REQUEST, detail=result.error_message
-        )
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=result.error_message)
     return result.placements

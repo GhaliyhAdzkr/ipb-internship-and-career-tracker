@@ -13,10 +13,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app_backend.models.master_departments import MasterDepartments
-from app_backend.schemas.admin import (DepartmentCreate, DepartmentResponse,
-                                       DepartmentUpdate)
-
-# ─── List ────────────────────────────────────────────────────────────────────
+from app_backend.schemas.admin import DepartmentCreate, DepartmentResponse, DepartmentUpdate
 
 
 @dataclass
@@ -38,12 +35,7 @@ def list_departments_command_handler(
     session: Session,
 ) -> ListDepartmentsResult:
     rows = session.query(MasterDepartments).order_by(MasterDepartments.name).all()
-    return ListDepartmentsResult(
-        items=[DepartmentResponse.model_validate(r) for r in rows]
-    )
-
-
-# ─── Create ──────────────────────────────────────────────────────────────────
+    return ListDepartmentsResult(items=[DepartmentResponse.model_validate(r) for r in rows])
 
 
 @dataclass
@@ -77,15 +69,10 @@ def create_department_command_handler(
         return CreateDepartmentResult(item=DepartmentResponse.model_validate(dept))
     except IntegrityError:
         session.rollback()
-        return CreateDepartmentResult(
-            error_message=f"Kode '{command.payload.code}' sudah ada"
-        )
+        return CreateDepartmentResult(error_message=f"Kode '{command.payload.code}' sudah ada")
     except Exception as exc:
         session.rollback()
         return CreateDepartmentResult(error_message=f"Gagal membuat departemen: {exc}")
-
-
-# ─── Update ──────────────────────────────────────────────────────────────────
 
 
 @dataclass
@@ -107,11 +94,7 @@ def update_department_command_handler(
     command: UpdateDepartmentCommand,
     session: Session,
 ) -> UpdateDepartmentResult:
-    dept = (
-        session.query(MasterDepartments)
-        .filter(MasterDepartments.id == command.dept_id)
-        .first()
-    )
+    dept = session.query(MasterDepartments).filter(MasterDepartments.id == command.dept_id).first()
     if not dept:
         return UpdateDepartmentResult(error_message="Departemen tidak ditemukan")
 
@@ -127,15 +110,10 @@ def update_department_command_handler(
         return UpdateDepartmentResult(item=DepartmentResponse.model_validate(dept))
     except IntegrityError:
         session.rollback()
-        return UpdateDepartmentResult(
-            error_message=f"Kode '{command.payload.code}' sudah digunakan"
-        )
+        return UpdateDepartmentResult(error_message=f"Kode '{command.payload.code}' sudah digunakan")
     except Exception as exc:
         session.rollback()
         return UpdateDepartmentResult(error_message=f"Gagal update departemen: {exc}")
-
-
-# ─── Delete ──────────────────────────────────────────────────────────────────
 
 
 @dataclass
@@ -155,11 +133,7 @@ def delete_department_command_handler(
     command: DeleteDepartmentCommand,
     session: Session,
 ) -> DeleteDepartmentResult:
-    dept = (
-        session.query(MasterDepartments)
-        .filter(MasterDepartments.id == command.dept_id)
-        .first()
-    )
+    dept = session.query(MasterDepartments).filter(MasterDepartments.id == command.dept_id).first()
     if not dept:
         return DeleteDepartmentResult(error_message="Departemen tidak ditemukan")
 
@@ -169,11 +143,7 @@ def delete_department_command_handler(
         return DeleteDepartmentResult()
     except IntegrityError:
         session.rollback()
-        return DeleteDepartmentResult(
-            error_message="Tidak dapat menghapus departemen yang masih dipakai oleh profil mahasiswa"
-        )
+        return DeleteDepartmentResult(error_message="Tidak dapat menghapus departemen yang masih dipakai oleh profil mahasiswa")
     except Exception as exc:
         session.rollback()
-        return DeleteDepartmentResult(
-            error_message=f"Gagal menghapus departemen: {exc}"
-        )
+        return DeleteDepartmentResult(error_message=f"Gagal menghapus departemen: {exc}")

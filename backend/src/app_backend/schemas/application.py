@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
@@ -38,12 +38,9 @@ class ApplicationUpdateStatus(BaseModel):
     proof_url: str | None = None
 
 
-import datetime
-
-
 class ApplicationVerifyPayload(BaseModel):
-    start_date: datetime.date
-    end_date: datetime.date
+    start_date: date
+    end_date: date
 
 
 class ApplicationRejectPayload(BaseModel):

@@ -51,11 +51,7 @@ def register_student_command_handler(
     if session.query(Users).filter(Users.email == command.payload.email).first():
         return RegisterStudentResult(error_message="Email sudah terdaftar")
 
-    if (
-        session.query(ProfilesStudent)
-        .filter(ProfilesStudent.nim == command.payload.nim)
-        .first()
-    ):
+    if session.query(ProfilesStudent).filter(ProfilesStudent.nim == command.payload.nim).first():
         return RegisterStudentResult(error_message="NIM sudah terdaftar")
 
     try:

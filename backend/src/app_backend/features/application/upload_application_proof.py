@@ -38,34 +38,21 @@ def upload_application_proof_command_handler(
     2. Ukuran maksimum 5MB.
     3. Endpoint ini hanya bisa dipanggil jika application.status = ACCEPTED
     """
-    application = (
-        session.query(Applications)
-        .filter_by(id=command.application_id, student_id=command.student_id)
-        .first()
-    )
+    application = session.query(Applications).filter_by(id=command.application_id, student_id=command.student_id).first()
     if not application:
         return UploadApplicationProofResult(error_message="Lamaran tidak ditemukan")
 
     if application.status != "ACCEPTED":
-        return UploadApplicationProofResult(
-            error_message="Status lamaran harus ACCEPTED untuk mengunggah bukti"
-        )
+        return UploadApplicationProofResult(error_message="Status lamaran harus ACCEPTED untuk mengunggah bukti")
 
     file = command.file
     valid_content_types = ["image/jpeg", "image/png", "application/pdf"]
     if file.content_type not in valid_content_types:
-        return UploadApplicationProofResult(
-            error_message="File harus berupa image/jpeg, image/png, atau application/pdf"
-        )
+        return UploadApplicationProofResult(error_message="File harus berupa image/jpeg, image/png, atau application/pdf")
 
     # Extension check
     filename = file.filename.lower()
-    if not (
-        filename.endswith(".jpg")
-        or filename.endswith(".jpeg")
-        or filename.endswith(".png")
-        or filename.endswith(".pdf")
-    ):
+    if not (filename.endswith(".jpg") or filename.endswith(".jpeg") or filename.endswith(".png") or filename.endswith(".pdf")):
         return UploadApplicationProofResult(error_message="Ekstensi file tidak valid")
 
     os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -84,9 +71,7 @@ def upload_application_proof_command_handler(
                 if size > MAX_SIZE:
                     buffer.close()
                     os.remove(file_path)
-                    return UploadApplicationProofResult(
-                        error_message="Ukuran file melebihi batas maksimal 15MB"
-                    )
+                    return UploadApplicationProofResult(error_message="Ukuran file melebihi batas maksimal 15MB")
                 buffer.write(chunk)
 
         proof_url = f"/uploads/proofs/{unique_filename}"
@@ -113,9 +98,7 @@ def upload_application_proof_command_handler(
         )
 
         session.commit()
-        return UploadApplicationProofResult(
-            proof_url=proof_url, message="Bukti berhasil diunggah"
-        )
+        return UploadApplicationProofResult(proof_url=proof_url, message="Bukti berhasil diunggah")
 
     except Exception as exc:
         session.rollback()

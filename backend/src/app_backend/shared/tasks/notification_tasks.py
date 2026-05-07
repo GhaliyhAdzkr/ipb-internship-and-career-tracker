@@ -37,12 +37,7 @@ def send_email_notification(
     try:
         from sqlalchemy.orm import joinedload
 
-        notif = (
-            session.query(NotificationQueue)
-            .options(joinedload(NotificationQueue.user))
-            .filter_by(id=notification_id)
-            .first()
-        )
+        notif = session.query(NotificationQueue).options(joinedload(NotificationQueue.user)).filter_by(id=notification_id).first()
         if not notif or notif.status != "PROCESSING":
             return {"status": "skipped", "reason": "Not found or not processing"}
 
@@ -63,9 +58,7 @@ def send_email_notification(
         user = notif.user
         if user:
             if user.role == "STUDENT":
-                student = (
-                    session.query(ProfilesStudent).filter_by(user_id=user.id).first()
-                )
+                student = session.query(ProfilesStudent).filter_by(user_id=user.id).first()
                 if student:
                     user_name = student.full_name
             elif user.role == "ADMIN":
@@ -74,33 +67,23 @@ def send_email_notification(
                     user_name = admin.full_name
 
         # Load Template
-        template_path = os.path.join(
-            os.path.dirname(__file__), "..", "templates", "email_base.html"
-        )
-        logo_path = os.path.join(
-            os.path.dirname(__file__), "..", "templates", "logo.png"
-        )
+        template_path = os.path.join(os.path.dirname(__file__), "..", "templates", "email_base.html")
+        logo_path = os.path.join(os.path.dirname(__file__), "..", "templates", "logo.png")
 
         if os.path.exists(template_path):
             with open(template_path, "r") as f:
                 html_content = f.read()
         else:
             # Fallback if template missing
-            html_content = (
-                f"<html><body><h2>{subject}</h2><p>{message}</p></body></html>"
-            )
+            html_content = f"<html><body><h2>{subject}</h2><p>{message}</p></body></html>"
 
         # Replace Placeholders
         now = datetime.now()
         html_content = html_content.replace("{{ user_name }}", user_name)
         html_content = html_content.replace("{{ title }}", subject)
-        html_content = html_content.replace(
-            "{{ message }}", message.replace("\n", "<br>")
-        )
+        html_content = html_content.replace("{{ message }}", message.replace("\n", "<br>"))
         html_content = html_content.replace("{{ year }}", str(now.year))
-        html_content = html_content.replace(
-            "{{ timestamp }}", now.strftime("%d %b %Y, %H:%M")
-        )
+        html_content = html_content.replace("{{ timestamp }}", now.strftime("%d %b %Y, %H:%M"))
 
         msg = email.message.EmailMessage()
         msg["Subject"] = subject
@@ -118,9 +101,7 @@ def send_email_notification(
             with open(logo_path, "rb") as f:
                 logo_data = f.read()
                 # add_related transforms the part into multipart/related
-                html_part.add_related(
-                    logo_data, maintype="image", subtype="png", cid="logo"
-                )
+                html_part.add_related(logo_data, maintype="image", subtype="png", cid="logo")
 
         # Add the HTML (with its related images) as an alternative to the plain text
         if html_part.is_multipart():
@@ -236,7 +217,7 @@ def cleanup_expired_tokens() -> Dict:
         expired_refresh = (
             session.query(UserRefreshTokens)
             .filter(
-                UserRefreshTokens.is_revoked == False,
+                not UserRefreshTokens.is_revoked,
                 UserRefreshTokens.expires_at < now,
             )
             .all()
@@ -246,11 +227,7 @@ def cleanup_expired_tokens() -> Dict:
             session.delete(token)
 
         # Cleanup expired action tokens
-        expired_actions = (
-            session.query(AuthActionTokens)
-            .filter(AuthActionTokens.expires_at < now)
-            .all()
-        )
+        expired_actions = session.query(AuthActionTokens).filter(AuthActionTokens.expires_at < now).all()
         action_deleted = len(expired_actions)
         for token in expired_actions:
             session.delete(token)

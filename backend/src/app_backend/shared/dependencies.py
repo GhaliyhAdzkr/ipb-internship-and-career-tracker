@@ -3,232 +3,154 @@ Dependencies untuk Authentication & Authorization.
 Berisi FastAPI Depends yang digunakan pada protected routes.
 """
 
-import uuid
-from typing import Optional
-
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi import Depends
 from sqlalchemy.orm import Session
 
-from app_backend.domain.student import Student as DomainStudent
-from app_backend.domain.user import User as DomainUser
-from app_backend.models.profiles_student import ProfilesStudent
-from app_backend.models.users import Users
+from app_backend.features.admin.master_data_service import MasterDataService
+from app_backend.features.application.application_service import ApplicationService
+from app_backend.features.auth.auth_service import AuthService
+from app_backend.features.placement.placement_service import PlacementService
+from app_backend.features.profile.profile_service import ProfileService
+from app_backend.features.vacancy.vacancy_service import VacancyService
+from app_backend.repositories.activity_log_repository import ActivityLogRepository
+from app_backend.repositories.admin_repository import AdminRepository
+from app_backend.repositories.application_log_repository import ApplicationLogRepository
+from app_backend.repositories.application_repository import ApplicationRepository
+from app_backend.repositories.company_repository import CompanyRepository
+from app_backend.repositories.department_repository import DepartmentRepository
+from app_backend.repositories.placement_repository import PlacementRepository
+from app_backend.repositories.refresh_token_repository import RefreshTokenRepository
+from app_backend.repositories.skill_repository import SkillRepository
+from app_backend.repositories.student_repository import StudentRepository
+from app_backend.repositories.student_skill_repository import StudentSkillRepository
+from app_backend.repositories.user_repository import UserRepository
+from app_backend.repositories.vacancy_repository import VacancyRepository
+from app_backend.repositories.vacancy_skill_repository import VacancySkillRepository
 from app_backend.shared.database import get_session
-from app_backend.shared.security import decode_access_token, verify_token_type
-
-security = HTTPBearer()
 
 
-async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
+def get_user_repository(session: Session = Depends(get_session)) -> UserRepository:
+    return UserRepository(session)
+
+
+def get_student_repository(
     session: Session = Depends(get_session),
-) -> DomainUser:
-    """Decode JWT access token dan kembalikan domain User."""
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Kredensial tidak valid",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-
-    payload = decode_access_token(credentials.credentials)
-    if not payload or not verify_token_type(payload, "access"):
-        raise credentials_exception
-
-    user_id_str: Optional[str] = payload.get("user_id")
-    try:
-        user_id = uuid.UUID(user_id_str)
-    except (TypeError, ValueError):
-        raise credentials_exception
-
-    user = session.query(Users).filter(Users.id == user_id).first()
-    if user is None:
-        raise credentials_exception
-
-    return user.to_domain()
+) -> StudentRepository:
+    return StudentRepository(session)
 
 
-async def get_current_student(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
+def get_admin_repository(session: Session = Depends(get_session)) -> AdminRepository:
+    return AdminRepository(session)
+
+
+def get_refresh_token_repository(
     session: Session = Depends(get_session),
-) -> DomainStudent:
-    """Decode JWT access token dan kembalikan domain Student."""
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Kredensial tidak valid",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-
-    payload = decode_access_token(credentials.credentials)
-    if not payload or not verify_token_type(payload, "access"):
-        raise credentials_exception
-
-    user_id_str: Optional[str] = payload.get("user_id")
-    try:
-        user_id = uuid.UUID(user_id_str)
-    except (TypeError, ValueError):
-        raise credentials_exception
-
-    # Get user and check role
-    user = session.query(Users).filter(Users.id == user_id).first()
-    if user is None:
-        raise credentials_exception
-
-    if user.role != "STUDENT":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Akses ditolak. Hanya STUDENT.",
-        )
-
-    # Get student profile
-    profile = (
-        session.query(ProfilesStudent)
-        .filter(ProfilesStudent.user_id == user_id)
-        .first()
-    )
-    if profile is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Profil mahasiswa tidak ditemukan",
-        )
-
-    return DomainStudent(
-        user_id=profile.user_id,
-        nim=profile.nim,
-        full_name=profile.full_name,
-        semester=profile.semester,
-        department_id=profile.department_id,
-        gpa=profile.gpa,
-        phone_number=profile.phone_number,
-        linkedin_url=profile.linkedin_url,
-        cv_url=profile.cv_url,
-        is_mbkm_eligible=(
-            profile.is_mbkm_eligible if profile.is_mbkm_eligible else False
-        ),
-        updated_at=profile.updated_at,
-    )
+) -> RefreshTokenRepository:
+    return RefreshTokenRepository(session)
 
 
-async def get_current_active_user(
-    current_user: DomainUser = Depends(get_current_user),
-) -> DomainUser:
-    """Pastikan user aktif."""
-    if not current_user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Akun dinonaktifkan. Hubungi admin.",
-        )
-    return current_user
-
-
-async def require_admin(
-    current_user: DomainUser = Depends(get_current_active_user),
-) -> DomainUser:
-    """Hanya ADMIN yang boleh akses endpoint ini."""
-    if not current_user.is_admin():
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Akses ditolak. Hanya ADMIN.",
-        )
-    return current_user
-
-
-async def require_student(
-    current_user: DomainUser = Depends(get_current_active_user),
-) -> DomainUser:
-    """Hanya STUDENT yang boleh akses endpoint ini."""
-    if not current_user.is_student():
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Akses ditolak. Hanya STUDENT.",
-        )
-    return current_user
-
-
-async def get_current_active_student(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
+def get_vacancy_repository(
     session: Session = Depends(get_session),
-) -> DomainStudent:
-    """
-    Pastikan student profile aktif.
-    Menggunakan dependency injection untuk session agar tidak ada leak.
-    """
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Kredensial tidak valid",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-
-    payload = decode_access_token(credentials.credentials)
-    if not payload or not verify_token_type(payload, "access"):
-        raise credentials_exception
-
-    user_id_str: Optional[str] = payload.get("user_id")
-    try:
-        user_id = uuid.UUID(user_id_str)
-    except (TypeError, ValueError):
-        raise credentials_exception
-
-    # Get user and check if active
-    user = session.query(Users).filter(Users.id == user_id).first()
-    if user is None:
-        raise credentials_exception
-
-    if not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Akun dinonaktifkan. Hubungi admin.",
-        )
-
-    if user.role != "STUDENT":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Akses ditolak. Hanya STUDENT.",
-        )
-
-    # Get student profile
-    profile = (
-        session.query(ProfilesStudent)
-        .filter(ProfilesStudent.user_id == user_id)
-        .first()
-    )
-    if profile is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Profil mahasiswa tidak ditemukan",
-        )
-
-    return DomainStudent(
-        user_id=profile.user_id,
-        nim=profile.nim,
-        full_name=profile.full_name,
-        semester=profile.semester,
-        department_id=profile.department_id,
-        gpa=profile.gpa,
-        phone_number=profile.phone_number,
-        linkedin_url=profile.linkedin_url,
-        cv_url=profile.cv_url,
-        is_mbkm_eligible=(
-            profile.is_mbkm_eligible if profile.is_mbkm_eligible else False
-        ),
-        updated_at=profile.updated_at,
-    )
+) -> VacancyRepository:
+    return VacancyRepository(session)
 
 
-def require_roles(roles: list[str]):
-    """
-    Factory dependency untuk multi-role RBAC.
-    Contoh: Depends(require_roles(['ADMIN', 'STUDENT']))
-    """
+def get_vacancy_skill_repository(
+    session: Session = Depends(get_session),
+) -> VacancySkillRepository:
+    return VacancySkillRepository(session)
 
-    async def role_checker(
-        current_user: DomainUser = Depends(get_current_active_user),
-    ) -> DomainUser:
-        if current_user.role not in roles:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Akses ditolak. Role yang diizinkan: {', '.join(roles)}",
-            )
-        return current_user
 
-    return role_checker
+def get_company_repository(
+    session: Session = Depends(get_session),
+) -> CompanyRepository:
+    return CompanyRepository(session)
+
+
+def get_department_repository(
+    session: Session = Depends(get_session),
+) -> DepartmentRepository:
+    return DepartmentRepository(session)
+
+
+def get_skill_repository(session: Session = Depends(get_session)) -> SkillRepository:
+    return SkillRepository(session)
+
+
+def get_application_repository(
+    session: Session = Depends(get_session),
+) -> ApplicationRepository:
+    return ApplicationRepository(session)
+
+
+def get_application_log_repository(
+    session: Session = Depends(get_session),
+) -> ApplicationLogRepository:
+    return ApplicationLogRepository(session)
+
+
+def get_placement_repository(
+    session: Session = Depends(get_session),
+) -> PlacementRepository:
+    return PlacementRepository(session)
+
+
+def get_activity_log_repository(
+    session: Session = Depends(get_session),
+) -> ActivityLogRepository:
+    return ActivityLogRepository(session)
+
+
+def get_student_skill_repository(
+    session: Session = Depends(get_session),
+) -> StudentSkillRepository:
+    return StudentSkillRepository(session)
+
+
+def get_auth_service(
+    user_repo: UserRepository = Depends(get_user_repository),
+    student_repo: StudentRepository = Depends(get_student_repository),
+    admin_repo: AdminRepository = Depends(get_admin_repository),
+    refresh_token_repo: RefreshTokenRepository = Depends(get_refresh_token_repository),
+) -> AuthService:
+    return AuthService(user_repo, student_repo, admin_repo, refresh_token_repo)
+
+
+def get_vacancy_service(
+    vacancy_repo: VacancyRepository = Depends(get_vacancy_repository),
+    vacancy_skill_repo: VacancySkillRepository = Depends(get_vacancy_skill_repository),
+    company_repo: CompanyRepository = Depends(get_company_repository),
+) -> VacancyService:
+    return VacancyService(vacancy_repo, vacancy_skill_repo, company_repo)
+
+
+def get_master_data_service(
+    department_repo: DepartmentRepository = Depends(get_department_repository),
+    skill_repo: SkillRepository = Depends(get_skill_repository),
+    company_repo: CompanyRepository = Depends(get_company_repository),
+) -> MasterDataService:
+    return MasterDataService(department_repo, skill_repo, company_repo)
+
+
+def get_application_service(
+    application_repo: ApplicationRepository = Depends(get_application_repository),
+    application_log_repo: ApplicationLogRepository = Depends(get_application_log_repository),
+    student_repo: StudentRepository = Depends(get_student_repository),
+    placement_repo: PlacementRepository = Depends(get_placement_repository),
+) -> ApplicationService:
+    return ApplicationService(application_repo, application_log_repo, student_repo, placement_repo)
+
+
+def get_placement_service(
+    placement_repo: PlacementRepository = Depends(get_placement_repository),
+    activity_log_repo: ActivityLogRepository = Depends(get_activity_log_repository),
+) -> PlacementService:
+    return PlacementService(placement_repo, activity_log_repo)
+
+
+def get_profile_service(
+    student_repo: StudentRepository = Depends(get_student_repository),
+    user_repo: UserRepository = Depends(get_user_repository),
+    student_skill_repo: StudentSkillRepository = Depends(get_student_skill_repository),
+) -> ProfileService:
+    return ProfileService(student_repo, user_repo, student_skill_repo)

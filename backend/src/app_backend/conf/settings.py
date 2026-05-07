@@ -29,19 +29,13 @@ class Settings(BaseSettings):
     session_auto_flush: bool = False
 
     # JWT Settings
-    secret_key: str = os.getenv(
-        "SECRET_KEY", "your-secret-key-here-change-in-production-09876543210987654321"
-    )
+    secret_key: str = os.getenv("SECRET_KEY", "your-secret-key-here-change-in-production-09876543210987654321")
     algorithm: str = os.getenv("ALGORITHM", "HS256")
-    access_token_expire_minutes: int = int(
-        os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30")
-    )
+    access_token_expire_minutes: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
     refresh_token_expire_days: int = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "32"))
 
     # Password Reset Settings
-    reset_password_token_expire_minutes: int = int(
-        os.getenv("RESET_PASSWORD_TOKEN_EXPIRE_MINUTES", "15")
-    )
+    reset_password_token_expire_minutes: int = int(os.getenv("RESET_PASSWORD_TOKEN_EXPIRE_MINUTES", "15"))
 
     # SMTP / Resend Settings
     smtp_host: str = os.getenv("SMTP_HOST", "smtp.resend.com")

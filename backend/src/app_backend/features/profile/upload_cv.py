@@ -45,11 +45,7 @@ def upload_cv_command_handler(
     2. File harus PDF.
     3. File size limit (ditangani oleh fastapi tapi baiknya double check, max 5MB).
     """
-    profile = (
-        session.query(ProfilesStudent)
-        .filter(ProfilesStudent.user_id == command.user_id)
-        .first()
-    )
+    profile = session.query(ProfilesStudent).filter(ProfilesStudent.user_id == command.user_id).first()
     if not profile:
         return UploadCVResult(error_message="Profil mahasiswa tidak ditemukan")
 
@@ -73,16 +69,12 @@ def upload_cv_command_handler(
         size = 0
 
         with open(file_path, "wb") as buffer:
-            while chunk := command.file.file.read(
-                1024 * 1024
-            ):  # Batching 1MB per iterasi
+            while chunk := command.file.file.read(1024 * 1024):  # Batching 1MB per iterasi
                 size += len(chunk)
                 if size > MAX_SIZE:
                     buffer.close()
                     os.remove(file_path)
-                    return UploadCVResult(
-                        error_message="Ukuran file melebihi batas maksimal 15MB"
-                    )
+                    return UploadCVResult(error_message="Ukuran file melebihi batas maksimal 15MB")
                 buffer.write(chunk)
 
         cv_url = f"/uploads/cv/{unique_filename}"

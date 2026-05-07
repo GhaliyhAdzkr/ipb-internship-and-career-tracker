@@ -36,25 +36,15 @@ class DocumentRequests(Base):
         ),
     )
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        Uuid, primary_key=True, server_default=text("public.gen_random_uuid()")
-    )
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, server_default=text("public.gen_random_uuid()"))
     document_type: Mapped[str] = mapped_column(String(50), nullable=False)
     student_id: Mapped[Optional[uuid.UUID]] = mapped_column(Uuid)
     reference_vacancy_id: Mapped[Optional[uuid.UUID]] = mapped_column(Uuid)
     purpose: Mapped[Optional[str]] = mapped_column(Text)
     generated_url: Mapped[Optional[str]] = mapped_column(Text)
-    status: Mapped[Optional[str]] = mapped_column(
-        String(20), server_default=text("'PENDING'::character varying")
-    )
-    created_at: Mapped[Optional[datetime.datetime]] = mapped_column(
-        DateTime(True), server_default=text("CURRENT_TIMESTAMP")
-    )
+    status: Mapped[Optional[str]] = mapped_column(String(20), server_default=text("'PENDING'::character varying"))
+    created_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True), server_default=text("CURRENT_TIMESTAMP"))
 
     # Relationships
-    reference_vacancy: Mapped[Optional["Vacancies"]] = relationship(
-        "Vacancies", back_populates="document_requests"
-    )
-    student: Mapped[Optional["ProfilesStudent"]] = relationship(
-        "ProfilesStudent", back_populates="document_requests"
-    )
+    reference_vacancy: Mapped[Optional["Vacancies"]] = relationship("Vacancies", back_populates="document_requests")
+    student: Mapped[Optional["ProfilesStudent"]] = relationship("ProfilesStudent", back_populates="document_requests")
