@@ -35,6 +35,17 @@ def send_direct_email(to_email: str, subject: str, body: str, user_name: str = "
     msg.set_content(body)  # Plain text version
     msg.add_alternative(html_content, subtype="html")
 
+    # Attach Logo as CID
+    if os.path.exists(logo_path):
+        with open(logo_path, "rb") as f:
+            logo_data = f.read()
+            msg.get_payload()[1].add_related(
+                logo_data,
+                maintype="image",
+                subtype="png",
+                cid="logo"
+            )
+
     try:
         if settings.smtp_port == 465:
             server = smtplib.SMTP_SSL(settings.smtp_host, settings.smtp_port)

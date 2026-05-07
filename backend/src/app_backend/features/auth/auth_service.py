@@ -4,6 +4,7 @@ from typing import Protocol
 
 from app_backend.conf.settings import settings
 from app_backend.domain.user import UserRole
+from app_backend.models.auth_action_tokens import AuthActionTokens
 from app_backend.models.profiles_admin import ProfilesAdmin
 from app_backend.models.profiles_student import ProfilesStudent
 from app_backend.models.user_refresh_tokens import UserRefreshTokens
@@ -13,7 +14,8 @@ from app_backend.repositories.refresh_token_repository import RefreshTokenReposi
 from app_backend.repositories.student_repository import StudentRepository
 from app_backend.repositories.user_repository import UserRepository
 from app_backend.schemas.user import AdminRegister, LoginResponse, StudentRegister, UserLogin, UserResponse
-from app_backend.shared.security import create_access_token, create_refresh_token, hash_password, hash_token, verify_password
+from app_backend.shared.mailer import send_direct_email
+from app_backend.shared.security import create_access_token, create_refresh_token, generate_secure_token, hash_password, hash_token, verify_password
 
 
 class IAuthService(Protocol):
@@ -66,9 +68,6 @@ class AuthService:
             self.student_repo.create(profile)
             
             # Buat Token Verifikasi
-            from app_backend.models.auth_action_tokens import AuthActionTokens
-            from app_backend.shared.security import generate_secure_token, hash_token
-            
             raw_token = generate_secure_token()
             expires_at = now + timedelta(hours=24)
             
@@ -82,21 +81,27 @@ class AuthService:
             self.user_repo.session.add(verification_token)
             self.user_repo.save_changes()
 
-            # Kirim Email Verifikasi (Sync untuk testing)
-            from app_backend.shared.mailer import send_direct_email
+            verification_link = f"{settings.frontend_url}/verify-email?token={raw_token}"
             subject = "Verifikasi Akun LARAS IPB"
             body = f"""
-Halo {data.full_name},
+Terima kasih telah mendaftar di <strong>LARAS (Internship and Career Tracker)</strong>.<br>
+Untuk mengaktifkan akun Anda, silakan klik tombol verifikasi di bawah ini:
 
-Terima kasih telah mendaftar di LARAS (Internship and Career Tracker).
-Untuk mengaktifkan akun Anda, silakan gunakan kode verifikasi berikut:
+<div class="btn-container">
+    <a href="{verification_link}" class="btn-action">
+       Verifikasi Akun Saya
+    </a>
+</div>
 
-{raw_token}
+<div class="raw-link">
+    Jika tombol di atas tidak berfungsi, Anda juga dapat mengeklik atau menyalin tautan berikut ke browser Anda:
+    <br><br>
+    <a href="{verification_link}" style="color: #0056b3;">{verification_link}</a>
+</div>
 
-Atau klik tautan berikut:
-http://localhost:5173/verify-email?token={raw_token}
-
-Kode ini berlaku selama 24 jam.
+<p style="font-size: 12px; color: #999; margin-top: 30px;">
+    Tautan ini akan kadaluarsa dalam 24 jam. Jika Anda tidak merasa mendaftar di LARAS, abaikan email ini.
+</p>
 """
             send_direct_email(user.email, subject, body, user_name=data.full_name)
 

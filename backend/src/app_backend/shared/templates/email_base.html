@@ -4,125 +4,85 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Manrope:wght@400;500;600&display=swap');
-        
         body {
-            font-family: 'Manrope', 'Plus Jakarta Sans', Arial, sans-serif;
-            background-color: #f4f7f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9fafb;
             margin: 0;
             padding: 0;
-            color: #4A6080;
-            -webkit-font-smoothing: antialiased;
+            color: #374151;
+            line-height: 1.6;
         }
         .wrapper {
-            background-color: #f4f7f9;
-            padding: 40px 10px;
+            padding: 40px 20px;
         }
         .container {
             max-width: 600px;
             margin: 0 auto;
             background-color: #ffffff;
-            border-radius: 16px;
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 10px 25px rgba(0, 63, 127, 0.08);
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
         .header {
-            background: linear-gradient(135deg, #003F7F 0%, #1A6FBF 100%);
-            padding: 40px 30px;
+            padding: 40px 40px 20px 40px;
             text-align: center;
         }
-        .header-content {
-            display: inline-block;
-            vertical-align: middle;
-        }
-        .header img {
-            max-height: 50px;
-            width: auto;
-            margin-bottom: 12px;
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-        }
         .header-title {
-            color: #ffffff;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 18px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
+            color: #002957;
+            font-size: 22px;
+            font-weight: 800;
             margin: 0;
             text-transform: uppercase;
-        }
-        .header-subtitle {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 12px;
-            margin-top: 4px;
-            font-weight: 500;
+            letter-spacing: 1px;
         }
         .content {
-            padding: 45px 40px;
+            padding: 0 40px 40px 40px;
         }
         .greeting {
-            font-weight: 600;
-            font-size: 18px;
-            color: #003F7F;
-            margin-bottom: 20px;
-        }
-        .subject-box {
-            background-color: #f0f7ff;
-            border-left: 4px solid #00A8CC;
-            padding: 15px 20px;
-            margin-bottom: 30px;
-            border-radius: 4px;
-        }
-        .subject-text {
-            margin: 0;
-            font-weight: 700;
-            color: #1A6FBF;
             font-size: 16px;
+            margin-bottom: 20px;
+            color: #111827;
         }
         .message-body {
-            line-height: 1.8;
             font-size: 15px;
-            color: #4A6080;
+            color: #4b5563;
         }
         .divider {
             height: 1px;
-            background-color: #edf2f7;
+            background-color: #f3f4f6;
             margin: 30px 0;
         }
         .footer {
-            background-color: #ffffff;
-            padding: 0 40px 40px 40px;
             text-align: center;
+            padding-top: 10px;
         }
         .footer-text {
             font-size: 12px;
-            color: #94a3b8;
-            line-height: 1.5;
+            color: #9ca3af;
         }
-        .footer-logo {
-            opacity: 0.5;
-            margin-top: 20px;
-            font-weight: 700;
-            font-size: 14px;
-            color: #4A6080;
-        }
-        .timestamp {
-            font-size: 11px;
-            color: #cbd5e1;
-            margin-top: 20px;
+        .btn-container {
+            text-align: center;
+            margin: 35px 0;
         }
         .btn-action {
             display: inline-block;
-            background-color: #1A6FBF;
+            background-color: #002957;
             color: #ffffff !important;
-            padding: 14px 28px;
+            padding: 14px 32px;
             text-decoration: none;
             border-radius: 8px;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 15px;
-            margin-top: 25px;
-            transition: background-color 0.2s;
+        }
+        .raw-link {
+            font-size: 13px;
+            color: #6b7280;
+            word-break: break-all;
+            margin-top: 30px;
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 8px;
         }
     </style>
 </head>
@@ -130,17 +90,12 @@
     <div class="wrapper">
         <div class="container">
             <div class="header">
-                <img src="cid:logo" alt="LARAS Logo">
-                <div class="header-title">LARAS Platform</div>
-                <div class="header-subtitle">IPB Internship & Career Tracker</div>
+                <img src="cid:logo" alt="LARAS Logo" style="max-height: 60px; margin-bottom: 20px;">
+                <h1 class="header-title">{{ title }}</h1>
             </div>
             
             <div class="content">
-                <div class="greeting">Halo, {{ user_name }}!</div>
-                
-                <div class="subject-box">
-                    <p class="subject-text">{{ title }}</p>
-                </div>
+                <div class="greeting">Halo <strong>{{ user_name }}</strong>,</div>
                 
                 <div class="message-body">
                     {{ message }}
@@ -150,16 +105,10 @@
                 
                 <div class="footer">
                     <p class="footer-text">
-                        Pesan ini dikirimkan karena Anda terdaftar pada sistem <strong>IPB Internship & Career Tracker</strong>.<br>
-                        Silakan abaikan email ini jika Anda merasa tidak melakukan aktivitas terkait.
+                        &copy; {{ year }} LARAS Platform - IPB University.<br>
+                        Direktorat Kemahasiswaan & Pengembangan Karir.
                     </p>
-                    <div class="footer-logo">LARAS</div>
-                    <div class="footer-text" style="margin-top: 10px;">
-                        &copy; {{ year }} Direktorat Kemahasiswaan & Pengembangan Karir IPB
-                    </div>
-                    <div class="timestamp">
-                        Dikirim pada: {{ timestamp }} WIB
-                    </div>
+                    <p style="font-size: 10px; color: #d1d5db;">{{ timestamp }} WIB</p>
                 </div>
             </div>
         </div>
