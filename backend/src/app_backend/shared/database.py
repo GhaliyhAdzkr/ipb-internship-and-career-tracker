@@ -11,8 +11,13 @@ from app_backend.conf.settings import settings
 SQLALCHEMY_DATABASE_URL = settings.db_url
 SQLALCHEMY_DATABASE_TEST_URL = settings.db_test_url
 
-# Use SQLAlchemy 2.0 style engine (future flag is optional but explicit)
-engine = create_engine(SQLALCHEMY_DATABASE_URL, future=True)
+# Use SQLAlchemy 2.0 style engine
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL, 
+    future=True,
+    pool_pre_ping=True,    # Verifikasi koneksi sebelum digunakan
+    pool_recycle=3600,     # Recycle koneksi setiap 1 jam
+)
 
 SessionLocal = sessionmaker(
     autocommit=settings.session_auto_commit,

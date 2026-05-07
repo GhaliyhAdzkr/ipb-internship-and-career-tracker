@@ -120,13 +120,14 @@ async def list_vacancies(
     """
     skip = (page - 1) * per_page
     vacancies = vacancy_service.list_active_vacancies(skip, per_page)
-    # Note: Simplified for now, in a real scenario we'd need a total count for pagination
+    total = vacancy_service.count_active_vacancies()
+    
     return VacancyListResponse(
         items=vacancies,
-        total=len(vacancies),  # This is a placeholder, usually we'd get total from repo
+        total=total,
         page=page,
         per_page=per_page,
-        total_pages=(len(vacancies) // per_page) + 1,
+        total_pages=(total + per_page - 1) // per_page if total > 0 else 1,
     )
 
 

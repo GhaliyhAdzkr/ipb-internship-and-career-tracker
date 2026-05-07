@@ -146,6 +146,17 @@ class ChangePassword(BaseModel):
         return _validate_password_strength(v)
 
 
+class ProfileUpdate(BaseModel):
+    """Payload untuk update data profil."""
+    full_name: Optional[str] = Field(None, min_length=3, max_length=150)
+    semester: Optional[int] = Field(None, ge=1, le=14)
+    nim: Optional[str] = Field(None, max_length=20)
+    phone_number: Optional[str] = Field(None, max_length=20)
+    linkedin_url: Optional[str] = None
+    gpa: Optional[float] = Field(None, ge=0.0, le=4.0)
+    department_id: Optional[uuid.UUID] = None
+
+
 # Response
 
 
@@ -158,6 +169,16 @@ class UserResponse(BaseModel):
     email: str
     role: str
     is_active: bool
+    full_name: Optional[str] = None
+    nim: Optional[str] = None
+    semester: Optional[int] = None
+    unit_name: Optional[str] = None
+    phone_number: Optional[str] = None
+    linkedin_url: Optional[str] = None
+    cv_url: Optional[str] = None
+    gpa: Optional[float] = None
+    department_id: Optional[uuid.UUID] = None
+    department_name: Optional[str] = None
     last_login_at: Optional[datetime] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None

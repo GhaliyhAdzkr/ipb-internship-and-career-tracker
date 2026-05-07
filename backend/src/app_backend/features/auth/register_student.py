@@ -62,8 +62,8 @@ def register_student_command_handler(
             id=user_id,
             email=command.payload.email,
             password_hash=hash_password(command.payload.password),
-            role=UserRole.STUDENT.value,  # HARDCODED – tidak bisa dari client
-            is_active=True,
+            role=UserRole.STUDENT.value,
+            is_active=False,  # AKUN TIDAK AKTIF SAMPAI DIVERIFIKASI
             created_at=now,
             updated_at=now,
         )
@@ -78,10 +78,45 @@ def register_student_command_handler(
         )
 
         session.add(user)
-        session.flush()  # FK constraint: user harus ada sebelum profile
+        session.flush()
         session.add(profile)
+        
+        # Buat Token Verifikasi
+        from app_backend.models.auth_action_tokens import AuthActionTokens
+        from app_backend.shared.security import generate_secure_token, hash_token
+        from datetime import timedelta
+        
+        raw_token = generate_secure_token()
+        expires_at = now + timedelta(hours=24)
+        
+        verification_token = AuthActionTokens(
+            user_id=user_id,
+            token_hash=hash_token(raw_token),
+            action_type="ACTIVATE_ACCOUNT",
+            expires_at=expires_at,
+            is_used=False,
+        )
+        session.add(verification_token)
         session.commit()
         session.refresh(user)
+
+        # Kirim Email Verifikasi
+        from app_backend.shared.mailer import send_direct_email
+        subject = "Verifikasi Akun LARAS IPB"
+        body = f"""
+Halo {command.payload.full_name},
+
+Terima kasih telah mendaftar di LARAS (Internship and Career Tracker).
+Untuk mengaktifkan akun Anda, silakan gunakan kode verifikasi berikut:
+
+{raw_token}
+
+Atau klik tautan berikut (jika sudah diimplementasi di frontend):
+http://localhost:5173/verify-email?token={raw_token}
+
+Kode ini berlaku selama 24 jam.
+"""
+        send_direct_email(user.email, subject, body, user_name=command.payload.full_name)
 
         return RegisterStudentResult(
             user=UserResponse(

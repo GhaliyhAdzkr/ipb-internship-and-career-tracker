@@ -10,24 +10,41 @@ export const useAuth = () => {
     mutationFn: authService.login,
     onSuccess: (data) => {
       localStorage.setItem('token', data.access_token);
+      localStorage.setItem('refreshToken', data.refresh_token);
       queryClient.setQueryData(['user'], data.user);
-      navigate('/home');
+      navigate('/lowongan');
     },
   });
 
   const registerMutation = useMutation({
     mutationFn: authService.register,
     onSuccess: () => {
-      navigate('/');
+      navigate('/login');
     },
   });
 
   const logoutMutation = useMutation({
     mutationFn: authService.logout,
-    onSuccess: () => {
+    onSettled: () => {
       localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
       queryClient.clear();
-      navigate('/');
+      navigate('/login');
+    },
+  });
+
+  const forgotPasswordMutation = useMutation({
+    mutationFn: authService.requestPasswordReset,
+  });
+
+  const verifyEmailMutation = useMutation({
+    mutationFn: authService.verifyEmail,
+  });
+
+  const updateProfileMutation = useMutation({
+    mutationFn: authService.updateProfile,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user'] });
     },
   });
 
@@ -47,6 +64,18 @@ export const useAuth = () => {
     loginError: loginMutation.error,
     register: registerMutation.mutate,
     isRegistering: registerMutation.isPending,
-    logout: logoutMutation.mutate,
+    registerError: registerMutation.error,
+    logout: () => {
+      const refreshToken = localStorage.getItem('refreshToken');
+      logoutMutation.mutate(refreshToken);
+    },
+    forgotPassword: forgotPasswordMutation.mutate,
+    isRequestingReset: forgotPasswordMutation.isPending,
+    resetSent: forgotPasswordMutation.isSuccess,
+    resetError: forgotPasswordMutation.error,
+    verifyEmail: verifyEmailMutation.mutateAsync,
+    isVerifying: verifyEmailMutation.isPending,
+    updateProfile: updateProfileMutation.mutateAsync,
+    isUpdating: updateProfileMutation.isPending,
   };
 };

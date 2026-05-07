@@ -61,14 +61,28 @@ def request_reset_password_command_handler(
     action_token = AuthActionTokens(
         user_id=user.id,
         token_hash=hash_token(raw_token),
-        action_type="RESET_PASSWORD",
+        action_type="PASSWORD_RESET",
         expires_at=expires_at,
         is_used=False,
     )
     session.add(action_token)
     session.commit()
 
-    # TODO: Kirim raw_token via email (SMTP worker).
+    # Kirim email reset password
+    from app_backend.shared.mailer import send_direct_email
+    subject = "Reset Password Akun LARAS"
+    body = f"""
+Halo,
+
+Anda telah meminta untuk mereset kata sandi akun LARAS Anda.
+Silakan gunakan token berikut untuk melanjutkan:
+
+{raw_token}
+
+Token ini berlaku selama 15 menit. Jika Anda tidak merasa melakukan permintaan ini, silakan abaikan email ini.
+"""
+    send_direct_email(user.email, subject, body)
+
     # Di production: hapus field `token` dari response ini.
     return RequestResetPasswordResult(
         token=raw_token,  # DEV ONLY
@@ -106,7 +120,7 @@ def reset_password_command_handler(
         session.query(AuthActionTokens)
         .filter(
             AuthActionTokens.token_hash == token_hash,
-            AuthActionTokens.action_type == "RESET_PASSWORD",
+            AuthActionTokens.action_type == "PASSWORD_RESET",
         )
         .first()
     )

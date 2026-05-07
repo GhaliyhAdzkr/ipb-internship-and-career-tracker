@@ -166,6 +166,9 @@ class VacancyService:
         vacancies = self.vacancy_repo.list_active(skip, limit)
         return [self._map_to_response(v) for v in vacancies]
 
+    def count_active_vacancies(self) -> int:
+        return self.vacancy_repo.count_active()
+
     def _map_to_response(self, vacancy: Vacancies) -> VacancyResponse:
         return VacancyResponse(
             id=vacancy.id,

@@ -40,9 +40,10 @@ class AuthActionTokens(Base):
     token_hash: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     action_type: Mapped[str] = mapped_column(
         Enum(
-            "RESET_PASSWORD",
+            "PASSWORD_RESET",
             "ACTIVATE_ACCOUNT",
-            name="action_token_type_enum",
+            "EMAIL_VERIFICATION",
+            name="auth_action_enum",
             schema="auth",
         ),
         nullable=False,
