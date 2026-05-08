@@ -26,7 +26,7 @@ const Sidebar = () => {
 	];
 
 	return (
-		<div className="w-64 min-h-screen bg-indigo-50 border-r border-neutral-300/20 flex flex-col font-jakarta">
+		<div className="sticky top-0 h-screen w-64 bg-indigo-50 border-r border-neutral-300/20 flex flex-col font-jakarta shrink-0">
 			{/* Brand */}
 			<div className="p-6 flex items-center gap-3 mb-4">
 				<img 

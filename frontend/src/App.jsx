@@ -11,6 +11,7 @@ import Lamaran from "./pages/Lamaran";
 import Jurnal from "./pages/Jurnal";
 import Laporan from "./pages/Laporan";
 import Profil from "./pages/Profil";
+import DetailLowongan from "./pages/DetailLowongan";
 
 import { useAuth } from "./hooks/useAuth";
 import { PiSpinnerGap } from "react-icons/pi";
@@ -93,6 +94,7 @@ function App() {
         <Route path="/jurnal" element={<ProtectedRoute><Jurnal /></ProtectedRoute>} />
         <Route path="/laporan" element={<ProtectedRoute><Laporan /></ProtectedRoute>} />
         <Route path="/profil" element={<ProtectedRoute><Profil /></ProtectedRoute>} />
+        <Route path="/detail" element={<ProtectedRoute><DetailLowongan /></ProtectedRoute>} />
         
         {/* Fallback redirect */}
         <Route path="*" element={<Navigate to="/" replace />} />
