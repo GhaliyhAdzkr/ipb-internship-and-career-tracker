@@ -9,16 +9,13 @@ function Dashboard() {
 	return (
 		<div className="font-jakarta">
 			{/* Welcome */}
-			<div className="mb-5 p-8 bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] flex justify-between items-center gap-6">
-				<h2 className="text-2xl text-black font-bold">
-					Selamat Datang Kembali, {user?.email?.split('@')[0] || 'Budi'}!
-				</h2>
-				<NavLink
-					to="/jurnal"
-					className="px-3 py-2 bg-sky-950 hover:bg-sky-900 text-white rounded font-bold"
-				>
-					Tulis Laporan
-				</NavLink>
+			<div className="mb-8 bg-sky-950 py-7 px-10 rounded-xl text-white flex justify-between items-center shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)]">
+				<div className="w-full flex gap-2 justify-between items-center">
+					<div className="text-3xl font-bold">Selamat Datang Kembali, Budi</div>
+					<button className="text-center bg-white text-sm font-bold py-2 px-4 text-sky-950 rounded">
+						Tulis Jurnal
+					</button>
+				</div>
 			</div>
 
 			{/* Cards Progress */}

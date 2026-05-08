@@ -12,13 +12,12 @@ function Laporan() {
 	return (
 		<div className="font-jakarta">
 			{/* Banner */}
-			<div className="mb-8 bg-sky-950 p-10 rounded-xl text-white flex justify-between items-center shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)]">
+			<div className="mb-8 bg-sky-950 py-7 px-10 rounded-xl text-white flex justify-between items-center shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)]">
 				<div className="flex flex-col gap-2">
 					<div className="text-3xl font-bold">Laporan Akhir</div>
-					<div className="text-justify max-w-xl text-sm opacity-90">
+					<div className="text-justify  opacity-90">
 						Unggah laporan akhir magang Anda untuk proses penilaian dan verifikasi sertifikat.
 					</div>
-					<TheFooter></TheFooter>
 				</div>
 			</div>
 

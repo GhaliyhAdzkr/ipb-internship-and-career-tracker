@@ -44,18 +44,18 @@ function Lowongan() {
 	return (
 		<div className="font-jakarta">
 			{/* Banner */}
-			<div className="mb-5 bg-sky-950 p-10 rounded-xl text-white flex justify-between items-center shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)]">
+			<div className="mb-5 bg-sky-950 py-7 px-10 rounded-xl text-white flex justify-between items-center shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)]">
 				<div className="flex flex-col gap-2">
 					<div className="text-3xl font-bold">Eksplorasi Karirmu</div>
-					<div className="text-justify max-w-xl text-sm opacity-90">
+					<div className="text-justify  opacity-90">
 						Temukan peluang magang dan karir profesional yang telah dikurasi khusus untuk mahasiswa dan alumni IPB University.
 					</div>
 				</div>
 			</div>
 
 			{/* Search Section */}
-			<div className="bg-white p-6 rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] mb-8 flex flex-col md:flex-row gap-4 items-end">
-				<div className="flex-1 w-full flex flex-col gap-1.5">
+			<div className="bg-white p-6 rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] mb-8 flex gap-4 items-end">
+				<div className="flex-1 flex flex-col gap-1.5 w-60">
 					<label className="text-xs font-bold text-black uppercase">Apa yang ingin kamu cari?</label>
 					<div className="relative">
 						<PiBriefcase className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={20} />
@@ -66,7 +66,7 @@ function Lowongan() {
 						/>
 					</div>
 				</div>
-				<div className="w-full md:w-60 flex flex-col gap-1.5">
+				<div className="w-full md:w-50 flex flex-col gap-1.5">
 					<label className="text-xs font-bold text-black uppercase">Lokasi</label>
 					<div className="relative">
 						<PiMapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={20} />
@@ -77,7 +77,7 @@ function Lowongan() {
 						/>
 					</div>
 				</div>
-				<div className="w-full md:w-60 flex flex-col gap-1.5">
+				<div className="w-full md:w-50 flex flex-col gap-1.5">
 					<label className="text-xs font-bold text-black uppercase">Tipe</label>
 					<div className="relative">
 						<PiShapes className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={20} />
@@ -89,7 +89,7 @@ function Lowongan() {
 					</div>
 				</div>
 				<button className="bg-sky-950 text-white p-2.5 rounded hover:bg-sky-900 transition-colors">
-					<PiMagnifyingGlass size={24} weight="bold" />
+					<PiMagnifyingGlass size={20} weight="bold" />
 				</button>
 			</div>
 

@@ -9,7 +9,7 @@ function Jurnal() {
 	const [selectedDate, setSelectedDate] = useState(new Date());
 	const [startTimeStr, setStartTimeStr] = useState("08:00");
 	const [endTimeStr, setEndTimeStr] = useState("16:00");
-	
+
 	const journalStartDate = new Date(2026, 1, 1);
 
 	const calculateWorkTime = (start, end) => {
@@ -19,7 +19,8 @@ function Jurnal() {
 		const sTotal = sH * 60 + sM;
 		const eTotal = eH * 60 + eM;
 		const diff = eTotal - sTotal;
-		if (diff <= 0) return { label: "-", error: "Jam selesai harus setelah jam mulai" };
+		if (diff <= 0)
+			return { label: "-", error: "Jam selesai harus setelah jam mulai" };
 		const hours = Math.floor(diff / 60);
 		const minutes = diff % 60;
 		return { label: `${hours} Jam ${minutes} Menit`, error: null };
@@ -30,11 +31,12 @@ function Jurnal() {
 	return (
 		<div className="font-jakarta">
 			{/* Banner */}
-			<div className="mb-5 bg-sky-950 p-10 rounded-xl text-white flex justify-between items-center shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)]">
+			<div className="mb-5 bg-sky-950 py-7 px-10 rounded-xl text-white flex justify-between items-center shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)]">
 				<div className="flex flex-col gap-2">
 					<div className="text-3xl font-bold">Jurnal Harian</div>
-					<div className="text-justify max-w-xl text-sm opacity-90">
-						Catat aktivitas internship harian Anda secara rutin untuk mempermudah penyusunan laporan akhir.
+					<div className="text-justify opacity-90">
+						Catat aktivitas internship harian Anda secara rutin
+						untuk mempermudah penyusunan laporan akhir.
 					</div>
 				</div>
 			</div>
@@ -45,10 +47,15 @@ function Jurnal() {
 				<div className="w-full lg:w-80 flex flex-col gap-5">
 					{/* Status */}
 					<div className="p-5 font-bold bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] flex flex-col gap-1">
-						<div className="text-black text-sm">Status Pengisian</div>
+						<div className="text-black text-sm">
+							Status Pengisian
+						</div>
 						<div className="text-black text-2xl flex justify-between items-center">
 							<div>
-								19 <strong className="text-sm text-zinc-500">/ 19 Hari</strong>
+								19{" "}
+								<strong className="text-sm text-zinc-500">
+									/ 19 Hari
+								</strong>
 							</div>
 							<div className="text-xs px-2 py-1 bg-sky-200 text-sky-800 rounded-full">
 								100% Selesai
@@ -60,32 +67,28 @@ function Jurnal() {
 					</div>
 
 					{/* Calendar */}
-					<div className="bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] overflow-hidden">
+					<div className="bg-white text-black rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] overflow-hidden">
 						<DayPicker
 							locale={id}
 							mode="single"
 							selected={selectedDate}
 							onSelect={setSelectedDate}
-							disabled={[{ dayOfWeek: [0] }, { before: journalStartDate }, { after: new Date() }]}
+							disabled={[
+								{ dayOfWeek: [0] },
+								{ before: journalStartDate },
+								{ after: new Date() },
+							]}
 							classNames={{
+								selected:
+									"outline-3 outline-sky-700 rounded-full",
 								month: "p-4",
-								caption: "flex justify-center py-2 relative items-center mb-4",
-								caption_label: "text-sm font-bold text-slate-900",
-								nav: "flex items-center",
-								nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 transition-opacity",
-								nav_button_previous: "absolute left-1",
-								nav_button_next: "absolute right-1",
-								table: "w-full border-collapse space-y-1",
-								head_row: "flex w-full mt-2",
-								head_cell: "text-slate-500 rounded-md w-9 font-normal text-[0.8rem]",
-								row: "flex w-full mt-2",
-								cell: "text-center text-sm p-0 relative focus-within:relative focus-within:z-20",
-								day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-slate-100 rounded-full transition-colors",
-								day_selected: "bg-sky-500 text-white hover:bg-sky-500 hover:text-white focus:bg-sky-500 focus:text-white",
-								day_today: "bg-sky-900 text-white font-bold",
-								day_outside: "text-slate-500 opacity-50",
-								day_disabled: "text-slate-500 opacity-50",
-								day_hidden: "invisible",
+								// selected: " focus:bg-blue-200",
+								// 2. Change the color of the navigation arrows
+								// nav_button: "text-red-500 hover:text-red-700",
+								// 3. Change the text color of "today" (if it's blue)
+								today: "text-sky-500 font-bold",
+								nav: "absolute right-2 top-5",
+								chevron: "fill-sky-700", // Change the color of the chevron
 							}}
 						/>
 					</div>
@@ -97,9 +100,17 @@ function Jurnal() {
 						{/* Header Entri */}
 						<div className="text-black flex justify-between items-start border-b pb-4">
 							<div>
-								<div className="font-bold text-black text-xl">Entri Jurnal</div>
+								<div className="font-bold text-black text-xl">
+									Entri Jurnal
+								</div>
 								<div className="text-zinc-500 text-sm">
-									{selectedDate ? format(selectedDate, "EEEE, d MMMM yyyy", { locale: id }) : "Pilih Tanggal"}
+									{selectedDate
+										? format(
+												selectedDate,
+												"EEEE, d MMMM yyyy",
+												{ locale: id },
+											)
+										: "Pilih Tanggal"}
 								</div>
 							</div>
 							<div className="flex gap-2 items-center text-xs px-3 py-1 bg-red-100 text-red-700 rounded-full font-bold">
@@ -112,26 +123,40 @@ function Jurnal() {
 						<div className="space-y-4">
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 								<div className="flex flex-col gap-1.5">
-									<label className="text-sm font-bold text-black">Jam Mulai</label>
+									<label className="text-sm font-bold text-black">
+										Jam Mulai
+									</label>
 									<div className="relative">
-										<PiClock className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
+										<PiClock
+											className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-700"
+											size={18}
+										/>
 										<input
 											type="time"
 											value={startTimeStr}
-											onChange={(e) => setStartTimeStr(e.target.value)}
-											className="pl-10 w-full py-2.5 bg-zinc-50 border border-zinc-200 rounded text-sm focus:ring-2 focus:ring-sky-500 outline-none"
+											onChange={(e) =>
+												setStartTimeStr(e.target.value)
+											}
+											className="pl-10 w-full py-2.5  text-zinc-700 bg-zinc-50 border border-zinc-200 rounded text-sm focus:ring-2 focus:ring-sky-500 outline-none"
 										/>
 									</div>
 								</div>
 								<div className="flex flex-col gap-1.5">
-									<label className="text-sm font-bold text-black">Jam Selesai</label>
+									<label className="text-sm font-bold text-black">
+										Jam Selesai
+									</label>
 									<div className="relative">
-										<PiClock className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
+										<PiClock
+											className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-700"
+											size={18}
+										/>
 										<input
 											type="time"
 											value={endTimeStr}
-											onChange={(e) => setEndTimeStr(e.target.value)}
-											className="pl-10 w-full py-2.5 bg-zinc-50 border border-zinc-200 rounded text-sm focus:ring-2 focus:ring-sky-500 outline-none"
+											onChange={(e) =>
+												setEndTimeStr(e.target.value)
+											}
+											className="pl-10 w-full py-2.5 text-zinc-700 bg-zinc-50 border border-zinc-200 rounded text-sm focus:ring-2 focus:ring-sky-500 outline-none"
 										/>
 									</div>
 								</div>
@@ -151,20 +176,31 @@ function Jurnal() {
 
 						{/* Textarea */}
 						<div className="flex flex-col gap-1.5">
-							<label className="text-sm font-bold text-black">Deskripsi Aktivitas</label>
+							<label className="text-sm font-bold text-black">
+								Deskripsi Aktivitas
+							</label>
 							<textarea
 								placeholder="Jelaskan kegiatan yang dijalankan secara detail"
-								className="w-full h-40 p-3 bg-zinc-50 border border-zinc-200 rounded text-sm focus:ring-2 focus:ring-sky-500 outline-none resize-none"
+								className="w-full h-40 p-3 text-zinc-700 bg-zinc-50 border border-zinc-200 rounded text-sm focus:ring-2 focus:ring-sky-500 outline-none resize-none"
 							/>
 						</div>
 
 						{/* Upload */}
 						<div className="flex flex-col gap-1.5">
-							<label className="text-sm font-bold text-black">Lampiran/Dokumen Pendukung</label>
+							<label className="text-sm font-bold text-black">
+								Lampiran/Dokumen Pendukung
+							</label>
 							<label className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-zinc-200 bg-zinc-50 rounded-xl cursor-pointer hover:bg-zinc-100 transition-colors group">
-								<PiUpload className="text-zinc-400 group-hover:text-sky-600 transition-colors" size={40} />
-								<span className="mt-4 font-bold text-zinc-700">Klik untuk upload file</span>
-								<span className="text-xs text-zinc-500 mt-1">PDF, JPG, PNG (Max 5MB)</span>
+								<PiUpload
+									className="text-zinc-400 group-hover:text-sky-600 transition-colors"
+									size={40}
+								/>
+								<span className="mt-4 font-bold text-zinc-700">
+									Klik untuk upload file
+								</span>
+								<span className="text-xs text-zinc-500 mt-1">
+									PDF, JPG, PNG (Max 5MB)
+								</span>
 								<input type="file" className="hidden" />
 							</label>
 						</div>
@@ -179,7 +215,6 @@ function Jurnal() {
 							</button>
 						</div>
 					</div>
-					<TheFooter></TheFooter>
 				</div>
 			</div>
 		</div>
