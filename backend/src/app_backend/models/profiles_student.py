@@ -10,9 +10,19 @@ import decimal
 import uuid
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import (Boolean, CheckConstraint, DateTime,
-                        ForeignKeyConstraint, Integer, Numeric, String, Text,
-                        UniqueConstraint, Uuid, text)
+from sqlalchemy import (
+    Boolean,
+    CheckConstraint,
+    DateTime,
+    ForeignKeyConstraint,
+    Integer,
+    Numeric,
+    String,
+    Text,
+    UniqueConstraint,
+    Uuid,
+    text,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app_backend.models.base import Base
@@ -23,8 +33,7 @@ if TYPE_CHECKING:
     from app_backend.models.master_departments import MasterDepartments
     from app_backend.models.placements import Placements
     from app_backend.models.student_skills import StudentSkills
-    from app_backend.models.student_wishlist_vacancies import \
-        StudentWishlistVacancies
+    from app_backend.models.student_wishlist_vacancies import StudentWishlistVacancies
 
 
 class ProfilesStudent(Base):
@@ -55,29 +64,15 @@ class ProfilesStudent(Base):
     phone_number: Mapped[Optional[str]] = mapped_column(String(20))
     linkedin_url: Mapped[Optional[str]] = mapped_column(Text)
     cv_url: Mapped[Optional[str]] = mapped_column(Text)
-    is_mbkm_eligible: Mapped[Optional[bool]] = mapped_column(
-        Boolean, server_default=text("true")
-    )
-    updated_at: Mapped[Optional[datetime.datetime]] = mapped_column(
-        DateTime(True), server_default=text("CURRENT_TIMESTAMP")
-    )
+    is_mbkm_eligible: Mapped[Optional[bool]] = mapped_column(Boolean, server_default=text("true"))
+    updated_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True), server_default=text("CURRENT_TIMESTAMP"))
 
     # Relationships
-    department: Mapped[Optional["MasterDepartments"]] = relationship(
-        "MasterDepartments", back_populates="profiles_student"
-    )
-    applications: Mapped[list["Applications"]] = relationship(
-        "Applications", back_populates="student"
-    )
-    document_requests: Mapped[list["DocumentRequests"]] = relationship(
-        "DocumentRequests", back_populates="student"
-    )
-    student_skills: Mapped[list["StudentSkills"]] = relationship(
-        "StudentSkills", back_populates="student"
-    )
+    department: Mapped[Optional["MasterDepartments"]] = relationship("MasterDepartments", back_populates="profiles_student")
+    applications: Mapped[list["Applications"]] = relationship("Applications", back_populates="student")
+    document_requests: Mapped[list["DocumentRequests"]] = relationship("DocumentRequests", back_populates="student")
+    student_skills: Mapped[list["StudentSkills"]] = relationship("StudentSkills", back_populates="student")
     student_wishlist_vacancies: Mapped[list["StudentWishlistVacancies"]] = relationship(
         "StudentWishlistVacancies", back_populates="student"
     )
-    placements: Mapped[list["Placements"]] = relationship(
-        "Placements", back_populates="student"
-    )
+    placements: Mapped[list["Placements"]] = relationship("Placements", back_populates="student")

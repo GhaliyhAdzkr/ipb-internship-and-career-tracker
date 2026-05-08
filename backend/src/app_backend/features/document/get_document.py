@@ -25,9 +25,7 @@ class GetDocumentResult:
         return self.error_message is not None
 
 
-def get_document_command_handler(
-    command: GetDocumentCommand, session: Session
-) -> GetDocumentResult:
+def get_document_command_handler(command: GetDocumentCommand, session: Session) -> GetDocumentResult:
     doc = (
         session.query(DocumentRequests)
         .filter(

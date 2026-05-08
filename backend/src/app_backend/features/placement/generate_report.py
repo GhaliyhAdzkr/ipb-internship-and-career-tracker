@@ -26,9 +26,7 @@ class GenerateReportResult:
         return self.error_message is not None
 
 
-def generate_report_command_handler(
-    command: GenerateReportCommand, session: Session
-) -> GenerateReportResult:
+def generate_report_command_handler(command: GenerateReportCommand, session: Session) -> GenerateReportResult:
     placement = (
         session.query(Placements)
         .filter(
@@ -68,6 +66,4 @@ def generate_report_command_handler(
     # Trigger Celery Task
     generate_final_report.delay(str(placement.id))
 
-    return GenerateReportResult(
-        message="Proses pembuatan laporan sedang berjalan di background"
-    )
+    return GenerateReportResult(message="Proses pembuatan laporan sedang berjalan di background")

@@ -26,13 +26,16 @@ from app_backend.domain.user import User as DomainUser
 from app_backend.domain.user import UserRole
 from app_backend.main import app
 from app_backend.shared.database import get_session
-from app_backend.shared.dependencies import (get_current_active_student,
-                                             get_current_active_user,
-                                             get_current_student,
-                                             get_current_user, require_admin,
-                                             require_student)
+from app_backend.shared.auth_dependencies import (
+    get_current_active_student,
+    get_current_active_user,
+    get_current_student,
+    get_current_user,
+    require_admin,
+    require_student,
+)
 
-# ─── Fixed IDs used across tests ─────────────────────────────────────────────
+# Fixed IDs used across tests
 
 STUDENT_USER_ID = uuid.UUID("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
 ADMIN_USER_ID = uuid.UUID("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
@@ -42,8 +45,7 @@ COMPANY_ID = uuid.UUID("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee")
 
 NOW = datetime(2026, 2, 24, 12, 0, 0, tzinfo=timezone.utc)
 
-
-# ─── Domain user stubs ────────────────────────────────────────────────────────
+# Domain user stubs
 
 
 def make_student_user() -> DomainUser:
@@ -89,7 +91,7 @@ def make_admin_user() -> DomainUser:
     )
 
 
-# ─── Session mock factory ─────────────────────────────────────────────────────
+# Session mock factory
 
 
 def make_mock_session() -> MagicMock:
@@ -97,12 +99,8 @@ def make_mock_session() -> MagicMock:
     session = MagicMock()
     # Configura chain: session.query(...).filter(...).first() → None by default
     session.query.return_value.filter.return_value.first.return_value = None
-    session.query.return_value.filter.return_value.filter.return_value.first.return_value = (
-        None
-    )
-    session.query.return_value.options.return_value.filter.return_value.first.return_value = (
-        None
-    )
+    session.query.return_value.filter.return_value.filter.return_value.first.return_value = None
+    session.query.return_value.options.return_value.filter.return_value.first.return_value = None
     session.query.return_value.order_by.return_value.all.return_value = []
     return session
 
@@ -111,7 +109,7 @@ def get_mock_session() -> Generator:
     yield make_mock_session()
 
 
-# ─── Pytest fixtures ──────────────────────────────────────────────────────────
+# Pytest fixtures
 
 
 @pytest.fixture

@@ -15,9 +15,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-# ══════════════════════════════════════════════════════
 # Departments
-# ══════════════════════════════════════════════════════
 
 
 class DepartmentCreate(BaseModel):
@@ -41,16 +39,12 @@ class DepartmentResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
-# ══════════════════════════════════════════════════════
 # Skills
-# ══════════════════════════════════════════════════════
 
 
 class SkillCreate(BaseModel):
     name: str = Field(..., max_length=100, description="Nama skill, contoh: Python")
-    category: Optional[str] = Field(
-        None, max_length=50, description="Kategori skill, contoh: Programming Language"
-    )
+    category: Optional[str] = Field(None, max_length=50, description="Kategori skill, contoh: Programming Language")
 
 
 class SkillUpdate(BaseModel):
@@ -66,9 +60,7 @@ class SkillResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
-# ══════════════════════════════════════════════════════
 # External Companies
-# ══════════════════════════════════════════════════════
 
 
 class CompanyCreate(BaseModel):
@@ -96,9 +88,7 @@ class CompanyResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
-# ══════════════════════════════════════════════════════
 # Admin Profile
-# ══════════════════════════════════════════════════════
 
 
 class AdminProfileResponse(BaseModel):

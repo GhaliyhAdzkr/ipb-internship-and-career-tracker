@@ -9,9 +9,19 @@ import datetime
 import uuid
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import (CheckConstraint, Date, DateTime, Enum,
-                        ForeignKeyConstraint, Index, String, Text,
-                        UniqueConstraint, Uuid, text)
+from sqlalchemy import (
+    CheckConstraint,
+    Date,
+    DateTime,
+    Enum,
+    ForeignKeyConstraint,
+    Index,
+    String,
+    Text,
+    UniqueConstraint,
+    Uuid,
+    text,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app_backend.models.base import Base
@@ -19,8 +29,7 @@ from app_backend.models.base import Base
 if TYPE_CHECKING:
     from app_backend.models.activity_logs import ActivityLogs
     from app_backend.models.applications import Applications
-    from app_backend.models.master_external_companies import \
-        MasterExternalCompanies
+    from app_backend.models.master_external_companies import MasterExternalCompanies
     from app_backend.models.profiles_student import ProfilesStudent
 
 
@@ -50,9 +59,7 @@ class Placements(Base):
         Index("idx_placements_student", "student_id", "status"),
     )
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        Uuid, primary_key=True, server_default=text("public.gen_random_uuid()")
-    )
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, server_default=text("public.gen_random_uuid()"))
     student_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
     company_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
     start_date: Mapped[datetime.date] = mapped_column(Date, nullable=False)
@@ -70,26 +77,12 @@ class Placements(Base):
         server_default=text("'ACTIVE'::placement_status_enum"),
     )
     auto_generated_report_url: Mapped[Optional[str]] = mapped_column(Text)
-    last_report_generated_at: Mapped[Optional[datetime.datetime]] = mapped_column(
-        DateTime(True)
-    )
-    created_at: Mapped[Optional[datetime.datetime]] = mapped_column(
-        DateTime(True), server_default=text("CURRENT_TIMESTAMP")
-    )
-    updated_at: Mapped[Optional[datetime.datetime]] = mapped_column(
-        DateTime(True), server_default=text("CURRENT_TIMESTAMP")
-    )
+    last_report_generated_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True))
+    created_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True), server_default=text("CURRENT_TIMESTAMP"))
+    updated_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True), server_default=text("CURRENT_TIMESTAMP"))
 
     # Relationships
-    application: Mapped[Optional["Applications"]] = relationship(
-        "Applications", back_populates="placements"
-    )
-    company: Mapped["MasterExternalCompanies"] = relationship(
-        "MasterExternalCompanies", back_populates="placements"
-    )
-    student: Mapped["ProfilesStudent"] = relationship(
-        "ProfilesStudent", back_populates="placements"
-    )
-    activity_logs: Mapped[list["ActivityLogs"]] = relationship(
-        "ActivityLogs", back_populates="placement"
-    )
+    application: Mapped[Optional["Applications"]] = relationship("Applications", back_populates="placements")
+    company: Mapped["MasterExternalCompanies"] = relationship("MasterExternalCompanies", back_populates="placements")
+    student: Mapped["ProfilesStudent"] = relationship("ProfilesStudent", back_populates="placements")
+    activity_logs: Mapped[list["ActivityLogs"]] = relationship("ActivityLogs", back_populates="placement")

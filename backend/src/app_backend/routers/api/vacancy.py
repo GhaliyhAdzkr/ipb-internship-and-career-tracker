@@ -26,56 +26,54 @@ from pydantic import BaseModel
 
 from app_backend.domain.student import Student as DomainStudent
 from app_backend.domain.user import User as DomainUser
-from app_backend.features.vacancy import (CreateVacancyCommand,
-                                          DeleteVacancyCommand,
-                                          GetVacancyCommand, JobMatchCommand,
-                                          JobMatchListCommand,
-                                          ListVacanciesCommand,
-                                          SearchVacanciesCommand,
-                                          UpdateVacancyCommand,
-                                          create_vacancy_command_handler,
-                                          delete_vacancy_command_handler,
-                                          get_vacancy_command_handler,
-                                          job_match_command_handler,
-                                          job_match_list_command_handler,
-                                          list_vacancies_command_handler,
-                                          search_vacancies_command_handler,
-                                          update_vacancy_command_handler)
-from app_backend.features.wishlist import (AddWishlistCommand,
-                                           DeleteWishlistCommand,
-                                           GetWishlistCommand,
-                                           ListWishlistCommand,
-                                           UpdateWishlistCommand,
-                                           add_wishlist_command_handler,
-                                           delete_wishlist_command_handler,
-                                           get_wishlist_command_handler,
-                                           list_wishlist_command_handler,
-                                           update_wishlist_command_handler)
-from app_backend.schemas.vacancy import (JobMatchResult, PaymentType,
-                                         VacancyCreate, VacancyDetailResponse,
-                                         VacancyListResponse, VacancyResponse,
-                                         VacancyType, VacancyUpdate)
-from app_backend.schemas.wishlist import (WishlistCreate,
-                                          WishlistDetailResponse,
-                                          WishlistListResponse,
-                                          WishlistResponse, WishlistUpdate)
+from app_backend.features.vacancy import (
+    JobMatchCommand,
+    JobMatchListCommand,
+    SearchVacanciesCommand,
+    job_match_command_handler,
+    job_match_list_command_handler,
+    search_vacancies_command_handler,
+)
+from app_backend.features.vacancy.vacancy_service import VacancyService
+from app_backend.features.wishlist import (
+    AddWishlistCommand,
+    DeleteWishlistCommand,
+    GetWishlistCommand,
+    ListWishlistCommand,
+    UpdateWishlistCommand,
+    add_wishlist_command_handler,
+    delete_wishlist_command_handler,
+    get_wishlist_command_handler,
+    list_wishlist_command_handler,
+    update_wishlist_command_handler,
+)
+from app_backend.schemas.vacancy import (
+    JobMatchResult,
+    PaymentType,
+    VacancyCreate,
+    VacancyDetailResponse,
+    VacancyListResponse,
+    VacancyResponse,
+    VacancyType,
+    VacancyUpdate,
+)
+from app_backend.schemas.wishlist import (
+    WishlistCreate,
+    WishlistDetailResponse,
+    WishlistListResponse,
+    WishlistResponse,
+    WishlistUpdate,
+)
+from app_backend.shared.auth_dependencies import get_current_active_student, get_current_active_user, require_admin
 from app_backend.shared.database import get_session
-from app_backend.shared.dependencies import (get_current_active_student,
-                                             get_current_active_user,
-                                             require_admin)
+from app_backend.shared.dependencies import get_vacancy_service
 
 router = APIRouter(
     prefix="/api/v1",
     tags=["vacancies"],
 )
 
-# ══════════════════════════════════════════════════════
 # Vacancy Management (Admin)
-# ══════════════════════════════════════════════════════
-
-
-from app_backend.features.vacancy.vacancy_service import VacancyService
-from app_backend.shared.dependencies_service import get_vacancy_service
 
 
 @router.post(
@@ -122,13 +120,14 @@ async def list_vacancies(
     """
     skip = (page - 1) * per_page
     vacancies = vacancy_service.list_active_vacancies(skip, per_page)
-    # Note: Simplified for now, in a real scenario we'd need a total count for pagination
+    total = vacancy_service.count_active_vacancies()
+    
     return VacancyListResponse(
         items=vacancies,
-        total=len(vacancies),  # This is a placeholder, usually we'd get total from repo
+        total=total,
         page=page,
         per_page=per_page,
-        total_pages=(len(vacancies) // per_page) + 1,
+        total_pages=(total + per_page - 1) // per_page if total > 0 else 1,
     )
 
 
@@ -140,12 +139,8 @@ async def list_vacancies(
 async def search_vacancies(
     query: Optional[str] = Query(None, description="Kata kunci pencarian"),
     location: Optional[str] = Query(None, description="Filter lokasi"),
-    type: Optional[VacancyType] = Query(
-        None, alias="type", description="Tipe lowongan"
-    ),
-    payment_type: Optional[PaymentType] = Query(
-        None, alias="payment_type", description="Tipe pembayaran"
-    ),
+    type: Optional[VacancyType] = Query(None, alias="type", description="Tipe lowongan"),
+    payment_type: Optional[PaymentType] = Query(None, alias="payment_type", description="Tipe pembayaran"),
     is_active: bool = Query(True, description="Hanya lowongan aktif"),
     page: int = Query(1, ge=1, description="Halaman"),
     per_page: int = Query(10, ge=1, le=100, description="Item per halaman"),
@@ -252,9 +247,7 @@ async def delete_vacancy(
         )
 
 
-# ══════════════════════════════════════════════════════
 # Wishlist (Student)
-# ══════════════════════════════════════════════════════
 
 
 @router.post(
@@ -401,9 +394,7 @@ async def delete_wishlist(
         )
 
 
-# ══════════════════════════════════════════════════════
 # Job Matching (Student)
-# ══════════════════════════════════════════════════════
 
 
 class JobMatchListResponse(BaseModel):
@@ -424,9 +415,7 @@ class JobMatchListResponse(BaseModel):
 async def list_job_matching(
     page: int = Query(1, ge=1, description="Halaman"),
     per_page: int = Query(10, ge=1, le=100, description="Item per halaman"),
-    min_match: float = Query(
-        0.0, ge=0, le=100, description="Minimum persentase kecocokan"
-    ),
+    min_match: float = Query(0.0, ge=0, le=100, description="Minimum persentase kecocokan"),
     session=Depends(get_session),
     current_student: DomainStudent = Depends(get_current_active_student),
 ) -> JobMatchListResponse:

@@ -5,28 +5,22 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app_backend.features.placement import (
-    CreateActivityLogCommand, DeleteActivityLogCommand, GetMyPlacementsCommand,
-    ListActivityLogsCommand, UpdateActivityLogCommand,
-    UploadActivityLogAttachmentCommand, create_activity_log_command_handler,
-    delete_activity_log_command_handler, get_my_placements_command_handler,
-    list_activity_logs_command_handler, update_activity_log_command_handler,
-    upload_activity_log_attachment_command_handler)
-from app_backend.features.placement.generate_report import (
-    GenerateReportCommand, generate_report_command_handler)
-from app_backend.features.placement.get_report import (
-    GetReportCommand, get_report_command_handler)
-from app_backend.schemas.placement import (ActivityLogCreate,
-                                           ActivityLogResponse,
-                                           ActivityLogUpdate,
-                                           PlacementResponse)
+    DeleteActivityLogCommand,
+    UpdateActivityLogCommand,
+    UploadActivityLogAttachmentCommand,
+    delete_activity_log_command_handler,
+    update_activity_log_command_handler,
+    upload_activity_log_attachment_command_handler,
+)
+from app_backend.features.placement.generate_report import GenerateReportCommand, generate_report_command_handler
+from app_backend.features.placement.get_report import GetReportCommand, get_report_command_handler
+from app_backend.features.placement.placement_service import PlacementService
+from app_backend.schemas.placement import ActivityLogCreate, ActivityLogResponse, ActivityLogUpdate, PlacementResponse
+from app_backend.shared.auth_dependencies import require_student
 from app_backend.shared.database import get_session
-from app_backend.shared.dependencies import require_student
+from app_backend.shared.dependencies import get_placement_service
 
 router = APIRouter(prefix="/api/v1/placements", tags=["placements"])
-
-
-from app_backend.features.placement.placement_service import PlacementService
-from app_backend.shared.dependencies_service import get_placement_service
 
 
 @router.get(
@@ -72,9 +66,7 @@ def create_activity_log(
     placement_service: PlacementService = Depends(get_placement_service),
 ):
     try:
-        return placement_service.create_activity_log(
-            current_user.id, placement_id, payload
-        )
+        return placement_service.create_activity_log(current_user.id, placement_id, payload)
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
     except PermissionError as exc:
@@ -111,11 +103,7 @@ def update_activity_log(
         session=session,
     )
     if result.got_error():
-        err_status = (
-            status.HTTP_400_BAD_REQUEST
-            if result.error_code == 400
-            else result.error_code
-        )
+        err_status = status.HTTP_400_BAD_REQUEST if result.error_code == 400 else result.error_code
         raise HTTPException(status_code=err_status, detail=result.error_message)
     return result.log
 
@@ -140,18 +128,12 @@ def delete_activity_log(
         session=session,
     )
     if result.got_error():
-        err_status = (
-            status.HTTP_400_BAD_REQUEST
-            if result.error_code == 400
-            else result.error_code
-        )
+        err_status = status.HTTP_400_BAD_REQUEST if result.error_code == 400 else result.error_code
         raise HTTPException(status_code=err_status, detail=result.error_message)
     return
 
 
-@router.post(
-    "/{placement_id}/logs/{log_id}/attachment", summary="Upload lampiran log harian"
-)
+@router.post("/{placement_id}/logs/{log_id}/attachment", summary="Upload lampiran log harian")
 def upload_activity_log_attachment(
     placement_id: uuid.UUID,
     log_id: uuid.UUID,
@@ -169,11 +151,7 @@ def upload_activity_log_attachment(
         session=session,
     )
     if result.got_error():
-        err_status = (
-            result.error_code
-            if hasattr(result, "error_code") and result.error_code
-            else status.HTTP_400_BAD_REQUEST
-        )
+        err_status = result.error_code if hasattr(result, "error_code") and result.error_code else status.HTTP_400_BAD_REQUEST
         raise HTTPException(status_code=err_status, detail=result.error_message)
     return {"message": result.message, "attachment_url": result.attachment_url}
 
@@ -185,15 +163,11 @@ def generate_report(
     session: Session = Depends(get_session),
 ):
     result = generate_report_command_handler(
-        command=GenerateReportCommand(
-            placement_id=placement_id, student_id=current_user.id
-        ),
+        command=GenerateReportCommand(placement_id=placement_id, student_id=current_user.id),
         session=session,
     )
     if result.got_error():
-        raise HTTPException(
-            status_code=result.error_status_code, detail=result.error_message
-        )
+        raise HTTPException(status_code=result.error_status_code, detail=result.error_message)
     return {"message": result.message}
 
 
@@ -208,9 +182,7 @@ def get_report(
         session=session,
     )
     if result.got_error():
-        raise HTTPException(
-            status_code=result.error_status_code, detail=result.error_message
-        )
+        raise HTTPException(status_code=result.error_status_code, detail=result.error_message)
     return {
         "status": result.status,
         "auto_generated_report_url": result.auto_generated_report_url,

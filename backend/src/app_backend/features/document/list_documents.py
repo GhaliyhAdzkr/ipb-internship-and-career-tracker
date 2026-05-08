@@ -22,9 +22,7 @@ class ListDocumentsResult:
         return self.error_message is not None
 
 
-def list_documents_command_handler(
-    command: ListDocumentsCommand, session: Session
-) -> ListDocumentsResult:
+def list_documents_command_handler(command: ListDocumentsCommand, session: Session) -> ListDocumentsResult:
     docs = (
         session.query(DocumentRequests)
         .filter(DocumentRequests.student_id == command.student_id)
@@ -32,6 +30,4 @@ def list_documents_command_handler(
         .all()
     )
 
-    return ListDocumentsResult(
-        documents=[DocumentResponse.model_validate(d) for d in docs]
-    )
+    return ListDocumentsResult(documents=[DocumentResponse.model_validate(d) for d in docs])

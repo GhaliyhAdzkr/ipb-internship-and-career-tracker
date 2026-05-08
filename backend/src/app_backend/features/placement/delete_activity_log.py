@@ -29,21 +29,11 @@ def delete_activity_log_command_handler(
     command: DeleteActivityLogCommand,
     session: Session,
 ) -> DeleteActivityLogResult:
-    placement = (
-        session.query(Placements)
-        .filter_by(id=command.placement_id, student_id=command.student_id)
-        .first()
-    )
+    placement = session.query(Placements).filter_by(id=command.placement_id, student_id=command.student_id).first()
     if not placement:
-        return DeleteActivityLogResult(
-            error_message="Placement tidak ditemukan", error_code=HTTPStatus.NOT_FOUND
-        )
+        return DeleteActivityLogResult(error_message="Placement tidak ditemukan", error_code=HTTPStatus.NOT_FOUND)
 
-    log = (
-        session.query(ActivityLogs)
-        .filter_by(id=command.log_id, placement_id=placement.id)
-        .first()
-    )
+    log = session.query(ActivityLogs).filter_by(id=command.log_id, placement_id=placement.id).first()
     if not log:
         return DeleteActivityLogResult(
             error_message="Activity log tidak ditemukan",

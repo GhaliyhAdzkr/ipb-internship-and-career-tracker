@@ -9,8 +9,6 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 
-# ============ Nested Schemas ============
-
 
 class DepartmentInfo(BaseModel):
     """Info singkat department"""
@@ -32,9 +30,6 @@ class SkillInfo(BaseModel):
     skill_name: str
     skill_category: Optional[str] = None
     level: int = Field(..., ge=1, le=5, description="Level keahlian 1-5")
-
-
-# ============ Response Schemas ============
 
 
 class StudentProfileResponse(BaseModel):
@@ -68,31 +63,20 @@ class StudentProfileResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-# ============ Update Schemas ============
-
-
 class SkillUpdate(BaseModel):
     """Schema untuk update skill"""
 
     skill_id: UUID
-    level: int = Field(
-        ..., ge=1, le=5, description="Level keahlian 1-5 (1=Beginner, 5=Expert)"
-    )
+    level: int = Field(..., ge=1, le=5, description="Level keahlian 1-5 (1=Beginner, 5=Expert)")
 
 
 class CVDataUpdate(BaseModel):
     """Schema untuk PUT /profile/cv-data - Update data CV"""
 
-    phone_number: Optional[str] = Field(
-        None, max_length=20, description="Nomor telepon"
-    )
+    phone_number: Optional[str] = Field(None, max_length=20, description="Nomor telepon")
     linkedin_url: Optional[HttpUrl] = Field(None, description="URL profil LinkedIn")
-    cv_url: Optional[HttpUrl] = Field(
-        None, description="URL file CV (Google Drive, Dropbox, etc)"
-    )
-    skills: Optional[List[SkillUpdate]] = Field(
-        default=None, description="Daftar skills dengan level"
-    )
+    cv_url: Optional[HttpUrl] = Field(None, description="URL file CV (Google Drive, Dropbox, etc)")
+    skills: Optional[List[SkillUpdate]] = Field(default=None, description="Daftar skills dengan level")
 
     model_config = ConfigDict(
         json_schema_extra={

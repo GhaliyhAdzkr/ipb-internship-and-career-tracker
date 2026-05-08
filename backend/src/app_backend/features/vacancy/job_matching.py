@@ -159,8 +159,7 @@ def job_match_command_handler(
     # Calculate match
     match_data = _calculate_match(student_skill_ids, vacancy.vacancy_skills)
 
-    from app_backend.schemas.vacancy import \
-        JobMatchResult as JobMatchResultSchema
+    from app_backend.schemas.vacancy import JobMatchResult as JobMatchResultSchema
 
     return JobMatchResult(
         result=JobMatchResultSchema(
@@ -203,13 +202,12 @@ def job_match_list_command_handler(
             joinedload(Vacancies.company),
             selectinload(Vacancies.vacancy_skills).joinedload(VacancySkills.skill),
         )
-        .filter(Vacancies.is_active == True)
+        .filter(Vacancies.is_active)
         .all()
     )
 
     # Calculate match for each vacancy
-    from app_backend.schemas.vacancy import \
-        JobMatchResult as JobMatchResultSchema
+    from app_backend.schemas.vacancy import JobMatchResult as JobMatchResultSchema
 
     results = []
     for vacancy in vacancies:

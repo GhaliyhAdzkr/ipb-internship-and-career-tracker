@@ -1,6 +1,6 @@
-from typing import List, Optional
+from typing import List
 
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 
 from app_backend.models.vacancies import Vacancies
@@ -12,19 +12,13 @@ class VacancyRepository(BaseRepository[Vacancies]):
         super().__init__(Vacancies, session)
 
     def list_active(self, skip: int = 0, limit: int = 100) -> List[Vacancies]:
-        query = (
-            select(Vacancies)
-            .where(Vacancies.is_active == True)
-            .offset(skip)
-            .limit(limit)
-        )
+        query = select(Vacancies).where(Vacancies.is_active).offset(skip).limit(limit)
         return list(self.session.scalars(query).all())
 
     def search(self, filters: list, skip: int = 0, limit: int = 100) -> List[Vacancies]:
-        query = (
-            select(Vacancies)
-            .where(Vacancies.is_active == True, *filters)
-            .offset(skip)
-            .limit(limit)
-        )
+        query = select(Vacancies).where(Vacancies.is_active, *filters).offset(skip).limit(limit)
         return list(self.session.scalars(query).all())
+
+    def count_active(self) -> int:
+        query = select(func.count()).select_from(Vacancies).where(Vacancies.is_active)
+        return self.session.execute(query).scalar_one()

@@ -13,8 +13,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from app_backend.models.vacancies import Vacancies
 from app_backend.models.vacancy_skills import VacancySkills
-from app_backend.schemas.vacancy import (CompanyInfo, SkillRequirement,
-                                         VacancyDetailResponse)
+from app_backend.schemas.vacancy import CompanyInfo, SkillRequirement, VacancyDetailResponse
 
 
 class GetVacancyException(Exception):
@@ -43,12 +42,7 @@ def get_vacancy_command_handler(
     """
     Ambil detail vacancy dengan company info dan skills.
     """
-    vacancy = (
-        session.query(Vacancies)
-        .options(joinedload(Vacancies.company))
-        .filter(Vacancies.id == command.vacancy_id)
-        .first()
-    )
+    vacancy = session.query(Vacancies).options(joinedload(Vacancies.company)).filter(Vacancies.id == command.vacancy_id).first()
 
     if not vacancy:
         return GetVacancyResult(error_message="Lowongan tidak ditemukan")

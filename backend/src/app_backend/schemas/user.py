@@ -9,9 +9,7 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
-# ─────────────────────────────────────────────
 # Shared
-# ─────────────────────────────────────────────
 
 
 class UserRole(str, Enum):
@@ -32,9 +30,7 @@ def _validate_password_strength(v: str) -> str:
     return v
 
 
-# ─────────────────────────────────────────────
 # Registration
-# ─────────────────────────────────────────────
 
 
 class StudentRegister(BaseModel):
@@ -58,9 +54,7 @@ class AdminRegister(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=8, max_length=100)
     full_name: str = Field(..., min_length=3, max_length=150)
-    unit_name: str = Field(
-        ..., min_length=2, max_length=150, description="Unit kerja (contoh: CDA IPB)"
-    )
+    unit_name: str = Field(..., min_length=2, max_length=150, description="Unit kerja (contoh: CDA IPB)")
     nip: Optional[str] = Field(None, max_length=30, description="NIP (opsional)")
 
     @field_validator("password")
@@ -69,9 +63,7 @@ class AdminRegister(BaseModel):
         return _validate_password_strength(v)
 
 
-# ─────────────────────────────────────────────
 # Login
-# ─────────────────────────────────────────────
 
 
 class UserLogin(BaseModel):
@@ -81,9 +73,7 @@ class UserLogin(BaseModel):
     password: str
 
 
-# ─────────────────────────────────────────────
 # Tokens
-# ─────────────────────────────────────────────
 
 
 class TokenData(BaseModel):
@@ -108,30 +98,22 @@ class TokenWithRefresh(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
-    expires_in: int = Field(
-        ..., description="Durasi validitas access token dalam detik"
-    )
+    expires_in: int = Field(..., description="Durasi validitas access token dalam detik")
 
 
 class RefreshTokenRequest(BaseModel):
     """Payload untuk rotate refresh token."""
 
-    refresh_token: str = Field(
-        ..., description="Refresh token yang valid dan belum di-revoke"
-    )
+    refresh_token: str = Field(..., description="Refresh token yang valid dan belum di-revoke")
 
 
 class LogoutRequest(BaseModel):
     """Payload logout – revoke satu sesi (refresh token tertentu)."""
 
-    refresh_token: str = Field(
-        ..., description="Refresh token sesi yang akan di-revoke"
-    )
+    refresh_token: str = Field(..., description="Refresh token sesi yang akan di-revoke")
 
 
-# ─────────────────────────────────────────────
 # Password reset
-# ─────────────────────────────────────────────
 
 
 class RequestResetPassword(BaseModel):
@@ -164,9 +146,18 @@ class ChangePassword(BaseModel):
         return _validate_password_strength(v)
 
 
-# ─────────────────────────────────────────────
+class ProfileUpdate(BaseModel):
+    """Payload untuk update data profil."""
+    full_name: Optional[str] = Field(None, min_length=3, max_length=150)
+    semester: Optional[int] = Field(None, ge=1, le=14)
+    nim: Optional[str] = Field(None, max_length=20)
+    phone_number: Optional[str] = Field(None, max_length=20)
+    linkedin_url: Optional[str] = None
+    gpa: Optional[float] = Field(None, ge=0.0, le=4.0)
+    department_id: Optional[uuid.UUID] = None
+
+
 # Response
-# ─────────────────────────────────────────────
 
 
 class UserResponse(BaseModel):
@@ -178,6 +169,16 @@ class UserResponse(BaseModel):
     email: str
     role: str
     is_active: bool
+    full_name: Optional[str] = None
+    nim: Optional[str] = None
+    semester: Optional[int] = None
+    unit_name: Optional[str] = None
+    phone_number: Optional[str] = None
+    linkedin_url: Optional[str] = None
+    cv_url: Optional[str] = None
+    gpa: Optional[float] = None
+    department_id: Optional[uuid.UUID] = None
+    department_name: Optional[str] = None
     last_login_at: Optional[datetime] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None

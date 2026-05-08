@@ -36,9 +36,7 @@ class ApplicationLogs(Base):
         ),
     )
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        Uuid, primary_key=True, server_default=text("public.gen_random_uuid()")
-    )
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, server_default=text("public.gen_random_uuid()"))
     application_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
     new_status: Mapped[str] = mapped_column(
         Enum(
@@ -68,14 +66,8 @@ class ApplicationLogs(Base):
     changed_by: Mapped[Optional[uuid.UUID]] = mapped_column(Uuid)
     proof_url: Mapped[Optional[str]] = mapped_column(Text)
     reason: Mapped[Optional[str]] = mapped_column(Text)
-    created_at: Mapped[Optional[datetime.datetime]] = mapped_column(
-        DateTime(True), server_default=text("CURRENT_TIMESTAMP")
-    )
+    created_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True), server_default=text("CURRENT_TIMESTAMP"))
 
     # Relationships
-    application: Mapped["Applications"] = relationship(
-        "Applications", back_populates="application_logs"
-    )
-    users: Mapped[Optional["Users"]] = relationship(
-        "Users", back_populates="application_logs"
-    )
+    application: Mapped["Applications"] = relationship("Applications", back_populates="application_logs")
+    users: Mapped[Optional["Users"]] = relationship("Users", back_populates="application_logs")

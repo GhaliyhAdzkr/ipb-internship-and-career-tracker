@@ -4,16 +4,12 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app_backend.features.document.get_document import (
-    GetDocumentCommand, get_document_command_handler)
-from app_backend.features.document.list_documents import (
-    ListDocumentsCommand, list_documents_command_handler)
-from app_backend.features.document.request_document import (
-    RequestDocumentCommand, request_document_command_handler)
-from app_backend.schemas.document import (DocumentRequestPayload,
-                                          DocumentResponse)
+from app_backend.features.document.get_document import GetDocumentCommand, get_document_command_handler
+from app_backend.features.document.list_documents import ListDocumentsCommand, list_documents_command_handler
+from app_backend.features.document.request_document import RequestDocumentCommand, request_document_command_handler
+from app_backend.schemas.document import DocumentRequestPayload, DocumentResponse
+from app_backend.shared.auth_dependencies import require_student
 from app_backend.shared.database import get_session
-from app_backend.shared.dependencies import require_student
 
 router = APIRouter(prefix="/api/v1/document-requests", tags=["Documents"])
 
@@ -34,9 +30,7 @@ def request_document(
         session=session,
     )
     if result.got_error():
-        raise HTTPException(
-            status_code=result.error_status_code, detail=result.error_message
-        )
+        raise HTTPException(status_code=result.error_status_code, detail=result.error_message)
     return {"message": result.message, "document_id": result.document_id}
 
 
@@ -50,9 +44,7 @@ def list_documents(
         session=session,
     )
     if result.got_error():
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=result.error_message
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=result.error_message)
     return result.documents
 
 
@@ -67,7 +59,5 @@ def get_document(
         session=session,
     )
     if result.got_error():
-        raise HTTPException(
-            status_code=result.error_status_code, detail=result.error_message
-        )
+        raise HTTPException(status_code=result.error_status_code, detail=result.error_message)
     return result.document

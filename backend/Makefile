@@ -7,13 +7,13 @@ down:
 	docker compose down --remove-orphans
 
 dev:
-	poetry run uvicorn app_backend.main:app --reload
+	PYTHONPATH=src poetry run uvicorn app_backend.main:app --reload
 
 start:
-	poetry run uvicorn app_backend.main:app --host 0.0.0.0 --port 8000
+	PYTHONPATH=src poetry run uvicorn app_backend.main:app --host 0.0.0.0 --port 8000
 
 load-fixtures:
-	poetry run load_fixtures
+	PYTHONPATH=src poetry run load_fixtures
 
 test:
 ifdef filter
@@ -23,15 +23,14 @@ else
 endif
 
 coverage:
-	poetry run pytest --cov=app_backend --cov-report term-missing --cov-report html -vv
+	PYTHONPATH=src poetry run pytest --cov=app_backend --cov-report term-missing --cov-report html -vv
 
 lint:
-	poetry run flake8 src/ tests/
+	poetry run ruff check --fix .
 	poetry run bandit -r src/ -ll
 
 format:
-	poetry run black src/ tests/
-	poetry run isort src/ tests/
+	poetry run ruff format
 
 install:
 	poetry install

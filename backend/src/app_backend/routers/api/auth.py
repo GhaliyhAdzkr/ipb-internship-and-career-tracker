@@ -19,40 +19,37 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 
 from app_backend.conf.settings import settings
 from app_backend.domain.user import User as DomainUser
-from app_backend.features.auth.login_user import (LoginUserCommand,
-                                                  login_user_command_handler)
-from app_backend.features.auth.logout import (LogoutCommand,
-                                              logout_command_handler)
-from app_backend.features.auth.refresh_token import (
-    RefreshTokenCommand, refresh_token_command_handler)
-from app_backend.features.auth.register_admin import (
-    RegisterAdminCommand, register_admin_command_handler)
-from app_backend.features.auth.register_student import (
-    RegisterStudentCommand, register_student_command_handler)
+from app_backend.features.auth.auth_service import AuthService
+from app_backend.features.auth.logout import LogoutCommand, logout_command_handler
+from app_backend.features.auth.refresh_token import RefreshTokenCommand, refresh_token_command_handler
 from app_backend.features.auth.reset_password import (
-    RequestResetPasswordCommand, ResetPasswordCommand,
-    request_reset_password_command_handler, reset_password_command_handler)
-from app_backend.schemas.user import (AdminRegister, LoginResponse,
-                                      LogoutRequest, RefreshTokenRequest,
-                                      RequestResetPassword, ResetPassword,
-                                      StudentRegister, UserLogin, UserResponse)
+    RequestResetPasswordCommand,
+    ResetPasswordCommand,
+    request_reset_password_command_handler,
+    reset_password_command_handler,
+)
+from app_backend.schemas.user import (
+    AdminRegister,
+    LoginResponse,
+    LogoutRequest,
+    ProfileUpdate,
+    RefreshTokenRequest,
+    RequestResetPassword,
+    ResetPassword,
+    StudentRegister,
+    UserLogin,
+    UserResponse,
+)
+from app_backend.shared.auth_dependencies import get_current_active_user, require_admin
 from app_backend.shared.database import get_session
-from app_backend.shared.dependencies import (get_current_active_user,
-                                             require_admin)
+from app_backend.shared.dependencies import get_auth_service
 
 router = APIRouter(
     prefix="/api/v1/auth",
     tags=["authentication"],
 )
 
-
-# ─────────────────────────────────────────────
 # Registration
-# ─────────────────────────────────────────────
-
-
-from app_backend.features.auth.auth_service import AuthService
-from app_backend.shared.dependencies_service import get_auth_service
 
 
 @router.post(
@@ -117,9 +114,7 @@ async def register_admin(
         )
 
 
-# ─────────────────────────────────────────────
 # Session management
-# ─────────────────────────────────────────────
 
 
 @router.post(
@@ -213,9 +208,7 @@ async def logout(
     )
 
 
-# ─────────────────────────────────────────────
 # Password reset
-# ─────────────────────────────────────────────
 
 
 @router.post(
@@ -272,9 +265,33 @@ async def reset_password(
     return {"message": result.message}
 
 
-# ─────────────────────────────────────────────
+@router.post(
+    "/verify-email",
+    status_code=HTTPStatus.OK,
+    summary="Verifikasi email mahasiswa",
+)
+async def verify_email(
+    token: str,
+    session=Depends(get_session),
+) -> dict:
+    """
+    Aktivasi akun mahasiswa menggunakan token yang dikirim melalui email saat registrasi.
+    """
+    from app_backend.features.auth.verify_email import VerifyEmailCommand, verify_email_command_handler
+    
+    result = verify_email_command_handler(
+        command=VerifyEmailCommand(token=token),
+        session=session,
+    )
+    if result.got_error():
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail=result.error_message,
+        )
+    return {"message": result.message}
+
+
 # Current user info
-# ─────────────────────────────────────────────
 
 
 @router.get(
@@ -284,14 +301,127 @@ async def reset_password(
 )
 async def get_me(
     current_user: DomainUser = Depends(get_current_active_user),
+    session=Depends(get_session),
 ) -> UserResponse:
     """Kembalikan data profil user berdasarkan JWT access token."""
+    from app_backend.models.profiles_student import ProfilesStudent
+    from app_backend.models.profiles_admin import ProfilesAdmin
+    
+    full_name = None
+    nim = None
+    semester = None
+    unit_name = None
+    phone_number = None
+    linkedin_url = None
+    cv_url = None
+    gpa = None
+    department_id = None
+    department_name = None
+    
+    if current_user.role == "STUDENT":
+        profile = session.query(ProfilesStudent).filter(ProfilesStudent.user_id == current_user.id).first()
+        if profile:
+            full_name = profile.full_name
+            nim = profile.nim
+            semester = profile.semester
+            phone_number = profile.phone_number
+            linkedin_url = profile.linkedin_url
+            cv_url = profile.cv_url
+            gpa = float(profile.gpa) if profile.gpa else None
+            department_id = profile.department_id
+            if profile.department:
+                department_name = profile.department.name
+    elif current_user.role == "ADMIN":
+        profile = session.query(ProfilesAdmin).filter(ProfilesAdmin.user_id == current_user.id).first()
+        if profile:
+            full_name = profile.full_name
+            unit_name = profile.unit_name
+
     return UserResponse(
         id=current_user.id,
         email=current_user.email,
         role=current_user.role,
         is_active=current_user.is_active,
+        full_name=full_name,
+        nim=nim,
+        semester=semester,
+        unit_name=unit_name,
+        phone_number=phone_number,
+        linkedin_url=linkedin_url,
+        cv_url=cv_url,
+        gpa=gpa,
+        department_id=department_id,
+        department_name=department_name,
         last_login_at=current_user.last_login_at,
         created_at=current_user.created_at,
         updated_at=current_user.updated_at,
     )
+
+
+@router.put(
+    "/profile",
+    response_model=UserResponse,
+    summary="Update data profil user",
+)
+async def update_profile(
+    payload: ProfileUpdate,
+    current_user: DomainUser = Depends(get_current_active_user),
+    session=Depends(get_session),
+) -> UserResponse:
+    """Update data di tabel profil (student/admin)."""
+    from app_backend.models.profiles_student import ProfilesStudent
+    from app_backend.models.profiles_admin import ProfilesAdmin
+    from datetime import datetime, timezone
+    
+    now = datetime.now(timezone.utc)
+    
+    if current_user.role == "STUDENT":
+        profile = session.query(ProfilesStudent).filter(ProfilesStudent.user_id == current_user.id).first()
+        if not profile:
+            raise HTTPException(status_code=404, detail="Profil mahasiswa tidak ditemukan")
+        
+        if payload.full_name:
+            profile.full_name = payload.full_name
+        if payload.semester:
+            profile.semester = payload.semester
+        if payload.nim:
+            profile.nim = payload.nim
+        if payload.phone_number:
+            profile.phone_number = payload.phone_number
+        if payload.linkedin_url:
+            profile.linkedin_url = payload.linkedin_url
+        if payload.gpa is not None:
+            profile.gpa = payload.gpa
+        if payload.department_id:
+            profile.department_id = payload.department_id
+        
+        profile.updated_at = now
+        
+    elif current_user.role == "ADMIN":
+        profile = session.query(ProfilesAdmin).filter(ProfilesAdmin.user_id == current_user.id).first()
+        if not profile:
+            raise HTTPException(status_code=404, detail="Profil admin tidak ditemukan")
+        
+        if payload.full_name:
+            profile.full_name = payload.full_name
+        
+        profile.updated_at = now
+        
+    session.commit()
+    return await get_me(current_user=current_user, session=session)
+
+
+@router.get(
+    "/departments",
+    summary="List master departemen",
+)
+async def get_departments(
+    session=Depends(get_session),
+):
+    """Ambil daftar departemen untuk lookup profil."""
+    from app_backend.models.master_departments import MasterDepartments
+    departments = session.query(MasterDepartments).all()
+    return [
+        {"id": d.id, "name": d.name, "faculty": d.faculty}
+        for d in departments
+    ]

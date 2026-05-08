@@ -10,8 +10,7 @@ import decimal
 import uuid
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import (CheckConstraint, Date, DateTime, ForeignKeyConstraint,
-                        Index, Numeric, Text, Uuid, text)
+from sqlalchemy import CheckConstraint, Date, DateTime, ForeignKeyConstraint, Index, Numeric, Text, Uuid, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app_backend.models.base import Base
@@ -36,22 +35,14 @@ class ActivityLogs(Base):
         Index("idx_activity_logs_date", "placement_id", "activity_date"),
     )
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        Uuid, primary_key=True, server_default=text("public.gen_random_uuid()")
-    )
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, server_default=text("public.gen_random_uuid()"))
     placement_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
     activity_date: Mapped[datetime.date] = mapped_column(Date, nullable=False)
-    duration_hours: Mapped[decimal.Decimal] = mapped_column(
-        Numeric(4, 2), nullable=False
-    )
+    duration_hours: Mapped[decimal.Decimal] = mapped_column(Numeric(4, 2), nullable=False)
     description_raw: Mapped[str] = mapped_column(Text, nullable=False)
     description_ai_enhanced: Mapped[Optional[str]] = mapped_column(Text)
     attachment_url: Mapped[Optional[str]] = mapped_column(Text)
-    created_at: Mapped[Optional[datetime.datetime]] = mapped_column(
-        DateTime(True), server_default=text("CURRENT_TIMESTAMP")
-    )
+    created_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True), server_default=text("CURRENT_TIMESTAMP"))
 
     # Relationships
-    placement: Mapped["Placements"] = relationship(
-        "Placements", back_populates="activity_logs"
-    )
+    placement: Mapped["Placements"] = relationship("Placements", back_populates="activity_logs")

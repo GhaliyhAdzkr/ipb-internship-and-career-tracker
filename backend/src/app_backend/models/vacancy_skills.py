@@ -38,14 +38,8 @@ class VacancySkills(Base):
 
     vacancy_id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
     skill_id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
-    is_mandatory: Mapped[Optional[bool]] = mapped_column(
-        Boolean, server_default=text("true")
-    )
+    is_mandatory: Mapped[Optional[bool]] = mapped_column(Boolean, server_default=text("true"))
 
     # Relationships
-    skill: Mapped["MasterSkills"] = relationship(
-        "MasterSkills", back_populates="vacancy_skills"
-    )
-    vacancy: Mapped["Vacancies"] = relationship(
-        "Vacancies", back_populates="vacancy_skills"
-    )
+    skill: Mapped["MasterSkills"] = relationship("MasterSkills", back_populates="vacancy_skills")
+    vacancy: Mapped["Vacancies"] = relationship("Vacancies", back_populates="vacancy_skills")

@@ -36,21 +36,11 @@ def update_activity_log_command_handler(
     command: UpdateActivityLogCommand,
     session: Session,
 ) -> UpdateActivityLogResult:
-    placement = (
-        session.query(Placements)
-        .filter_by(id=command.placement_id, student_id=command.student_id)
-        .first()
-    )
+    placement = session.query(Placements).filter_by(id=command.placement_id, student_id=command.student_id).first()
     if not placement:
-        return UpdateActivityLogResult(
-            error_message="Placement tidak ditemukan", error_code=HTTPStatus.NOT_FOUND
-        )
+        return UpdateActivityLogResult(error_message="Placement tidak ditemukan", error_code=HTTPStatus.NOT_FOUND)
 
-    log = (
-        session.query(ActivityLogs)
-        .filter_by(id=command.log_id, placement_id=placement.id)
-        .first()
-    )
+    log = session.query(ActivityLogs).filter_by(id=command.log_id, placement_id=placement.id).first()
     if not log:
         return UpdateActivityLogResult(
             error_message="Activity log tidak ditemukan",
@@ -60,21 +50,13 @@ def update_activity_log_command_handler(
     new_date = command.log_date if command.log_date is not None else log.activity_date
 
     if new_date > datetime.date.today():
-        return UpdateActivityLogResult(
-            error_message="log_date tidak boleh di masa depan"
-        )
+        return UpdateActivityLogResult(error_message="log_date tidak boleh di masa depan")
 
     if not (placement.start_date <= new_date <= placement.end_date):
-        return UpdateActivityLogResult(
-            error_message="log_date harus dalam rentang periode magang"
-        )
+        return UpdateActivityLogResult(error_message="log_date harus dalam rentang periode magang")
 
     if new_date != log.activity_date:
-        existing_log = (
-            session.query(ActivityLogs)
-            .filter_by(placement_id=placement.id, activity_date=new_date)
-            .first()
-        )
+        existing_log = session.query(ActivityLogs).filter_by(placement_id=placement.id, activity_date=new_date).first()
         if existing_log:
             return UpdateActivityLogResult(
                 error_message="Log untuk tanggal ini sudah ada",
@@ -90,17 +72,13 @@ def update_activity_log_command_handler(
         end_dt = datetime.datetime.combine(new_date, command.end_time)
 
         if end_dt <= start_dt:
-            return UpdateActivityLogResult(
-                error_message="waktu selesai harus lebih besar dari waktu mulai"
-            )
+            return UpdateActivityLogResult(error_message="waktu selesai harus lebih besar dari waktu mulai")
 
         delta = end_dt - start_dt
         duration_hours = Decimal(delta.total_seconds() / 3600.0)
 
         if duration_hours <= 0 or duration_hours > 24:
-            return UpdateActivityLogResult(
-                error_message="Durasi harus antara 0 hingga 24 jam"
-            )
+            return UpdateActivityLogResult(error_message="Durasi harus antara 0 hingga 24 jam")
 
         log.duration_hours = duration_hours
 

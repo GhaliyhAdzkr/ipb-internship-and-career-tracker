@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import { useSearchParams } from "react-router-dom";
 import { 
   PiEnvelopeSimple, 
   PiLockKey, 
@@ -8,7 +9,8 @@ import {
   PiSpinnerGap, 
   PiEye, 
   PiEyeSlash, 
-  PiGraduationCap 
+  PiGraduationCap,
+  PiCheckCircle
 } from "react-icons/pi";
 
 function Login() {
@@ -17,9 +19,29 @@ function Login() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [showPassword, setShowPassword] = useState(false);
+	const [error, setError] = useState("");
 
-	const handleSubmit = (e) => {
+	const [searchParams] = useSearchParams();
+	const isVerified = searchParams.get("verified") === "true";
+
+	const handleSubmit = async (e) => {
 		e.preventDefault();
+		setError("");
+		
+		// =========================================================================
+		// DEV ONLY: Bypass login validation on localhost.
+		// Remove this block when ready for production!
+		// =========================================================================
+		const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+		if (isLocalhost) {
+			navigate('/lowongan');
+			return;
+		}
+
+		if (!email || !password) {
+			setError("Email dan password wajib diisi");
+			return;
+		}
 		login({ email, password });
 	};
 
@@ -52,6 +74,17 @@ function Login() {
 			{/* Right Side: Login Form (Larger Sizing Maintained) */}
 			<div className="flex items-center justify-center bg-white p-8 md:p-20 overflow-y-auto">
 				<div className="w-full max-w-md space-y-10">
+					{isVerified && (
+						<div className="p-4 bg-green-50 border border-green-100 rounded-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-500">
+							<div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white shrink-0">
+								<PiCheckCircle size={24} weight="fill" />
+							</div>
+							<div>
+								<h4 className="text-sm font-bold text-green-800">Email Terverifikasi!</h4>
+								<p className="text-xs text-green-600 font-medium">Akun Anda sudah aktif, silakan masuk.</p>
+							</div>
+						</div>
+					)}
 					<div className="space-y-4">
 						<div className="space-y-3">
 							<h2 className="text-4xl font-extrabold text-[#002957] tracking-tight">
@@ -116,7 +149,9 @@ function Login() {
 
 						{loginError && (
 							<div className="p-3 bg-red-50 border border-red-100 rounded-lg text-red-600 text-xs font-bold">
-								Email atau kata sandi yang Anda masukkan salah.
+								{typeof loginError.response?.data?.detail === 'string' 
+									? loginError.response.data.detail 
+									: "Email atau kata sandi yang Anda masukkan salah."}
 							</div>
 						)}
 

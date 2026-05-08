@@ -52,9 +52,7 @@ class Vacancy:
         # Validasi type
         valid_types = [vt.value for vt in VacancyType]
         if self.type not in valid_types:
-            raise ValueError(
-                f"Tipe lowongan tidak valid. Pilih salah satu: {', '.join(valid_types)}"
-            )
+            raise ValueError(f"Tipe lowongan tidak valid. Pilih salah satu: {', '.join(valid_types)}")
 
         # Validasi tanggal
         if self.open_date >= self.close_date:
@@ -63,9 +61,7 @@ class Vacancy:
         # Validasi salary
         if self.salary_min is not None and self.salary_max is not None:
             if self.salary_min > self.salary_max:
-                raise ValueError(
-                    "Gaji minimum tidak boleh lebih besar dari gaji maksimum"
-                )
+                raise ValueError("Gaji minimum tidak boleh lebih besar dari gaji maksimum")
             if self.salary_min < 0:
                 raise ValueError("Gaji minimum tidak boleh negatif")
 
@@ -149,9 +145,7 @@ class Vacancy:
         # Validasi salary range jika keduanya ada
         if self.salary_min is not None and self.salary_max is not None:
             if self.salary_min > self.salary_max:
-                raise ValueError(
-                    "Gaji minimum tidak boleh lebih besar dari gaji maksimum"
-                )
+                raise ValueError("Gaji minimum tidak boleh lebih besar dari gaji maksimum")
 
         self.updated_at = datetime.utcnow()
 

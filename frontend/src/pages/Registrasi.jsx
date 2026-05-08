@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 import { 
   PiUser, 
   PiIdentificationCard, 
@@ -9,18 +10,38 @@ import {
   PiEyeSlash, 
   PiGraduationCap,
   PiArrowRight,
-  PiGraph
+  PiGraph,
+  PiSpinnerGap,
+  PiBookOpenText
 } from "react-icons/pi";
 
 function Registration() {
 	const navigate = useNavigate();
-	const [showPassword, setShowPassword] = React.useState(false);
+	const { register, isRegistering, registerError } = useAuth();
+	
+	const [fullName, setFullName] = useState("");
+	const [nim, setNim] = useState("");
+	const [email, setEmail] = useState("");
+	const [password, setPassword] = useState("");
+	const [semester, setSemester] = useState(1);
+	const [showPassword, setShowPassword] = useState(false);
+
+	const handleSubmit = (e) => {
+		e.preventDefault();
+		register({
+			full_name: fullName,
+			nim,
+			email,
+			password,
+			semester: parseInt(semester)
+		});
+	};
 
 	return (
 		<div className="grid h-screen bg-white grid-cols-1 md:grid-cols-2 font-jakarta overflow-hidden">
 			{/* Left Side: Form Section */}
-			<div className="flex items-center justify-center bg-white p-8 md:p-20 overflow-hidden order-1">
-				<div className="w-full max-w-md space-y-10">
+			<div className="flex items-center justify-center bg-white p-8 md:p-20 overflow-y-auto order-1">
+				<div className="w-full max-w-md space-y-10 py-10">
 					<div className="space-y-3">
 						<h2 className="text-4xl font-extrabold text-[#002957] tracking-tight">
 							Daftar LARAS
@@ -30,7 +51,7 @@ function Registration() {
 						</p>
 					</div>
 
-					<form className="space-y-6">
+					<form onSubmit={handleSubmit} className="space-y-6">
 						<div className="space-y-5">
 							{/* Nama Lengkap */}
 							<div className="space-y-2">
@@ -39,22 +60,47 @@ function Registration() {
 									<PiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-sky-600 transition-colors" size={20} />
 									<input
 										type="text"
+										required
+										value={fullName}
+										onChange={(e) => setFullName(e.target.value)}
 										placeholder="Contoh: Windah Basudara"
 										className="w-full pl-12 pr-4 py-3.5 bg-[#E8F1FF] border-none rounded-xl focus:ring-2 focus:ring-sky-500 outline-none transition-all font-medium text-sm text-zinc-800"
 									/>
 								</div>
 							</div>
 
-							{/* NIM */}
-							<div className="space-y-2">
-								<label className="text-sm font-bold text-[#002957] ml-1 uppercase tracking-wider">NIM (Nomor Induk Mahasiswa)</label>
-								<div className="relative group">
-									<PiIdentificationCard className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-sky-600 transition-colors" size={20} />
-									<input
-										type="text"
-										placeholder="G64012010XX"
-										className="w-full pl-12 pr-4 py-3.5 bg-[#E8F1FF] border-none rounded-xl focus:ring-2 focus:ring-sky-500 outline-none transition-all font-medium text-sm text-zinc-800"
-									/>
+							<div className="grid grid-cols-2 gap-4">
+								{/* NIM */}
+								<div className="space-y-2">
+									<label className="text-sm font-bold text-[#002957] ml-1 uppercase tracking-wider">NIM</label>
+									<div className="relative group">
+										<PiIdentificationCard className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-sky-600 transition-colors" size={20} />
+										<input
+											type="text"
+											required
+											value={nim}
+											onChange={(e) => setNim(e.target.value)}
+											placeholder="G640120XXXX"
+											className="w-full pl-12 pr-4 py-3.5 bg-[#E8F1FF] border-none rounded-xl focus:ring-2 focus:ring-sky-500 outline-none transition-all font-medium text-sm text-zinc-800"
+										/>
+									</div>
+								</div>
+
+								{/* Semester */}
+								<div className="space-y-2">
+									<label className="text-sm font-bold text-[#002957] ml-1 uppercase tracking-wider">Semester</label>
+									<div className="relative group">
+										<PiBookOpenText className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-sky-600 transition-colors" size={20} />
+										<input
+											type="number"
+											min="1"
+											max="14"
+											required
+											value={semester}
+											onChange={(e) => setSemester(e.target.value)}
+											className="w-full pl-12 pr-4 py-3.5 bg-[#E8F1FF] border-none rounded-xl focus:ring-2 focus:ring-sky-500 outline-none transition-all font-medium text-sm text-zinc-800"
+										/>
+									</div>
 								</div>
 							</div>
 
@@ -65,6 +111,9 @@ function Registration() {
 									<PiEnvelopeSimple className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-sky-600 transition-colors" size={20} />
 									<input
 										type="email"
+										required
+										value={email}
+										onChange={(e) => setEmail(e.target.value)}
 										placeholder="username@apps.ipb.ac.id"
 										className="w-full pl-12 pr-4 py-3.5 bg-[#E8F1FF] border-none rounded-xl focus:ring-2 focus:ring-sky-500 outline-none transition-all font-medium text-sm text-zinc-800"
 									/>
@@ -78,6 +127,9 @@ function Registration() {
 									<PiLockKey className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-sky-600 transition-colors" size={20} />
 									<input
 										type={showPassword ? "text" : "password"}
+										required
+										value={password}
+										onChange={(e) => setPassword(e.target.value)}
 										placeholder="Minimal 8 karakter"
 										className="w-full pl-12 pr-11 py-3.5 bg-[#E8F1FF] border-none rounded-xl focus:ring-2 focus:ring-sky-500 outline-none transition-all font-medium text-sm text-zinc-800"
 									/>
@@ -92,23 +144,29 @@ function Registration() {
 							</div>
 						</div>
 
-						<label className="flex items-start gap-3 cursor-pointer group">
-							<input
-								type="checkbox"
-								className="mt-1 size-4 rounded border-gray-300 text-sky-900 focus:ring-sky-500"
-							/>
-							<span className="text-sm font-medium text-zinc-600 group-hover:text-zinc-900 transition-colors leading-relaxed">
-								Saya menyetujui <strong className="text-sky-700 underline">Syarat & Ketentuan</strong> dan <strong className="text-sky-700 underline">Kebijakan Privasi</strong> LARAS
-							</span>
-						</label>
+						{registerError && (
+							<div className="p-3 bg-red-50 border border-red-100 rounded-lg text-red-600 text-xs font-bold">
+								{typeof registerError.response?.data?.detail === 'string'
+									? registerError.response.data.detail
+									: Array.isArray(registerError.response?.data?.detail)
+									? registerError.response.data.detail[0]?.msg
+									: "Registrasi gagal. Pastikan data yang Anda masukkan benar."}
+							</div>
+						)}
 
 						<button
-							type="button"
-							onClick={() => navigate("/")}
-							className="w-full py-4 bg-[#002957] hover:bg-[#001f42] text-white rounded-xl shadow-lg shadow-sky-950/20 font-bold text-base transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+							type="submit"
+							disabled={isRegistering}
+							className="w-full py-4 bg-[#002957] hover:bg-[#001f42] text-white rounded-xl shadow-lg shadow-sky-950/20 font-bold text-base transition-all flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-70"
 						>
-							<span>Daftar Sekarang</span>
-							<PiArrowRight size={20} weight="bold" />
+							{isRegistering ? (
+								<PiSpinnerGap size={24} className="animate-spin" />
+							) : (
+								<>
+									<span>Daftar Sekarang</span>
+									<PiArrowRight size={20} weight="bold" />
+								</>
+							)}
 						</button>
 					</form>
 

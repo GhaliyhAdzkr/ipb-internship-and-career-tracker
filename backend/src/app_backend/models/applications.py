@@ -10,8 +10,7 @@ import decimal
 import uuid
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import (DateTime, Enum, ForeignKeyConstraint, Index, Numeric,
-                        Text, UniqueConstraint, Uuid, event, text)
+from sqlalchemy import DateTime, Enum, ForeignKeyConstraint, Index, Numeric, Text, UniqueConstraint, Uuid, event, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.orm.attributes import get_history
 
@@ -39,16 +38,12 @@ class Applications(Base):
             ondelete="RESTRICT",
             name="applications_vacancy_id_fkey",
         ),
-        UniqueConstraint(
-            "vacancy_id", "student_id", name="applications_vacancy_id_student_id_key"
-        ),
+        UniqueConstraint("vacancy_id", "student_id", name="applications_vacancy_id_student_id_key"),
         Index("idx_apps_student", "student_id", "status"),
         Index("idx_apps_vacancy", "vacancy_id"),
     )
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        Uuid, primary_key=True, server_default=text("public.gen_random_uuid()")
-    )
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, server_default=text("public.gen_random_uuid()"))
     vacancy_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
     student_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
     cv_snapshot_url: Mapped[str] = mapped_column(Text, nullable=False)
@@ -66,26 +61,14 @@ class Applications(Base):
         server_default=text("'APPLIED'::app_status_enum"),
     )
     match_percentage: Mapped[Optional[decimal.Decimal]] = mapped_column(Numeric(5, 2))
-    applied_at: Mapped[Optional[datetime.datetime]] = mapped_column(
-        DateTime(True), server_default=text("CURRENT_TIMESTAMP")
-    )
-    updated_at: Mapped[Optional[datetime.datetime]] = mapped_column(
-        DateTime(True), server_default=text("CURRENT_TIMESTAMP")
-    )
+    applied_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True), server_default=text("CURRENT_TIMESTAMP"))
+    updated_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True), server_default=text("CURRENT_TIMESTAMP"))
 
     # Relationships
-    student: Mapped["ProfilesStudent"] = relationship(
-        "ProfilesStudent", back_populates="applications"
-    )
-    vacancy: Mapped["Vacancies"] = relationship(
-        "Vacancies", back_populates="applications"
-    )
-    application_logs: Mapped[list["ApplicationLogs"]] = relationship(
-        "ApplicationLogs", back_populates="application"
-    )
-    placements: Mapped[Optional["Placements"]] = relationship(
-        "Placements", uselist=False, back_populates="application"
-    )
+    student: Mapped["ProfilesStudent"] = relationship("ProfilesStudent", back_populates="applications")
+    vacancy: Mapped["Vacancies"] = relationship("Vacancies", back_populates="applications")
+    application_logs: Mapped[list["ApplicationLogs"]] = relationship("ApplicationLogs", back_populates="application")
+    placements: Mapped[Optional["Placements"]] = relationship("Placements", uselist=False, back_populates="application")
 
 
 @event.listens_for(Applications, "after_update")

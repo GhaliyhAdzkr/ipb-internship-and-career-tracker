@@ -37,23 +37,12 @@ def get_vacancy_stats_command_handler(
     command: GetVacancyStatsCommand,
     session: Session,
 ) -> GetVacancyStatsResult:
-    # --- Total lowongan aktif ---
-    total_active = (
-        session.query(func.count(Vacancies.id))
-        .filter(Vacancies.is_active.is_(True))
-        .scalar()
-        or 0
-    )
 
-    # --- Rata-rata pelamar per lowongan (dari semua lowongan, bukan hanya aktif) ---
-    avg_row = (
-        session.query(func.avg(func.count(Applications.id)))
-        .group_by(Applications.vacancy_id)
-        .scalar()
-    )
+    total_active = session.query(func.count(Vacancies.id)).filter(Vacancies.is_active.is_(True)).scalar() or 0
+
+    avg_row = session.query(func.avg(func.count(Applications.id))).group_by(Applications.vacancy_id).scalar()
     avg_applicants = round(float(avg_row), 2) if avg_row is not None else 0.0
 
-    # --- Top 5 lowongan paling diminati ---
     top_rows = (
         session.query(
             Vacancies.id,

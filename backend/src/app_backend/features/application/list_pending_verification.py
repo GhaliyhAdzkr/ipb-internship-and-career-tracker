@@ -24,11 +24,6 @@ def list_pending_verification_command_handler(
     command: ListPendingVerificationCommand,
     session: Session,
 ) -> ListPendingVerificationResult:
-    applications = (
-        session.query(Applications)
-        .filter_by(status="ACCEPTED")
-        .order_by(Applications.updated_at.asc())
-        .all()
-    )
+    applications = session.query(Applications).filter_by(status="ACCEPTED").order_by(Applications.updated_at.asc()).all()
 
     return ListPendingVerificationResult(items=applications)

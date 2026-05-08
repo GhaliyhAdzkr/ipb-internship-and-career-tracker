@@ -25,8 +25,6 @@ def get_my_placements_command_handler(
     command: GetMyPlacementsCommand,
     session: Session,
 ) -> GetMyPlacementsResult:
-    placements = (
-        session.query(Placements).filter_by(student_id=command.student_id).all()
-    )
+    placements = session.query(Placements).filter_by(student_id=command.student_id).all()
 
     return GetMyPlacementsResult(placements=placements)

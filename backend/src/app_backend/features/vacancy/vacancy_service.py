@@ -1,30 +1,21 @@
 import uuid
 from datetime import datetime, timezone
-from typing import Any, List, Optional, Protocol
+from typing import List, Optional, Protocol
 
 from app_backend.models.vacancies import Vacancies
 from app_backend.models.vacancy_skills import VacancySkills
 from app_backend.repositories.company_repository import CompanyRepository
 from app_backend.repositories.vacancy_repository import VacancyRepository
-from app_backend.repositories.vacancy_skill_repository import \
-    VacancySkillRepository
-from app_backend.schemas.vacancy import (CompanyInfo, VacancyCreate,
-                                         VacancyDetailResponse,
-                                         VacancyResponse, VacancyUpdate)
+from app_backend.repositories.vacancy_skill_repository import VacancySkillRepository
+from app_backend.schemas.vacancy import CompanyInfo, VacancyCreate, VacancyDetailResponse, VacancyResponse, VacancyUpdate
 
 
 class IVacancyService(Protocol):
-    def create_vacancy(
-        self, data: VacancyCreate, created_by: uuid.UUID
-    ) -> VacancyResponse: ...
+    def create_vacancy(self, data: VacancyCreate, created_by: uuid.UUID) -> VacancyResponse: ...
     def get_vacancy(self, vacancy_id: uuid.UUID) -> Optional[VacancyDetailResponse]: ...
-    def update_vacancy(
-        self, vacancy_id: uuid.UUID, data: VacancyUpdate
-    ) -> VacancyResponse: ...
+    def update_vacancy(self, vacancy_id: uuid.UUID, data: VacancyUpdate) -> VacancyResponse: ...
     def delete_vacancy(self, vacancy_id: uuid.UUID) -> None: ...
-    def list_active_vacancies(
-        self, skip: int = 0, limit: int = 100
-    ) -> List[VacancyResponse]: ...
+    def list_active_vacancies(self, skip: int = 0, limit: int = 100) -> List[VacancyResponse]: ...
 
 
 class VacancyService:
@@ -38,18 +29,14 @@ class VacancyService:
         self.vacancy_skill_repo = vacancy_skill_repo
         self.company_repo = company_repo
 
-    def create_vacancy(
-        self, data: VacancyCreate, created_by: Optional[uuid.UUID] = None
-    ) -> VacancyResponse:
+    def create_vacancy(self, data: VacancyCreate, created_by: Optional[uuid.UUID] = None) -> VacancyResponse:
         if not self.company_repo.get_by_id(data.company_id):
             raise ValueError("Perusahaan tidak ditemukan")
         if data.close_date <= data.open_date:
             raise ValueError("Tanggal tutup harus setelah tanggal buka")
         if data.compensation_min and data.compensation_max:
             if data.compensation_min > data.compensation_max:
-                raise ValueError(
-                    "Kompensasi minimum tidak boleh lebih besar dari maksimum"
-                )
+                raise ValueError("Kompensasi minimum tidak boleh lebih besar dari maksimum")
 
         try:
             now = datetime.now(timezone.utc)
@@ -62,9 +49,7 @@ class VacancyService:
                 open_date=data.open_date,
                 close_date=data.close_date,
                 location=data.location,
-                payment_type=(
-                    data.payment_type.value if data.payment_type else "UNPAID"
-                ),
+                payment_type=(data.payment_type.value if data.payment_type else "UNPAID"),
                 compensation_min=data.compensation_min,
                 compensation_max=data.compensation_max,
                 compensation_note=data.compensation_note,
@@ -126,18 +111,14 @@ class VacancyService:
             compensation_note=vacancy.compensation_note,
             source_url=vacancy.source_url,
             is_scraped=vacancy.is_scraped if vacancy.is_scraped is not None else False,
-            is_auto_close=(
-                vacancy.is_auto_close if vacancy.is_auto_close is not None else True
-            ),
+            is_auto_close=(vacancy.is_auto_close if vacancy.is_auto_close is not None else True),
             is_active=vacancy.is_active if vacancy.is_active is not None else True,
             skills=[],  # Need to fetch skills if detail requires them
             created_at=vacancy.created_at,
             updated_at=vacancy.updated_at,
         )
 
-    def update_vacancy(
-        self, vacancy_id: uuid.UUID, data: VacancyUpdate
-    ) -> VacancyResponse:
+    def update_vacancy(self, vacancy_id: uuid.UUID, data: VacancyUpdate) -> VacancyResponse:
         vacancy = self.vacancy_repo.get_by_id(vacancy_id)
         if not vacancy:
             raise ValueError("Lowongan tidak ditemukan")
@@ -181,11 +162,12 @@ class VacancyService:
         vacancy.updated_at = datetime.now(timezone.utc)
         self.vacancy_repo.save_changes()
 
-    def list_active_vacancies(
-        self, skip: int = 0, limit: int = 100
-    ) -> List[VacancyResponse]:
+    def list_active_vacancies(self, skip: int = 0, limit: int = 100) -> List[VacancyResponse]:
         vacancies = self.vacancy_repo.list_active(skip, limit)
         return [self._map_to_response(v) for v in vacancies]
+
+    def count_active_vacancies(self) -> int:
+        return self.vacancy_repo.count_active()
 
     def _map_to_response(self, vacancy: Vacancies) -> VacancyResponse:
         return VacancyResponse(
@@ -203,9 +185,7 @@ class VacancyService:
             compensation_note=vacancy.compensation_note,
             source_url=vacancy.source_url,
             is_scraped=vacancy.is_scraped if vacancy.is_scraped is not None else False,
-            is_auto_close=(
-                vacancy.is_auto_close if vacancy.is_auto_close is not None else True
-            ),
+            is_auto_close=(vacancy.is_auto_close if vacancy.is_auto_close is not None else True),
             is_active=vacancy.is_active if vacancy.is_active is not None else True,
             created_at=vacancy.created_at,
             updated_at=vacancy.updated_at,

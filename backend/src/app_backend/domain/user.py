@@ -38,18 +38,13 @@ class User:
             raise ValueError("Alamat email tidak valid")
 
         if self.role not in UserRole.values():
-            raise ValueError(
-                f"Role tidak valid: '{self.role}'. "
-                f"Role yang diizinkan: {UserRole.values()}"
-            )
+            raise ValueError(f"Role tidak valid: '{self.role}'. Role yang diizinkan: {UserRole.values()}")
 
         now = datetime.now(timezone.utc)
         if self.created_at is None:
             self.created_at = now
         if self.updated_at is None:
             self.updated_at = now
-
-    # ---------- State transitions ----------
 
     def activate(self) -> None:
         """Aktifkan akun user."""
@@ -66,8 +61,6 @@ class User:
         now = datetime.now(timezone.utc)
         self.last_login_at = now
         self.updated_at = now
-
-    # ---------- Role predicates ----------
 
     def is_student(self) -> bool:
         return self.role == UserRole.STUDENT.value

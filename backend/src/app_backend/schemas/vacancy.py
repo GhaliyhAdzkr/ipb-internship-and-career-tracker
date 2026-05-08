@@ -28,9 +28,7 @@ class PaymentType(str, Enum):
     ALLOWANCE_ONLY = "ALLOWANCE_ONLY"
 
 
-# ─────────────────────────────────────────────
 # Nested Schemas
-# ─────────────────────────────────────────────
 
 
 class CompanyInfo(BaseModel):
@@ -52,9 +50,7 @@ class SkillRequirement(BaseModel):
     is_mandatory: bool = True
 
 
-# ─────────────────────────────────────────────
 # Create Schemas
-# ─────────────────────────────────────────────
 
 
 class VacancySkillCreate(BaseModel):
@@ -75,22 +71,14 @@ class VacancyCreate(BaseModel):
     close_date: datetime
     location: Optional[str] = Field(None, max_length=150)
     payment_type: PaymentType = PaymentType.UNPAID
-    compensation_min: Optional[Decimal] = Field(
-        None, ge=0, description="Kompensasi minimum"
-    )
-    compensation_max: Optional[Decimal] = Field(
-        None, ge=0, description="Kompensasi maksimum"
-    )
+    compensation_min: Optional[Decimal] = Field(None, ge=0, description="Kompensasi minimum")
+    compensation_max: Optional[Decimal] = Field(None, ge=0, description="Kompensasi maksimum")
     compensation_note: Optional[str] = None
     source_url: Optional[HttpUrl] = None
-    skills: Optional[List[VacancySkillCreate]] = Field(
-        default_factory=list, description="Daftar skills yang diperlukan"
-    )
+    skills: Optional[List[VacancySkillCreate]] = Field(default_factory=list, description="Daftar skills yang diperlukan")
 
 
-# ─────────────────────────────────────────────
 # Update Schemas
-# ─────────────────────────────────────────────
 
 
 class VacancySkillUpdate(BaseModel):
@@ -119,9 +107,7 @@ class VacancyUpdate(BaseModel):
     skills: Optional[List[VacancySkillUpdate]] = None
 
 
-# ─────────────────────────────────────────────
 # Response Schemas
-# ─────────────────────────────────────────────
 
 
 class VacancyResponse(BaseModel):
@@ -185,9 +171,7 @@ class VacancyListResponse(BaseModel):
     total_pages: int
 
 
-# ─────────────────────────────────────────────
 # Search/Filter Schemas
-# ─────────────────────────────────────────────
 
 
 class VacancySearchFilter(BaseModel):
@@ -202,9 +186,7 @@ class VacancySearchFilter(BaseModel):
     is_active: bool = Field(True, description="Hanya lowongan aktif")
 
 
-# ─────────────────────────────────────────────
 # Job Matching
-# ─────────────────────────────────────────────
 
 
 class JobMatchResult(BaseModel):
@@ -213,9 +195,7 @@ class JobMatchResult(BaseModel):
     vacancy_id: UUID
     vacancy_title: str
     company_name: str
-    match_percentage: float = Field(
-        ..., ge=0, le=100, description="Persentase kecocokan"
-    )
+    match_percentage: float = Field(..., ge=0, le=100, description="Persentase kecocokan")
     matched_skills: List[str] = []
     missing_mandatory_skills: List[str] = []
     total_required_skills: int

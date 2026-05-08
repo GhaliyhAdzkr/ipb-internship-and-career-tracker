@@ -15,8 +15,6 @@ from sqlalchemy.orm import Session
 from app_backend.models.master_skills import MasterSkills
 from app_backend.schemas.admin import SkillCreate, SkillResponse, SkillUpdate
 
-# ─── List ────────────────────────────────────────────────────────────────────
-
 
 @dataclass
 class ListSkillsCommand:
@@ -36,15 +34,8 @@ def list_skills_command_handler(
     command: ListSkillsCommand,
     session: Session,
 ) -> ListSkillsResult:
-    rows = (
-        session.query(MasterSkills)
-        .order_by(MasterSkills.category, MasterSkills.name)
-        .all()
-    )
+    rows = session.query(MasterSkills).order_by(MasterSkills.category, MasterSkills.name).all()
     return ListSkillsResult(items=[SkillResponse.model_validate(r) for r in rows])
-
-
-# ─── Create ──────────────────────────────────────────────────────────────────
 
 
 @dataclass
@@ -77,15 +68,10 @@ def create_skill_command_handler(
         return CreateSkillResult(item=SkillResponse.model_validate(skill))
     except IntegrityError:
         session.rollback()
-        return CreateSkillResult(
-            error_message=f"Skill '{command.payload.name}' sudah ada"
-        )
+        return CreateSkillResult(error_message=f"Skill '{command.payload.name}' sudah ada")
     except Exception as exc:
         session.rollback()
         return CreateSkillResult(error_message=f"Gagal membuat skill: {exc}")
-
-
-# ─── Update ──────────────────────────────────────────────────────────────────
 
 
 @dataclass
@@ -107,9 +93,7 @@ def update_skill_command_handler(
     command: UpdateSkillCommand,
     session: Session,
 ) -> UpdateSkillResult:
-    skill = (
-        session.query(MasterSkills).filter(MasterSkills.id == command.skill_id).first()
-    )
+    skill = session.query(MasterSkills).filter(MasterSkills.id == command.skill_id).first()
     if not skill:
         return UpdateSkillResult(error_message="Skill tidak ditemukan")
 
@@ -123,15 +107,10 @@ def update_skill_command_handler(
         return UpdateSkillResult(item=SkillResponse.model_validate(skill))
     except IntegrityError:
         session.rollback()
-        return UpdateSkillResult(
-            error_message=f"Nama skill '{command.payload.name}' sudah digunakan"
-        )
+        return UpdateSkillResult(error_message=f"Nama skill '{command.payload.name}' sudah digunakan")
     except Exception as exc:
         session.rollback()
         return UpdateSkillResult(error_message=f"Gagal update skill: {exc}")
-
-
-# ─── Delete ──────────────────────────────────────────────────────────────────
 
 
 @dataclass
@@ -151,9 +130,7 @@ def delete_skill_command_handler(
     command: DeleteSkillCommand,
     session: Session,
 ) -> DeleteSkillResult:
-    skill = (
-        session.query(MasterSkills).filter(MasterSkills.id == command.skill_id).first()
-    )
+    skill = session.query(MasterSkills).filter(MasterSkills.id == command.skill_id).first()
     if not skill:
         return DeleteSkillResult(error_message="Skill tidak ditemukan")
 
@@ -163,9 +140,7 @@ def delete_skill_command_handler(
         return DeleteSkillResult()
     except IntegrityError:
         session.rollback()
-        return DeleteSkillResult(
-            error_message="Tidak dapat menghapus skill yang masih dipakai mahasiswa atau lowongan"
-        )
+        return DeleteSkillResult(error_message="Tidak dapat menghapus skill yang masih dipakai mahasiswa atau lowongan")
     except Exception as exc:
         session.rollback()
         return DeleteSkillResult(error_message=f"Gagal menghapus skill: {exc}")

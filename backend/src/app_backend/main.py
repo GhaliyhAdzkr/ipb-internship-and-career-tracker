@@ -12,9 +12,7 @@ from fastapi.staticfiles import StaticFiles
 
 import app_backend.models  # noqa: F401 – registrasi semua tabel ke metadata
 from app_backend.models.base import Base
-from app_backend.routers.api import (admin, analytics, application, auth,
-                                     document, notification, placement,
-                                     profile, vacancy)
+from app_backend.routers.api import admin, analytics, application, auth, document, notification, placement, profile, vacancy
 from app_backend.shared.database import engine
 
 

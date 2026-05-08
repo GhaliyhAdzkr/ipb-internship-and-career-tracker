@@ -14,8 +14,7 @@ from sqlalchemy.orm import Session, joinedload, selectinload
 from app_backend.models.profiles_student import ProfilesStudent
 from app_backend.models.student_skills import StudentSkills
 from app_backend.models.users import Users
-from app_backend.schemas.profile import (DepartmentInfo, SkillInfo,
-                                         StudentProfileResponse)
+from app_backend.schemas.profile import DepartmentInfo, SkillInfo, StudentProfileResponse
 
 
 @dataclass
@@ -50,9 +49,7 @@ def get_student_profile_command_handler(
         session.query(ProfilesStudent)
         .options(
             joinedload(ProfilesStudent.department),
-            selectinload(ProfilesStudent.student_skills).joinedload(
-                StudentSkills.skill
-            ),
+            selectinload(ProfilesStudent.student_skills).joinedload(StudentSkills.skill),
         )
         .filter(ProfilesStudent.user_id == command.user_id)
         .first()
@@ -91,11 +88,7 @@ def get_student_profile_command_handler(
             semester=profile.semester,
             department=department_info,
             gpa=profile.gpa,
-            is_mbkm_eligible=(
-                profile.is_mbkm_eligible
-                if profile.is_mbkm_eligible is not None
-                else True
-            ),
+            is_mbkm_eligible=(profile.is_mbkm_eligible if profile.is_mbkm_eligible is not None else True),
             phone_number=profile.phone_number,
             linkedin_url=profile.linkedin_url,
             cv_url=profile.cv_url,

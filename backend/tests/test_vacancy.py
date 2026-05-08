@@ -26,12 +26,9 @@ from unittest.mock import MagicMock, patch
 
 from tests.conftest import COMPANY_ID, NOW, SKILL_ID, STUDENT_USER_ID
 
-# ════════════════════════════════════════════════════════════════════════════
 #  Test Data
-# ════════════════════════════════════════════════════════════════════════════
 
 VACANCY_ID = uuid.UUID("ffffffff-ffff-ffff-ffff-ffffffffffff")
-
 
 VACANCY_PAYLOAD = {
     "company_id": str(COMPANY_ID),
@@ -48,16 +45,12 @@ VACANCY_PAYLOAD = {
     "skills": [{"skill_id": str(SKILL_ID), "is_mandatory": True}],
 }
 
-
 WISHLIST_PAYLOAD = {
     "vacancy_id": str(VACANCY_ID),
     "notes": "Lowongan yang menarik untuk saya",
 }
 
-
-# ════════════════════════════════════════════════════════════════════════════
 #  Vacancy: Create (Admin only)
-# ════════════════════════════════════════════════════════════════════════════
 
 
 def _make_vacancy_orm(vacancy_id=VACANCY_ID, company_id=COMPANY_ID):
@@ -85,9 +78,7 @@ def _make_vacancy_orm(vacancy_id=VACANCY_ID, company_id=COMPANY_ID):
 
 
 def test_create_vacancy_success(client_as_admin):
-    with patch(
-        "app_backend.features.vacancy.vacancy_service.VacancyService.create_vacancy"
-    ) as mock_method:
+    with patch("app_backend.features.vacancy.vacancy_service.VacancyService.create_vacancy") as mock_method:
         from app_backend.schemas.vacancy import VacancyResponse
 
         mock_method.return_value = VacancyResponse(
@@ -129,9 +120,7 @@ def test_create_vacancy_as_student_forbidden(client_as_student):
 
 
 def test_create_vacancy_invalid_company(client_as_admin):
-    with patch(
-        "app_backend.features.vacancy.vacancy_service.VacancyService.create_vacancy"
-    ) as mock_method:
+    with patch("app_backend.features.vacancy.vacancy_service.VacancyService.create_vacancy") as mock_method:
         mock_method.side_effect = ValueError("Perusahaan tidak ditemukan")
         resp = client_as_admin.post("/api/v1/vacancies", json=VACANCY_PAYLOAD)
 
@@ -139,15 +128,11 @@ def test_create_vacancy_invalid_company(client_as_admin):
     assert "Perusahaan tidak ditemukan" in resp.json()["detail"]
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  Vacancy: List
-# ════════════════════════════════════════════════════════════════════════════
 
 
 def test_list_vacancies_success(client_as_student):
-    with patch(
-        "app_backend.features.vacancy.vacancy_service.VacancyService.list_active_vacancies"
-    ) as mock_method:
+    with patch("app_backend.features.vacancy.vacancy_service.VacancyService.list_active_vacancies") as mock_method:
         mock_method.return_value = []
         resp = client_as_student.get("/api/v1/vacancies")
 
@@ -158,9 +143,7 @@ def test_list_vacancies_success(client_as_student):
 
 
 def test_list_vacancies_with_pagination(client_as_student):
-    with patch(
-        "app_backend.features.vacancy.vacancy_service.VacancyService.list_active_vacancies"
-    ) as mock_method:
+    with patch("app_backend.features.vacancy.vacancy_service.VacancyService.list_active_vacancies") as mock_method:
         mock_method.return_value = []
         resp = client_as_student.get("/api/v1/vacancies?page=2&per_page=5")
 
@@ -168,15 +151,11 @@ def test_list_vacancies_with_pagination(client_as_student):
     assert resp.json()["page"] == 2
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  Vacancy: Search
-# ════════════════════════════════════════════════════════════════════════════
 
 
 def test_search_vacancies_by_query(client_as_student):
-    with patch(
-        "app_backend.routers.api.vacancy.search_vacancies_command_handler"
-    ) as mock_handler:
+    with patch("app_backend.routers.api.vacancy.search_vacancies_command_handler") as mock_handler:
         from app_backend.schemas.vacancy import VacancyListResponse
 
         mock_handler.return_value = MagicMock(
@@ -195,9 +174,7 @@ def test_search_vacancies_by_query(client_as_student):
 
 
 def test_search_vacancies_by_location(client_as_student):
-    with patch(
-        "app_backend.routers.api.vacancy.search_vacancies_command_handler"
-    ) as mock_handler:
+    with patch("app_backend.routers.api.vacancy.search_vacancies_command_handler") as mock_handler:
         from app_backend.schemas.vacancy import VacancyListResponse
 
         mock_handler.return_value = MagicMock(
@@ -216,9 +193,7 @@ def test_search_vacancies_by_location(client_as_student):
 
 
 def test_search_vacancies_by_type(client_as_student):
-    with patch(
-        "app_backend.routers.api.vacancy.search_vacancies_command_handler"
-    ) as mock_handler:
+    with patch("app_backend.routers.api.vacancy.search_vacancies_command_handler") as mock_handler:
         from app_backend.schemas.vacancy import VacancyListResponse
 
         mock_handler.return_value = MagicMock(
@@ -236,17 +211,12 @@ def test_search_vacancies_by_type(client_as_student):
     assert resp.status_code == 200
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  Vacancy: Get Detail
-# ════════════════════════════════════════════════════════════════════════════
 
 
 def test_get_vacancy_detail_success(client_as_student):
-    with patch(
-        "app_backend.features.vacancy.vacancy_service.VacancyService.get_vacancy"
-    ) as mock_method:
-        from app_backend.schemas.vacancy import (CompanyInfo,
-                                                 VacancyDetailResponse)
+    with patch("app_backend.features.vacancy.vacancy_service.VacancyService.get_vacancy") as mock_method:
+        from app_backend.schemas.vacancy import CompanyInfo, VacancyDetailResponse
 
         mock_method.return_value = VacancyDetailResponse(
             id=VACANCY_ID,
@@ -283,24 +253,18 @@ def test_get_vacancy_detail_success(client_as_student):
 
 
 def test_get_vacancy_not_found(client_as_student):
-    with patch(
-        "app_backend.features.vacancy.vacancy_service.VacancyService.get_vacancy"
-    ) as mock_method:
+    with patch("app_backend.features.vacancy.vacancy_service.VacancyService.get_vacancy") as mock_method:
         mock_method.return_value = None
         resp = client_as_student.get(f"/api/v1/vacancies/{uuid.uuid4()}")
 
     assert resp.status_code == 404
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  Vacancy: Update (Admin only)
-# ════════════════════════════════════════════════════════════════════════════
 
 
 def test_update_vacancy_success(client_as_admin):
-    with patch(
-        "app_backend.features.vacancy.vacancy_service.VacancyService.update_vacancy"
-    ) as mock_method:
+    with patch("app_backend.features.vacancy.vacancy_service.VacancyService.update_vacancy") as mock_method:
         from app_backend.schemas.vacancy import VacancyResponse
 
         mock_method.return_value = VacancyResponse(
@@ -340,15 +304,11 @@ def test_update_vacancy_as_student_forbidden(client_as_student):
     assert resp.status_code == 403
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  Vacancy: Delete (Admin only)
-# ════════════════════════════════════════════════════════════════════════════
 
 
 def test_delete_vacancy_success(client_as_admin):
-    with patch(
-        "app_backend.features.vacancy.vacancy_service.VacancyService.delete_vacancy"
-    ) as mock_method:
+    with patch("app_backend.features.vacancy.vacancy_service.VacancyService.delete_vacancy") as mock_method:
         mock_method.return_value = None
         resp = client_as_admin.delete(f"/api/v1/vacancies/{VACANCY_ID}")
 
@@ -356,19 +316,14 @@ def test_delete_vacancy_success(client_as_admin):
 
 
 def test_delete_vacancy_not_found(client_as_admin):
-    with patch(
-        "app_backend.features.vacancy.vacancy_service.VacancyService.delete_vacancy"
-    ) as mock_method:
+    with patch("app_backend.features.vacancy.vacancy_service.VacancyService.delete_vacancy") as mock_method:
         mock_method.side_effect = ValueError("Lowongan tidak ditemukan")
         resp = client_as_admin.delete(f"/api/v1/vacancies/{uuid.uuid4()}")
 
     assert resp.status_code == 404
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  Wishlist: Add (Student only)
-# ════════════════════════════════════════════════════════════════════════════
-
 
 WISHLIST_ID = uuid.UUID("99999999-9999-9999-9999-999999999999")
 
@@ -385,9 +340,7 @@ def _make_wishlist_orm(wishlist_id=WISHLIST_ID, student_id=STUDENT_USER_ID):
 
 
 def test_add_wishlist_success(client_as_student):
-    with patch(
-        "app_backend.routers.api.vacancy.add_wishlist_command_handler"
-    ) as mock_handler:
+    with patch("app_backend.routers.api.vacancy.add_wishlist_command_handler") as mock_handler:
         from app_backend.schemas.wishlist import WishlistResponse
 
         mock_handler.return_value = MagicMock(
@@ -407,16 +360,12 @@ def test_add_wishlist_success(client_as_student):
 
 
 def test_add_wishlist_as_admin_forbidden(client_as_admin_for_student_only):
-    resp = client_as_admin_for_student_only.post(
-        "/api/v1/wishlist", json=WISHLIST_PAYLOAD
-    )
+    resp = client_as_admin_for_student_only.post("/api/v1/wishlist", json=WISHLIST_PAYLOAD)
     assert resp.status_code == 403
 
 
 def test_add_wishlist_duplicate(client_as_student):
-    with patch(
-        "app_backend.routers.api.vacancy.add_wishlist_command_handler"
-    ) as mock_handler:
+    with patch("app_backend.routers.api.vacancy.add_wishlist_command_handler") as mock_handler:
         mock_handler.return_value = MagicMock(
             got_error=lambda: True,
             error_message="Lowongan sudah ada di wishlist",
@@ -426,15 +375,11 @@ def test_add_wishlist_duplicate(client_as_student):
     assert resp.status_code == 400
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  Wishlist: List
-# ════════════════════════════════════════════════════════════════════════════
 
 
 def test_list_wishlist_success(client_as_student):
-    with patch(
-        "app_backend.routers.api.vacancy.list_wishlist_command_handler"
-    ) as mock_handler:
+    with patch("app_backend.routers.api.vacancy.list_wishlist_command_handler") as mock_handler:
         from app_backend.schemas.wishlist import WishlistListResponse
 
         mock_handler.return_value = MagicMock(
@@ -455,17 +400,12 @@ def test_list_wishlist_as_admin_forbidden(client_as_admin_for_student_only):
     assert resp.status_code == 403
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  Wishlist: Get Detail
-# ════════════════════════════════════════════════════════════════════════════
 
 
 def test_get_wishlist_detail_success(client_as_student):
-    with patch(
-        "app_backend.routers.api.vacancy.get_wishlist_command_handler"
-    ) as mock_handler:
-        from app_backend.schemas.wishlist import (VacancySummary,
-                                                  WishlistDetailResponse)
+    with patch("app_backend.routers.api.vacancy.get_wishlist_command_handler") as mock_handler:
+        from app_backend.schemas.wishlist import VacancySummary, WishlistDetailResponse
 
         mock_handler.return_value = MagicMock(
             got_error=lambda: False,
@@ -492,9 +432,7 @@ def test_get_wishlist_detail_success(client_as_student):
 
 
 def test_get_wishlist_not_found(client_as_student):
-    with patch(
-        "app_backend.routers.api.vacancy.get_wishlist_command_handler"
-    ) as mock_handler:
+    with patch("app_backend.routers.api.vacancy.get_wishlist_command_handler") as mock_handler:
         mock_handler.return_value = MagicMock(
             got_error=lambda: True,
             error_message="Wishlist tidak ditemukan",
@@ -504,15 +442,11 @@ def test_get_wishlist_not_found(client_as_student):
     assert resp.status_code == 404
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  Wishlist: Update
-# ════════════════════════════════════════════════════════════════════════════
 
 
 def test_update_wishlist_notes_success(client_as_student):
-    with patch(
-        "app_backend.routers.api.vacancy.update_wishlist_command_handler"
-    ) as mock_handler:
+    with patch("app_backend.routers.api.vacancy.update_wishlist_command_handler") as mock_handler:
         from app_backend.schemas.wishlist import WishlistResponse
 
         mock_handler.return_value = MagicMock(
@@ -535,9 +469,7 @@ def test_update_wishlist_notes_success(client_as_student):
 
 
 def test_update_wishlist_not_owner(client_as_student):
-    with patch(
-        "app_backend.routers.api.vacancy.update_wishlist_command_handler"
-    ) as mock_handler:
+    with patch("app_backend.routers.api.vacancy.update_wishlist_command_handler") as mock_handler:
         mock_handler.return_value = MagicMock(
             got_error=lambda: True,
             error_message="Tidak berhak mengubah wishlist ini",
@@ -550,15 +482,11 @@ def test_update_wishlist_not_owner(client_as_student):
     assert resp.status_code == 400
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  Wishlist: Delete
-# ════════════════════════════════════════════════════════════════════════════
 
 
 def test_delete_wishlist_success(client_as_student):
-    with patch(
-        "app_backend.routers.api.vacancy.delete_wishlist_command_handler"
-    ) as mock_handler:
+    with patch("app_backend.routers.api.vacancy.delete_wishlist_command_handler") as mock_handler:
         mock_handler.return_value = MagicMock(
             success=True,
             got_error=lambda: False,
@@ -569,9 +497,7 @@ def test_delete_wishlist_success(client_as_student):
 
 
 def test_delete_wishlist_not_owner(client_as_student):
-    with patch(
-        "app_backend.routers.api.vacancy.delete_wishlist_command_handler"
-    ) as mock_handler:
+    with patch("app_backend.routers.api.vacancy.delete_wishlist_command_handler") as mock_handler:
         mock_handler.return_value = MagicMock(
             success=False,
             got_error=lambda: True,

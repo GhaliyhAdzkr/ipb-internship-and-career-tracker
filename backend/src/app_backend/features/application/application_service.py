@@ -1,40 +1,33 @@
 import uuid
 from datetime import datetime, timezone
-from typing import Any, List, Optional, Protocol
+from typing import List, Optional, Protocol
 
 from sqlalchemy import select
 
 from app_backend.models.application_logs import ApplicationLogs
 from app_backend.models.applications import Applications
-from app_backend.models.placements import Placements
-from app_backend.repositories.application_log_repository import \
-    ApplicationLogRepository
-from app_backend.repositories.application_repository import \
-    ApplicationRepository
+from app_backend.repositories.application_log_repository import ApplicationLogRepository
+from app_backend.repositories.application_repository import ApplicationRepository
 from app_backend.repositories.placement_repository import PlacementRepository
 from app_backend.repositories.student_repository import StudentRepository
-from app_backend.schemas.application import (ApplicationCreate,
-                                             ApplicationLogResponse,
-                                             ApplicationResponse,
-                                             ApplicationUpdateStatus)
+from app_backend.schemas.application import (
+    ApplicationCreate,
+    ApplicationLogResponse,
+    ApplicationResponse,
+    ApplicationUpdateStatus,
+)
 
 
 class IApplicationService(Protocol):
-    def apply(
-        self, student_id: uuid.UUID, data: ApplicationCreate
-    ) -> ApplicationResponse: ...
-    def get_application(
-        self, application_id: uuid.UUID
-    ) -> Optional[ApplicationResponse]: ...
+    def apply(self, student_id: uuid.UUID, data: ApplicationCreate) -> ApplicationResponse: ...
+    def get_application(self, application_id: uuid.UUID) -> Optional[ApplicationResponse]: ...
     def update_status(
         self,
         application_id: uuid.UUID,
         student_id: uuid.UUID,
         data: ApplicationUpdateStatus,
     ) -> ApplicationResponse: ...
-    def get_history(
-        self, application_id: uuid.UUID, student_id: Optional[uuid.UUID] = None
-    ) -> List[ApplicationLogResponse]: ...
+    def get_history(self, application_id: uuid.UUID, student_id: Optional[uuid.UUID] = None) -> List[ApplicationLogResponse]: ...
 
 
 class ApplicationService:
@@ -50,9 +43,7 @@ class ApplicationService:
         self.student_repo = student_repo
         self.placement_repo = placement_repo
 
-    def apply(
-        self, student_id: uuid.UUID, data: ApplicationCreate
-    ) -> ApplicationResponse:
+    def apply(self, student_id: uuid.UUID, data: ApplicationCreate) -> ApplicationResponse:
         student = self.student_repo.get_by_id(student_id)
         if not student:
             raise ValueError("Profil mahasiswa tidak ditemukan")
@@ -82,9 +73,7 @@ class ApplicationService:
             self.application_repo.rollback()
             raise exc
 
-    def get_application(
-        self, application_id: uuid.UUID
-    ) -> Optional[ApplicationResponse]:
+    def get_application(self, application_id: uuid.UUID) -> Optional[ApplicationResponse]:
         app = self.application_repo.get_by_id(application_id)
         return ApplicationResponse.model_validate(app) if app else None
 
@@ -117,9 +106,7 @@ class ApplicationService:
         self.application_repo.save_changes()
         return ApplicationResponse.model_validate(app)
 
-    def get_history(
-        self, application_id: uuid.UUID, student_id: Optional[uuid.UUID] = None
-    ) -> List[ApplicationLogResponse]:
+    def get_history(self, application_id: uuid.UUID, student_id: Optional[uuid.UUID] = None) -> List[ApplicationLogResponse]:
         app = self.application_repo.get_by_id(application_id)
         if not app:
             raise ValueError("Lamaran tidak ditemukan")
@@ -132,7 +119,7 @@ class ApplicationService:
             .order_by(ApplicationLogs.changed_at.desc())
         )
         logs = self.application_log_repo.session.scalars(query).all()
-        return [ApplicationLogResponse.model_validate(l) for l in logs]
+        return [ApplicationLogResponse.model_validate(log) for log in logs]
 
     def list_pending_verification(self) -> List[ApplicationResponse]:
         query = select(Applications).where(Applications.status == "ACCEPTED")

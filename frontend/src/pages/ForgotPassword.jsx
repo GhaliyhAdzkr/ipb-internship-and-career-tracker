@@ -1,9 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { PiEnvelopeSimple, PiArrowRight } from "react-icons/pi";
+import { useAuth } from "../hooks/useAuth";
+import { PiEnvelopeSimple, PiArrowRight, PiSpinnerGap, PiCheckCircle } from "react-icons/pi";
 
 function ForgotPassword() {
 	const navigate = useNavigate();
+	const { forgotPassword, isRequestingReset, resetSent, resetError } = useAuth();
+	const [email, setEmail] = useState("");
+
+	const handleSubmit = (e) => {
+		e.preventDefault();
+		forgotPassword(email);
+	};
 
 	return (
 		<div className="h-screen w-full bg-gradient-to-br from-[#F8FAFF] via-[#F0F5FF] to-[#E8F1FF] flex flex-col items-center justify-center p-6 font-jakarta overflow-hidden relative">
@@ -36,27 +44,65 @@ function ForgotPassword() {
 						</p>
 					</div>
 
-					<form className="space-y-8">
-						<div className="space-y-2.5">
-							<label className="text-sm font-bold text-[#002957] ml-1">Email IPB</label>
-							<div className="relative group">
-								<PiEnvelopeSimple className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-sky-600 transition-colors" size={22} />
-								<input
-									type="email"
-									placeholder="NIM@apps.ipb.ac.id"
-									className="w-full pl-12 pr-4 py-4.5 bg-[#E8F1FF] border-none rounded-xl focus:ring-2 focus:ring-sky-500 outline-none transition-all font-medium text-zinc-800"
-								/>
+					{resetSent ? (
+						<div className="space-y-8 py-4">
+							<div className="flex flex-col items-center gap-4 text-center">
+								<div className="w-16 h-16 bg-green-50 text-green-600 rounded-full flex items-center justify-center">
+									<PiCheckCircle size={48} weight="fill" />
+								</div>
+								<div className="space-y-2">
+									<h3 className="text-xl font-bold text-zinc-800">Email Terkirim!</h3>
+									<p className="text-sm text-zinc-500">
+										Silakan periksa kotak masuk email <strong>{email}</strong> untuk melanjutkan proses reset password.
+									</p>
+								</div>
 							</div>
+							<button 
+								onClick={() => navigate("/login")}
+								className="w-full py-4 bg-[#002957] text-white rounded-xl font-bold transition-all hover:bg-[#001f42]"
+							>
+								Kembali ke Login
+							</button>
 						</div>
+					) : (
+						<form onSubmit={handleSubmit} className="space-y-8">
+							<div className="space-y-2.5">
+								<label className="text-sm font-bold text-[#002957] ml-1">Email IPB</label>
+								<div className="relative group">
+									<PiEnvelopeSimple className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-sky-600 transition-colors" size={22} />
+									<input
+										type="email"
+										required
+										value={email}
+										onChange={(e) => setEmail(e.target.value)}
+										placeholder="NIM@apps.ipb.ac.id"
+										className="w-full pl-12 pr-4 py-4.5 bg-[#E8F1FF] border-none rounded-xl focus:ring-2 focus:ring-sky-500 outline-none transition-all font-medium text-zinc-800"
+									/>
+								</div>
+							</div>
 
-						<button
-							type="button"
-							className="w-full py-4.5 bg-[#002957] hover:bg-[#001f42] text-white rounded-xl shadow-lg shadow-sky-950/20 font-bold text-base transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
-						>
-							<span>Kirim Tautan Reset</span>
-							<PiArrowRight size={20} weight="bold" />
-						</button>
-					</form>
+							{resetError && (
+								<div className="p-3 bg-red-50 border border-red-100 rounded-lg text-red-600 text-xs font-bold">
+									{resetError.response?.data?.detail || "Gagal mengirim permintaan reset password."}
+								</div>
+							)}
+
+							<button
+								type="submit"
+								disabled={isRequestingReset}
+								className="w-full py-4.5 bg-[#002957] hover:bg-[#001f42] text-white rounded-xl shadow-lg shadow-sky-950/20 font-bold text-base transition-all flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-70"
+							>
+								{isRequestingReset ? (
+									<PiSpinnerGap size={24} className="animate-spin" />
+								) : (
+									<>
+										<span>Kirim Tautan Reset</span>
+										<PiArrowRight size={20} weight="bold" />
+									</>
+								)}
+							</button>
+						</form>
+					)}
 
 					<div className="text-center pt-2">
 						<button 

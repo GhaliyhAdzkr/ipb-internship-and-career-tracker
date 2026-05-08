@@ -54,11 +54,7 @@ def register_admin_command_handler(
         return RegisterAdminResult(error_message="Email sudah terdaftar")
 
     if command.payload.nip:
-        if (
-            session.query(ProfilesAdmin)
-            .filter(ProfilesAdmin.nip == command.payload.nip)
-            .first()
-        ):
+        if session.query(ProfilesAdmin).filter(ProfilesAdmin.nip == command.payload.nip).first():
             return RegisterAdminResult(error_message="NIP sudah terdaftar")
 
     try:

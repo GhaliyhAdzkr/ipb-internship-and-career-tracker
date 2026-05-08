@@ -41,9 +41,7 @@ class Application:
         # Validasi status
         valid_statuses = [s.value for s in ApplicationStatus]
         if self.status not in valid_statuses:
-            raise ValueError(
-                f"Status tidak valid. Pilih salah satu: {', '.join(valid_statuses)}"
-            )
+            raise ValueError(f"Status tidak valid. Pilih salah satu: {', '.join(valid_statuses)}")
 
         # Validasi match percentage jika ada
         if self.match_percentage is not None:
@@ -66,10 +64,7 @@ class Application:
         if self.status == ApplicationStatus.WITHDRAWN.value:
             raise ValueError("Aplikasi yang sudah di-withdraw tidak bisa diupdate")
 
-        if (
-            self.status == ApplicationStatus.ACCEPTED.value
-            and new_status != ApplicationStatus.WITHDRAWN.value
-        ):
+        if self.status == ApplicationStatus.ACCEPTED.value and new_status != ApplicationStatus.WITHDRAWN.value:
             raise ValueError("Aplikasi yang sudah diterima hanya bisa di-withdraw")
 
         if self.status == ApplicationStatus.REJECTED.value:
@@ -92,9 +87,7 @@ class Application:
     def move_to_screening(self):
         """Pindahkan ke tahap screening"""
         if self.status != ApplicationStatus.APPLIED.value:
-            raise ValueError(
-                "Hanya aplikasi dengan status APPLIED yang bisa dipindah ke SCREENING"
-            )
+            raise ValueError("Hanya aplikasi dengan status APPLIED yang bisa dipindah ke SCREENING")
         self.update_status(ApplicationStatus.SCREENING.value)
 
     def move_to_interview(self):

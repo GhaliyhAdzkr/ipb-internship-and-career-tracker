@@ -8,8 +8,7 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import (CheckConstraint, ForeignKeyConstraint, Index, Integer,
-                        Uuid)
+from sqlalchemy import CheckConstraint, ForeignKeyConstraint, Index, Integer, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app_backend.models.base import Base
@@ -43,9 +42,5 @@ class StudentSkills(Base):
     level: Mapped[Optional[int]] = mapped_column(Integer)
 
     # Relationships
-    skill: Mapped["MasterSkills"] = relationship(
-        "MasterSkills", back_populates="student_skills"
-    )
-    student: Mapped["ProfilesStudent"] = relationship(
-        "ProfilesStudent", back_populates="student_skills"
-    )
+    skill: Mapped["MasterSkills"] = relationship("MasterSkills", back_populates="student_skills")
+    student: Mapped["ProfilesStudent"] = relationship("ProfilesStudent", back_populates="student_skills")

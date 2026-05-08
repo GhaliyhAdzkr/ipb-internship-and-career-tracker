@@ -1,33 +1,27 @@
 import uuid
 from datetime import datetime, timedelta, timezone
-from typing import Optional, Protocol
-
-from sqlalchemy.orm import Session
+from typing import Protocol
 
 from app_backend.conf.settings import settings
 from app_backend.domain.user import UserRole
+from app_backend.models.auth_action_tokens import AuthActionTokens
 from app_backend.models.profiles_admin import ProfilesAdmin
 from app_backend.models.profiles_student import ProfilesStudent
 from app_backend.models.user_refresh_tokens import UserRefreshTokens
 from app_backend.models.users import Users
 from app_backend.repositories.admin_repository import AdminRepository
-from app_backend.repositories.refresh_token_repository import \
-    RefreshTokenRepository
+from app_backend.repositories.refresh_token_repository import RefreshTokenRepository
 from app_backend.repositories.student_repository import StudentRepository
 from app_backend.repositories.user_repository import UserRepository
-from app_backend.schemas.user import (AdminRegister, LoginResponse,
-                                      StudentRegister, UserLogin, UserResponse)
-from app_backend.shared.security import (create_access_token,
-                                         create_refresh_token, hash_password,
-                                         hash_token, verify_password)
+from app_backend.schemas.user import AdminRegister, LoginResponse, StudentRegister, UserLogin, UserResponse
+from app_backend.shared.mailer import send_direct_email
+from app_backend.shared.security import create_access_token, create_refresh_token, generate_secure_token, hash_password, hash_token, verify_password
 
 
 class IAuthService(Protocol):
     def register_student(self, data: StudentRegister) -> UserResponse: ...
     def register_admin(self, data: AdminRegister) -> UserResponse: ...
-    def login(
-        self, data: UserLogin, device_info: str = None, ip_address: str = None
-    ) -> LoginResponse: ...
+    def login(self, data: UserLogin, device_info: str = None, ip_address: str = None) -> LoginResponse: ...
 
 
 class AuthService:
@@ -57,7 +51,7 @@ class AuthService:
                 email=data.email,
                 password_hash=hash_password(data.password),
                 role=UserRole.STUDENT.value,
-                is_active=True,
+                is_active=False,  # AKUN TIDAK AKTIF SAMPAI DIVERIFIKASI
                 created_at=now,
                 updated_at=now,
             )
@@ -72,7 +66,44 @@ class AuthService:
             self.user_repo.create(user)
             self.user_repo.flush()
             self.student_repo.create(profile)
+            
+            # Buat Token Verifikasi
+            raw_token = generate_secure_token()
+            expires_at = now + timedelta(hours=24)
+            
+            verification_token = AuthActionTokens(
+                user_id=user_id,
+                token_hash=hash_token(raw_token),
+                action_type="ACTIVATE_ACCOUNT",
+                expires_at=expires_at,
+                is_used=False,
+            )
+            self.user_repo.session.add(verification_token)
             self.user_repo.save_changes()
+
+            verification_link = f"{settings.frontend_url}/verify-email?token={raw_token}"
+            subject = "Verifikasi Akun LARAS IPB"
+            body = f"""
+Terima kasih telah mendaftar di <strong>LARAS (Internship and Career Tracker)</strong>.<br>
+Untuk mengaktifkan akun Anda, silakan klik tombol verifikasi di bawah ini:
+
+<div class="btn-container">
+    <a href="{verification_link}" class="btn-action">
+       Verifikasi Akun Saya
+    </a>
+</div>
+
+<div class="raw-link">
+    Jika tombol di atas tidak berfungsi, Anda juga dapat mengeklik atau menyalin tautan berikut ke browser Anda:
+    <br><br>
+    <a href="{verification_link}" style="color: #0056b3;">{verification_link}</a>
+</div>
+
+<p style="font-size: 12px; color: #999; margin-top: 30px;">
+    Tautan ini akan kadaluarsa dalam 24 jam. Jika Anda tidak merasa mendaftar di LARAS, abaikan email ini.
+</p>
+"""
+            send_direct_email(user.email, subject, body, user_name=data.full_name)
 
             return self._map_user_to_response(user)
         except Exception as exc:
@@ -113,9 +144,7 @@ class AuthService:
             self.user_repo.rollback()
             raise exc
 
-    def login(
-        self, data: UserLogin, device_info: str = None, ip_address: str = None
-    ) -> LoginResponse:
+    def login(self, data: UserLogin, device_info: str = None, ip_address: str = None) -> LoginResponse:
         user = self.user_repo.get_by_email(data.email)
         if not user or not verify_password(data.password, user.password_hash):
             raise ValueError("Email atau password salah")

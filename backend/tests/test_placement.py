@@ -6,13 +6,9 @@ from tests.conftest import STUDENT_USER_ID
 PLACEMENT_ID = uuid.UUID("33333333-3333-3333-3333-333333333333")
 LOG_ID = uuid.UUID("44444444-4444-4444-4444-444444444444")
 
-# ─── Self-Reporting Pipeline ──────────────────────────────────────────────────
-
 
 def test_get_my_placements(client_as_student):
-    with patch(
-        "app_backend.features.placement.placement_service.PlacementService.get_my_placements"
-    ) as mock_method:
+    with patch("app_backend.features.placement.placement_service.PlacementService.get_my_placements") as mock_method:
         import datetime
 
         from app_backend.schemas.placement import PlacementResponse
@@ -34,9 +30,7 @@ def test_get_my_placements(client_as_student):
 
 
 def test_create_activity_log_success(client_as_student):
-    with patch(
-        "app_backend.features.placement.placement_service.PlacementService.create_activity_log"
-    ) as mock_method:
+    with patch("app_backend.features.placement.placement_service.PlacementService.create_activity_log") as mock_method:
         import datetime
 
         from app_backend.schemas.placement import ActivityLogResponse
@@ -62,12 +56,8 @@ def test_create_activity_log_success(client_as_student):
 
 
 def test_create_activity_log_out_of_bounds(client_as_student):
-    with patch(
-        "app_backend.features.placement.placement_service.PlacementService.create_activity_log"
-    ) as mock_method:
-        mock_method.side_effect = ValueError(
-            "log_date harus dalam rentang periode magang"
-        )
+    with patch("app_backend.features.placement.placement_service.PlacementService.create_activity_log") as mock_method:
+        mock_method.side_effect = ValueError("log_date harus dalam rentang periode magang")
         resp = client_as_student.post(
             f"/api/v1/placements/{PLACEMENT_ID}/logs",
             json={
@@ -82,9 +72,7 @@ def test_create_activity_log_out_of_bounds(client_as_student):
 
 
 def test_create_activity_log_duplicate(client_as_student):
-    with patch(
-        "app_backend.features.placement.placement_service.PlacementService.create_activity_log"
-    ) as mock_method:
+    with patch("app_backend.features.placement.placement_service.PlacementService.create_activity_log") as mock_method:
         mock_method.side_effect = ValueError("Log untuk tanggal ini sudah ada")
         resp = client_as_student.post(
             f"/api/v1/placements/{PLACEMENT_ID}/logs",
@@ -100,26 +88,20 @@ def test_create_activity_log_duplicate(client_as_student):
 
 
 def test_upload_activity_log_attachment_success(client_as_student):
-    with patch(
-        "app_backend.routers.api.placement.upload_activity_log_attachment_command_handler"
-    ) as mock_handler:
+    with patch("app_backend.routers.api.placement.upload_activity_log_attachment_command_handler") as mock_handler:
         mock_handler.return_value = MagicMock(
             got_error=lambda: False,
             message="Lampiran berhasil diunggah",
             attachment_url="/uploads/activity_logs/test.png",
         )
         files = {"file": ("test.png", b"dummy content", "image/png")}
-        resp = client_as_student.post(
-            f"/api/v1/placements/{PLACEMENT_ID}/logs/{LOG_ID}/attachment", files=files
-        )
+        resp = client_as_student.post(f"/api/v1/placements/{PLACEMENT_ID}/logs/{LOG_ID}/attachment", files=files)
     assert resp.status_code == 200
     assert resp.json()["attachment_url"] == "/uploads/activity_logs/test.png"
 
 
 def test_list_admin_placements(client_as_admin):
-    with patch(
-        "app_backend.routers.api.admin.list_admin_placements_command_handler"
-    ) as mock_handler:
+    with patch("app_backend.routers.api.admin.list_admin_placements_command_handler") as mock_handler:
         mock_handler.return_value = MagicMock(got_error=lambda: False, placements=[])
         resp = client_as_admin.get("/api/v1/admin/placements")
     assert resp.status_code == 200
