@@ -1,6 +1,6 @@
 """
 Register Admin Feature – Command Handler.
-Registrasi fasilitator/admin: buat auth.users + public.profiles_admin dalam satu transaksi.
+Registrasi fasilitator/admin: buat public.users + public.profiles_admin dalam satu transaksi.
 Endpoint ini sebaiknya hanya dipanggil oleh super-admin yang sudah login,
 atau dari internal script seeding.
 """
@@ -45,7 +45,7 @@ def register_admin_command_handler(
 ) -> RegisterAdminResult:
     """
     Business Rules:
-    1. Email harus unik (cek auth.users).
+    1. Email harus unik (cek public.users).
     2. NIP boleh None; jika diisi harus unik.
     3. Role di-hardcode ke ADMIN – tidak bisa diubah dari client.
     4. users dan profiles_admin dibuat dalam satu transaksi atomik.

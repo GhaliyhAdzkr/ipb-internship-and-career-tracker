@@ -57,7 +57,7 @@ class Vacancies(Base):
         ),
         ForeignKeyConstraint(
             ["created_by"],
-            ["auth.users.id"],
+            ["users.id"],
             ondelete="SET NULL",
             name="vacancies_created_by_fkey",
         ),
@@ -65,7 +65,7 @@ class Vacancies(Base):
         Index("idx_vacancies_active", "open_date", "close_date"),
     )
 
-    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, server_default=text("public.gen_random_uuid()"))
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     company_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)

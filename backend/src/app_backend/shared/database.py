@@ -13,10 +13,10 @@ SQLALCHEMY_DATABASE_TEST_URL = settings.db_test_url
 
 # Use SQLAlchemy 2.0 style engine
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, 
+    SQLALCHEMY_DATABASE_URL,
     future=True,
-    pool_pre_ping=True,    # Verifikasi koneksi sebelum digunakan
-    pool_recycle=3600,     # Recycle koneksi setiap 1 jam
+    pool_pre_ping=True,  # Verifikasi koneksi sebelum digunakan
+    pool_recycle=3600,  # Recycle koneksi setiap 1 jam
 )
 
 SessionLocal = sessionmaker(

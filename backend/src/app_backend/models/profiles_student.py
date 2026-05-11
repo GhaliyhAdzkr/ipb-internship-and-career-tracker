@@ -48,7 +48,7 @@ class ProfilesStudent(Base):
         ),
         ForeignKeyConstraint(
             ["user_id"],
-            ["auth.users.id"],
+            ["users.id"],
             ondelete="CASCADE",
             name="profiles_student_user_id_fkey",
         ),

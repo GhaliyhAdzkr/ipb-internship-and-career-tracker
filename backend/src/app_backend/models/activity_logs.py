@@ -35,7 +35,7 @@ class ActivityLogs(Base):
         Index("idx_activity_logs_date", "placement_id", "activity_date"),
     )
 
-    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, server_default=text("public.gen_random_uuid()"))
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     placement_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
     activity_date: Mapped[datetime.date] = mapped_column(Date, nullable=False)
     duration_hours: Mapped[decimal.Decimal] = mapped_column(Numeric(4, 2), nullable=False)

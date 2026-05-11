@@ -36,7 +36,7 @@ class DocumentRequests(Base):
         ),
     )
 
-    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, server_default=text("public.gen_random_uuid()"))
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     document_type: Mapped[str] = mapped_column(String(50), nullable=False)
     student_id: Mapped[Optional[uuid.UUID]] = mapped_column(Uuid)
     reference_vacancy_id: Mapped[Optional[uuid.UUID]] = mapped_column(Uuid)

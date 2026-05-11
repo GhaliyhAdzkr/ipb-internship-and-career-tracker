@@ -59,7 +59,7 @@ class Placements(Base):
         Index("idx_placements_student", "student_id", "status"),
     )
 
-    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, server_default=text("public.gen_random_uuid()"))
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     student_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
     company_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
     start_date: Mapped[datetime.date] = mapped_column(Date, nullable=False)

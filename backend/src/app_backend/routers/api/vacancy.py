@@ -121,7 +121,7 @@ async def list_vacancies(
     skip = (page - 1) * per_page
     vacancies = vacancy_service.list_active_vacancies(skip, per_page)
     total = vacancy_service.count_active_vacancies()
-    
+
     return VacancyListResponse(
         items=vacancies,
         total=total,

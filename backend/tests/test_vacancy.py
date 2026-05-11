@@ -132,8 +132,12 @@ def test_create_vacancy_invalid_company(client_as_admin):
 
 
 def test_list_vacancies_success(client_as_student):
-    with patch("app_backend.features.vacancy.vacancy_service.VacancyService.list_active_vacancies") as mock_method:
-        mock_method.return_value = []
+    with (
+        patch("app_backend.features.vacancy.vacancy_service.VacancyService.list_active_vacancies") as mock_list,
+        patch("app_backend.features.vacancy.vacancy_service.VacancyService.count_active_vacancies") as mock_count,
+    ):
+        mock_list.return_value = []
+        mock_count.return_value = 0
         resp = client_as_student.get("/api/v1/vacancies")
 
     assert resp.status_code == 200
@@ -143,8 +147,12 @@ def test_list_vacancies_success(client_as_student):
 
 
 def test_list_vacancies_with_pagination(client_as_student):
-    with patch("app_backend.features.vacancy.vacancy_service.VacancyService.list_active_vacancies") as mock_method:
-        mock_method.return_value = []
+    with (
+        patch("app_backend.features.vacancy.vacancy_service.VacancyService.list_active_vacancies") as mock_list,
+        patch("app_backend.features.vacancy.vacancy_service.VacancyService.count_active_vacancies") as mock_count,
+    ):
+        mock_list.return_value = []
+        mock_count.return_value = 0
         resp = client_as_student.get("/api/v1/vacancies?page=2&per_page=5")
 
     assert resp.status_code == 200

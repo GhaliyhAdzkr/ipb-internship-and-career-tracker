@@ -1,6 +1,9 @@
 """
-Model: auth.users
-Tabel pengguna utama dengan skema 'auth'.
+Model: public.users
+Tabel pengguna utama.
+
+Note: We use public schema instead of auth schema because Supabase reserves
+the auth schema for their built-in authentication tables.
 """
 
 from __future__ import annotations
@@ -24,15 +27,12 @@ if TYPE_CHECKING:
 
 class Users(Base):
     __tablename__ = "users"
-    __table_args__ = (
-        UniqueConstraint("email", name="users_email_key"),
-        {"schema": "auth"},
-    )
+    __table_args__ = (UniqueConstraint("email", name="users_email_key"),)
 
-    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, server_default=text("public.gen_random_uuid()"))
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     email: Mapped[str] = mapped_column(String(255), nullable=False)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
-    role: Mapped[str] = mapped_column(Enum("ADMIN", "STUDENT", name="user_role_enum", schema="auth"), nullable=False)
+    role: Mapped[str] = mapped_column(Enum("ADMIN", "STUDENT", name="user_role_enum"), nullable=False)
     is_active: Mapped[Optional[bool]] = mapped_column(Boolean, server_default=text("true"))
     last_login_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True))
     created_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True), server_default=text("CURRENT_TIMESTAMP"))

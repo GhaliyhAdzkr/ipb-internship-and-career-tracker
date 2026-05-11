@@ -4,6 +4,7 @@ import os
 from datetime import datetime
 from app_backend.conf.settings import settings
 
+
 def send_direct_email(to_email: str, subject: str, body: str, user_name: str = "Pengguna LARAS"):
     """
     Kirim email secara langsung (synchronous) menggunakan SMTP.
@@ -17,7 +18,7 @@ def send_direct_email(to_email: str, subject: str, body: str, user_name: str = "
         with open(template_path, "r") as f:
             html_content = f.read()
     else:
-        html_content = f"<html><body><h2>{{ title }}</h2><p>{{ message }}</p></body></html>"
+        html_content = "<html><body><h2>{ title }</h2><p>{ message }</p></body></html>"
 
     # Replace Placeholders
     now = datetime.now()
@@ -39,12 +40,7 @@ def send_direct_email(to_email: str, subject: str, body: str, user_name: str = "
     if os.path.exists(logo_path):
         with open(logo_path, "rb") as f:
             logo_data = f.read()
-            msg.get_payload()[1].add_related(
-                logo_data,
-                maintype="image",
-                subtype="png",
-                cid="logo"
-            )
+            msg.get_payload()[1].add_related(logo_data, maintype="image", subtype="png", cid="logo")
 
     try:
         if settings.smtp_port == 465:

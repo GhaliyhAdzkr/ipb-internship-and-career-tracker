@@ -63,6 +63,9 @@ function Profil() {
 	// Sync state with user data
 	useEffect(() => {
 		if (user) {
+			// Handle different possible response shapes: { department_id, department_name } or { department: { id, name } }
+			const deptId = user.department_id || user.department?.id || "";
+			const deptName = user.department_name || user.department?.name || "";
 			setFormData({
 				full_name: user.full_name || "",
 				nim: user.nim || "",
@@ -70,11 +73,21 @@ function Profil() {
 				phone_number: user.phone_number || "",
 				linkedin_url: user.linkedin_url || "",
 				gpa: user.gpa || "",
-				department_id: user.department_id || "",
-				department_name: user.department_name || "",
+				department_id: deptId,
+				department_name: deptName,
 			});
 		}
 	}, [user]);
+
+	// If departments list loads after user, fill department_name when only id exists
+	useEffect(() => {
+		if (departments.length > 0 && formData.department_id && !formData.department_name) {
+			const found = departments.find((d) => String(d.id) === String(formData.department_id));
+			if (found) {
+				setFormData((s) => ({ ...s, department_name: found.name }));
+			}
+		}
+	}, [departments, formData.department_id, formData.department_name]);
 
 	// Close dropdown when clicking outside
 	useEffect(() => {

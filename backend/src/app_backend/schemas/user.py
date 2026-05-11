@@ -148,6 +148,7 @@ class ChangePassword(BaseModel):
 
 class ProfileUpdate(BaseModel):
     """Payload untuk update data profil."""
+
     full_name: Optional[str] = Field(None, min_length=3, max_length=150)
     semester: Optional[int] = Field(None, ge=1, le=14)
     nim: Optional[str] = Field(None, max_length=20)

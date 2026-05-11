@@ -26,7 +26,7 @@ class MasterExternalCompanies(Base):
         Index("idx_master_companies_name", "name"),
     )
 
-    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, server_default=text("public.gen_random_uuid()"))
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     name: Mapped[str] = mapped_column(String(150), nullable=False)
     industry: Mapped[Optional[str]] = mapped_column(String(100))
     website_url: Mapped[Optional[str]] = mapped_column(Text)

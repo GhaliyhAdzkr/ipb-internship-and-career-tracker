@@ -15,8 +15,10 @@ from fastapi import UploadFile
 from sqlalchemy.orm import Session
 
 from app_backend.models.profiles_student import ProfilesStudent
+from app_backend.shared.s3_storage import get_s3_client, upload_fileobj
+from app_backend.conf.settings import settings
 
-UPLOAD_DIR = "uploads/cv"
+UPLOAD_DIR = "cv"
 
 
 @dataclass
@@ -43,7 +45,7 @@ def upload_cv_command_handler(
     Business Rules:
     1. Profil mahasiswa harus ada.
     2. File harus PDF.
-    3. File size limit (ditangani oleh fastapi tapi baiknya double check, max 5MB).
+    3. File size limit (ditangani oleh fastapi tapi baiknya double check, max 10MB).
     """
     profile = session.query(ProfilesStudent).filter(ProfilesStudent.user_id == command.user_id).first()
     if not profile:
@@ -56,28 +58,37 @@ def upload_cv_command_handler(
     if not (command.file.filename and command.file.filename.lower().endswith(".pdf")):
         return UploadCVResult(error_message="Ekstensi file tidak diizinkan, harus .pdf")
 
-    # Ensure upload directory exists
-    os.makedirs(UPLOAD_DIR, exist_ok=True)
-
     # Generate unique filename
     file_ext = ".pdf"
     unique_filename = f"{command.user_id}_{uuid.uuid4().hex[:8]}{file_ext}"
-    file_path = os.path.join(UPLOAD_DIR, unique_filename)
+    s3_key = f"{UPLOAD_DIR}/{unique_filename}"
 
     try:
+        # Check size before upload (FastAPI UploadFile might already have it in memory or spooled)
+        file.file.seek(0, os.SEEK_END)
+        file_size = file.file.tell()
+        file.file.seek(0)
+
         MAX_SIZE = 10 * 1024 * 1024  # 10MB
-        size = 0
+        if file_size > MAX_SIZE:
+            return UploadCVResult(error_message="Ukuran file melebihi batas maksimal 10MB")
 
-        with open(file_path, "wb") as buffer:
-            while chunk := command.file.file.read(1024 * 1024):  # Batching 1MB per iterasi
-                size += len(chunk)
-                if size > MAX_SIZE:
-                    buffer.close()
-                    os.remove(file_path)
-                    return UploadCVResult(error_message="Ukuran file melebihi batas maksimal 15MB")
-                buffer.write(chunk)
+        if settings.storage_type == "s3":
+            s3_client = get_s3_client()
+            success = upload_fileobj(s3_client, file.file, settings.s3_bucket, s3_key, content_type="application/pdf")
+            if not success:
+                return UploadCVResult(error_message="Gagal mengunggah file ke storage S3")
 
-        cv_url = f"/uploads/cv/{unique_filename}"
+            # Construct public URL (for Supabase Storage S3 gateway)
+            cv_url = f"{settings.s3_endpoint}/{settings.s3_bucket}/{s3_key}"
+        else:
+            # Fallback to local
+            os.makedirs(f"uploads/{UPLOAD_DIR}", exist_ok=True)
+            file_path = os.path.join(f"uploads/{UPLOAD_DIR}", unique_filename)
+            with open(file_path, "wb") as buffer:
+                buffer.write(file.file.read())
+            cv_url = f"/uploads/{UPLOAD_DIR}/{unique_filename}"
+
         profile.cv_url = cv_url
         profile.updated_at = datetime.now(timezone.utc)
 

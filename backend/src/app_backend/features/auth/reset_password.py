@@ -70,6 +70,7 @@ def request_reset_password_command_handler(
 
     # Kirim email reset password
     from app_backend.shared.mailer import send_direct_email
+
     subject = "Reset Password Akun LARAS"
     body = f"""
 Halo,

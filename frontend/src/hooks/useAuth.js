@@ -12,7 +12,7 @@ export const useAuth = () => {
       localStorage.setItem('token', data.access_token);
       localStorage.setItem('refreshToken', data.refresh_token);
       queryClient.setQueryData(['user'], data.user);
-      navigate('/lowongan');
+      navigate('/app/home');
     },
   });
 

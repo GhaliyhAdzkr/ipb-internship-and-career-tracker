@@ -5,13 +5,14 @@ import { PiBookmarkSimple } from "react-icons/pi";
 
 function Dashboard() {
 	const { user } = useAuth();
+	const displayName = user?.full_name || "Mahasiswa";
 
 	return (
 		<div className="font-jakarta">
 			{/* Welcome */}
 			<div className="mb-8 bg-sky-950 py-7 px-10 rounded-xl text-white flex justify-between items-center shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)]">
 				<div className="w-full flex gap-2 justify-between items-center">
-					<div className="text-3xl font-bold">Selamat Datang Kembali, Budi</div>
+					<div className="text-3xl font-bold">Selamat Datang Kembali, {displayName}</div>
 					<button className="text-center bg-white text-sm font-bold py-2 px-4 text-sky-950 rounded">
 						Tulis Jurnal
 					</button>
@@ -49,7 +50,7 @@ function Dashboard() {
 				<div className="lg:col-span-1">
 					<div className="flex justify-between items-center py-3 font-bold">
 						<div className="text-black">Lamaran Terakhir</div>
-						<NavLink to="/lamaran" className="text-sm text-sky-950 hover:text-sky-800">
+						<NavLink to="/app/lamaran" className="text-sm text-sky-950 hover:text-sky-800">
 							Selengkapnya
 						</NavLink>
 					</div>
@@ -83,7 +84,7 @@ function Dashboard() {
 				<div className="lg:col-span-2">
 					<div className="flex justify-between items-center py-3 font-bold">
 						<div className="text-black">Rekomendasi Magang</div>
-						<NavLink to="/lowongan" className="text-sm text-sky-950 hover:text-sky-800">
+						<NavLink to="/app/lowongan" className="text-sm text-sky-950 hover:text-sky-800">
 							Selengkapnya
 						</NavLink>
 					</div>

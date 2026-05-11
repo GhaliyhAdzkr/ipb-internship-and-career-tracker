@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import Layout from "./components/Layout";
-// import LandingPage from "./pages/LandingPage";
+// Layout component replaced by AppShell for protected routes
+import Landing from "./pages/Landing";
+import AppShell from "./layouts/AppShell";
+import Wishlist from "./pages/Wishlist";
 import Login from "./pages/Login";
 import Registration from "./pages/Registrasi";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -20,15 +22,6 @@ import { PiSpinnerGap } from "react-icons/pi";
 const ProtectedRoute = ({ children }) => {
   const { user, isLoading, isError } = useAuth();
   const token = localStorage.getItem('token');
-  
-  // =========================================================================
-  // DEV ONLY: Bypass login check on localhost for faster frontend development
-  // UNCOMMENT the block below when ready for production!
-  // =========================================================================
-  const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-  if (isLocalhost) {
-    return <Layout>{children}</Layout>;
-  }
 
   if (!token) {
     return <Navigate to="/login" replace />;
@@ -51,50 +44,42 @@ const ProtectedRoute = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
 
-  return <Layout>{children}</Layout>;
+  return children;
 };
 
 // Component to redirect authenticated users away from public auth pages
 const PublicRoute = ({ children }) => {
   const token = localStorage.getItem('token');
-  const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-  
-  if (token && !isLocalhost) {
-    return <Navigate to="/lowongan" replace />;
+  if (token) {
+    return <Navigate to="/app/home" replace />;
   }
   return children;
 };
 
 function App() {
-  // DEV ONLY: Detect if running on local machine
-  const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-
   return (
     <Router>
       <Routes>
-        {/* 
-            DEV ONLY: Auto redirect to /lowongan if on localhost.
-            Change this to simply <Login /> for production.
-        */}
-        <Route 
-          path="/" 
-          element={isLocalhost ? <Navigate to="/lowongan" replace /> : <Login />} 
-        />
-
         {/* Authentication Routes (Grouped logically) */}
+        {/* Guest / Public Routes (landing + auth) */}
+        <Route path="/" element={<Landing />} />
         <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
         <Route path="/registration" element={<PublicRoute><Registration /></PublicRoute>} />
         <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
         <Route path="/verify-email" element={<VerifyEmail />} />
 
-        {/* Protected Application Routes (Authentication temporarily disabled) */}
-        <Route path="/home" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/lowongan" element={<ProtectedRoute><Lowongan /></ProtectedRoute>} />
-        <Route path="/lamaran" element={<ProtectedRoute><Lamaran /></ProtectedRoute>} />
-        <Route path="/jurnal" element={<ProtectedRoute><Jurnal /></ProtectedRoute>} />
-        <Route path="/laporan" element={<ProtectedRoute><Laporan /></ProtectedRoute>} />
-        <Route path="/profil" element={<ProtectedRoute><Profil /></ProtectedRoute>} />
-        <Route path="/detail" element={<ProtectedRoute><DetailLowongan /></ProtectedRoute>} />
+        {/* App (protected) with nested routes */}
+        <Route path="/app" element={<ProtectedRoute><AppShell /></ProtectedRoute>}>
+          <Route index element={<Dashboard />} />
+          <Route path="home" element={<Dashboard />} />
+          <Route path="lowongan" element={<Lowongan />} />
+          <Route path="wishlist" element={<Wishlist />} />
+          <Route path="lamaran" element={<Lamaran />} />
+          <Route path="jurnal" element={<Jurnal />} />
+          <Route path="laporan" element={<Laporan />} />
+          <Route path="profil" element={<Profil />} />
+          <Route path="detail/:vacancyId" element={<DetailLowongan />} />
+        </Route>
         
         {/* Fallback redirect */}
         <Route path="*" element={<Navigate to="/" replace />} />

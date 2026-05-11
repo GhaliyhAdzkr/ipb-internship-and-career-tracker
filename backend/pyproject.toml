@@ -40,6 +40,7 @@ langgraph = "^0.2.0"
 pypdf = "^5.1.0"
 reportlab = "^4.4.10"
 pandas = "^3.0.2"
+boto3 = "^1.28.0"
 
 [tool.poetry.group.dev.dependencies]
 isort = "^7.0.0"

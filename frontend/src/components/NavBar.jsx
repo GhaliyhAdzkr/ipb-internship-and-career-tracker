@@ -51,7 +51,7 @@ const NavBar = () => {
 				</div>
 
 				{/* Profile */}
-				<NavLink to="/profil" className="cursor-pointer">
+				<NavLink to="/app/profil" className="cursor-pointer">
 					<div className="w-10 h-10 overflow-hidden rounded-full border-2 border-transparent hover:border-sky-700 transition-all bg-slate-100 flex items-center justify-center">
 						<PiUserCircle size={32} className="text-zinc-600" />
 					</div>

@@ -6,9 +6,11 @@ from app_backend.models.auth_action_tokens import AuthActionTokens
 from app_backend.models.users import Users
 from app_backend.shared.security import hash_token
 
+
 @dataclass
 class VerifyEmailCommand:
     token: str
+
 
 @dataclass
 class VerifyEmailResult:
@@ -17,6 +19,7 @@ class VerifyEmailResult:
 
     def got_error(self) -> bool:
         return self.error_message is not None
+
 
 def verify_email_command_handler(
     command: VerifyEmailCommand,

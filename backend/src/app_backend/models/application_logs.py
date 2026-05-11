@@ -30,13 +30,13 @@ class ApplicationLogs(Base):
         ),
         ForeignKeyConstraint(
             ["changed_by"],
-            ["auth.users.id"],
+            ["users.id"],
             ondelete="SET NULL",
             name="application_logs_changed_by_fkey",
         ),
     )
 
-    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, server_default=text("public.gen_random_uuid()"))
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     application_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
     new_status: Mapped[str] = mapped_column(
         Enum(

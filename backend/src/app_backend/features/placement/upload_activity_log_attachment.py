@@ -9,8 +9,10 @@ from sqlalchemy.orm import Session
 
 from app_backend.models.activity_logs import ActivityLogs
 from app_backend.models.placements import Placements
+from app_backend.shared.s3_storage import get_s3_client, upload_fileobj
+from app_backend.conf.settings import settings
 
-UPLOAD_DIR = "uploads/activity_logs"
+UPLOAD_DIR = "activity_logs"
 
 
 @dataclass
@@ -63,26 +65,32 @@ def upload_activity_log_attachment_command_handler(
             error_code=HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
         )
 
-    os.makedirs(UPLOAD_DIR, exist_ok=True)
-
     ext = os.path.splitext(filename)[1]
     unique_filename = f"log_{command.log_id}_{uuid.uuid4().hex[:8]}{ext}"
-    file_path = os.path.join(UPLOAD_DIR, unique_filename)
+    s3_key = f"{UPLOAD_DIR}/{unique_filename}"
 
     try:
+        file.file.seek(0, os.SEEK_END)
+        file_size = file.file.tell()
+        file.file.seek(0)
+
         MAX_SIZE = 15 * 1024 * 1024  # 15MB
-        size = 0
+        if file_size > MAX_SIZE:
+            return UploadActivityLogAttachmentResult(error_message="Ukuran file melebihi batas maksimal 15MB")
 
-        with open(file_path, "wb") as buffer:
-            while chunk := file.file.read(1024 * 1024):  # 1MB iterasi
-                size += len(chunk)
-                if size > MAX_SIZE:
-                    buffer.close()
-                    os.remove(file_path)
-                    return UploadActivityLogAttachmentResult(error_message="Ukuran file melebihi batas maksimal 15MB")
-                buffer.write(chunk)
+        if settings.storage_type == "s3":
+            s3_client = get_s3_client()
+            success = upload_fileobj(s3_client, file.file, settings.s3_bucket, s3_key, content_type=file.content_type)
+            if not success:
+                return UploadActivityLogAttachmentResult(error_message="Gagal mengunggah lampiran ke storage S3")
 
-        attachment_url = f"/uploads/activity_logs/{unique_filename}"
+            attachment_url = f"{settings.s3_endpoint}/{settings.s3_bucket}/{s3_key}"
+        else:
+            os.makedirs(f"uploads/{UPLOAD_DIR}", exist_ok=True)
+            file_path = os.path.join(f"uploads/{UPLOAD_DIR}", unique_filename)
+            with open(file_path, "wb") as buffer:
+                buffer.write(file.file.read())
+            attachment_url = f"/uploads/{UPLOAD_DIR}/{unique_filename}"
 
         log.attachment_url = attachment_url
         session.commit()

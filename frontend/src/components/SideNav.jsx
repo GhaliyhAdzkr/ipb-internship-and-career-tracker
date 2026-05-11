@@ -1,13 +1,14 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { 
-  PiSquaresFour, 
-  PiMagnifyingGlass, 
-  PiClipboardText, 
-  PiNotePencil, 
-  PiFileText, 
-  PiUser, 
-  PiSignOut 
+	PiSquaresFour, 
+	PiMagnifyingGlass, 
+	PiClipboardText, 
+	PiNotePencil, 
+	PiFileText, 
+	PiUser, 
+	PiSignOut,
+	PiBookmarkSimple
 } from "react-icons/pi";
 import { useAuth } from "../hooks/useAuth";
 
@@ -17,12 +18,13 @@ const Sidebar = () => {
 	const inactiveStyle = "text-slate-500 hover:text-sky-700 transition-colors";
 
 	const navItems = [
-		{ to: "/home", icon: PiSquaresFour, label: "Beranda" },
-		{ to: "/lowongan", icon: PiMagnifyingGlass, label: "Cari Lowongan" },
-		{ to: "/lamaran", icon: PiClipboardText, label: "Lamaran Saya" },
-		{ to: "/jurnal", icon: PiNotePencil, label: "Jurnal Harian" },
-		{ to: "/laporan", icon: PiFileText, label: "Laporan" },
-		{ to: "/profil", icon: PiUser, label: "Profil" },
+		{ to: "/app/home", icon: PiSquaresFour, label: "Beranda" },
+		{ to: "/app/lowongan", icon: PiMagnifyingGlass, label: "Cari Lowongan" },
+		{ to: "/app/wishlist", icon: PiBookmarkSimple, label: "Wishlist" },
+		{ to: "/app/lamaran", icon: PiClipboardText, label: "Lamaran Saya" },
+		{ to: "/app/jurnal", icon: PiNotePencil, label: "Jurnal Harian" },
+		{ to: "/app/laporan", icon: PiFileText, label: "Laporan" },
+		{ to: "/app/profil", icon: PiUser, label: "Profil" },
 	];
 
 	return (

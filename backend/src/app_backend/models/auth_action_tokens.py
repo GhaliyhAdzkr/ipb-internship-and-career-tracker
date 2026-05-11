@@ -23,7 +23,7 @@ class AuthActionTokens(Base):
     __table_args__ = (
         ForeignKeyConstraint(
             ["user_id"],
-            ["auth.users.id"],
+            ["users.id"],
             ondelete="CASCADE",
             name="auth_action_tokens_user_id_fkey",
         ),
@@ -32,10 +32,9 @@ class AuthActionTokens(Base):
             "token_hash",
             postgresql_where=text("is_used = false"),
         ),
-        {"schema": "auth"},
     )
 
-    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, server_default=text("public.gen_random_uuid()"))
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     user_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
     token_hash: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     action_type: Mapped[str] = mapped_column(
@@ -44,7 +43,6 @@ class AuthActionTokens(Base):
             "ACTIVATE_ACCOUNT",
             "EMAIL_VERIFICATION",
             name="auth_action_enum",
-            schema="auth",
         ),
         nullable=False,
     )

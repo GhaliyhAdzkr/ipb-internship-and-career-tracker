@@ -15,7 +15,14 @@ from app_backend.repositories.student_repository import StudentRepository
 from app_backend.repositories.user_repository import UserRepository
 from app_backend.schemas.user import AdminRegister, LoginResponse, StudentRegister, UserLogin, UserResponse
 from app_backend.shared.mailer import send_direct_email
-from app_backend.shared.security import create_access_token, create_refresh_token, generate_secure_token, hash_password, hash_token, verify_password
+from app_backend.shared.security import (
+    create_access_token,
+    create_refresh_token,
+    generate_secure_token,
+    hash_password,
+    hash_token,
+    verify_password,
+)
 
 
 class IAuthService(Protocol):
@@ -66,11 +73,11 @@ class AuthService:
             self.user_repo.create(user)
             self.user_repo.flush()
             self.student_repo.create(profile)
-            
+
             # Buat Token Verifikasi
             raw_token = generate_secure_token()
             expires_at = now + timedelta(hours=24)
-            
+
             verification_token = AuthActionTokens(
                 user_id=user_id,
                 token_hash=hash_token(raw_token),

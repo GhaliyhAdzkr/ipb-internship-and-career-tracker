@@ -43,7 +43,7 @@ class Applications(Base):
         Index("idx_apps_vacancy", "vacancy_id"),
     )
 
-    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, server_default=text("public.gen_random_uuid()"))
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     vacancy_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
     student_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
     cv_snapshot_url: Mapped[str] = mapped_column(Text, nullable=False)
@@ -85,9 +85,10 @@ def receive_after_update(mapper, connection, target):
         connection.execute(
             text("""
             INSERT INTO application_logs (id, application_id, previous_status, new_status, changed_by, proof_url, reason)
-            VALUES (public.gen_random_uuid(), :app_id, :prev, :new, :by, :proof, :reason)
+            VALUES (:id, :app_id, :prev, :new, :by, :proof, :reason)
             """),
             {
+                "id": uuid.uuid4(),
                 "app_id": target.id,
                 "prev": old_status,
                 "new": new_status,
@@ -105,9 +106,10 @@ def receive_after_insert(mapper, connection, target):
     connection.execute(
         text("""
         INSERT INTO application_logs (id, application_id, previous_status, new_status, changed_by)
-        VALUES (public.gen_random_uuid(), :app_id, NULL, :new, :by)
+        VALUES (:id, :app_id, NULL, :new, :by)
         """),
         {
+            "id": uuid.uuid4(),
             "app_id": target.id,
             "new": target.status,
             "by": changed_by,

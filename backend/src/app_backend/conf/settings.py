@@ -48,6 +48,14 @@ class Settings(BaseSettings):
     # API Versioning
     api_version: str = "v1"
 
+    # S3 / Supabase Storage settings
+    storage_type: str = os.getenv("STORAGE_TYPE", "local")
+    s3_endpoint: str = os.getenv("S3_ENDPOINT", "")
+    s3_region: str = os.getenv("S3_REGION", "")
+    s3_access_key_id: str = os.getenv("S3_ACCESS_KEY_ID", "")
+    s3_secret_access_key: str = os.getenv("S3_SECRET_ACCESS_KEY", "")
+    s3_bucket: str | None = os.getenv("S3_BUCKET", None)
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

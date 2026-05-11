@@ -4,6 +4,7 @@ Background tasks for generating PDF reports and documents.
 
 import datetime
 import os
+import io
 from typing import Dict
 
 import pandas as pd
@@ -19,6 +20,8 @@ from app_backend.models.document_requests import DocumentRequests
 from app_backend.models.notification_queue import NotificationQueue
 from app_backend.models.placements import Placements
 from app_backend.shared.database import create_engine
+from app_backend.shared.s3_storage import get_s3_client, upload_fileobj
+from app_backend.conf.settings import settings
 
 
 def get_db_session():
@@ -65,12 +68,11 @@ def generate_final_report(self, placement_id: str) -> Dict:
         _ = df.groupby(df["Date"].dt.isocalendar().week)["Duration"].sum().to_dict()
 
         # Generate PDF
-        os.makedirs("uploads/reports", exist_ok=True)
         filename = f"report_{placement_id}.pdf"
-        file_path = f"uploads/reports/{filename}"
-        public_url = f"/uploads/reports/{filename}"
 
-        doc = SimpleDocTemplate(str(file_path), pagesize=A4)
+        # Use a BytesIO buffer instead of a file path
+        pdf_buffer = io.BytesIO()
+        doc = SimpleDocTemplate(pdf_buffer, pagesize=A4)
         styles = getSampleStyleSheet()
         elements = []
 
@@ -117,6 +119,27 @@ def generate_final_report(self, placement_id: str) -> Dict:
 
         doc.build(elements)
 
+        # Seek back to beginning of buffer
+        pdf_buffer.seek(0)
+
+        # Determine upload path
+        s3_key = f"reports/{filename}"
+
+        if settings.storage_type == "s3":
+            s3_client = get_s3_client()
+            success = upload_fileobj(s3_client, pdf_buffer, settings.s3_bucket, s3_key, content_type="application/pdf")
+            if not success:
+                return {"status": "failed", "error": "Failed to upload to S3"}
+
+            public_url = f"{settings.s3_endpoint}/{settings.s3_bucket}/{s3_key}"
+        else:
+            # Fallback to local
+            os.makedirs("uploads/reports", exist_ok=True)
+            file_path = f"uploads/reports/{filename}"
+            with open(file_path, "wb") as f:
+                f.write(pdf_buffer.read())
+            public_url = f"/uploads/reports/{filename}"
+
         # Update Database
         placement.auto_generated_report_url = public_url
         placement.last_report_generated_at = datetime.datetime.now()
@@ -152,12 +175,10 @@ def generate_cover_letter(self, request_id: str) -> Dict:
             return {"status": "failed", "error": "Request not found"}
 
         # Generate PDF
-        os.makedirs("uploads/documents", exist_ok=True)
         filename = f"letter_{request_id}.pdf"
-        file_path = f"uploads/documents/{filename}"
-        public_url = f"/uploads/documents/{filename}"
 
-        doc = SimpleDocTemplate(str(file_path), pagesize=A4)
+        pdf_buffer = io.BytesIO()
+        doc = SimpleDocTemplate(pdf_buffer, pagesize=A4)
         styles = getSampleStyleSheet()
         elements = []
 
@@ -197,6 +218,25 @@ def generate_cover_letter(self, request_id: str) -> Dict:
         elements.append(Paragraph("Direktur Kemahasiswaan", styles["Normal"]))
 
         doc.build(elements)
+
+        # Seek back and upload
+        pdf_buffer.seek(0)
+        s3_key = f"documents/{filename}"
+
+        if settings.storage_type == "s3":
+            s3_client = get_s3_client()
+            success = upload_fileobj(s3_client, pdf_buffer, settings.s3_bucket, s3_key, content_type="application/pdf")
+            if not success:
+                return {"status": "failed", "error": "Failed to upload to S3"}
+
+            public_url = f"{settings.s3_endpoint}/{settings.s3_bucket}/{s3_key}"
+        else:
+            # Fallback to local
+            os.makedirs("uploads/documents", exist_ok=True)
+            file_path = f"uploads/documents/{filename}"
+            with open(file_path, "wb") as f:
+                f.write(pdf_buffer.read())
+            public_url = f"/uploads/documents/{filename}"
 
         # Update Database
         req.generated_url = public_url

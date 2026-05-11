@@ -23,16 +23,15 @@ class UserRefreshTokens(Base):
     __table_args__ = (
         ForeignKeyConstraint(
             ["user_id"],
-            ["auth.users.id"],
+            ["users.id"],
             ondelete="CASCADE",
             name="user_refresh_tokens_user_id_fkey",
         ),
         Index("idx_refresh_tokens_user", "user_id"),
         Index("idx_refresh_tokens_hash", "token_hash"),
-        {"schema": "auth"},
     )
 
-    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, server_default=text("public.gen_random_uuid()"))
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     user_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
     token_hash: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     device_info: Mapped[Optional[str]] = mapped_column(Text)

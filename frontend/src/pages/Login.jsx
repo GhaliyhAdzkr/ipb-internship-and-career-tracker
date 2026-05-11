@@ -27,16 +27,6 @@ function Login() {
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		setError("");
-		
-		// =========================================================================
-		// DEV ONLY: Bypass login validation on localhost.
-		// Remove this block when ready for production!
-		// =========================================================================
-		const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-		if (isLocalhost) {
-			navigate('/lowongan');
-			return;
-		}
 
 		if (!email || !password) {
 			setError("Email dan password wajib diisi");

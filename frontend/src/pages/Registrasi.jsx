@@ -172,7 +172,7 @@ function Registration() {
 
 					<div className="text-center text-zinc-500 font-medium text-sm">
 						Sudah punya akun?{" "}
-						<button onClick={() => navigate("/")} className="text-[#002957] font-bold hover:underline">
+						<button onClick={() => navigate("/login")} className="text-[#002957] font-bold hover:underline">
 							Masuk di sini
 						</button>
 					</div>

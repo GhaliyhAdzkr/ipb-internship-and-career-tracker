@@ -23,14 +23,14 @@ class NotificationQueue(Base):
     __table_args__ = (
         ForeignKeyConstraint(
             ["user_id"],
-            ["auth.users.id"],
+            ["users.id"],
             ondelete="CASCADE",
             name="notification_queue_user_id_fkey",
         ),
         Index("idx_notif_pending", "scheduled_at"),
     )
 
-    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, server_default=text("public.gen_random_uuid()"))
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     message: Mapped[str] = mapped_column(Text, nullable=False)
     user_id: Mapped[Optional[uuid.UUID]] = mapped_column(Uuid)

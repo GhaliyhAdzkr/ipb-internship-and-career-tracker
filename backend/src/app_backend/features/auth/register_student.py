@@ -1,6 +1,6 @@
 """
 Register Student Feature – Command Handler.
-Registrasi mahasiswa: buat auth.users + public.profiles_student dalam satu transaksi.
+Registrasi mahasiswa: buat public.users + public.profiles_student dalam satu transaksi.
 """
 
 from __future__ import annotations
@@ -43,7 +43,7 @@ def register_student_command_handler(
 ) -> RegisterStudentResult:
     """
     Business Rules:
-    1. Email harus unik (cek auth.users).
+    1. Email harus unik (cek public.users).
     2. NIM harus unik (cek profiles_student).
     3. Role di-hardcode ke STUDENT – tidak bisa diubah dari client.
     4. user dan profile_student dibuat dalam satu transaksi atomik.
@@ -80,15 +80,15 @@ def register_student_command_handler(
         session.add(user)
         session.flush()
         session.add(profile)
-        
+
         # Buat Token Verifikasi
         from app_backend.models.auth_action_tokens import AuthActionTokens
         from app_backend.shared.security import generate_secure_token, hash_token
         from datetime import timedelta
-        
+
         raw_token = generate_secure_token()
         expires_at = now + timedelta(hours=24)
-        
+
         verification_token = AuthActionTokens(
             user_id=user_id,
             token_hash=hash_token(raw_token),
@@ -102,6 +102,7 @@ def register_student_command_handler(
 
         # Kirim Email Verifikasi
         from app_backend.shared.mailer import send_direct_email
+
         subject = "Verifikasi Akun LARAS IPB"
         body = f"""
 Halo {command.payload.full_name},

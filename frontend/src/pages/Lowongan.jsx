@@ -1,6 +1,8 @@
-import data from "../data/items.json";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { useMediaQuery } from "react-responsive";
+import { vacancyService } from "../services/vacancyService";
 import {
   PiBookmarkSimple,
   PiLeaf,
@@ -13,19 +15,35 @@ import {
 } from "react-icons/pi";
 
 function Lowongan() {
-	// Dropdown
-	const [isOpenDropdown, setIsOpenDropdown] = useState(false);
-	const [sortActive, setSortActive] = useState(0);
-	const sortOption = ["Terbaru", "Terlama"];
+	const navigate = useNavigate();
+	const [query, setQuery] = useState("");
+	const [location, setLocation] = useState("");
+	const [type, setType] = useState("");
+	const [paymentType, setPaymentType] = useState("");
 
 	const [currentPage, setCurrentPage] = useState(1);
 	const isXl = useMediaQuery({ query: "(min-width: 1280px)" });
 	const itemsPerPage = isXl ? 9 : 6;
 
-	const lastIndex = currentPage * itemsPerPage;
-	const firstIndex = lastIndex - itemsPerPage;
-	const currentCards = data.slice(firstIndex, lastIndex);
-	const totalPages = Math.ceil(data.length / itemsPerPage);
+	useEffect(() => {
+		setCurrentPage(1);
+	}, [query, location, type, paymentType]);
+
+	const vacanciesQuery = useQuery({
+		queryKey: ["vacancies", currentPage, itemsPerPage, query, location, type, paymentType],
+		queryFn: () => vacancyService.getVacancies({
+			page: currentPage,
+			perPage: itemsPerPage,
+			query: query.trim() || undefined,
+			location: location.trim() || undefined,
+			type: type || undefined,
+			paymentType: paymentType || undefined,
+		}),
+	});
+
+	const currentCards = vacanciesQuery.data?.items || [];
+	const totalPages = vacanciesQuery.data?.total_pages || 1;
+	const totalItems = vacanciesQuery.data?.total || 0;
 
 	const getPaginationRange = (current, total) => {
 		const range = [];
@@ -40,6 +58,38 @@ function Lowongan() {
 		return range;
 	};
 	const paginationRange = getPaginationRange(currentPage, totalPages);
+
+	const displayType = (value) => {
+		switch (value) {
+			case "INTERNSHIP_GENERAL":
+				return "Magang Umum";
+			case "MBKM_INTERNSHIP":
+				return "MBKM Magang";
+			case "MBKM_STUDY_INDEPENDENT":
+				return "MBKM Studi Independen";
+			case "FULL_TIME":
+				return "Full Time";
+			default:
+				return value || "-";
+		}
+	};
+
+	const displayPayment = (value) => {
+		switch (value) {
+			case "PAID":
+				return "Paid";
+			case "UNPAID":
+				return "Unpaid";
+			case "ALLOWANCE_ONLY":
+				return "Allowance";
+			default:
+				return value || "-";
+		}
+	};
+
+	const handleCardClick = (vacancyId) => {
+		navigate(`/detail/${vacancyId}`);
+	};
 
 	return (
 		<div className="font-jakarta">
@@ -62,6 +112,8 @@ function Lowongan() {
 						<input
 							type="text"
 							placeholder="Posisi, Kata Kunci, atau Perusahaan"
+							value={query}
+							onChange={(e) => setQuery(e.target.value)}
 							className="pl-10 w-full py-2.5 bg-zinc-50 border border-zinc-200 rounded text-sm focus:ring-2 focus:ring-sky-500 outline-none"
 						/>
 					</div>
@@ -73,22 +125,40 @@ function Lowongan() {
 						<input
 							type="text"
 							placeholder="Semua Lokasi"
+							value={location}
+							onChange={(e) => setLocation(e.target.value)}
 							className="pl-10 w-full py-2.5 bg-zinc-50 border border-zinc-200 rounded text-sm focus:ring-2 focus:ring-sky-500 outline-none"
 						/>
 					</div>
 				</div>
 				<div className="w-full md:w-50 flex flex-col gap-1.5">
 					<label className="text-xs font-bold text-black uppercase">Tipe</label>
-					<div className="relative">
-						<PiShapes className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={20} />
-						<input
-							type="text"
-							placeholder="Semua Tipe"
-							className="pl-10 w-full py-2.5 bg-zinc-50 border border-zinc-200 rounded text-sm focus:ring-2 focus:ring-sky-500 outline-none"
-						/>
-					</div>
+					<select
+						value={type}
+						onChange={(e) => setType(e.target.value)}
+						className="w-full py-2.5 px-3 bg-zinc-50 border border-zinc-200 rounded text-sm focus:ring-2 focus:ring-sky-500 outline-none"
+					>
+						<option value="">Semua Tipe</option>
+						<option value="INTERNSHIP_GENERAL">Magang Umum</option>
+						<option value="MBKM_INTERNSHIP">MBKM Magang</option>
+						<option value="MBKM_STUDY_INDEPENDENT">MBKM Studi Independen</option>
+						<option value="FULL_TIME">Full Time</option>
+					</select>
 				</div>
-				<button className="bg-sky-950 text-white p-2.5 rounded hover:bg-sky-900 transition-colors">
+				<div className="w-full md:w-50 flex flex-col gap-1.5">
+					<label className="text-xs font-bold text-black uppercase">Kompensasi</label>
+					<select
+						value={paymentType}
+						onChange={(e) => setPaymentType(e.target.value)}
+						className="w-full py-2.5 px-3 bg-zinc-50 border border-zinc-200 rounded text-sm focus:ring-2 focus:ring-sky-500 outline-none"
+					>
+						<option value="">Semua Kompensasi</option>
+						<option value="PAID">Paid</option>
+						<option value="UNPAID">Unpaid</option>
+						<option value="ALLOWANCE_ONLY">Allowance</option>
+					</select>
+				</div>
+				<button type="button" onClick={() => setCurrentPage(1)} className="bg-sky-950 text-white p-2.5 rounded hover:bg-sky-900 transition-colors">
 					<PiMagnifyingGlass size={20} weight="bold" />
 				</button>
 			</div>
@@ -117,25 +187,49 @@ function Lowongan() {
 
 				{/* Listings */}
 				<div className="flex-1">
+					<div className="mb-4 flex items-center justify-between text-sm text-zinc-500">
+						<span>{vacanciesQuery.isLoading ? "Memuat lowongan..." : `${totalItems} lowongan ditemukan`}</span>
+						<span className="font-medium">Halaman {currentPage} dari {totalPages}</span>
+					</div>
+
+					{vacanciesQuery.isError && (
+						<div className="mb-6 p-4 rounded-xl border border-red-100 bg-red-50 text-red-700 text-sm font-medium">
+							Gagal memuat lowongan dari backend.
+						</div>
+					)}
+
 					<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-						{currentCards.map((item, idx) => (
-							<div key={idx} className="p-6 bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] flex flex-col gap-4 hover:translate-y-[-4px] transition-transform">
+						{currentCards.map((item) => (
+							<div
+								key={item.id}
+								onClick={() => handleCardClick(item.id)}
+								className="p-6 bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] flex flex-col gap-4 hover:-translate-y-1 transition-transform cursor-pointer"
+							>
 								<div className="flex justify-between items-start">
 									<div className="bg-sky-200 px-2 py-1 rounded text-[10px] text-sky-800 font-bold uppercase">
-										DIKURASI CDA
+										{item.is_active ? "AKTIF" : "NONAKTIF"}
 									</div>
 									<PiLeaf size={20} className="text-zinc-400" />
 								</div>
 								<div>
-									<h4 className="text-base font-bold text-black">{item.name}</h4>
-									<p className="text-sm text-zinc-500">Shopee Indonesia</p>
+									<h4 className="text-base font-bold text-black">{item.title}</h4>
+									<p className="text-sm text-zinc-500">{item.company?.name || "Perusahaan belum tercantum"}</p>
 								</div>
+								<div className="text-sm text-zinc-600 line-clamp-2">{item.location || "Lokasi belum tercantum"}</div>
 								<div className="flex gap-2 mt-2">
-									<span className="px-2 py-0.5 bg-zinc-100 text-[10px] text-zinc-600 font-bold rounded uppercase tracking-wider">Remote</span>
-									<span className="px-2 py-0.5 bg-zinc-100 text-[10px] text-zinc-600 font-bold rounded uppercase tracking-wider">Paid</span>
+									<span className="px-2 py-0.5 bg-zinc-100 text-[10px] text-zinc-600 font-bold rounded uppercase tracking-wider">{displayType(item.type)}</span>
+									<span className="px-2 py-0.5 bg-zinc-100 text-[10px] text-zinc-600 font-bold rounded uppercase tracking-wider">{displayPayment(item.payment_type)}</span>
+								</div>
+								<div className="text-xs text-zinc-400 font-medium">
+									{item.skills?.length || 0} skill requirement
 								</div>
 							</div>
 						))}
+						{!vacanciesQuery.isLoading && currentCards.length === 0 && (
+							<div className="col-span-full p-8 rounded-xl border border-dashed border-zinc-200 text-center text-zinc-500 bg-white">
+								Tidak ada lowongan yang cocok dengan filter saat ini.
+							</div>
+						)}
 					</div>
 
 					{/* Pagination */}

@@ -20,7 +20,7 @@ class ProfilesAdmin(Base):
     __table_args__ = (
         ForeignKeyConstraint(
             ["user_id"],
-            ["auth.users.id"],
+            ["users.id"],
             ondelete="CASCADE",
             name="profiles_admin_user_id_fkey",
         ),

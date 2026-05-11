@@ -8,7 +8,7 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import String, UniqueConstraint, Uuid, text
+from sqlalchemy import String, UniqueConstraint, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app_backend.models.base import Base
@@ -22,7 +22,7 @@ class MasterSkills(Base):
     __tablename__ = "master_skills"
     __table_args__ = (UniqueConstraint("name", name="master_skills_name_key"),)
 
-    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, server_default=text("public.gen_random_uuid()"))
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     category: Mapped[Optional[str]] = mapped_column(String(50))
 

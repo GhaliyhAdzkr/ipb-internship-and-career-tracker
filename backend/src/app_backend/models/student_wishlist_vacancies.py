@@ -41,7 +41,7 @@ class StudentWishlistVacancies(Base):
         ),
     )
 
-    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, server_default=text("public.gen_random_uuid()"))
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     student_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
     vacancy_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
     notes: Mapped[Optional[str]] = mapped_column("note", Text)

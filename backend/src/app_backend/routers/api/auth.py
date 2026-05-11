@@ -278,7 +278,7 @@ async def verify_email(
     Aktivasi akun mahasiswa menggunakan token yang dikirim melalui email saat registrasi.
     """
     from app_backend.features.auth.verify_email import VerifyEmailCommand, verify_email_command_handler
-    
+
     result = verify_email_command_handler(
         command=VerifyEmailCommand(token=token),
         session=session,
@@ -306,7 +306,7 @@ async def get_me(
     """Kembalikan data profil user berdasarkan JWT access token."""
     from app_backend.models.profiles_student import ProfilesStudent
     from app_backend.models.profiles_admin import ProfilesAdmin
-    
+
     full_name = None
     nim = None
     semester = None
@@ -317,7 +317,7 @@ async def get_me(
     gpa = None
     department_id = None
     department_name = None
-    
+
     if current_user.role == "STUDENT":
         profile = session.query(ProfilesStudent).filter(ProfilesStudent.user_id == current_user.id).first()
         if profile:
@@ -372,14 +372,14 @@ async def update_profile(
     from app_backend.models.profiles_student import ProfilesStudent
     from app_backend.models.profiles_admin import ProfilesAdmin
     from datetime import datetime, timezone
-    
+
     now = datetime.now(timezone.utc)
-    
+
     if current_user.role == "STUDENT":
         profile = session.query(ProfilesStudent).filter(ProfilesStudent.user_id == current_user.id).first()
         if not profile:
             raise HTTPException(status_code=404, detail="Profil mahasiswa tidak ditemukan")
-        
+
         if payload.full_name:
             profile.full_name = payload.full_name
         if payload.semester:
@@ -394,19 +394,19 @@ async def update_profile(
             profile.gpa = payload.gpa
         if payload.department_id:
             profile.department_id = payload.department_id
-        
+
         profile.updated_at = now
-        
+
     elif current_user.role == "ADMIN":
         profile = session.query(ProfilesAdmin).filter(ProfilesAdmin.user_id == current_user.id).first()
         if not profile:
             raise HTTPException(status_code=404, detail="Profil admin tidak ditemukan")
-        
+
         if payload.full_name:
             profile.full_name = payload.full_name
-        
+
         profile.updated_at = now
-        
+
     session.commit()
     return await get_me(current_user=current_user, session=session)
 
@@ -420,8 +420,6 @@ async def get_departments(
 ):
     """Ambil daftar departemen untuk lookup profil."""
     from app_backend.models.master_departments import MasterDepartments
+
     departments = session.query(MasterDepartments).all()
-    return [
-        {"id": d.id, "name": d.name, "faculty": d.faculty}
-        for d in departments
-    ]
+    return [{"id": d.id, "name": d.name, "faculty": d.faculty} for d in departments]

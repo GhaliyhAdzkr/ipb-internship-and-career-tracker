@@ -26,7 +26,7 @@
 
 ### Global Flow
 
-- [x] Setiap card memiliki scope jelas, acceptance criteria, dan owner yang ditentukan
+- [x] Setiap card memiliki scope jelas, acceptance criteria, dan For yang ditentukan
 - [x] Setiap card memiliki implementation checklist dan test checklist terpisah
 - [x] Tidak ada card yang pindah ke Done tanpa bukti review kode dan QA
 - [x] Tidak ada phase baru dimulai sebelum test gate phase sebelumnya green
@@ -47,7 +47,7 @@ Setiap worker didaftarkan di `app/workers/` sebagai Celery task dengan signature
 ## Phase 0 Foundation dan Infrastructure
 
 **Objective**: Membangun baseline yang reliable sebagai fondasi seluruh phase berikutnya.
-**Owner**: @Peka, @Insan
+**For**: @Peka, @Insan
 
 ### Database dan Migration
 
@@ -93,7 +93,7 @@ Setiap worker didaftarkan di `app/workers/` sebagai Celery task dengan signature
 ## Phase 1 User Management dan Authentication
 
 **Objective**: Menghadirkan lifecycle akun dan sesi yang aman dengan arsitektur Multi-Schema.
-**Owner**: @Peka
+**For**: @Peka
 
 ### Sign Up
 
@@ -163,7 +163,7 @@ Setiap worker didaftarkan di `app/workers/` sebagai Celery task dengan signature
 ## Phase 2 Profile Management dan Master Data
 
 **Objective**: Menghadirkan manajemen profil mahasiswa, admin, dan entitas referensi utama sistem.
-**Owner**: @Peka
+**For**: @Peka
 
 ### Master Data (Admin)
 
@@ -215,7 +215,7 @@ Setiap worker didaftarkan di `app/workers/` sebagai Celery task dengan signature
 ## Phase 3 Aggregated Job Board dan Discovery
 
 **Objective**: Menghadirkan papan lowongan terpusat yang dikurasi oleh internal IPB dengan fitur pencarian dan wishlist.
-**Owner**: @Peka
+**For**: @Peka
 
 ### Vacancy Management (Admin)
 
@@ -263,7 +263,7 @@ Setiap worker didaftarkan di `app/workers/` sebagai Celery task dengan signature
 ## Phase 4 Self-Reported ATS
 
 **Objective**: Menghadirkan pelacakan status lamaran secara mandiri oleh mahasiswa dengan audit trail lengkap.
-**Owner**: @Insan
+**For**: @Insan
 
 ### Application Initialization
 
@@ -319,7 +319,7 @@ Setiap worker didaftarkan di `app/workers/` sebagai Celery task dengan signature
 ## Phase 5 Placement dan Activity Tracker
 
 **Objective**: Menghadirkan manajemen penempatan magang dan pencatatan aktivitas harian mahasiswa.
-**Owner**: @Peka
+**For**: @Peka
 
 ### Placement Activation
 
@@ -364,7 +364,7 @@ Setiap worker didaftarkan di `app/workers/` sebagai Celery task dengan signature
 ## Phase 6 Auto-Report Automation
 
 **Objective**: Menghadirkan pembuatan laporan otomatis dari seluruh logbook mahasiswa siap cetak dalam format kampus.
-**Owner**: @Peka
+**For**: @Peka
 
 ### Report Generation
 
@@ -407,7 +407,7 @@ Setiap worker didaftarkan di `app/workers/` sebagai Celery task dengan signature
 ## Phase 7 Analytics dan Utilities
 
 **Objective**: Menghadirkan dashboard distribusi magang dan eksplorasi data untuk kebutuhan administratif.
-**Owner**: @Insan
+**For**: @Insan
 
 ### Internship Distribution Dashboard
 
@@ -443,7 +443,7 @@ Setiap worker didaftarkan di `app/workers/` sebagai Celery task dengan signature
 ## Phase 8 Notification System
 
 **Objective**: Menghadirkan sistem komunikasi asinkron untuk notifikasi in-app dan email.
-**Owner**: @Peka
+**For**: @Peka
 
 ### Notification Queue Management
 
