@@ -185,10 +185,10 @@
   [8], [Application tracking dan self-reported ATS dengan audit log], [6],
   [9], [Placement activation dan daily activity log], [8],
   [10], [Auto report generation dan document request (PDF)], [9],
-  [11], [Notification system (in-app, unread, read/delete)], [6],
+  [11], [Notification system (in-app, unread, read/delete)], [4],
   [12], [Frontend UI dan integrasi API per phase (auth, profile, job board, aplikasi)], [4, 5, 6, 7, 8],
-  [13], [Dashboard dan analytics (student dan admin)], [12, 11],
-  [14], [Testing dan QA (unit, integration, e2e, test gate per phase)], [12, 13],
+  [13], [Dashboard dan analytics (student dan admin)], [12],
+  [14], [Testing dan QA (unit, integration, e2e, test gate per phase)], [10, 11, 13, 17],
   [15], [CI/CD, deployment pipeline, dan environment staging/production], [2],
   [16], [Monitoring, logging, dan hardening security], [15],
   [17], [Data prefill dan skenario uji untuk validasi UI/flow], [3],
@@ -287,7 +287,7 @@
 
       task((8, 2), align(center)[9\ (10d)], <t9>)
       task((9, 2), align(center)[10\ (13d)], <t10>)
-      task((10, 2), align(center)[19\ (11d)], <t19>)
+      task((10, 3), align(center)[19\ (11d)], <t19>)
 
       task((8, 1), align(center)[12\ (33d)], <t12>, critical: true)
       task((9, 1), align(center)[13\ (7d)], <t13>, critical: true)
@@ -310,22 +310,20 @@
 
       edge(<t6>, <t7>, "-|>")
       edge(<t6>, <t8>, "-|>", stroke: crit + 1.2pt)
-      edge(<t6>, <t11>, "-|>")
+      edge(<t4>, <t11>, "-|>")
 
       edge(<t8>, <t9>, "-|>")
       edge(<t9>, <t10>, "-|>")
-      edge(<t10>, <t19>, "-|>")
+      edge(<t9>, <t19>, "-|>")
 
       edge(<t7>, <t12>, "-|>")
       edge(<t8>, <t12>, "-|>", stroke: crit + 1.2pt)
-      edge(<t4>, <t12>, "-|>")
-      edge(<t5>, <t12>, "-|>")
-      edge(<t6>, <t12>, "-|>")
 
-      edge(<t11>, <t13>, "-|>")
       edge(<t12>, <t13>, "-|>", stroke: crit + 1.2pt)
-      edge(<t12>, <t14>, "-|>")
       edge(<t13>, <t14>, "-|>", stroke: crit + 1.2pt)
+      edge(<t17>, <t14>, "-|>")
+      edge(<t10>, <t14>, "-|>")
+      edge(<t11>, <t14>, "-|>")
 
       edge(<t2>, <t15>, "-|>")
       edge(<t15>, <t16>, "-|>")
@@ -378,7 +376,7 @@ Task dengan buffer (slack, hari):
   [11 Notification system], [39],
   [15 CI/CD dan staging], [93],
   [16 Monitoring dan hardening security], [93],
-  [17 Data prefill untuk validasi UI], [104],
+  [17 Data prefill untuk validasi UI], [88],
   [18 UX polish dan aksesibilitas], [7],
   [19 Performance tuning], [30],
 )

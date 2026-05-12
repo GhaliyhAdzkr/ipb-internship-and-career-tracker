@@ -56,7 +56,7 @@ tasks:
     start: 2026-04-04
     end: 2026-04-11
     dependencies:
-      - id: t6
+      - id: t4
   - name: "10. Placement dan activity log"
     id: t9
     start: 2026-04-18
@@ -82,13 +82,15 @@ tasks:
     end: 2026-05-27
     dependencies:
       - id: t12
-      - id: t11
   - name: "14. Testing dan QA"
     id: t14
     start: 2026-05-21
     end: 2026-05-31
     dependencies:
       - id: t13
+      - id: t17
+      - id: t10
+      - id: t11
   - name: "15. CI/CD dan staging"
     id: t15
     start: 2026-02-07
