@@ -26,6 +26,7 @@ class SearchVacanciesCommand:
     location: Optional[str] = None
     vacancy_type: Optional[str] = None
     payment_type: Optional[str] = None
+    industry: Optional[str] = None
     is_active: bool = True
     page: int = 1
     per_page: int = 10
@@ -83,6 +84,11 @@ def search_vacancies_command_handler(
     if command.payment_type:
         query = query.filter(Vacancies.payment_type == command.payment_type)
 
+    # Filter by industry (joining with MasterExternalCompanies)
+    if command.industry:
+        from app_backend.models.master_external_companies import MasterExternalCompanies
+        query = query.join(Vacancies.company).filter(MasterExternalCompanies.industry.ilike(f"%{command.industry}%"))
+
     # Get total count (tanpa eager loading untuk efisiensi)
     count_query = session.query(Vacancies).filter(Vacancies.is_active == command.is_active)
     if command.query:
@@ -99,6 +105,9 @@ def search_vacancies_command_handler(
         count_query = count_query.filter(Vacancies.type == command.vacancy_type)
     if command.payment_type:
         count_query = count_query.filter(Vacancies.payment_type == command.payment_type)
+    if command.industry:
+        from app_backend.models.master_external_companies import MasterExternalCompanies
+        count_query = count_query.join(Vacancies.company).filter(MasterExternalCompanies.industry.ilike(f"%{command.industry}%"))
     total = count_query.count()
 
     # Get paginated results dengan eager loading
@@ -122,6 +131,7 @@ def search_vacancies_command_handler(
             name=vacancy.company.name,
             industry=vacancy.company.industry,
             website_url=vacancy.company.website_url,
+            logo_url=vacancy.company.logo_url,
         )
 
         items.append(

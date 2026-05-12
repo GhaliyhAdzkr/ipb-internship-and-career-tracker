@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useMediaQuery } from "react-responsive";
-import { vacancyService } from "../services/vacancyService";
+import { vacancyService } from "../../services/vacancyService";
 import {
   PiBookmarkSimple,
   PiLeaf,

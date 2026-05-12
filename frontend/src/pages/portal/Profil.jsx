@@ -1,6 +1,6 @@
 import { React, useState, useEffect, useRef } from "react";
-import { useAuth } from "../hooks/useAuth";
-import { authService } from "../services/authService";
+import { useAuth } from "../../hooks/useAuth";
+import { authService } from "../../services/authService";
 import {
 	PiUserCircle,
 	PiIdentificationCard,

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../../hooks/useAuth";
 import { PiEnvelopeSimple, PiArrowRight, PiSpinnerGap, PiCheckCircle } from "react-icons/pi";
 
 function ForgotPassword() {

@@ -2,19 +2,19 @@
     "education": [
         {
             "index": 0,
-            "name": "Institut Pertanian Ngawi",
+            "name": "IPB University",
             "jenjang": "S1",
-            "jurusan": "Teknologi Pertanian Ngawi",
+            "jurusan": "Ilmu Komputer",
             "nilai": "3.93",
-            "lulus": "23-2-2025"
+            "lulus": "2025-02-23"
         },
         {
             "index": 1,
-            "name": "SMA Sukashawarma 14 Cimanggu Bogor",
+            "name": "SMA Negeri 1 Bogor",
             "jenjang": "SMA/SMK",
-            "jurusan": "Rekayasa Perangakat agak keras",
+            "jurusan": "MIPA",
             "nilai": "97.77",
-            "lulus": "21-6-2021"
+            "lulus": "2021-06-21"
         }
     ]
 }

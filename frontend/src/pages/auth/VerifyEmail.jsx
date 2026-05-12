@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../../hooks/useAuth";
 import { PiSpinnerGap, PiCheckCircle, PiXCircle, PiArrowRight } from "react-icons/pi";
 
 function VerifyEmail() {

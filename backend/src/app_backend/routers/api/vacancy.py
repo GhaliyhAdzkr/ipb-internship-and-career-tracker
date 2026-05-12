@@ -113,7 +113,6 @@ async def list_vacancies(
     page: int = Query(1, ge=1, description="Halaman"),
     per_page: int = Query(10, ge=1, le=100, description="Item per halaman"),
     vacancy_service: VacancyService = Depends(get_vacancy_service),
-    _: DomainUser = Depends(get_current_active_user),
 ) -> VacancyListResponse:
     """
     List semua lowongan aktif dengan pagination.
@@ -139,13 +138,13 @@ async def list_vacancies(
 async def search_vacancies(
     query: Optional[str] = Query(None, description="Kata kunci pencarian"),
     location: Optional[str] = Query(None, description="Filter lokasi"),
+    industry: Optional[str] = Query(None, description="Filter industri"),
     type: Optional[VacancyType] = Query(None, alias="type", description="Tipe lowongan"),
     payment_type: Optional[PaymentType] = Query(None, alias="payment_type", description="Tipe pembayaran"),
     is_active: bool = Query(True, description="Hanya lowongan aktif"),
     page: int = Query(1, ge=1, description="Halaman"),
     per_page: int = Query(10, ge=1, le=100, description="Item per halaman"),
     session=Depends(get_session),
-    _: DomainUser = Depends(get_current_active_user),
 ) -> VacancyListResponse:
     """
     Cari lowongan berdasarkan berbagai filter.
@@ -154,6 +153,7 @@ async def search_vacancies(
         command=SearchVacanciesCommand(
             query=query,
             location=location,
+            industry=industry,
             vacancy_type=type.value if type else None,
             payment_type=payment_type.value if payment_type else None,
             is_active=is_active,
@@ -178,7 +178,6 @@ async def search_vacancies(
 async def get_vacancy(
     vacancy_id: UUID,
     vacancy_service: VacancyService = Depends(get_vacancy_service),
-    _: DomainUser = Depends(get_current_active_user),
 ) -> VacancyDetailResponse:
     """
     Ambil detail lowongan berdasarkan ID.

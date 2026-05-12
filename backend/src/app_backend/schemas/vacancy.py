@@ -40,6 +40,7 @@ class CompanyInfo(BaseModel):
     name: str
     industry: Optional[str] = None
     website_url: Optional[str] = None
+    logo_url: Optional[str] = None
 
 
 class SkillRequirement(BaseModel):

@@ -44,6 +44,7 @@ class Settings(BaseSettings):
     smtp_password: str = os.getenv("SMTP_PASSWORD", "")
     smtp_from_email: str = os.getenv("SMTP_FROM_EMAIL", "noreply@yourdomain.com")
     smtp_from_name: str = os.getenv("SMTP_FROM_NAME", "IPB Career Tracker")
+    frontend_url: str = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
     # API Versioning
     api_version: str = "v1"

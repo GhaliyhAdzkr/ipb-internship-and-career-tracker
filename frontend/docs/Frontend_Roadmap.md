@@ -184,28 +184,24 @@ Bagian ini menjadi peta kerja frontend untuk menentukan halaman mana yang sudah 
 **For**: @Raihan
 
 ### Listing Lowongan
-
-- [ ] Ganti data lokal lowongan dengan fetch ke endpoint vacancy list/search
-- [ ] Tambahkan pagination, search, filter lokasi, tipe, dan pembayaran sesuai dukungan backend
-- [ ] Pastikan card lowongan menampilkan data yang berasal dari backend, termasuk status aktif dan company
+- [x] Ganti data lokal lowongan dengan fetch ke endpoint vacancy list/search
+- [x] Tambahkan pagination, search, filter lokasi, tipe, dan pembayaran sesuai dukungan backend
+- [x] Pastikan card lowongan menampilkan data yang berasal dari backend, termasuk status aktif dan company
 
 ### Detail Lowongan
-
-- [ ] Hubungkan halaman detail lowongan ke endpoint detail vacancy berdasarkan ID
-- [ ] Tampilkan requirement, skill, company, lokasi, dan CTA yang sesuai
-- [ ] Sediakan empty state jika vacancy tidak ditemukan
+- [x] Hubungkan halaman detail lowongan ke endpoint detail vacancy berdasarkan ID
+- [x] Tampilkan requirement, skill, company, lokasi, dan CTA yang sesuai
+- [x] Sediakan empty state jika vacancy tidak ditemukan
 
 ### Wishlist dan Match
-
-- [ ] Integrasikan wishlist student ke backend
-- [ ] Tampilkan indikator match percentage jika endpoint match tersedia dan data student lengkap
-- [ ] Buat aksi simpan/hapus wishlist yang terhubung dengan perubahan optimis di UI
+- [x] Integrasikan wishlist student ke backend
+- [x] Tampilkan indikator match percentage jika endpoint match tersedia dan data student lengkap
+- [x] Buat aksi simpan/hapus wishlist yang terhubung dengan perubahan optimis di UI
 
 ### Test Gate Phase 3
-
-- [ ] Job board menampilkan vacancy backend dengan pagination
-- [ ] Search dan filter mengubah hasil secara benar
-- [ ] Detail lowongan tidak lagi bergantung pada data JSON lokal
+- [x] Job board menampilkan vacancy backend dengan pagination
+- [x] Search dan filter mengubah hasil secara benar
+- [x] Detail lowongan tidak lagi bergantung pada data JSON lokal
 
 **Exit Criteria**: Halaman discovery sudah hidup dengan data backend, bukan mock item.
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import vacancyService from '../services/vacancyService';
+import vacancyService from '../../services/vacancyService';
 import { PiTrash } from 'react-icons/pi';
 
 export default function Wishlist() {

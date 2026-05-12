@@ -13,11 +13,18 @@ import {
 import { useAuth } from "../hooks/useAuth";
 
 const Sidebar = () => {
-	const { logout } = useAuth();
+	const { logout, user } = useAuth();
 	const activeStyle = "text-sky-700 font-bold bg-white shadow-sm";
 	const inactiveStyle = "text-slate-500 hover:text-sky-700 transition-colors";
 
-	const navItems = [
+	const isAdmin = user?.role === "ADMIN";
+
+	const navItems = isAdmin ? [
+		{ to: "/app/admin/dashboard", icon: PiSquaresFour, label: "Admin Panel" },
+		{ to: "/app/admin/verifikasi", icon: PiClipboardText, label: "Verifikasi" },
+		{ to: "/app/lowongan", icon: PiMagnifyingGlass, label: "Dashboard Lowongan" },
+		{ to: "/app/profil", icon: PiUser, label: "Profil Admin" },
+	] : [
 		{ to: "/app/home", icon: PiSquaresFour, label: "Beranda" },
 		{ to: "/app/lowongan", icon: PiMagnifyingGlass, label: "Cari Lowongan" },
 		{ to: "/app/wishlist", icon: PiBookmarkSimple, label: "Wishlist" },

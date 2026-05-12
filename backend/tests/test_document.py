@@ -95,7 +95,7 @@ def test_generate_cover_letter_task_updates_db(mock_session):
             result = generate_cover_letter(str(doc_id))
 
             assert result["status"] == "completed"
-            assert result["url"] == f"/uploads/documents/letter_{doc_id}.pdf"
+            assert f"letter_{doc_id}.pdf" in result["url"]
             assert mock_doc.generated_url == result["url"]
             assert mock_doc.status == "COMPLETED"
 

@@ -15,7 +15,7 @@ class IVacancyService(Protocol):
     def get_vacancy(self, vacancy_id: uuid.UUID) -> Optional[VacancyDetailResponse]: ...
     def update_vacancy(self, vacancy_id: uuid.UUID, data: VacancyUpdate) -> VacancyResponse: ...
     def delete_vacancy(self, vacancy_id: uuid.UUID) -> None: ...
-    def list_active_vacancies(self, skip: int = 0, limit: int = 100) -> List[VacancyResponse]: ...
+    def list_active_vacancies(self, skip: int = 0, limit: int = 100) -> List[VacancyDetailResponse]: ...
 
 
 class VacancyService:
@@ -91,6 +91,7 @@ class VacancyService:
                 name=company.name,
                 industry=company.industry,
                 website_url=company.website_url,
+                logo_url=company.logo_url,
             )
             if company
             else None
@@ -162,9 +163,9 @@ class VacancyService:
         vacancy.updated_at = datetime.now(timezone.utc)
         self.vacancy_repo.save_changes()
 
-    def list_active_vacancies(self, skip: int = 0, limit: int = 100) -> List[VacancyResponse]:
+    def list_active_vacancies(self, skip: int = 0, limit: int = 100) -> List[VacancyDetailResponse]:
         vacancies = self.vacancy_repo.list_active(skip, limit)
-        return [self._map_to_response(v) for v in vacancies]
+        return [self._map_to_detail_response(v) for v in vacancies]
 
     def count_active_vacancies(self) -> int:
         return self.vacancy_repo.count_active()
@@ -187,6 +188,49 @@ class VacancyService:
             is_scraped=vacancy.is_scraped if vacancy.is_scraped is not None else False,
             is_auto_close=(vacancy.is_auto_close if vacancy.is_auto_close is not None else True),
             is_active=vacancy.is_active if vacancy.is_active is not None else True,
+            created_at=vacancy.created_at,
+            updated_at=vacancy.updated_at,
+        )
+
+    def _map_to_detail_response(self, vacancy: Vacancies) -> VacancyDetailResponse:
+        company_info = None
+        if vacancy.company:
+            company_info = CompanyInfo(
+                id=vacancy.company.id,
+                name=vacancy.company.name,
+                industry=vacancy.company.industry,
+                website_url=vacancy.company.website_url,
+                logo_url=vacancy.company.logo_url,
+            )
+        elif vacancy.company_id:
+            company = self.company_repo.get_by_id(vacancy.company_id)
+            if company:
+                company_info = CompanyInfo(
+                    id=company.id,
+                    name=company.name,
+                    industry=company.industry,
+                    website_url=company.website_url,
+                    logo_url=company.logo_url,
+                )
+
+        return VacancyDetailResponse(
+            id=vacancy.id,
+            company=company_info,
+            title=vacancy.title,
+            description=vacancy.description,
+            type=vacancy.type,
+            open_date=vacancy.open_date,
+            close_date=vacancy.close_date,
+            location=vacancy.location,
+            payment_type=vacancy.payment_type,
+            compensation_min=vacancy.compensation_min,
+            compensation_max=vacancy.compensation_max,
+            compensation_note=vacancy.compensation_note,
+            source_url=vacancy.source_url,
+            is_scraped=vacancy.is_scraped if vacancy.is_scraped is not None else False,
+            is_auto_close=(vacancy.is_auto_close if vacancy.is_auto_close is not None else True),
+            is_active=vacancy.is_active if vacancy.is_active is not None else True,
+            skills=[],  # Skills empty for list view to save bandwidth
             created_at=vacancy.created_at,
             updated_at=vacancy.updated_at,
         )

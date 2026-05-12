@@ -1,19 +1,22 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 // Layout component replaced by AppShell for protected routes
-import Landing from "./pages/Landing";
+import Landing from "./pages/public/Landing";
 import AppShell from "./layouts/AppShell";
-import Wishlist from "./pages/Wishlist";
-import Login from "./pages/Login";
-import Registration from "./pages/Registrasi";
-import ForgotPassword from "./pages/ForgotPassword";
-import VerifyEmail from "./pages/VerifyEmail";
-import Dashboard from "./pages/Dashboard";
-import Lowongan from "./pages/Lowongan";
-import Lamaran from "./pages/Lamaran";
-import Jurnal from "./pages/Jurnal";
-import Laporan from "./pages/Laporan";
-import Profil from "./pages/Profil";
-import DetailLowongan from "./pages/DetailLowongan";
+import Wishlist from "./pages/portal/Wishlist";
+import Login from "./pages/auth/Login";
+import Registration from "./pages/auth/Registrasi";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import VerifyEmail from "./pages/auth/VerifyEmail";
+import Dashboard from "./pages/portal/Dashboard";
+import Lowongan from "./pages/portal/Lowongan";
+import Lamaran from "./pages/portal/Lamaran";
+import Jurnal from "./pages/portal/Jurnal";
+import Laporan from "./pages/portal/Laporan";
+import Profil from "./pages/portal/Profil";
+import DetailLowongan from "./pages/portal/DetailLowongan";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminVerification from "./pages/admin/AdminVerification";
+import PublicLowongan from "./pages/public/PublicLowongan";
 
 import { useAuth } from "./hooks/useAuth";
 import { PiSpinnerGap } from "react-icons/pi";
@@ -49,8 +52,12 @@ const ProtectedRoute = ({ children }) => {
 
 // Component to redirect authenticated users away from public auth pages
 const PublicRoute = ({ children }) => {
+  const { user } = useAuth();
   const token = localStorage.getItem('token');
   if (token) {
+    if (user?.role === 'ADMIN') {
+      return <Navigate to="/app/admin/dashboard" replace />;
+    }
     return <Navigate to="/app/home" replace />;
   }
   return children;
@@ -60,9 +67,12 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Authentication Routes (Grouped logically) */}
-        {/* Guest / Public Routes (landing + auth) */}
+        {/* Guest / Public Routes */}
         <Route path="/" element={<Landing />} />
+        <Route path="/lowongan" element={<PublicLowongan />} />
+        <Route path="/detail/:vacancyId" element={<DetailLowongan />} />
+        
+        {/* Authentication Routes */}
         <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
         <Route path="/registration" element={<PublicRoute><Registration /></PublicRoute>} />
         <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
@@ -72,6 +82,11 @@ function App() {
         <Route path="/app" element={<ProtectedRoute><AppShell /></ProtectedRoute>}>
           <Route index element={<Dashboard />} />
           <Route path="home" element={<Dashboard />} />
+          
+          {/* Admin Routes */}
+          <Route path="admin/dashboard" element={<AdminDashboard />} />
+          <Route path="admin/verifikasi" element={<AdminVerification />} />
+          
           <Route path="lowongan" element={<Lowongan />} />
           <Route path="wishlist" element={<Wishlist />} />
           <Route path="lamaran" element={<Lamaran />} />
