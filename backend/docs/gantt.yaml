@@ -51,32 +51,29 @@ tasks:
     end: 2026-04-17
     dependencies:
       - id: t6
-  - name: "9. Placement dan activity log"
-    id: t9
-    start: 2026-04-18
-    end: 2026-04-27
-    dependencies:
-      - id: t8
-  - name: "10. Auto report dan document request"
-    id: t10
-    start: 2026-04-28
-    end: 2026-05-10
-    dependencies:
-      - id: t9
-  - name: "11. Notification system"
+  - name: "9. Notification system"
     id: t11
     start: 2026-04-04
     end: 2026-04-11
     dependencies:
       - id: t6
+  - name: "10. Placement dan activity log"
+    id: t9
+    start: 2026-04-18
+    end: 2026-04-27
+    dependencies:
+      - id: t8
+  - name: "11. Auto report dan document request"
+    id: t10
+    start: 2026-04-28
+    end: 2026-05-10
+    dependencies:
+      - id: t9
   - name: "12. Frontend integrasi API per phase"
     id: t12
     start: 2026-04-18
     end: 2026-05-20
     dependencies:
-      - id: t4
-      - id: t5
-      - id: t6
       - id: t7
       - id: t8
   - name: "13. Dashboard dan analytics"
@@ -91,7 +88,6 @@ tasks:
     start: 2026-05-21
     end: 2026-05-31
     dependencies:
-      - id: t12
       - id: t13
   - name: "15. CI/CD dan staging"
     id: t15
@@ -122,8 +118,6 @@ tasks:
     start: 2026-04-28
     end: 2026-05-08
     dependencies:
-      - id: t6
-      - id: t8
       - id: t9
   - name: "20. UAT, rilis, dan handover"
     id: t20

@@ -210,14 +210,14 @@
   import gantty.field: default-field-drawer
   import gantty.header: default-headers-drawer
   import gantty.dividers: default-dividers-drawer
-  import gantty.dependencies: default-dependencies-drawer
+  import gantty.dependencies: orthogonal-dependencies-drawer
   import gantty.milestones: default-milestones-drawer
 
   let drawer = (
-    sidebar: default-sidebar-drawer,
+    sidebar: default-sidebar-drawer.with(spacing: 6pt),
     field: default-field-drawer,
     headers: default-headers-drawer,
-    dividers: default-dividers-drawer,
+    dividers: default-dividers-drawer.with(styles: (none,)),
     tasks: default-tasks-drawer.with(
       styles: (
         (
@@ -233,7 +233,11 @@
         ),
       ),
     ),
-    dependencies: default-dependencies-drawer,
+    dependencies: orthogonal-dependencies-drawer.with(style: (
+      stroke: luma(10%) + 0.8pt,
+      radius: 8pt,
+      mark: (end: "straight"),
+    )),
     milestones: default-milestones-drawer,
   )
 
@@ -247,7 +251,7 @@
 == Critical Path (PERT)
 
 #{
-  import "@preview/fletcher:0.5.8": diagram, node, edge
+  import "@preview/fletcher:0.5.8": diagram, edge, node
 
   let crit = rgb("#E45756")
   let normal = rgb("#4C78A8")
@@ -268,34 +272,34 @@
     node-stroke: 0.8pt + luma(30%),
     edge-stroke: 0.7pt + luma(40%),
     {
-      node((0,2), [Start], name: <start>, corner-radius: 2pt, fill: fill-normal)
+      node((0, 2), [Start], name: <start>, corner-radius: 2pt, fill: fill-normal)
 
-      task((1,2), align(center)[1\ (2d)], <t1>, critical: true)
-      task((2,2), align(center)[2\ (10d)], <t2>, critical: true)
-      task((3,2), align(center)[3\ (14d)], <t3>, critical: true)
-      task((4,2), align(center)[4\ (13d)], <t4>, critical: true)
-      task((5,2), align(center)[5\ (14d)], <t5>, critical: true)
-      task((6,2), align(center)[6\ (15d)], <t6>, critical: true)
+      task((1, 2), align(center)[1\ (2d)], <t1>, critical: true)
+      task((2, 2), align(center)[2\ (10d)], <t2>, critical: true)
+      task((3, 2), align(center)[3\ (14d)], <t3>, critical: true)
+      task((4, 2), align(center)[4\ (13d)], <t4>, critical: true)
+      task((5, 2), align(center)[5\ (14d)], <t5>, critical: true)
+      task((6, 2), align(center)[6\ (15d)], <t6>, critical: true)
 
-      task((7,1), align(center)[7\ (7d)], <t7>)
-      task((7,2), align(center)[8\ (14d)], <t8>, critical: true)
-      task((7,3), align(center)[11\ (8d)], <t11>)
+      task((7, 1), align(center)[7\ (7d)], <t7>)
+      task((7, 2), align(center)[8\ (14d)], <t8>, critical: true)
+      task((7, 3), align(center)[11\ (8d)], <t11>)
 
-      task((8,2), align(center)[9\ (10d)], <t9>)
-      task((9,2), align(center)[10\ (13d)], <t10>)
-      task((10,2), align(center)[19\ (11d)], <t19>)
+      task((8, 2), align(center)[9\ (10d)], <t9>)
+      task((9, 2), align(center)[10\ (13d)], <t10>)
+      task((10, 2), align(center)[19\ (11d)], <t19>)
 
-      task((8,1), align(center)[12\ (33d)], <t12>, critical: true)
-      task((9,1), align(center)[13\ (7d)], <t13>, critical: true)
-      task((10,1), align(center)[14\ (11d)], <t14>, critical: true)
+      task((8, 1), align(center)[12\ (33d)], <t12>, critical: true)
+      task((9, 1), align(center)[13\ (7d)], <t13>, critical: true)
+      task((10, 1), align(center)[14\ (11d)], <t14>, critical: true)
 
-      task((3,4), align(center)[15\ (14d)], <t15>)
-      task((4,4), align(center)[16\ (14d)], <t16>)
-      task((4,5), align(center)[17\ (8d)], <t17>)
-      task((9,3), align(center)[18\ (11d)], <t18>)
+      task((3, 4), align(center)[15\ (14d)], <t15>)
+      task((4, 4), align(center)[16\ (14d)], <t16>)
+      task((4, 5), align(center)[17\ (8d)], <t17>)
+      task((9, 3), align(center)[18\ (11d)], <t18>)
 
-      task((11,2), align(center)[20\ (5d)], <t20>, critical: true)
-      node((12,2), [Finish], name: <finish>, corner-radius: 2pt, fill: fill-normal)
+      task((11, 2), align(center)[20\ (5d)], <t20>, critical: true)
+      node((12, 2), [Finish], name: <finish>, corner-radius: 2pt, fill: fill-normal)
 
       edge(<start>, <t1>, "-|>", stroke: crit + 1.2pt)
       edge(<t1>, <t2>, "-|>", stroke: crit + 1.2pt)
@@ -333,7 +337,7 @@
       edge(<t18>, <t20>, "-|>")
       edge(<t19>, <t20>, "-|>")
       edge(<t20>, <finish>, "-|>", stroke: crit + 1.2pt)
-    }
+    },
   )
 }
 
