@@ -131,6 +131,20 @@ async def list_vacancies(
 
 
 @router.get(
+    "/vacancies/industries",
+    response_model=List[str],
+    summary="List semua kategori industri",
+)
+async def list_industries(
+    vacancy_service: VacancyService = Depends(get_vacancy_service),
+) -> List[str]:
+    """
+    Ambil semua kategori industri unik dari data perusahaan eksternal.
+    """
+    return vacancy_service.list_industries()
+
+
+@router.get(
     "/vacancies/search",
     response_model=VacancyListResponse,
     summary="Cari lowongan dengan filter",

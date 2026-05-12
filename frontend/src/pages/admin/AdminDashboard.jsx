@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { 
     PiUsersThin, 
@@ -58,7 +59,7 @@ function AdminDashboard() {
     return (
         <div className="font-jakarta space-y-8">
             {/* Header / Welcome Area */}
-            <div className="bg-sky-950 py-10 px-10 rounded-3xl text-white shadow-xl relative overflow-hidden">
+            <div className="bg-sky-950 py-10 px-10 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
                 <div className="relative z-10">
                     <h1 className="text-3xl font-bold mb-2">Panel Administrator CDA</h1>
                     <p className="text-sky-200 max-w-xl">
@@ -125,14 +126,20 @@ function AdminDashboard() {
                     </div>
                     
                     <div className="grid grid-cols-2 gap-4">
-                        <button className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:border-sky-200 hover:bg-sky-50 transition-all flex flex-col items-center gap-3">
+                        <Link 
+                            to="/app/admin/perusahaan"
+                            className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:border-sky-200 hover:bg-sky-50 transition-all flex flex-col items-center gap-3"
+                        >
                             <PiBuildingsThin size={32} className="text-sky-900" />
                             <span className="font-bold text-slate-900">Kelola PT</span>
-                        </button>
-                        <button className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:border-sky-200 hover:bg-sky-50 transition-all flex flex-col items-center gap-3">
+                        </Link>
+                        <Link 
+                            to="/app/admin/verifikasi"
+                            className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:border-sky-200 hover:bg-sky-50 transition-all flex flex-col items-center gap-3"
+                        >
                             <PiCheckCircleThin size={32} className="text-sky-900" />
                             <span className="font-bold text-slate-900">Validasi</span>
-                        </button>
+                        </Link>
                     </div>
                 </div>
             </div>

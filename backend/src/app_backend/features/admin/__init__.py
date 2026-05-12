@@ -19,6 +19,9 @@ from app_backend.features.admin.manage_skills import (
 from app_backend.features.admin.toggle_user_active import (
     ToggleUserActiveCommand, ToggleUserActiveResult,
     toggle_user_active_command_handler)
+from app_backend.features.admin.list_users import (
+    ListUsersCommand, ListUsersResult,
+    list_users_command_handler)
 
 __all__ = [
     "ToggleUserActiveCommand",
@@ -60,4 +63,7 @@ __all__ = [
     "DeleteCompanyCommand",
     "DeleteCompanyResult",
     "delete_company_command_handler",
+    "ListUsersCommand",
+    "ListUsersResult",
+    "list_users_command_handler",
 ]

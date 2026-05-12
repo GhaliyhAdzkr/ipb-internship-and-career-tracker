@@ -24,6 +24,7 @@ from sqlalchemy import (
     Uuid,
     text,
 )
+from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app_backend.models.base import Base
@@ -63,12 +64,14 @@ class Vacancies(Base):
         ),
         PrimaryKeyConstraint("id", name="vacancies_pkey"),
         Index("idx_vacancies_active", "open_date", "close_date"),
+        Index("idx_vacancies_search_vector", "search_vector", postgresql_using="gin"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     company_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
+    search_vector: Mapped[Optional[any]] = mapped_column(TSVECTOR, nullable=True)
     type: Mapped[str] = mapped_column(
         Enum(
             "INTERNSHIP_GENERAL",

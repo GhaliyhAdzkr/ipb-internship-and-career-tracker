@@ -177,6 +177,7 @@ class UserResponse(BaseModel):
     phone_number: Optional[str] = None
     linkedin_url: Optional[str] = None
     cv_url: Optional[str] = None
+    avatar_url: Optional[str] = None
     gpa: Optional[float] = None
     department_id: Optional[uuid.UUID] = None
     department_name: Optional[str] = None

@@ -8,7 +8,11 @@ import {
 	PiFileText, 
 	PiUser, 
 	PiSignOut,
-	PiBookmarkSimple
+	PiBookmarkSimple,
+	PiBriefcaseThin,
+	PiBuildingsThin,
+	PiUsersThin,
+	PiFileTextThin
 } from "react-icons/pi";
 import { useAuth } from "../hooks/useAuth";
 
@@ -20,10 +24,12 @@ const Sidebar = () => {
 	const isAdmin = user?.role === "ADMIN";
 
 	const navItems = isAdmin ? [
-		{ to: "/app/admin/dashboard", icon: PiSquaresFour, label: "Admin Panel" },
+		{ to: "/app/admin/dashboard", icon: PiSquaresFour, label: "Dashboard" },
+		{ to: "/app/admin/lowongan", icon: PiBriefcaseThin, label: "Kelola Lowongan" },
 		{ to: "/app/admin/verifikasi", icon: PiClipboardText, label: "Verifikasi" },
-		{ to: "/app/lowongan", icon: PiMagnifyingGlass, label: "Dashboard Lowongan" },
-		{ to: "/app/profil", icon: PiUser, label: "Profil Admin" },
+		{ to: "/app/admin/perusahaan", icon: PiBuildingsThin, label: "Kelola Perusahaan" },
+		{ to: "/app/admin/mahasiswa", icon: PiUsersThin, label: "Kelola Mahasiswa" },
+		{ to: "/app/admin/master-data", icon: PiFileTextThin, label: "Data Master" },
 	] : [
 		{ to: "/app/home", icon: PiSquaresFour, label: "Beranda" },
 		{ to: "/app/lowongan", icon: PiMagnifyingGlass, label: "Cari Lowongan" },

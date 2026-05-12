@@ -10,6 +10,14 @@ export const adminService = {
     const response = await api.post('/admin/departments', data);
     return response.data;
   },
+  updateDepartment: async (id, data) => {
+    const response = await api.patch(`/admin/departments/${id}`, data);
+    return response.data;
+  },
+  deleteDepartment: async (id) => {
+    const response = await api.delete(`/admin/departments/${id}`);
+    return response.data;
+  },
 
   // Master Data: Skills
   getSkills: async () => {
@@ -18,6 +26,14 @@ export const adminService = {
   },
   createSkill: async (data) => {
     const response = await api.post('/admin/skills', data);
+    return response.data;
+  },
+  updateSkill: async (id, data) => {
+    const response = await api.patch(`/admin/skills/${id}`, data);
+    return response.data;
+  },
+  deleteSkill: async (id) => {
+    const response = await api.delete(`/admin/skills/${id}`);
     return response.data;
   },
 
@@ -30,8 +46,34 @@ export const adminService = {
     const response = await api.post('/admin/companies', data);
     return response.data;
   },
+  updateCompany: async (id, data) => {
+    const response = await api.patch(`/admin/companies/${id}`, data);
+    return response.data;
+  },
+  deleteCompany: async (id) => {
+    const response = await api.delete(`/admin/companies/${id}`);
+    return response.data;
+  },
+
+  // Vacancy Management (Admin Authority)
+  createVacancy: async (data) => {
+    const response = await api.post('/vacancies', data);
+    return response.data;
+  },
+  updateVacancy: async (id, data) => {
+    const response = await api.put(`/vacancies/${id}`, data);
+    return response.data;
+  },
+  deleteVacancy: async (id) => {
+    const response = await api.delete(`/vacancies/${id}`);
+    return response.data;
+  },
 
   // User Management
+  getStudents: async () => {
+    const response = await api.get('/admin/users', { params: { role: 'STUDENT' } });
+    return response.data;
+  },
   toggleUserActive: async (userId) => {
     const response = await api.patch(`/admin/users/${userId}/toggle-active`);
     return response.data;
@@ -39,7 +81,7 @@ export const adminService = {
 
   // Application Verification
   getPendingVerifications: async () => {
-    const response = await api.get('/admin/applications/pending');
+    const response = await api.get('/admin/applications/pending-verification');
     return response.data;
   },
   verifyApplication: async (applicationId, data) => {
@@ -47,9 +89,15 @@ export const adminService = {
     return response.data;
   },
   rejectApplication: async (applicationId, data) => {
-    const response = await api.post(`/admin/applications/${applicationId}/reject`, data);
+    const response = await api.post(`/admin/applications/${applicationId}/reject-proof`, data);
     return response.data;
   },
+  
+  // Placements
+  getPlacements: async () => {
+    const response = await api.get('/admin/placements');
+    return response.data;
+  }
 };
 
 export default adminService;

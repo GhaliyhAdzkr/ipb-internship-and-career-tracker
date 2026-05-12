@@ -190,11 +190,55 @@ Untuk mengaktifkan akun Anda, silakan klik tombol verifikasi di bawah ini:
         )
 
     def _map_user_to_response(self, user: Users) -> UserResponse:
+        full_name = None
+        nim = None
+        semester = None
+        unit_name = None
+        phone_number = None
+        linkedin_url = None
+        cv_url = None
+        avatar_url = None
+        gpa = None
+        department_id = None
+        department_name = None
+
+        if user.role == "STUDENT":
+            profile = self.student_repo.get_by_user_id(user.id)
+            if profile:
+                full_name = profile.full_name
+                nim = profile.nim
+                semester = profile.semester
+                phone_number = profile.phone_number
+                linkedin_url = profile.linkedin_url
+                cv_url = profile.cv_url
+                avatar_url = profile.avatar_url
+                gpa = float(profile.gpa) if profile.gpa else None
+                department_id = profile.department_id
+                if profile.department:
+                    department_name = profile.department.name
+        elif user.role == "ADMIN":
+            profile = self.admin_repo.get_by_user_id(user.id)
+            if profile:
+                full_name = profile.full_name
+                unit_name = profile.unit_name
+                avatar_url = profile.avatar_url
+
         return UserResponse(
             id=user.id,
             email=user.email,
             role=user.role,
             is_active=user.is_active if user.is_active is not None else True,
+            full_name=full_name,
+            nim=nim,
+            semester=semester,
+            unit_name=unit_name,
+            phone_number=phone_number,
+            linkedin_url=linkedin_url,
+            cv_url=cv_url,
+            avatar_url=avatar_url,
+            gpa=gpa,
+            department_id=department_id,
+            department_name=department_name,
             last_login_at=user.last_login_at,
             created_at=user.created_at,
             updated_at=user.updated_at,

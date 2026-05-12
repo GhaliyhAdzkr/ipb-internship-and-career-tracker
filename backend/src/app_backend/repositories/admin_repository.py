@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -14,3 +14,6 @@ class AdminRepository(BaseRepository[ProfilesAdmin]):
     def get_by_nip(self, nip: str) -> Optional[ProfilesAdmin]:
         query = select(ProfilesAdmin).where(ProfilesAdmin.nip == nip)
         return self.session.scalars(query).first()
+
+    def get_by_user_id(self, user_id: Any) -> Optional[ProfilesAdmin]:
+        return self.session.get(ProfilesAdmin, user_id)

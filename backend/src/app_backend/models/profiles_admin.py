@@ -9,7 +9,7 @@ import datetime
 import uuid
 from typing import Optional
 
-from sqlalchemy import DateTime, ForeignKeyConstraint, String, UniqueConstraint, Uuid, text
+from sqlalchemy import DateTime, ForeignKeyConstraint, String, Text, UniqueConstraint, Uuid, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app_backend.models.base import Base
@@ -31,4 +31,5 @@ class ProfilesAdmin(Base):
     full_name: Mapped[str] = mapped_column(String(150), nullable=False)
     unit_name: Mapped[str] = mapped_column(String(150), nullable=False)
     nip: Mapped[Optional[str]] = mapped_column(String(30))
+    avatar_url: Mapped[Optional[str]] = mapped_column(Text)
     updated_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True), server_default=text("CURRENT_TIMESTAMP"))

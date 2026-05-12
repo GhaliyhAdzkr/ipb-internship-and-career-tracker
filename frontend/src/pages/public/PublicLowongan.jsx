@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
@@ -17,7 +17,9 @@ import {
   PiChartBar,
   PiCaretLeft,
   PiCaretRight,
-  PiXCircle
+  PiXCircle,
+  PiCalendar,
+  PiBookmarkSimple
 } from 'react-icons/pi';
 import { vacancyService } from '../../services/vacancyService';
 
@@ -25,26 +27,20 @@ export default function PublicLowongan() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   
-  // Sync state with URL params
-  const [searchQuery, setSearchQuery] = useState(searchParams.get('query') || '');
-  const [location, setLocation] = useState(searchParams.get('location') || '');
-  const [type, setType] = useState(searchParams.get('type') || '');
-  const [industry, setIndustry] = useState(searchParams.get('industry') || '');
-  const [academicLevel, setAcademicLevel] = useState(searchParams.get('academic') || '');
-  const [currentPage, setCurrentPage] = useState(Number(searchParams.get('page')) || 1);
-  const itemsPerPage = 6;
+  const [showAllIndustries, setShowAllIndustries] = useState(false);
 
-  // Update URL when filters change
-  useEffect(() => {
-    const params = {};
-    if (searchQuery) params.query = searchQuery;
-    if (location) params.location = location;
-    if (type) params.type = type;
-    if (industry) params.industry = industry;
-    if (academicLevel) params.academic = academicLevel;
-    if (currentPage > 1) params.page = currentPage;
-    setSearchParams(params, { replace: true });
-  }, [searchQuery, location, type, industry, academicLevel, currentPage]);
+  // Refs for uncontrolled inputs (zero re-renders on typing)
+  const queryRef = useRef(null);
+  const locationRef = useRef(null);
+
+  // Derived state from URL (Single Source of Truth)
+  const searchQuery = searchParams.get('query') || '';
+  const location = searchParams.get('location') || '';
+  const type = searchParams.get('type') || '';
+  const industry = searchParams.get('industry') || '';
+  const academicLevel = searchParams.get('academic') || '';
+  const currentPage = Number(searchParams.get('page')) || 1;
+  const itemsPerPage = 6;
 
   const { data: vacanciesData, isLoading, isError, error } = useQuery({
     queryKey: ['public-vacancies', currentPage, searchQuery, location, type, industry, academicLevel],
@@ -55,17 +51,41 @@ export default function PublicLowongan() {
       location: location || undefined,
       type: type || undefined,
       industry: industry || undefined
-      // academicLevel is UI-only for now as backend doesn't support it yet
     }),
   });
 
+  const industriesQuery = useQuery({
+    queryKey: ["industries"],
+    queryFn: () => vacancyService.getIndustries(),
+    staleTime: 60 * 60 * 1000, // 1 hour
+  });
+
+  const updateFilters = (newFilters) => {
+    const nextParams = new URLSearchParams(searchParams);
+    Object.entries(newFilters).forEach(([key, value]) => {
+      if (value) nextParams.set(key, value);
+      else nextParams.delete(key);
+    });
+
+    // Only reset to page 1 if we're NOT explicitly setting a new page
+    if (!newFilters.hasOwnProperty("page")) {
+      nextParams.set("page", "1");
+    }
+
+    setSearchParams(nextParams);
+  };
+
+  const handleSearch = () => {
+    updateFilters({
+      query: queryRef.current?.value,
+      location: locationRef.current?.value,
+    });
+  };
+
   const handleReset = () => {
-    setSearchQuery('');
-    setLocation('');
-    setType('');
-    setIndustry('');
-    setAcademicLevel('');
-    setCurrentPage(1);
+    if (queryRef.current) queryRef.current.value = '';
+    if (locationRef.current) locationRef.current.value = '';
+    setSearchParams({});
   };
 
   const displayType = (value) => {
@@ -137,8 +157,9 @@ export default function PublicLowongan() {
             <div className="flex-[2] flex items-center gap-3 px-4 py-3 bg-slate-50/50 rounded-xl border border-slate-100">
               <PiBriefcase className="text-slate-400" size={22} />
               <input 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                ref={queryRef}
+                defaultValue={searchQuery}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 placeholder="Posisi, kata kunci, atau perusahaan..." 
                 className="bg-transparent border-none outline-none w-full text-[15px] font-medium placeholder:text-slate-400" 
               />
@@ -146,8 +167,9 @@ export default function PublicLowongan() {
             <div className="flex-1 flex items-center gap-3 px-4 py-3 bg-slate-50/50 rounded-xl border border-slate-100">
               <PiMapPin className="text-slate-400" size={22} />
               <input 
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
+                ref={locationRef}
+                defaultValue={location}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 placeholder="Lokasi..." 
                 className="bg-transparent border-none outline-none w-full text-[15px] font-medium placeholder:text-slate-400" 
               />
@@ -156,7 +178,7 @@ export default function PublicLowongan() {
               <PiBriefcase className="text-slate-400" size={22} />
               <select 
                 value={type}
-                onChange={(e) => setType(e.target.value)}
+                onChange={(e) => updateFilters({ type: e.target.value })}
                 className="bg-transparent border-none outline-none w-full text-[15px] font-medium text-slate-600 appearance-none cursor-pointer"
               >
                 <option value="">Semua Tipe</option>
@@ -167,6 +189,12 @@ export default function PublicLowongan() {
               </select>
               <PiCaretDown className="absolute right-4 text-slate-400 pointer-events-none" />
             </div>
+            <button 
+              onClick={handleSearch}
+              className="bg-sky-950 text-white px-8 py-3 rounded-xl font-bold hover:bg-sky-900 transition-all active:scale-95 shadow-lg shadow-sky-900/20"
+            >
+              Cari
+            </button>
           </div>
           
           <div className="mt-4 flex items-center gap-3 px-2 text-[13px]">
@@ -175,7 +203,10 @@ export default function PublicLowongan() {
               {['Data Analyst', 'Agronomi', 'Marketing'].map((tag) => (
                 <button 
                   key={tag} 
-                  onClick={() => setSearchQuery(tag)}
+                  onClick={() => {
+                    if (queryRef.current) queryRef.current.value = tag;
+                    updateFilters({ query: tag });
+                  }}
                   className="bg-sky-50 text-sky-700 font-bold px-3 py-1 rounded-full hover:bg-sky-100 transition-colors"
                 >
                   {tag}
@@ -208,23 +239,31 @@ export default function PublicLowongan() {
                       <input 
                         type="checkbox" 
                         checked={industry === ''} 
-                        onChange={() => setIndustry('')}
+                        onChange={() => updateFilters({ industry: '' })}
                         className="w-5 h-5 rounded border-slate-200 text-sky-600 focus:ring-sky-600" 
                       />
                       <span className={`text-sm font-bold ${industry === '' ? 'text-sky-950' : 'text-slate-600'} group-hover:text-sky-950 transition-colors`}>Semua Industri</span>
                     </label>
-                    {['Agrikultur', 'Teknologi Informasi', 'FMCG', 'Perbankan'].map((label) => (
+                    {(industriesQuery.data?.slice(0, showAllIndustries ? undefined : 5) || []).map((label) => (
                       <label key={label} className="flex items-center gap-3 cursor-pointer group">
                         <input 
                           type="checkbox" 
                           checked={industry === label}
-                          onChange={() => setIndustry(label)}
+                          onChange={() => updateFilters({ industry: label })}
                           className="w-5 h-5 rounded border-slate-200 text-sky-600 focus:ring-sky-600" 
                         />
                         <span className={`text-sm font-bold ${industry === label ? 'text-sky-950' : 'text-slate-600'} group-hover:text-sky-950 transition-colors`}>{label}</span>
                       </label>
                     ))}
                   </div>
+                  {industriesQuery.data?.length > 5 && (
+                    <button 
+                      onClick={() => setShowAllIndustries(!showAllIndustries)}
+                      className="mt-4 text-[11px] font-bold text-sky-600 hover:text-sky-800 transition-colors uppercase tracking-wider"
+                    >
+                      {showAllIndustries ? "Lihat Sedikit" : `Lihat Selengkapnya (${industriesQuery.data.length - 5}+)`}
+                    </button>
+                  )}
                 </div>
 
                 <div>
@@ -235,7 +274,7 @@ export default function PublicLowongan() {
                         type="radio" 
                         name="academic" 
                         checked={academicLevel === ''} 
-                        onChange={() => setAcademicLevel('')}
+                        onChange={() => updateFilters({ academic: '' })}
                         className="w-5 h-5 border-slate-200 text-sky-600 focus:ring-sky-600" 
                       />
                       <span className={`text-sm font-bold ${academicLevel === '' ? 'text-sky-950' : 'text-slate-600'} group-hover:text-sky-950 transition-colors`}>Semua Tingkat</span>
@@ -246,7 +285,7 @@ export default function PublicLowongan() {
                           type="radio" 
                           name="academic" 
                           checked={academicLevel === label}
-                          onChange={() => setAcademicLevel(label)}
+                          onChange={() => updateFilters({ academic: label })}
                           className="w-5 h-5 border-slate-200 text-sky-600 focus:ring-sky-600" 
                         />
                         <span className={`text-sm font-bold ${academicLevel === label ? 'text-sky-950' : 'text-slate-600'} group-hover:text-sky-950 transition-colors`}>{label}</span>
@@ -310,7 +349,7 @@ export default function PublicLowongan() {
               <div className="mt-16 flex items-center justify-center gap-3">
                 <button 
                   disabled={currentPage === 1}
-                  onClick={() => setCurrentPage(prev => prev - 1)}
+                  onClick={() => updateFilters({ page: currentPage - 1 })}
                   className="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 hover:text-sky-600 disabled:opacity-30 transition-all shadow-sm"
                 >
                   <PiCaretLeft size={20} weight="bold" />
@@ -319,7 +358,7 @@ export default function PublicLowongan() {
                   {[...Array(totalPages)].map((_, i) => (
                     <button 
                       key={i}
-                      onClick={() => setCurrentPage(i + 1)}
+                      onClick={() => updateFilters({ page: i + 1 })}
                       className={`w-10 h-10 rounded-xl font-[900] text-sm transition-all shadow-sm ${
                         currentPage === i + 1 
                           ? 'bg-sky-950 text-white shadow-sky-950/20' 
@@ -332,7 +371,7 @@ export default function PublicLowongan() {
                 </div>
                 <button 
                   disabled={currentPage === totalPages}
-                  onClick={() => setCurrentPage(prev => prev + 1)}
+                  onClick={() => updateFilters({ page: currentPage + 1 })}
                   className="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 hover:text-sky-600 disabled:opacity-30 transition-all shadow-sm"
                 >
                   <PiCaretRight size={20} weight="bold" />
@@ -391,23 +430,32 @@ function VacancyCard({ id, title, company, companyLogo, location, type, deadline
             </div>
           )}
         </div>
-        <div className="bg-sky-50 border border-sky-100 text-sky-700 text-[10px] font-bold px-3 py-1 rounded-full flex items-center gap-1.5 uppercase tracking-wider">
-          <PiCheckCircleFill size={14} />
-          Dikurasi CDA
-        </div>
+        <button 
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            window.location.href = "/login";
+          }}
+          className="p-1.5 text-slate-300 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-all"
+          title="Simpan ke Wishlist"
+        >
+          <PiBookmarkSimple size={20} />
+        </button>
       </div>
       
-      <div className="flex-1 mb-8">
-        <h3 className="text-[17px] font-[900] text-sky-950 mb-1 group-hover:text-sky-600 transition-colors line-clamp-1">{title}</h3>
-        <p className="text-[14px] font-medium text-slate-400 mb-6">{company}</p>
-        
+      <div className="flex-1 mb-6">
+        <h3 className="text-[17px] font-[900] text-sky-950 mb-1 group-hover:text-sky-600 transition-colors line-clamp-2 leading-snug">{title}</h3>
+        <p className="text-[14px] font-medium text-slate-400">{company}</p>
+      </div>
+      
+      <div className="mt-auto pt-6 border-t border-slate-50 space-y-4">
         <div className="flex flex-wrap gap-2">
           <span className="bg-slate-50 text-slate-500 text-[11px] font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5">
-            <PiMapPin size={14} />
-            {location}
+            <PiMapPin size={14} className="text-sky-600" />
+            <span className="line-clamp-1">{location}</span>
           </span>
           <span className="bg-slate-50 text-slate-500 text-[11px] font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5">
-            <PiBriefcase size={14} />
+            <PiBriefcase size={14} className="text-sky-600" />
             {type}
           </span>
         </div>

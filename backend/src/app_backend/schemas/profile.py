@@ -53,6 +53,7 @@ class StudentProfileResponse(BaseModel):
     phone_number: Optional[str] = None
     linkedin_url: Optional[str] = None
     cv_url: Optional[str] = None
+    avatar_url: Optional[str] = None
 
     # Skills
     skills: List[SkillInfo] = []

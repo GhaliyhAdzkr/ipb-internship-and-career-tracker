@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -25,6 +25,7 @@ import PARTNERS from '../../data/partners.json';
 import mockVacancies from '../../data/vacancies.json';
 
 export default function Landing() {
+  const navigate = useNavigate();
   const { data: vacanciesData, isLoading, isError, error } = useQuery({
     queryKey: ['landing-vacancies'],
     queryFn: async () => {
@@ -155,7 +156,13 @@ export default function Landing() {
                 <span className="text-slate-400 font-medium tracking-tight">Pencarian populer:</span>
                 <div className="flex gap-2">
                   {['Data Analyst', 'Agronomi', 'Management Trainee'].map((item) => (
-                    <button key={item} className="text-sky-700 font-bold hover:underline">{item}</button>
+                    <button 
+                      key={item} 
+                      onClick={() => navigate(`/lowongan?query=${item}`)}
+                      className="text-sky-700 font-bold hover:underline"
+                    >
+                      {item}
+                    </button>
                   ))}
                 </div>
               </div>

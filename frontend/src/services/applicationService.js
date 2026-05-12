@@ -1,4 +1,5 @@
 import api from '../api/axios';
+import { fileService } from './fileService';
 
 export const applicationService = {
   /**
@@ -26,14 +27,7 @@ export const applicationService = {
    * @param {File} file
    */
   uploadProof: async (applicationId, file) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    const response = await api.post(`/applications/${applicationId}/proof`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data;
+    return await fileService.uploadSingle(`/applications/${applicationId}/proof`, file);
   },
 
   /**

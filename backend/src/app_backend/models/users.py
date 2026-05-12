@@ -23,6 +23,8 @@ if TYPE_CHECKING:
     from app_backend.models.notification_queue import NotificationQueue
     from app_backend.models.user_refresh_tokens import UserRefreshTokens
     from app_backend.models.vacancies import Vacancies
+    from app_backend.models.profiles_student import ProfilesStudent
+    from app_backend.models.profiles_admin import ProfilesAdmin
 
 
 class Users(Base):
@@ -48,6 +50,13 @@ class Users(Base):
     notification_queue: Mapped[list["NotificationQueue"]] = relationship("NotificationQueue", back_populates="user")
     vacancies: Mapped[list["Vacancies"]] = relationship("Vacancies", back_populates="users")
     application_logs: Mapped[list["ApplicationLogs"]] = relationship("ApplicationLogs", back_populates="users")
+    
+    profile_student: Mapped[Optional["ProfilesStudent"]] = relationship(
+        "ProfilesStudent", backref="user", uselist=False, cascade="all, delete-orphan"
+    )
+    profile_admin: Mapped[Optional["ProfilesAdmin"]] = relationship(
+        "ProfilesAdmin", backref="user", uselist=False, cascade="all, delete-orphan"
+    )
 
     def to_domain(self):
         """Convert ke domain model User"""

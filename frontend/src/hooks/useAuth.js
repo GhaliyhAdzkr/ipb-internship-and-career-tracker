@@ -47,6 +47,13 @@ export const useAuth = () => {
       queryClient.invalidateQueries({ queryKey: ['user'] });
     },
   });
+  
+  const uploadAvatarMutation = useMutation({
+    mutationFn: authService.uploadAvatar,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user'] });
+    },
+  });
 
   const { data: user, isLoading, isError } = useQuery({
     queryKey: ['user'],
@@ -77,5 +84,7 @@ export const useAuth = () => {
     isVerifying: verifyEmailMutation.isPending,
     updateProfile: updateProfileMutation.mutateAsync,
     isUpdating: updateProfileMutation.isPending,
+    uploadAvatar: uploadAvatarMutation.mutateAsync,
+    isUploadingAvatar: uploadAvatarMutation.isPending,
   };
 };

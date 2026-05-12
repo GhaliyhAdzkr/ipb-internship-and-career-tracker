@@ -80,20 +80,22 @@ class VacancyService:
             raise exc
 
     def get_vacancy(self, vacancy_id: uuid.UUID) -> Optional[VacancyDetailResponse]:
-        vacancy = self.vacancy_repo.get_by_id(vacancy_id)
+        vacancy = self.vacancy_repo.get_with_company(vacancy_id)
         if not vacancy:
             return None
 
-        company = self.company_repo.get_by_id(vacancy.company_id)
+        # Fetch skills for detail view
+        skills = self.vacancy_skill_repo.get_by_vacancy_id(vacancy_id)
+        
         company_info = (
             CompanyInfo(
-                id=company.id,
-                name=company.name,
-                industry=company.industry,
-                website_url=company.website_url,
-                logo_url=company.logo_url,
+                id=vacancy.company.id,
+                name=vacancy.company.name,
+                industry=vacancy.company.industry,
+                website_url=vacancy.company.website_url,
+                logo_url=vacancy.company.logo_url,
             )
-            if company
+            if vacancy.company
             else None
         )
 
@@ -114,7 +116,7 @@ class VacancyService:
             is_scraped=vacancy.is_scraped if vacancy.is_scraped is not None else False,
             is_auto_close=(vacancy.is_auto_close if vacancy.is_auto_close is not None else True),
             is_active=vacancy.is_active if vacancy.is_active is not None else True,
-            skills=[],  # Need to fetch skills if detail requires them
+            skills=skills,
             created_at=vacancy.created_at,
             updated_at=vacancy.updated_at,
         )
@@ -169,6 +171,9 @@ class VacancyService:
 
     def count_active_vacancies(self) -> int:
         return self.vacancy_repo.count_active()
+
+    def list_industries(self) -> List[str]:
+        return self.company_repo.get_distinct_industries()
 
     def _map_to_response(self, vacancy: Vacancies) -> VacancyResponse:
         return VacancyResponse(

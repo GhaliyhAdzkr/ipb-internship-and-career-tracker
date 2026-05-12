@@ -15,20 +15,12 @@ import {
 	PiCheckCircle,
 	PiCaretDown,
 	PiMagnifyingGlass,
+	PiUpload
 } from "react-icons/pi";
 
-// PACKAGE
-
-// ICONS
-import { PiUpload } from "react-icons/pi";
-import { AiOutlineCloudUpload } from "react-icons/ai";
-import { HiOutlineDotsCircleHorizontal } from "react-icons/hi";
-import { CiTextAlignJustify } from "react-icons/ci";
-import { FaRegCircleCheck } from "react-icons/fa6";
-import { TiMessages } from "react-icons/ti";
-
 function Profil() {
-	const { user, updateProfile, isUpdating } = useAuth();
+	const { user, updateProfile, isUpdating, uploadAvatar, isUploadingAvatar } = useAuth();
+	const fileInputRef = useRef(null);
 
 	const [formData, setFormData] = useState({
 		full_name: "",
@@ -36,11 +28,13 @@ function Profil() {
 		semester: "",
 		phone_number: "",
 		linkedin_url: "",
+		cv_url: "",
 		gpa: "",
 		department_id: "",
 		department_name: "",
 	});
 
+	const [isEditMode, setIsEditMode] = useState(false);
 	const [departments, setDepartments] = useState([]);
 	const [isDeptOpen, setIsDeptOpen] = useState(false);
 	const [deptSearch, setDeptSearch] = useState("");
@@ -72,6 +66,7 @@ function Profil() {
 				semester: user.semester || "",
 				phone_number: user.phone_number || "",
 				linkedin_url: user.linkedin_url || "",
+				cv_url: user.cv_url || "",
 				gpa: user.gpa || "",
 				department_id: deptId,
 				department_name: deptName,
@@ -137,13 +132,55 @@ function Profil() {
 				semester: semesterInt || undefined,
 				phone_number: formData.phone_number,
 				linkedin_url: formData.linkedin_url,
+				cv_url: formData.cv_url,
 				gpa: gpaFloat || undefined,
 				department_id: formData.department_id || undefined,
 			});
 			setShowSuccess(true);
+			setIsEditMode(false);
 			setTimeout(() => setShowSuccess(false), 3000);
 		} catch (err) {
 			console.error("Update profile failed:", err);
+		}
+	};
+
+	const handleCancel = () => {
+		// Reset form to user data
+		if (user) {
+			const deptId = user.department_id || user.department?.id || "";
+			const deptName = user.department_name || user.department?.name || "";
+			setFormData({
+				full_name: user.full_name || "",
+				nim: user.nim || "",
+				semester: user.semester || "",
+				phone_number: user.phone_number || "",
+				linkedin_url: user.linkedin_url || "",
+				cv_url: user.cv_url || "",
+				gpa: user.gpa || "",
+				department_id: deptId,
+				department_name: deptName,
+			});
+		}
+		setIsEditMode(false);
+	};
+
+	const handleFileChange = async (e) => {
+		const file = e.target.files[0];
+		if (!file) return;
+
+		// Limit 2MB
+		if (file.size > 2 * 1024 * 1024) {
+			alert("Ukuran file maksimal 2MB");
+			return;
+		}
+
+		try {
+			await uploadAvatar(file);
+			setShowSuccess(true);
+			setTimeout(() => setShowSuccess(false), 3000);
+		} catch (err) {
+			console.error("Upload avatar failed:", err);
+			alert("Gagal mengunggah foto profil");
 		}
 	};
 
@@ -164,14 +201,39 @@ function Profil() {
 				{/* Avatar Card */}
 				<div className="lg:col-span-4">
 					<div className="p-8 bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] flex flex-col items-center text-center gap-6">
-						<div className="relative">
-							<div className="w-32 h-32 bg-zinc-100 rounded-full flex items-center justify-center border-4 border-white shadow-sm overflow-hidden">
-								<PiUserCircle
-									size={100}
-									className="text-zinc-400"
-								/>
+						<div className="relative group">
+							<div className="w-32 h-32 bg-zinc-100 rounded-full flex items-center justify-center border-4 border-white shadow-sm overflow-hidden relative">
+								{user?.avatar_url ? (
+									<img
+										src={user.avatar_url}
+										alt="Profile"
+										className="w-full h-full object-cover"
+										referrerPolicy="no-referrer"
+									/>
+								) : (
+									<PiUserCircle
+										size={100}
+										className="text-zinc-400"
+									/>
+								)}
+								{isUploadingAvatar && (
+									<div className="absolute inset-0 bg-black/40 flex items-center justify-center text-white">
+										<PiSpinnerGap className="animate-spin" size={24} />
+									</div>
+								)}
 							</div>
-							<button className="absolute bottom-0 right-0 p-2 bg-sky-950 text-white rounded-full shadow-lg hover:bg-sky-900 transition-all">
+							<input
+								type="file"
+								ref={fileInputRef}
+								className="hidden"
+								accept="image/*"
+								onChange={handleFileChange}
+							/>
+							<button
+								onClick={() => fileInputRef.current?.click()}
+								disabled={isUploadingAvatar}
+								className="absolute bottom-0 right-0 p-2 bg-sky-950 text-white rounded-full shadow-lg hover:bg-sky-900 transition-all disabled:opacity-50"
+							>
 								<PiCamera size={20} weight="bold" />
 							</button>
 						</div>
@@ -317,14 +379,14 @@ function Profil() {
 									/>
 									<div
 										onClick={() =>
-											setIsDeptOpen(!isDeptOpen)
+											isEditMode && setIsDeptOpen(!isDeptOpen)
 										}
-										className="pl-10 pr-10 w-full py-2.5 bg-zinc-50 border border-zinc-200 text-zinc-700 rounded text-sm focus:ring-2 focus:ring-sky-500 outline-none cursor-pointer flex justify-between items-center"
+										className={`pl-10 pr-10 w-full py-2.5 bg-zinc-50 border border-zinc-200 text-zinc-700 rounded text-sm focus:ring-2 focus:ring-sky-500 outline-none flex justify-between items-center ${isEditMode ? "cursor-pointer" : "cursor-not-allowed bg-zinc-100/50 text-zinc-500"}`}
 									>
 										<span
 											className={
 												formData.department_name
-													? "text-black"
+													? "text-zinc-700"
 													: "text-zinc-400"
 											}
 										>
@@ -337,7 +399,7 @@ function Profil() {
 										/>
 									</div>
 
-									{isDeptOpen && (
+									{isEditMode && isDeptOpen && (
 										<div className="absolute z-50 top-full left-0 w-full mt-2 bg-white border border-zinc-200 text-zinc-700 rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
 											<div className="p-3 border-b bg-zinc-50">
 												<div className="relative">
@@ -408,37 +470,30 @@ function Profil() {
 									)}
 								</div>
 							</div>
-
-							{/* IPK / GPA */}
 							<div className="flex flex-col gap-1.5">
 								<label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
-									IPK / GPA
+									IPK Terakhir
 								</label>
-								<div className="relative">
-									<PiChartLineUp
-										size={20}
-										className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
-									/>
-									<input
-										type="number"
-										step="0.01"
-										value={formData.gpa}
-										onChange={(e) =>
-											setFormData({
-												...formData,
-												gpa: e.target.value,
-											})
-										}
-										placeholder="Contoh: 3.85"
-										className="pl-10 w-full py-2.5 bg-zinc-50 border border-zinc-200 text-zinc-700 rounded text-sm focus:ring-2 focus:ring-sky-500 outline-none transition-all"
-									/>
-								</div>
+								<input
+									type="number"
+									step="0.01"
+									value={formData.gpa}
+									onChange={(e) =>
+										setFormData({ ...formData, gpa: e.target.value })
+									}
+									disabled={!isEditMode}
+									placeholder="0.00"
+									className="w-full px-3 py-2.5 bg-zinc-50 border border-zinc-200 text-zinc-700 rounded text-sm focus:ring-2 focus:ring-sky-500 outline-none transition-all disabled:bg-zinc-100/50 disabled:text-zinc-500"
+								/>
 							</div>
+						</div>
 
-							{/* No. HP */}
+						{/* Contact & Social */}
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t mt-4">
+							{/* Phone */}
 							<div className="flex flex-col gap-1.5">
 								<label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
-									Nomor WhatsApp
+									No. Telepon / WhatsApp
 								</label>
 								<div className="relative">
 									<PiPhone
@@ -446,7 +501,7 @@ function Profil() {
 										className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
 									/>
 									<input
-										type="text"
+										type="tel"
 										value={formData.phone_number}
 										onChange={(e) =>
 											setFormData({
@@ -454,8 +509,9 @@ function Profil() {
 												phone_number: e.target.value,
 											})
 										}
-										placeholder="Contoh: 08123456789"
-										className="pl-10 w-full py-2.5 bg-zinc-50 border border-zinc-200 text-zinc-700 rounded text-sm focus:ring-2 focus:ring-sky-500 outline-none transition-all"
+										disabled={!isEditMode}
+										placeholder="0812..."
+										className="pl-10 w-full py-2.5 bg-zinc-50 border border-zinc-200 text-zinc-700 rounded text-sm focus:ring-2 focus:ring-sky-500 outline-none transition-all disabled:bg-zinc-100/50 disabled:text-zinc-500"
 									/>
 								</div>
 							</div>
@@ -479,24 +535,68 @@ function Profil() {
 												linkedin_url: e.target.value,
 											})
 										}
+										disabled={!isEditMode}
 										placeholder="linkedin.com/in/username"
-										className="pl-10 w-full py-2.5 bg-zinc-50 border border-zinc-200 text-zinc-700 rounded text-sm focus:ring-2 focus:ring-sky-500 outline-none transition-all"
+										className="pl-10 w-full py-2.5 bg-zinc-50 border border-zinc-200 text-zinc-700 rounded text-sm focus:ring-2 focus:ring-sky-500 outline-none transition-all disabled:bg-zinc-100/50 disabled:text-zinc-500"
+									/>
+								</div>
+							</div>
+
+							{/* CV URL */}
+							<div className="flex flex-col gap-1.5">
+								<label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
+									URL CV (Portofolio/Drive)
+								</label>
+								<div className="relative">
+									<PiUpload
+										size={20}
+										className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
+									/>
+									<input
+										type="text"
+										value={formData.cv_url}
+										onChange={(e) =>
+											setFormData({
+												...formData,
+												cv_url: e.target.value,
+											})
+										}
+										disabled={!isEditMode}
+										placeholder="drive.google.com/..."
+										className="pl-10 w-full py-2.5 bg-zinc-50 border border-zinc-200 text-zinc-700 rounded text-sm focus:ring-2 focus:ring-sky-500 outline-none transition-all disabled:bg-zinc-100/50 disabled:text-zinc-500"
 									/>
 								</div>
 							</div>
 						</div>
 
-						<div className="flex justify-end mt-4 border-t pt-6">
-							<button
-								type="submit"
-								disabled={isUpdating}
-								className="px-8 py-2.5 bg-sky-950 text-white font-bold rounded hover:bg-sky-900 transition-all flex items-center gap-2 disabled:opacity-50"
-							>
-								{isUpdating ? (
-									<PiSpinnerGap className="animate-spin" />
-								) : null}
-								<span>Simpan Perubahan</span>
-							</button>
+						<div className="flex justify-end mt-4 border-t pt-6 gap-3">
+							{!isEditMode ? (
+								<button
+									type="button"
+									onClick={() => setIsEditMode(true)}
+									className="px-6 py-2.5 bg-sky-900 text-white font-bold rounded-lg hover:bg-sky-800 transition-all shadow-sm"
+								>
+									Edit Profil
+								</button>
+							) : (
+								<>
+									<button
+										type="button"
+										onClick={handleCancel}
+										className="px-6 py-2.5 bg-zinc-100 text-zinc-700 font-bold rounded-lg hover:bg-zinc-200 transition-all"
+									>
+										Batal
+									</button>
+									<button
+										type="submit"
+										disabled={isUpdating}
+										className="px-6 py-2.5 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-700 transition-all shadow-sm disabled:opacity-50 flex items-center gap-2"
+									>
+										{isUpdating && <PiSpinnerGap className="animate-spin" />}
+										Simpan Perubahan
+									</button>
+								</>
+							)}
 						</div>
 					</form>
 				</div>

@@ -81,6 +81,7 @@ class ProfileService:
             phone_number=profile.phone_number,
             linkedin_url=profile.linkedin_url,
             cv_url=profile.cv_url,
+            avatar_url=profile.avatar_url,
             skills=skills,
             updated_at=profile.updated_at,
         )

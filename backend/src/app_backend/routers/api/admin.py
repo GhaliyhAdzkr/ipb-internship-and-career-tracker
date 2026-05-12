@@ -27,12 +27,17 @@ from __future__ import annotations
 import uuid
 from datetime import datetime, timezone
 from http import HTTPStatus
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 
 from app_backend.domain.user import User as DomainUser
-from app_backend.features.admin import ToggleUserActiveCommand, toggle_user_active_command_handler
+from app_backend.features.admin import (
+    ListUsersCommand,
+    ToggleUserActiveCommand,
+    list_users_command_handler,
+    toggle_user_active_command_handler,
+)
 from app_backend.features.admin.master_data_service import MasterDataService
 from app_backend.features.application import (
     ListPendingVerificationCommand,
@@ -93,6 +98,28 @@ async def toggle_user_active(
     if result.got_error():
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=result.error_message)
     return result.user
+
+
+@router.get(
+    "/users",
+    response_model=List[UserResponse],
+    summary="Daftar semua user (mahasiswa/admin)",
+)
+async def list_users(
+    role: Optional[str] = None,
+    session=Depends(get_session),
+    _: DomainUser = Depends(require_admin),
+) -> List[UserResponse]:
+    """
+    Daftar semua user di sistem. Bisa difilter berdasarkan role.
+    """
+    result = list_users_command_handler(
+        command=ListUsersCommand(role=role),
+        session=session,
+    )
+    if result.got_error():
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=result.error_message)
+    return result.items
 
 
 # Admin Profile (Section 2.3)

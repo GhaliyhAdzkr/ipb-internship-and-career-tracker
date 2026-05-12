@@ -40,13 +40,28 @@ export default function DetailLowongan() {
     staleTime: 1000 * 60 * 5,
   });
 
+  // Point 4: Optimistic Updates for Wishlist in Detail Page
   const saveWishlistMutation = useMutation({
     mutationFn: () => vacancyService.addToWishlist(vacancyId),
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ["vacancy", vacancyId] });
+      const previousVacancy = queryClient.getQueryData(["vacancy", vacancyId]);
+      
+      // If we had is_wishlisted in the detail, we would toggle it here
+      // queryClient.setQueryData(["vacancy", vacancyId], { ...previousVacancy, is_wishlisted: true });
+
+      return { previousVacancy };
+    },
     onSuccess: () => {
+      // Invalidate both vacancy and wishlist
       queryClient.invalidateQueries({ queryKey: ["vacancy", vacancyId] });
+      queryClient.invalidateQueries({ queryKey: ["wishlist"] });
       alert("Lowongan berhasil disimpan ke wishlist.");
     },
-    onError: (error) => {
+    onError: (error, variables, context) => {
+      if (context?.previousVacancy) {
+        queryClient.setQueryData(["vacancy", vacancyId], context.previousVacancy);
+      }
       alert(error.response?.data?.detail || "Gagal menyimpan ke wishlist.");
     },
   });
@@ -121,7 +136,7 @@ export default function DetailLowongan() {
             <Link to="/" className="flex items-center gap-2">
               <img src="/logo/laras.png" alt="LARAS" className="w-8 h-8 object-contain" />
               <span className="text-[18px] font-[1000] text-sky-950 tracking-tighter">
-                LARAS<span className="text-sky-600">.</span>
+                LARAS
               </span>
             </Link>
           </div>
@@ -198,21 +213,31 @@ export default function DetailLowongan() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3">
-              {token ? (
-                <button 
-                  onClick={() => saveWishlistMutation.mutate()}
-                  disabled={saveWishlistMutation.isPending}
-                  className="bg-white text-sky-950 border border-slate-200 px-6 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-slate-50 transition-all active:scale-95"
-                >
-                  <PiBookmarkSimple size={22} />
-                  <span>Simpan</span>
-                </button>
-              ) : null}
+              <button 
+                onClick={(e) => {
+                  if (!token) {
+                    navigate("/login");
+                    return;
+                  }
+                  saveWishlistMutation.mutate();
+                }}
+                disabled={saveWishlistMutation.isPending}
+                className="bg-white text-sky-950 border border-slate-200 px-6 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-slate-50 transition-all active:scale-95"
+              >
+                <PiBookmarkSimple size={22} />
+                <span>Simpan</span>
+              </button>
               
               <a 
                 href={vacancy.source_url || "#"} 
                 target="_blank" 
                 rel="noreferrer"
+                onClick={(e) => {
+                  if (!token) {
+                    e.preventDefault();
+                    navigate("/login");
+                  }
+                }}
                 className="bg-sky-950 text-white px-10 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-sky-900 transition-all active:scale-95 shadow-xl shadow-sky-900/20"
               >
                 <span>Lamar Sekarang</span>
@@ -228,47 +253,6 @@ export default function DetailLowongan() {
         <div className="grid lg:grid-cols-3 gap-12">
           {/* Left Column: Details */}
           <div className="lg:col-span-2 space-y-12">
-            {/* Job Match Score (Guest Protection) */}
-            {token && match && (
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-gradient-to-br from-sky-950 to-sky-900 rounded-[32px] p-8 text-white relative overflow-hidden shadow-2xl shadow-sky-950/20"
-              >
-                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sky-300 text-xs font-bold uppercase tracking-[0.2em]">
-                      <PiChartBarFill size={18} />
-                      AI Talent Matching
-                    </div>
-                    <h3 className="text-2xl font-[900]">Kesesuaian Profil Anda</h3>
-                    <p className="text-sky-200/70 text-sm max-w-sm">
-                      Berdasarkan skill dan kualifikasi Anda, sistem kami menghitung tingkat kecocokan dengan posisi ini.
-                    </p>
-                  </div>
-                  
-                  <div className="flex items-center gap-6">
-                    <div className="w-24 h-24 rounded-full border-[6px] border-sky-800 flex items-center justify-center relative">
-                      <div className="text-3xl font-[1000]">{match.match_percentage}%</div>
-                      <svg className="absolute -inset-[6px] w-24 h-24 -rotate-90">
-                        <circle 
-                          cx="48" cy="48" r="42" 
-                          fill="transparent" 
-                          stroke="currentColor" 
-                          strokeWidth="6"
-                          className="text-sky-400"
-                          strokeDasharray={264}
-                          strokeDashoffset={264 - (264 * match.match_percentage) / 100}
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-                {/* Background Pattern */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-sky-400/10 blur-3xl -mr-20 -mt-20 rounded-full" />
-              </motion.div>
-            )}
 
             <section className="space-y-6">
               <h2 className="text-xl font-[900] text-sky-950 flex items-center gap-3">

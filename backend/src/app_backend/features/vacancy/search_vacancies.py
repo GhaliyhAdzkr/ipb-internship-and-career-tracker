@@ -8,12 +8,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
-from sqlalchemy import or_
-from sqlalchemy.orm import Session, joinedload, selectinload
+from sqlalchemy import or_, func
+from sqlalchemy.orm import Session, joinedload, defer
 
 from app_backend.models.vacancies import Vacancies
-from app_backend.models.vacancy_skills import VacancySkills
-from app_backend.schemas.vacancy import CompanyInfo, SkillRequirement, VacancyDetailResponse, VacancyListResponse
+from app_backend.models.master_external_companies import MasterExternalCompanies
+from app_backend.schemas.vacancy import CompanyInfo, VacancySummaryResponse, VacancyListResponse
 
 
 class SearchVacanciesException(Exception):
@@ -47,29 +47,25 @@ def search_vacancies_command_handler(
 ) -> SearchVacanciesResult:
     """
     Search vacancies dengan berbagai filter.
-    Menggunakan eager loading untuk menghindari N+1 query.
+    Menggunakan eager loading untuk company dan defer untuk description agar payload kecil.
     """
     page = max(1, command.page)
     per_page = min(max(1, command.per_page), 100)
     offset = (page - 1) * per_page
 
-    # Base query with eager loading untuk company dan vacancy_skills + skill
+    # Base query with eager loading untuk company, tapi defer description
     query = session.query(Vacancies).options(
         joinedload(Vacancies.company),
-        selectinload(Vacancies.vacancy_skills).joinedload(VacancySkills.skill),
+        defer(Vacancies.description),
     )
 
     # Filter by active status
     query = query.filter(Vacancies.is_active == command.is_active)
 
-    # Filter by query (title or description)
+    # Filter by query using Full-Text Search (Point 1 Optimization)
     if command.query:
-        search_term = f"%{command.query}%"
         query = query.filter(
-            or_(
-                Vacancies.title.ilike(search_term),
-                Vacancies.description.ilike(search_term),
-            )
+            Vacancies.search_vector.op('@@')(func.plainto_tsquery('indonesian', command.query))
         )
 
     # Filter by location
@@ -86,18 +82,13 @@ def search_vacancies_command_handler(
 
     # Filter by industry (joining with MasterExternalCompanies)
     if command.industry:
-        from app_backend.models.master_external_companies import MasterExternalCompanies
         query = query.join(Vacancies.company).filter(MasterExternalCompanies.industry.ilike(f"%{command.industry}%"))
 
     # Get total count (tanpa eager loading untuk efisiensi)
     count_query = session.query(Vacancies).filter(Vacancies.is_active == command.is_active)
     if command.query:
-        search_term = f"%{command.query}%"
         count_query = count_query.filter(
-            or_(
-                Vacancies.title.ilike(search_term),
-                Vacancies.description.ilike(search_term),
-            )
+            Vacancies.search_vector.op('@@')(func.plainto_tsquery('indonesian', command.query))
         )
     if command.location:
         count_query = count_query.filter(Vacancies.location.ilike(f"%{command.location}%"))
@@ -106,26 +97,15 @@ def search_vacancies_command_handler(
     if command.payment_type:
         count_query = count_query.filter(Vacancies.payment_type == command.payment_type)
     if command.industry:
-        from app_backend.models.master_external_companies import MasterExternalCompanies
         count_query = count_query.join(Vacancies.company).filter(MasterExternalCompanies.industry.ilike(f"%{command.industry}%"))
     total = count_query.count()
 
     # Get paginated results dengan eager loading
     vacancies = query.order_by(Vacancies.created_at.desc()).offset(offset).limit(per_page).all()
 
-    # Build response - skills sudah di-load via eager loading
+    # Build response
     items = []
     for vacancy in vacancies:
-        # Skills sudah eager-loaded, tidak perlu query tambahan
-        skills = [
-            SkillRequirement(
-                skill_id=vs.skill_id,
-                skill_name=vs.skill.name if vs.skill else "Unknown",
-                is_mandatory=vs.is_mandatory if vs.is_mandatory else True,
-            )
-            for vs in vacancy.vacancy_skills
-        ]
-
         company_info = CompanyInfo(
             id=vacancy.company.id,
             name=vacancy.company.name,
@@ -135,11 +115,10 @@ def search_vacancies_command_handler(
         )
 
         items.append(
-            VacancyDetailResponse(
+            VacancySummaryResponse(
                 id=vacancy.id,
                 company=company_info,
                 title=vacancy.title,
-                description=vacancy.description,
                 type=vacancy.type,
                 open_date=vacancy.open_date,
                 close_date=vacancy.close_date,
@@ -152,7 +131,6 @@ def search_vacancies_command_handler(
                 is_scraped=vacancy.is_scraped if vacancy.is_scraped else False,
                 is_auto_close=vacancy.is_auto_close if vacancy.is_auto_close else True,
                 is_active=vacancy.is_active if vacancy.is_active else True,
-                skills=skills,
                 created_at=vacancy.created_at,
                 updated_at=vacancy.updated_at,
             )

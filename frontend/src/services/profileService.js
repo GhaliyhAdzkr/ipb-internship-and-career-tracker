@@ -1,4 +1,5 @@
 import api from '../api/axios';
+import { fileService } from './fileService';
 
 export const profileService = {
   /**
@@ -23,14 +24,7 @@ export const profileService = {
    * @param {File} file
    */
   uploadCV: async (file) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    const response = await api.post('/profile/student/cv', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data;
+    return await fileService.uploadSingle('/profile/student/cv', file);
   },
 };
 

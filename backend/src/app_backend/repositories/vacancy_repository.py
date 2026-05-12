@@ -22,3 +22,7 @@ class VacancyRepository(BaseRepository[Vacancies]):
     def count_active(self) -> int:
         query = select(func.count()).select_from(Vacancies).where(Vacancies.is_active)
         return self.session.execute(query).scalar_one()
+
+    def get_with_company(self, vacancy_id) -> Vacancies:
+        query = select(Vacancies).options(joinedload(Vacancies.company)).where(Vacancies.id == vacancy_id)
+        return self.session.scalars(query).first()

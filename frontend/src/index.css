@@ -23,11 +23,26 @@
   }
 }
 @layer base {
+  html, body {
+    overscroll-behavior: none;
+  }
+  
   button:focus, 
   a:focus,
   input:focus,
   select:focus {
     outline: none !important;
     box-shadow: none !important;
+  }
+
+  /* Global select reset for custom icons */
+  select {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    background-image: none !important;
+  }
+  select::-ms-expand {
+    display: none !important;
   }
 }

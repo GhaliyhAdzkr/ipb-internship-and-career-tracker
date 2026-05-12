@@ -4,7 +4,7 @@ import { useNotifications } from "../hooks/useNotifications";
 import { useAuth } from "../hooks/useAuth";
 import { NavLink } from "react-router-dom";
 
-const NavBar = () => {
+const TopBar = () => {
 	const { unreadCount, notifications } = useNotifications();
 	const { user, logout } = useAuth();
 	const [showNotifications, setShowNotifications] = useState(false);
@@ -53,7 +53,16 @@ const NavBar = () => {
 				{/* Profile */}
 				<NavLink to="/app/profil" className="cursor-pointer">
 					<div className="w-10 h-10 overflow-hidden rounded-full border-2 border-transparent hover:border-sky-700 transition-all bg-slate-100 flex items-center justify-center">
-						<PiUserCircle size={32} className="text-zinc-600" />
+						{user?.avatar_url ? (
+							<img 
+								src={user.avatar_url} 
+								alt="Profile" 
+								className="w-full h-full object-cover"
+								referrerPolicy="no-referrer"
+							/>
+						) : (
+							<PiUserCircle size={32} className="text-zinc-600" />
+						)}
 					</div>
 				</NavLink>
 			</div>
@@ -61,5 +70,5 @@ const NavBar = () => {
 	);
 };
 
-export default NavBar;
+export default TopBar;
 

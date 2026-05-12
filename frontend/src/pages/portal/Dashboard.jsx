@@ -13,9 +13,12 @@ function Dashboard() {
 			<div className="mb-8 bg-sky-950 py-7 px-10 rounded-xl text-white flex justify-between items-center shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)]">
 				<div className="w-full flex gap-2 justify-between items-center">
 					<div className="text-3xl font-bold">Selamat Datang Kembali, {displayName}</div>
-					<button className="text-center bg-white text-sm font-bold py-2 px-4 text-sky-950 rounded">
+					<NavLink 
+						to="/app/jurnal"
+						className="text-center bg-white text-sm font-bold py-2.5 px-6 text-sky-950 rounded-lg hover:bg-sky-50 transition-all shadow-sm flex items-center gap-2"
+					>
 						Tulis Jurnal
-					</button>
+					</NavLink>
 				</div>
 			</div>
 
@@ -47,14 +50,14 @@ function Dashboard() {
 			{/* Lamaran & Rekomendasi */}
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 				{/* Lamaran */}
-				<div className="lg:col-span-1">
+				<div className="lg:col-span-1 flex flex-col h-full">
 					<div className="flex justify-between items-center py-3 font-bold">
 						<div className="text-black">Lamaran Terakhir</div>
 						<NavLink to="/app/lamaran" className="text-sm text-sky-950 hover:text-sky-800">
 							Selengkapnya
 						</NavLink>
 					</div>
-					<div className="p-5 bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] flex flex-col gap-8">
+					<div className="flex-1 p-5 bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] flex flex-col gap-8">
 						<div className="flex justify-between gap-2">
 							<div className="text-black text-sm">
 								<div className="font-bold">Data Analysis Intern</div>
@@ -81,14 +84,14 @@ function Dashboard() {
 				</div>
 
 				{/* Rekomendasi Magang */}
-				<div className="lg:col-span-2">
+				<div className="lg:col-span-2 flex flex-col h-full">
 					<div className="flex justify-between items-center py-3 font-bold">
 						<div className="text-black">Rekomendasi Magang</div>
 						<NavLink to="/app/lowongan" className="text-sm text-sky-950 hover:text-sky-800">
 							Selengkapnya
 						</NavLink>
 					</div>
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+					<div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-5">
 						{[1, 2].map((i) => (
 							<div key={i} className="p-5 bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] flex flex-col gap-4">
 								<div className="flex gap-2 justify-between">

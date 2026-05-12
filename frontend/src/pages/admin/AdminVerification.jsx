@@ -50,16 +50,20 @@ function AdminVerification() {
     };
 
     return (
-        <div className="font-jakarta space-y-6">
-            <div className="flex justify-between items-center">
-                <div>
-                    <h1 className="text-2xl font-bold text-slate-900">Verifikasi Lamaran</h1>
-                    <p className="text-slate-500 text-sm">Validasi dokumen dan syarat lamaran mahasiswa.</p>
+        <div className="font-jakarta space-y-8 pb-20">
+            {/* Header Banner */}
+            <div className="bg-sky-950 py-12 px-10 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
+                <div className="relative z-10">
+                    <h1 className="text-3xl font-extrabold mb-2 tracking-tight">Verifikasi Lamaran</h1>
+                    <p className="text-sky-200 max-w-xl text-lg opacity-80 font-medium leading-relaxed">
+                        Tinjau dokumen pendukung dan syarat lamaran mahasiswa. Pastikan semua data valid sebelum menyetujui penempatan magang.
+                    </p>
+                    <div className="mt-8 inline-flex bg-white/10 backdrop-blur-md px-6 py-3 rounded-2xl text-sm font-bold items-center gap-3 border border-white/10 shadow-lg shadow-sky-900/20">
+                        <PiClockFill className="text-amber-400" size={20} />
+                        <span>{applications?.length || 0} Perlu Diverifikasi</span>
+                    </div>
                 </div>
-                <div className="bg-amber-100 text-amber-700 px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2">
-                    <PiClockFill />
-                    {applications?.length || 0} Perlu Diverifikasi
-                </div>
+                <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -mr-32 -mt-32 blur-[100px]"></div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

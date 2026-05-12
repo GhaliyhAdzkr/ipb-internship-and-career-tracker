@@ -1,4 +1,5 @@
 import api from '../api/axios';
+import { fileService } from './fileService';
 
 export const authService = {
   login: async (credentials) => {
@@ -28,6 +29,9 @@ export const authService = {
   updateProfile: async (data) => {
     const response = await api.put('/auth/profile', data);
     return response.data;
+  },
+  uploadAvatar: async (file) => {
+    return await fileService.uploadSingle('/auth/profile/avatar', file);
   },
   getDepartments: async () => {
     const response = await api.get('/auth/departments');

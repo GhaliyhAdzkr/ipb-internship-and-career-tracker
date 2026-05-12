@@ -162,10 +162,34 @@ class VacancyDetailResponse(BaseModel):
     updated_at: Optional[datetime] = None
 
 
+class VacancySummaryResponse(BaseModel):
+    """Response singkat vacancy untuk tampilan list (tanpa description)"""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    company: CompanyInfo
+    title: str
+    type: str
+    open_date: datetime
+    close_date: datetime
+    location: Optional[str] = None
+    payment_type: Optional[str] = None
+    compensation_min: Optional[Decimal] = None
+    compensation_max: Optional[Decimal] = None
+    compensation_note: Optional[str] = None
+    source_url: Optional[str] = None
+    is_scraped: bool
+    is_auto_close: bool
+    is_active: bool
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+
 class VacancyListResponse(BaseModel):
     """Response untuk list vacancy dengan pagination"""
 
-    items: List[VacancyDetailResponse]
+    items: List[VacancySummaryResponse]
     total: int
     page: int
     per_page: int

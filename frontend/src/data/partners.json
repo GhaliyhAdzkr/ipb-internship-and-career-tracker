@@ -52,11 +52,5 @@
     "logo": "/assets/companies/shopee.png",
     "alt": "Logo Shopee",
     "website": "https://shopee.co.id"
-  },
-  {
-    "name": "Tokopedia",
-    "logo": "/assets/companies/tokopedia.png",
-    "alt": "Logo Tokopedia",
-    "website": "https://www.tokopedia.com"
   }
 ]
