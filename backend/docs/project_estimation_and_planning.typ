@@ -1,4 +1,20 @@
-= Project Estimation
+#align(center)[
+= ANALISIS DESAIN SISTEM - Project Estimation
+#table(
+  align: left,
+  columns: (auto, auto),
+  [Kelompok], [3],
+  [Tanggal Praktikum], [12 Mei 2026],
+  [Paralel Praktikum], [3],
+  [Waktu Praktikum], [10:00 - 12:00],
+  [Anggota Kelompok], [
+    - Ghaliyh Rayhan Adz-Dzikra (G6401231001)
+    - Raihan Putra Kirana (G6401231027)
+    - Insan Anshary Rasul (G6401231132)
+  ],
+)
+]
+
 
 == Kickoff Meeting
 
