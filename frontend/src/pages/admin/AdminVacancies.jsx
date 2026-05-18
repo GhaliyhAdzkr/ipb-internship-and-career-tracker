@@ -75,7 +75,7 @@ function AdminVacancies() {
         setSelectedVacancy(v);
         setFormData({
             title: v.title,
-            company_id: v.company_id,
+            company_id: v.company_id || v.company?.id || "",
             location: v.location || "",
             type: v.type,
             payment_type: v.payment_type || "UNPAID",
@@ -617,8 +617,10 @@ function AdminVacancies() {
                                         <div className="space-y-3">
                                             {formData.skills.map((skillItem, index) => {
                                                 const selectedSkill = masterSkills?.find(s => s.id === skillItem.skill_id);
+                                                const selectedSkillIds = formData.skills?.map(sk => sk.skill_id).filter(id => !!id) || [];
                                                 const filteredSkills = masterSkills?.filter(s =>
-                                                    s.name.toLowerCase().includes(skillSearchQuery.toLowerCase())
+                                                    s.name.toLowerCase().includes(skillSearchQuery.toLowerCase()) &&
+                                                    !selectedSkillIds.includes(s.id)
                                                 ) || [];
                                                 const isPerfectMatch = filteredSkills.some(s => s.name.toLowerCase() === skillSearchQuery.trim().toLowerCase());
 

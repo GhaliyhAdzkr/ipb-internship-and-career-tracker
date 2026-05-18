@@ -7,7 +7,7 @@ from app_backend.models.vacancy_skills import VacancySkills
 from app_backend.repositories.company_repository import CompanyRepository
 from app_backend.repositories.vacancy_repository import VacancyRepository
 from app_backend.repositories.vacancy_skill_repository import VacancySkillRepository
-from app_backend.schemas.vacancy import CompanyInfo, VacancyCreate, VacancyDetailResponse, VacancyResponse, VacancyUpdate
+from app_backend.schemas.vacancy import CompanyInfo, SkillRequirement, VacancyCreate, VacancyDetailResponse, VacancyResponse, VacancyUpdate
 
 
 class IVacancyService(Protocol):
@@ -85,7 +85,15 @@ class VacancyService:
             return None
 
         # Fetch skills for detail view
-        skills = self.vacancy_skill_repo.get_by_vacancy_id(vacancy_id)
+        skills_raw = self.vacancy_skill_repo.get_by_vacancy_id(vacancy_id)
+        skills = [
+            SkillRequirement(
+                skill_id=s.skill_id,
+                skill_name=s.skill.name if s.skill else "Keahlian",
+                is_mandatory=s.is_mandatory if s.is_mandatory is not None else True
+            )
+            for s in skills_raw
+        ]
 
         company_info = (
             CompanyInfo(
