@@ -32,7 +32,7 @@ export function useAdminVacancies(onFormSuccess) {
     const deleteMutation = useMutation({
         mutationFn: adminService.deleteVacancy,
         onSuccess: () => {
-            queryClient.invalidateQueries(["admin", "vacancies"]);
+            queryClient.invalidateQueries({ queryKey: ["admin", "vacancies"] });
             toast.success("Lowongan berhasil dihapus");
         }
     });
@@ -54,7 +54,7 @@ export function useAdminVacancies(onFormSuccess) {
     const createMutation = useMutation({
         mutationFn: adminService.createVacancy,
         onSuccess: () => {
-            queryClient.invalidateQueries(["admin", "vacancies"]);
+            queryClient.invalidateQueries({ queryKey: ["admin", "vacancies"] });
             if (onFormSuccess) onFormSuccess();
             toast.success("Lowongan baru berhasil ditambahkan");
         }
@@ -63,7 +63,7 @@ export function useAdminVacancies(onFormSuccess) {
     const updateMutation = useMutation({
         mutationFn: ({ id, data }) => adminService.updateVacancy(id, data),
         onSuccess: () => {
-            queryClient.invalidateQueries(["admin", "vacancies"]);
+            queryClient.invalidateQueries({ queryKey: ["admin", "vacancies"] });
             if (onFormSuccess) onFormSuccess();
             toast.success("Lowongan berhasil diperbarui");
         }
@@ -75,7 +75,7 @@ export function useAdminVacancies(onFormSuccess) {
         },
         onSuccess: () => {
             toast.success("Sinkronisasi scraping selesai!");
-            queryClient.invalidateQueries(["admin", "vacancies"]);
+            queryClient.invalidateQueries({ queryKey: ["admin", "vacancies"] });
         }
     });
 
