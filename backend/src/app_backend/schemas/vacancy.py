@@ -89,6 +89,7 @@ class VacancyUpdate(BaseModel):
     """Payload untuk update lowongan"""
 
     title: Optional[str] = Field(None, min_length=5, max_length=200)
+    company_id: Optional[UUID] = None
     description: Optional[str] = Field(None, min_length=20)
     type: Optional[VacancyType] = None
     open_date: Optional[datetime] = None

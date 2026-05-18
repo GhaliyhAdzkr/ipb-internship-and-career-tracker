@@ -42,7 +42,7 @@ backend/
 │       ├── features/          # Fitur aplikasi atau services (dengan vertical slices)
 │       │   ├── auth/          # Autentikasi
 │       │   ├── admin/         # Manajemen admin
-│       │   ├── profile/        # Manajemen profil mahasiswa dan admin
+│       │   ├── profile/       # Manajemen profil mahasiswa dan admin
 │       │   ├── vacancy/       # Lowongan kerja dan pencocokan kerja
 │       │   ├── wishlist/      # Wishlist mahasiswa
 │       │   └── application/   # Pelacakan lamaran (Self-Reported ATS)

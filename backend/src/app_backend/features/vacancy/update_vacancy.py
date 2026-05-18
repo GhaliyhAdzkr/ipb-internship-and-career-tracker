@@ -68,6 +68,8 @@ def update_vacancy_command_handler(
         # Update basic fields
         if payload.title is not None:
             vacancy.title = payload.title
+        if payload.company_id is not None:
+            vacancy.company_id = payload.company_id
         if payload.description is not None:
             vacancy.description = payload.description
         if payload.type is not None:

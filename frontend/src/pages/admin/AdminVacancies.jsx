@@ -99,6 +99,8 @@ function AdminVacancies() {
                     is_mandatory: s.is_mandatory
                 }));
                 setFormData(prev => ({ ...prev, skills: formattedSkills }));
+            } else {
+                setFormData(prev => ({ ...prev, skills: [] }));
             }
         } catch (err) {
             console.error("Failed to fetch vacancy details:", err);
@@ -108,11 +110,30 @@ function AdminVacancies() {
     const handleSubmit = (e) => {
         e.preventDefault();
         const cleanedSkills = (formData.skills || []).filter(s => s.skill_id !== "");
+        
+        let formattedSourceUrl = null;
+        if (formData.source_url && formData.source_url.trim() !== "") {
+            let url = formData.source_url.trim();
+            if (!/^https?:\/\//i.test(url)) {
+                url = "https://" + url;
+            }
+            formattedSourceUrl = url;
+        }
+
         const payload = {
-            ...formData,
-            skills: cleanedSkills,
+            title: formData.title.trim(),
+            company_id: formData.company_id || null,
+            description: formData.description.trim(),
+            type: formData.type,
+            open_date: formData.open_date ? new Date(formData.open_date).toISOString() : new Date().toISOString(),
+            close_date: formData.close_date ? new Date(formData.close_date).toISOString() : null,
+            location: formData.location && formData.location.trim() !== "" ? formData.location.trim() : null,
+            payment_type: formData.payment_type,
             compensation_min: formData.compensation_min === "" ? null : formData.compensation_min,
             compensation_max: formData.compensation_max === "" ? null : formData.compensation_max,
+            compensation_note: formData.compensation_note && formData.compensation_note.trim() !== "" ? formData.compensation_note.trim() : null,
+            source_url: formattedSourceUrl,
+            skills: cleanedSkills,
         };
 
         if (selectedVacancy && isFormOpen) {
@@ -402,8 +423,13 @@ function AdminVacancies() {
                                                         is_mandatory: s.is_mandatory
                                                     }));
                                                     setFormData(prev => ({ ...prev, skills: formattedSkills }));
+                                                } else {
+                                                    setFormData(prev => ({ ...prev, skills: [] }));
                                                 }
-                                            }).catch(err => console.error("Failed to fetch duplicate skills:", err));
+                                            }).catch(err => {
+                                                console.error("Failed to fetch duplicate skills:", err);
+                                                setFormData(prev => ({ ...prev, skills: [] }));
+                                            });
                                         }}
                                         className="p-4 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-2xl transition-all shadow-sm border border-transparent hover:border-amber-100" 
                                         title="Duplikat"
@@ -445,7 +471,7 @@ function AdminVacancies() {
                         </div>
 
                         {/* Modal Body */}
-                        <form id="vacancy-form" onSubmit={handleSubmit} className="p-10 overflow-y-auto flex-1 space-y-8 text-sm">
+                        <form id="vacancy-form" onSubmit={handleSubmit} className="p-10 pb-44 overflow-y-auto flex-1 space-y-8 text-sm">
                             <div className="grid grid-cols-2 gap-6">
                                 <div className="col-span-2 space-y-2">
                                     <label className="font-bold text-slate-700 uppercase tracking-wider text-[11px]">Judul Posisi</label>
@@ -594,18 +620,6 @@ function AdminVacancies() {
                                 <div className="col-span-2 space-y-4 border-t border-slate-100 pt-6">
                                     <div className="flex justify-between items-center">
                                         <label className="font-bold text-slate-700 uppercase tracking-wider text-[11px]">Kualifikasi & Keahlian (Skills)</label>
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                setFormData(prev => ({
-                                                    ...prev,
-                                                    skills: [...(prev.skills || []), { skill_id: "", is_mandatory: true }]
-                                                }));
-                                            }}
-                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-sky-50 text-sky-700 font-bold rounded-lg text-xs hover:bg-sky-100 transition-colors border border-sky-100"
-                                        >
-                                            <PiPlusBold /> Tambah Skill
-                                        </button>
                                     </div>
 
                                     {formData.skills && formData.skills.length > 0 ? (
@@ -628,6 +642,7 @@ function AdminVacancies() {
                                                             <input
                                                                 type="text"
                                                                 required={!skillItem.skill_id}
+                                                                autoComplete="new-skill-search"
                                                                 className="w-full p-3 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-medium text-xs pr-10 cursor-text"
                                                                 placeholder="Cari atau ketik keahlian baru..."
                                                                 value={openSkillDropdownIndex === index ? skillSearchQuery : (selectedSkill ? `${selectedSkill.name} (${selectedSkill.category || 'General'})` : "")}
@@ -636,6 +651,37 @@ function AdminVacancies() {
                                                                     setSkillSearchQuery("");
                                                                 }}
                                                                 onChange={(e) => setSkillSearchQuery(e.target.value)}
+                                                                onKeyDown={async (e) => {
+                                                                    if (e.key === "Enter") {
+                                                                        e.preventDefault();
+                                                                        const newName = skillSearchQuery.trim();
+                                                                        if (!newName) return;
+
+                                                                        // Check perfect match
+                                                                        const perfectMatch = masterSkills?.find(s => s.name.toLowerCase() === newName.toLowerCase());
+                                                                        if (perfectMatch) {
+                                                                            const newSkills = [...formData.skills];
+                                                                            newSkills[index].skill_id = perfectMatch.id;
+                                                                            setFormData({ ...formData, skills: newSkills });
+                                                                            setOpenSkillDropdownIndex(null);
+                                                                            setSkillSearchQuery("");
+                                                                        } else {
+                                                                            try {
+                                                                                const newSkill = await createSkillMutation.mutateAsync({
+                                                                                    name: newName,
+                                                                                    category: "Technical"
+                                                                                });
+                                                                                const newSkills = [...formData.skills];
+                                                                                newSkills[index].skill_id = newSkill.id;
+                                                                                setFormData({ ...formData, skills: newSkills });
+                                                                                setOpenSkillDropdownIndex(null);
+                                                                                setSkillSearchQuery("");
+                                                                            } catch (err) {
+                                                                                console.error(err);
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }}
                                                             />
                                                             <PiCaretDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
 
@@ -660,34 +706,40 @@ function AdminVacancies() {
                                                                     ))}
 
                                                                     {skillSearchQuery.trim() !== "" && !isPerfectMatch && (
-                                                                        <button
-                                                                            type="button"
-                                                                            disabled={createSkillMutation.isPending}
-                                                                            onClick={async () => {
-                                                                                const newName = skillSearchQuery.trim();
-                                                                                try {
-                                                                                    const newSkill = await createSkillMutation.mutateAsync({
-                                                                                        name: newName,
-                                                                                        category: "Technical"
-                                                                                    });
-                                                                                    const newSkills = [...formData.skills];
-                                                                                    newSkills[index].skill_id = newSkill.id;
-                                                                                    setFormData({ ...formData, skills: newSkills });
-                                                                                    setOpenSkillDropdownIndex(null);
-                                                                                } catch (err) {
-                                                                                    console.error(err);
-                                                                                }
-                                                                            }}
-                                                                            className="w-full text-left px-3 py-2 text-xs text-amber-800 hover:bg-amber-50 rounded-lg transition-all font-bold flex items-center justify-between border border-dashed border-amber-200 bg-amber-50/50"
-                                                                        >
-                                                                            <span className="flex items-center gap-1.5">
-                                                                                {createSkillMutation.isPending ? (
-                                                                                    <PiSpinnerGap className="animate-spin text-amber-600" size={14} />
-                                                                                ) : "✨"}
-                                                                                Tambah Keahlian Baru: &quot;{skillSearchQuery}&quot;
-                                                                            </span>
-                                                                            <span className="text-[9px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-bold uppercase">Dynamic</span>
-                                                                        </button>
+                                                                        <div className="p-2 border border-slate-100 rounded-xl bg-slate-50 space-y-2 mt-1 relative z-30">
+                                                                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-1">Tambah Keahlian Baru &quot;{skillSearchQuery}&quot; sebagai:</p>
+                                                                            <div className="flex gap-2">
+                                                                                {["Technical", "Soft Skill", "General"].map(cat => (
+                                                                                    <button
+                                                                                        key={cat}
+                                                                                        type="button"
+                                                                                        disabled={createSkillMutation.isPending}
+                                                                                        onClick={async () => {
+                                                                                            const newName = skillSearchQuery.trim();
+                                                                                            try {
+                                                                                                const newSkill = await createSkillMutation.mutateAsync({
+                                                                                                    name: newName,
+                                                                                                    category: cat
+                                                                                                });
+                                                                                                const newSkills = [...formData.skills];
+                                                                                                newSkills[index].skill_id = newSkill.id;
+                                                                                                setFormData({ ...formData, skills: newSkills });
+                                                                                                setOpenSkillDropdownIndex(null);
+                                                                                                setSkillSearchQuery("");
+                                                                                            } catch (err) {
+                                                                                                console.error(err);
+                                                                                            }
+                                                                                        }}
+                                                                                        className="flex-1 py-2 px-1 hover:bg-sky-50 text-slate-700 hover:text-sky-800 text-[10px] font-bold rounded-lg border border-slate-200 hover:border-sky-300 transition-all flex items-center justify-center gap-1 active:scale-95 disabled:opacity-50 bg-white"
+                                                                                    >
+                                                                                        {createSkillMutation.isPending ? (
+                                                                                            <PiSpinnerGap className="animate-spin text-slate-400" size={10} />
+                                                                                        ) : null}
+                                                                                        <span>{cat}</span>
+                                                                                    </button>
+                                                                                ))}
+                                                                            </div>
+                                                                        </div>
                                                                     )}
 
                                                                     {filteredSkills.length === 0 && skillSearchQuery.trim() === "" && (
@@ -732,6 +784,21 @@ function AdminVacancies() {
                                             Belum ada kualifikasi skill yang ditentukan untuk lowongan ini.
                                         </div>
                                     )}
+
+                                    {/* Dashed placeholder add button below the list */}
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setFormData(prev => ({
+                                                ...prev,
+                                                skills: [...(prev.skills || []), { skill_id: "", is_mandatory: true }]
+                                            }));
+                                        }}
+                                        className="w-full py-4 px-6 border border-dashed border-slate-200 hover:border-sky-500 hover:bg-sky-50/10 rounded-2xl text-xs text-slate-500 hover:text-sky-600 bg-white transition-all font-bold flex items-center justify-center gap-2 cursor-pointer relative z-30"
+                                    >
+                                        <PiPlusBold size={14} />
+                                        <span>Tambah Kebutuhan Keahlian (Skills)</span>
+                                    </button>
                                 </div>
                             </div>
                         </form>
