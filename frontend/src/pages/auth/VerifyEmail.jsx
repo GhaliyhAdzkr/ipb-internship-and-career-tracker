@@ -7,16 +7,12 @@ function VerifyEmail() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const token = searchParams.get("token");
-  const { verifyEmail, isVerifying } = useAuth();
-  const [status, setStatus] = useState("loading"); // loading, success, error
-  const [errorMessage, setErrorMessage] = useState("");
+  const { verifyEmail } = useAuth();
+  const [status, setStatus] = useState(() => token ? "loading" : "error");
+  const [errorMessage, setErrorMessage] = useState(() => token ? "" : "Token verifikasi tidak ditemukan.");
 
   useEffect(() => {
-    if (!token) {
-      setStatus("error");
-      setErrorMessage("Token verifikasi tidak ditemukan.");
-      return;
-    }
+    if (!token) return;
 
     const performVerification = async () => {
       // Tambahkan delay 1 detik agar transisi UI lebih halus

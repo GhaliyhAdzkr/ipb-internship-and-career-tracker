@@ -1,7 +1,8 @@
 import React from 'react';
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+ 
+import { motion } from "framer-motion";
 import { vacancyService } from "../../services/vacancyService";
 import { format } from 'date-fns';
 import {
@@ -33,13 +34,6 @@ export default function DetailLowongan() {
     enabled: !!vacancyId,
   });
 
-  const jobMatchQuery = useQuery({
-    queryKey: ["jobmatch", vacancyId],
-    queryFn: () => vacancyService.getJobMatch(vacancyId),
-    enabled: !!vacancyId && !!token,
-    staleTime: 1000 * 60 * 5,
-  });
-
   // Point 4: Optimistic Updates for Wishlist in Detail Page
   const saveWishlistMutation = useMutation({
     mutationFn: () => vacancyService.addToWishlist(vacancyId),
@@ -67,7 +61,6 @@ export default function DetailLowongan() {
   });
 
   const vacancy = vacancyQuery.data;
-  const match = jobMatchQuery.data;
 
   const displayType = (value) => {
     const types = {
@@ -214,7 +207,7 @@ export default function DetailLowongan() {
 
             <div className="flex flex-col sm:flex-row gap-3">
               <button 
-                onClick={(e) => {
+                onClick={() => {
                   if (!token) {
                     navigate("/login");
                     return;

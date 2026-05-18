@@ -16,7 +16,13 @@ class VacancyRepository(BaseRepository[Vacancies]):
         return list(self.session.scalars(query).unique().all())
 
     def search(self, filters: list, skip: int = 0, limit: int = 100) -> List[Vacancies]:
-        query = select(Vacancies).options(joinedload(Vacancies.company)).where(Vacancies.is_active, *filters).offset(skip).limit(limit)
+        query = (
+            select(Vacancies)
+            .options(joinedload(Vacancies.company))
+            .where(Vacancies.is_active, *filters)
+            .offset(skip)
+            .limit(limit)
+        )
         return list(self.session.scalars(query).unique().all())
 
     def count_active(self) -> int:

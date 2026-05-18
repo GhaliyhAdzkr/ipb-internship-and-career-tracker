@@ -1,31 +1,16 @@
 services:
-  db:
-    image: postgres:18.3-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: ${DB_USER:-user}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
-      POSTGRES_DB: ${DB_NAME:-internship_career_tracker}
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-user}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   redis:
-    image: redis:7.2-alpine
+    image: redis:7-alpine
     restart: unless-stopped
-    ports:
-      - "6379:6379"
+    # SECURE SRE PATTERN: No ports exposed to the host system.
+    # Redis is only reachable through the internal secure bridge network.
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - laras-network
 
   app:
     build:
@@ -33,26 +18,23 @@ services:
       dockerfile: Dockerfile
     image: laras-backend:latest
     depends_on:
-      db:
-        condition: service_healthy
       redis:
         condition: service_healthy
     ports:
       - "8000:8000"
     volumes:
       - uploads_data:/app/uploads
+    env_file:
+      - .env
     environment:
-      DATABASE_URL: ${DATABASE_URL:-postgresql://user:password@db:5432/internship_career_tracker}
+      # Connects directly to the external database via DATABASE_URL from .env
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/2}
       CELERY_BROKER_URL: ${CELERY_BROKER_URL:-redis://redis:6379/0}
       CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND:-redis://redis:6379/1}
-      SECRET_KEY: ${SECRET_KEY}
-      SMTP_HOST: ${SMTP_HOST}
-      SMTP_PORT: ${SMTP_PORT}
-      SMTP_USER: ${SMTP_USER}
-      SMTP_PASSWORD: ${SMTP_PASSWORD}
-      SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL}
-      SMTP_FROM_NAME: ${SMTP_FROM_NAME}
     restart: unless-stopped
+    networks:
+      - laras-network
 
   worker:
     build:
@@ -61,23 +43,22 @@ services:
     image: laras-backend:latest
     command: ["celery", "-A", "app_backend.shared.celery_app", "worker", "--loglevel=info", "-Q", "ai,vacancy,notification,report"]
     depends_on:
-      db:
-        condition: service_healthy
       redis:
         condition: service_healthy
+    env_file:
+      - .env
     environment:
-      DATABASE_URL: ${DATABASE_URL:-postgresql://user:password@db:5432/internship_career_tracker}
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/2}
       CELERY_BROKER_URL: ${CELERY_BROKER_URL:-redis://redis:6379/0}
       CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND:-redis://redis:6379/1}
-      SECRET_KEY: ${SECRET_KEY}
-      SMTP_HOST: ${SMTP_HOST}
-      SMTP_PORT: ${SMTP_PORT}
-      SMTP_USER: ${SMTP_USER}
-      SMTP_PASSWORD: ${SMTP_PASSWORD}
-      SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL}
-      SMTP_FROM_NAME: ${SMTP_FROM_NAME}
     restart: unless-stopped
+    networks:
+      - laras-network
+
+networks:
+  laras-network:
+    driver: bridge
 
 volumes:
-  postgres_data:
   uploads_data:

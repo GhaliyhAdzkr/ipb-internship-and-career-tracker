@@ -75,11 +75,7 @@ def generate_presigned_url(client, bucket: str, key: str, expiration: int = 3600
     :return: Presigned URL as string. If error, returns None.
     """
     try:
-        response = client.generate_presigned_url(
-            "get_object",
-            Params={"Bucket": bucket, "Key": key},
-            ExpiresIn=expiration
-        )
+        response = client.generate_presigned_url("get_object", Params={"Bucket": bucket, "Key": key}, ExpiresIn=expiration)
         return response
     except ClientError as exc:
         logger.exception("generate_presigned_url failed: %s", exc)

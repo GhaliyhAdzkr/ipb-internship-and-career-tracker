@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMediaQuery } from "react-responsive";
 import { format } from "date-fns";
 import { vacancyService } from "../../services/vacancyService";
@@ -66,7 +66,7 @@ function Lowongan() {
 	// Point 4: Optimistic Updates for Wishlist
 	const wishlistMutation = useMutation({
 		mutationFn: (vacancyId) => vacancyService.addToWishlist(vacancyId),
-		onMutate: async (vacancyId) => {
+		onMutate: async () => {
 			// Cancel any outgoing refetches (so they don't overwrite our optimistic update)
 			await queryClient.cancelQueries({ queryKey: ["vacancies"] });
 
@@ -104,7 +104,7 @@ function Lowongan() {
 		});
 
 		// Only reset to page 1 if we're NOT explicitly setting a new page
-		if (!newFilters.hasOwnProperty("page")) {
+		if (!("page" in newFilters)) {
 			nextParams.set("page", "1");
 		}
 		

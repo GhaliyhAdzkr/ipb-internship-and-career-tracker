@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { 
@@ -7,7 +7,6 @@ import {
   PiMapPin, 
   PiBriefcase, 
   PiCaretDown,
-  PiCheckCircleFill,
   PiArrowRightBold,
   PiLeaf,
   PiTerminal,
@@ -24,7 +23,6 @@ import {
 import { vacancyService } from '../../services/vacancyService';
 
 export default function PublicLowongan() {
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   
   const [showAllIndustries, setShowAllIndustries] = useState(false);
@@ -68,7 +66,7 @@ export default function PublicLowongan() {
     });
 
     // Only reset to page 1 if we're NOT explicitly setting a new page
-    if (!newFilters.hasOwnProperty("page")) {
+    if (!("page" in newFilters)) {
       nextParams.set("page", "1");
     }
 
@@ -104,9 +102,9 @@ export default function PublicLowongan() {
     if (category?.toLowerCase().includes('marketing')) return <PiMegaphone size={24} />;
     if (category?.toLowerCase().includes('research') || category?.toLowerCase().includes('food')) return <PiFlask size={24} />;
     
-    // Fallback based on index for variety
-    const icons = [<PiChartBar size={24} />, <PiMonitor size={24} />, <PiBriefcase size={24} />];
-    return icons[index % 3];
+    const IconComponents = [PiChartBar, PiMonitor, PiBriefcase];
+    const SelectedIcon = IconComponents[index % 3];
+    return <SelectedIcon size={24} />;
   };
 
   const totalItems = vacanciesData?.total || 0;

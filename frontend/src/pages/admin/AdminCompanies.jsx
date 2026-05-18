@@ -213,7 +213,7 @@ function AdminCompanies() {
                                     required
                                     className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-bold"
                                     value={formData.name}
-                                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                 />
                             </div>
                             <div className="space-y-2">
@@ -221,7 +221,7 @@ function AdminCompanies() {
                                 <input 
                                     className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-medium"
                                     value={formData.industry}
-                                    onChange={(e) => setFormData({...formData, industry: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
                                 />
                             </div>
                             <div className="space-y-2">
@@ -229,7 +229,7 @@ function AdminCompanies() {
                                 <input 
                                     className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-medium"
                                     value={formData.website_url}
-                                    onChange={(e) => setFormData({...formData, website_url: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
                                 />
                             </div>
                             <div className="space-y-2">
@@ -238,7 +238,7 @@ function AdminCompanies() {
                                     className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-medium"
                                     rows={3}
                                     value={formData.address}
-                                    onChange={(e) => setFormData({...formData, address: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                                 />
                             </div>
                             <div className="space-y-2">
@@ -246,7 +246,7 @@ function AdminCompanies() {
                                 <input 
                                     className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-medium"
                                     value={formData.logo_url}
-                                    onChange={(e) => setFormData({...formData, logo_url: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, logo_url: e.target.value })}
                                 />
                             </div>
 

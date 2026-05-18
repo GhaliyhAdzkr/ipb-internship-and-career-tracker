@@ -100,6 +100,14 @@ class Vacancies(Base):
     created_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True), server_default=text("CURRENT_TIMESTAMP"))
     updated_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True), server_default=text("CURRENT_TIMESTAMP"))
 
+    @property
+    def company_name(self) -> str:
+        return self.company.name if self.company else ""
+
+    @property
+    def company_logo(self) -> Optional[str]:
+        return self.company.logo_url if self.company else None
+
     # Relationships
     company: Mapped["MasterExternalCompanies"] = relationship("MasterExternalCompanies", back_populates="vacancies")
     users: Mapped[Optional["Users"]] = relationship("Users", back_populates="vacancies")

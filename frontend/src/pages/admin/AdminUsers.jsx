@@ -309,7 +309,7 @@ function AdminUsers() {
                                             <a 
                                                 href={selectedStudent.linkedin_url || "#"} 
                                                 target="_blank" 
-                                                className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${selectedStudent.linkedin_url ? 'bg-sky-50 border-sky-100 text-sky-700 hover:bg-sky-100' : 'bg-slate-50 border-slate-100 text-slate-300 pointer-events-none'}`}
+                                                className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${selectedStudent.linkedin_url ? 'bg-sky-50 border-sky-100 text-sky-700 hover:bg-sky-100' : 'bg-slate-50 border-slate-100 text-slate-300 pointer-events-none'}`} rel="noreferrer"
                                             >
                                                 <div className="flex items-center gap-3">
                                                     <PiLinkedinLogoFill size={20} />
@@ -319,7 +319,7 @@ function AdminUsers() {
                                             <a 
                                                 href={selectedStudent.cv_url || "#"} 
                                                 target="_blank" 
-                                                className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${selectedStudent.cv_url ? 'bg-indigo-50 border-indigo-100 text-indigo-700 hover:bg-indigo-100' : 'bg-slate-50 border-slate-100 text-slate-300 pointer-events-none'}`}
+                                                className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${selectedStudent.cv_url ? 'bg-indigo-50 border-indigo-100 text-indigo-700 hover:bg-indigo-100' : 'bg-slate-50 border-slate-100 text-slate-300 pointer-events-none'}`} rel="noreferrer"
                                             >
                                                 <div className="flex items-center gap-3">
                                                     <PiFilePdfBold size={20} />

@@ -71,18 +71,21 @@ def request_reset_password_command_handler(
     # Kirim email reset password
     from app_backend.shared.mailer import send_direct_email
 
-    subject = "Reset Password Akun LARAS"
+    subject = "Your LARAS password reset token"
     body = f"""
-Halo,
-
-Anda telah meminta untuk mereset kata sandi akun LARAS Anda.
-Silakan gunakan token berikut untuk melanjutkan:
-
-{raw_token}
-
-Token ini berlaku selama 15 menit. Jika Anda tidak merasa melakukan permintaan ini, silakan abaikan email ini.
+A request was made to reset the password for the LARAS account associated with <strong>{user.email}</strong>.
+<br><br>
+Was this you? Enter this password reset token to proceed:
+<br><br>
+<div id="headline" style="font-size: 26px; font-weight: bold; color: #111827;">
+  {raw_token}
+</div>
+<br>
+This token is valid for 15 minutes. If you did not make this request, please ignore this email.
 """
-    send_direct_email(user.email, subject, body)
+    import threading
+
+    threading.Thread(target=send_direct_email, args=(user.email, subject, body), daemon=True).start()
 
     # Di production: hapus field `token` dari response ini.
     return RequestResetPasswordResult(

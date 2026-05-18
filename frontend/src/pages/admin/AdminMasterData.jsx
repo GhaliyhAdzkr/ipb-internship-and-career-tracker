@@ -255,7 +255,7 @@ function AdminMasterData() {
                                     required
                                     className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-bold"
                                     value={formData.name || ""}
-                                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                 />
                             </div>
 
@@ -268,7 +268,7 @@ function AdminMasterData() {
                                             placeholder="Contoh: ILK"
                                             className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-bold"
                                             value={formData.code || ""}
-                                            onChange={(e) => setFormData({...formData, code: e.target.value})}
+                                            onChange={(e) => setFormData({ ...formData, code: e.target.value })}
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -277,7 +277,7 @@ function AdminMasterData() {
                                             required
                                             className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-medium"
                                             value={formData.faculty || ""}
-                                            onChange={(e) => setFormData({...formData, faculty: e.target.value})}
+                                            onChange={(e) => setFormData({ ...formData, faculty: e.target.value })}
                                         />
                                     </div>
                                 </>
@@ -288,7 +288,7 @@ function AdminMasterData() {
                                         placeholder="Contoh: Programming, Design, etc."
                                         className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-medium"
                                         value={formData.category || ""}
-                                        onChange={(e) => setFormData({...formData, category: e.target.value})}
+                                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                                     />
                                 </div>
                             )}

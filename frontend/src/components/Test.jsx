@@ -4,7 +4,7 @@ import "react-day-picker/style.css";
 // asas
 function Test() {
 	const [date, setDate] = useState(new Date());
-	const [startDate, setStartDate] = useState(new Date(2026, 3, 7));
+	const startDate = new Date(2026, 3, 7);
 
 	return (
 		<>

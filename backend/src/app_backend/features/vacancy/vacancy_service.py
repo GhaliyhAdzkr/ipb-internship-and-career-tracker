@@ -86,7 +86,7 @@ class VacancyService:
 
         # Fetch skills for detail view
         skills = self.vacancy_skill_repo.get_by_vacancy_id(vacancy_id)
-        
+
         company_info = (
             CompanyInfo(
                 id=vacancy.company.id,

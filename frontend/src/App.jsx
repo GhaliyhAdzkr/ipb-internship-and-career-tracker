@@ -49,7 +49,7 @@ const RoleGuard = ({ children, allowedRoles }) => {
 
 // Component to protect routes that require authentication
 const ProtectedRoute = ({ children }) => {
-  const { user, isLoading, isError } = useAuth();
+  const { isLoading, isError } = useAuth();
   const token = localStorage.getItem('token');
 
   if (!token) {

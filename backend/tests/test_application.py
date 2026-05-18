@@ -122,3 +122,28 @@ def test_get_application_history_success(client_as_student):
         mock_method.return_value = []
         resp = client_as_student.get(f"/api/v1/applications/{APPLICATION_ID}/history")
     assert resp.status_code == 200
+
+
+def test_get_my_applications_success(client_as_student):
+    with patch("app_backend.features.application.application_service.ApplicationService.get_my_applications") as mock_method:
+        from app_backend.schemas.application import ApplicationDetailResponse
+
+        mock_method.return_value = [
+            ApplicationDetailResponse(
+                id=APPLICATION_ID,
+                vacancy_id=VACANCY_ID,
+                student_id=STUDENT_USER_ID,
+                cv_snapshot_url="https://example.com/cv.pdf",
+                status="APPLIED",
+                vacancy={
+                    "id": VACANCY_ID,
+                    "title": "Software Engineer",
+                    "type": "INTERNSHIP_GENERAL",
+                    "company_name": "Shopee Indonesia",
+                },
+            )
+        ]
+        resp = client_as_student.get("/api/v1/applications/my")
+    assert resp.status_code == 200
+    assert len(resp.json()) == 1
+    assert resp.json()[0]["vacancy"]["company_name"] == "Shopee Indonesia"

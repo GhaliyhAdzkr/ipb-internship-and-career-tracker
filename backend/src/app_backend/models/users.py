@@ -33,6 +33,7 @@ class Users(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     email: Mapped[str] = mapped_column(String(255), nullable=False)
+    username: Mapped[Optional[str]] = mapped_column(String(100), unique=True, nullable=True)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     role: Mapped[str] = mapped_column(Enum("ADMIN", "STUDENT", name="user_role_enum"), nullable=False)
     is_active: Mapped[Optional[bool]] = mapped_column(Boolean, server_default=text("true"))
@@ -50,7 +51,7 @@ class Users(Base):
     notification_queue: Mapped[list["NotificationQueue"]] = relationship("NotificationQueue", back_populates="user")
     vacancies: Mapped[list["Vacancies"]] = relationship("Vacancies", back_populates="users")
     application_logs: Mapped[list["ApplicationLogs"]] = relationship("ApplicationLogs", back_populates="users")
-    
+
     profile_student: Mapped[Optional["ProfilesStudent"]] = relationship(
         "ProfilesStudent", backref="user", uselist=False, cascade="all, delete-orphan"
     )

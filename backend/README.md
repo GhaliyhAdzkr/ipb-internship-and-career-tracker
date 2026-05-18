@@ -92,6 +92,11 @@ REFRESH_TOKEN_EXPIRE_DAYS=32
 # Password Reset
 RESET_PASSWORD_TOKEN_EXPIRE_MINUTES=15
 
+# Celery & Redis
+CELERY_BROKER_URL=redis://localhost:6379/0
+CELERY_RESULT_BACKEND=redis://localhost:6379/1
+REDIS_URL=redis://localhost:6379/2
+
 # Environment (development, staging, production)
 ENVIRONMENT=development
 ```
@@ -124,8 +129,12 @@ Dokumentasi API: http://localhost:8000/docs
 | `make dev` | Jalankan development server |
 | `make test` | Jalankan unit tests |
 | `make coverage` | Jalankan tests dengan coverage report |
-| `make format` | Format kode dengan Black dan isort |
-| `make lint` | Lint kode dengan Flake8 |
+| `make format` | Format kode dengan Ruff |
+| `make lint` | Lint kode dengan Ruff dan Bandit |
+| `make up-prod` | Jalankan production Docker Compose (dengan Redis internal terproteksi) |
+| `make down-prod` | Hentikan production Docker Compose |
+| `make up-dev` | Jalankan development Docker Compose (hanya container app FastAPI) |
+| `make down-dev` | Hentikan development Docker Compose |
 
 ## Database & Migrasi
 

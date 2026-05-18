@@ -6,7 +6,7 @@ import { NavLink } from "react-router-dom";
 
 const TopBar = () => {
 	const { unreadCount, notifications } = useNotifications();
-	const { user, logout } = useAuth();
+	const { user } = useAuth();
 	const [showNotifications, setShowNotifications] = useState(false);
 
 	return (
@@ -71,4 +71,3 @@ const TopBar = () => {
 };
 
 export default TopBar;
-

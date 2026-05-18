@@ -53,6 +53,31 @@ router = APIRouter(
 # Registration
 
 
+@router.get(
+    "/register/check-availability",
+    summary="Periksa ketersediaan email atau username",
+)
+async def check_availability(
+    identifier: str,
+    auth_service: AuthService = Depends(get_auth_service),
+):
+    """
+    Periksa ketersediaan email atau username secara asinkron (untuk as-you-type validation).
+    Mendukung debouncing, caching performa tinggi Redis (SRE pattern), dan B-Tree lookup.
+    """
+    if not identifier or len(identifier) < 3:
+        return {"available": False, "reason": "Identifier minimal 3 karakter"}
+
+    # Optional: If email is input, validate domain as well
+    if "@" in identifier:
+        domain = identifier.split("@")[-1].lower()
+        if domain not in ("ipb.ac.id", "apps.ipb.ac.id"):
+            return {"available": False, "reason": "Domain email harus @ipb.ac.id atau @apps.ipb.ac.id"}
+
+    result = auth_service.check_availability(identifier)
+    return result
+
+
 @router.post(
     "/register/student",
     response_model=UserResponse,
@@ -352,7 +377,7 @@ async def get_me(
         phone_number=phone_number,
         linkedin_url=linkedin_url,
         cv_url=cv_url,
-        avatar_url=profile.avatar_url if profile else None,
+        avatar_url=avatar_url,
         gpa=gpa,
         department_id=department_id,
         department_name=department_name,
@@ -440,11 +465,7 @@ async def upload_avatar(
     # Upload ke S3
     s3_client = get_s3_client()
     success = upload_fileobj(
-        client=s3_client,
-        fileobj=file.file,
-        bucket=settings.s3_bucket,
-        key=file_key,
-        content_type=file.content_type
+        client=s3_client, fileobj=file.file, bucket=settings.s3_bucket, key=file_key, content_type=file.content_type
     )
 
     if not success:

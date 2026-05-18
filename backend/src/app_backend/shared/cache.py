@@ -39,6 +39,17 @@ def cache_delete(key: str) -> None:
         pass
 
 
+def cache_delete_pattern(pattern: str) -> None:
+    """Hapus semua key yang cocok dengan pattern wildcard (misal 'vacancies:list:*')."""
+    try:
+        client = _client()
+        keys = client.keys(pattern)
+        if keys:
+            client.delete(*keys)
+    except Exception:
+        pass
+
+
 def cache_ttl(key: str) -> int:
     """Kembalikan TTL key dalam detik, atau -2 jika tidak ada."""
     try:

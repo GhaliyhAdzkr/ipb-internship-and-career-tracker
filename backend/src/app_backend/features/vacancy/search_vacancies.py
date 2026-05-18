@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
-from sqlalchemy import or_, func
+from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload, defer
 
 from app_backend.models.vacancies import Vacancies
@@ -64,9 +64,7 @@ def search_vacancies_command_handler(
 
     # Filter by query using Full-Text Search (Point 1 Optimization)
     if command.query:
-        query = query.filter(
-            Vacancies.search_vector.op('@@')(func.plainto_tsquery('indonesian', command.query))
-        )
+        query = query.filter(Vacancies.search_vector.op("@@")(func.plainto_tsquery("indonesian", command.query)))
 
     # Filter by location
     if command.location:
@@ -87,9 +85,7 @@ def search_vacancies_command_handler(
     # Get total count (tanpa eager loading untuk efisiensi)
     count_query = session.query(Vacancies).filter(Vacancies.is_active == command.is_active)
     if command.query:
-        count_query = count_query.filter(
-            Vacancies.search_vector.op('@@')(func.plainto_tsquery('indonesian', command.query))
-        )
+        count_query = count_query.filter(Vacancies.search_vector.op("@@")(func.plainto_tsquery("indonesian", command.query)))
     if command.location:
         count_query = count_query.filter(Vacancies.location.ilike(f"%{command.location}%"))
     if command.vacancy_type:

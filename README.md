@@ -169,10 +169,14 @@ ENVIRONMENT=development
 | `make dev` | Run development server |
 | `make test` | Run tests |
 | `make coverage` | Run tests with coverage |
-| `make format` | Format code |
-| `make lint` | Lint code |
-| `poetry run alembic upgrade head` | Apply migrations |
-| `poetry run alembic revision --autogenerate -m "desc"` | Create migration |
+| `make format` | Format code with Ruff |
+| `make lint` | Lint code with Ruff & Bandit |
+| `make up-prod` | Run production Docker Compose (secured network, local Redis) |
+| `make down-prod` | Stop production Docker Compose |
+| `make up-dev` | Run development Docker Compose (app-only, external DB/Redis) |
+| `make down-dev` | Stop development Docker Compose |
+| `poetry run alembic upgrade head` | Apply database migrations |
+| `poetry run alembic revision --autogenerate -m "desc"` | Create database migration |
 
 ### Frontend
 

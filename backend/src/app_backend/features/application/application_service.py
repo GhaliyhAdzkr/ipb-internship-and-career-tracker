@@ -15,6 +15,7 @@ from app_backend.schemas.application import (
     ApplicationLogResponse,
     ApplicationResponse,
     ApplicationUpdateStatus,
+    ApplicationDetailResponse,
 )
 
 
@@ -125,3 +126,15 @@ class ApplicationService:
         query = select(Applications).where(Applications.status == "ACCEPTED")
         apps = self.application_repo.session.scalars(query).all()
         return [ApplicationResponse.model_validate(a) for a in apps]
+
+    def get_my_applications(self, student_id: uuid.UUID) -> List[ApplicationDetailResponse]:
+        from sqlalchemy.orm import joinedload
+        from app_backend.models.vacancies import Vacancies
+
+        query = (
+            select(Applications)
+            .options(joinedload(Applications.vacancy).joinedload(Vacancies.company))
+            .where(Applications.student_id == student_id)
+        )
+        apps = self.application_repo.session.scalars(query).all()
+        return [ApplicationDetailResponse.model_validate(a) for a in apps]

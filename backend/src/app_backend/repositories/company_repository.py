@@ -1,5 +1,5 @@
 from typing import List
-from sqlalchemy import select, func
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app_backend.models.master_external_companies import MasterExternalCompanies
@@ -11,5 +11,5 @@ class CompanyRepository(BaseRepository[MasterExternalCompanies]):
         super().__init__(MasterExternalCompanies, session)
 
     def get_distinct_industries(self) -> List[str]:
-        query = select(MasterExternalCompanies.industry).distinct().where(MasterExternalCompanies.industry != None)
+        query = select(MasterExternalCompanies.industry).distinct().where(MasterExternalCompanies.industry.is_not(None))
         return list(self.session.scalars(query).all())

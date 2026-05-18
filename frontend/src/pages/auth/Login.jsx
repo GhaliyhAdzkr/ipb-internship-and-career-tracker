@@ -19,19 +19,12 @@ function Login() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [showPassword, setShowPassword] = useState(false);
-	const [error, setError] = useState("");
 
 	const [searchParams] = useSearchParams();
 	const isVerified = searchParams.get("verified") === "true";
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
-		setError("");
-
-		if (!email || !password) {
-			setError("Email dan password wajib diisi");
-			return;
-		}
 		login({ email, password });
 	};
 
@@ -90,15 +83,15 @@ function Login() {
 						<div className="space-y-5">
 							{/* Email Input */}
 							<div className="space-y-2">
-								<label className="text-sm font-bold text-[#002957] ml-1 uppercase tracking-wider">Email Akademik</label>
+								<label className="text-sm font-bold text-[#002957] ml-1 uppercase tracking-wider">Email atau Username</label>
 								<div className="relative group">
 									<PiEnvelopeSimple className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-sky-600 transition-colors" size={20} />
 									<input
-										type="email"
+										type="text"
 										required
 										value={email}
 										onChange={(e) => setEmail(e.target.value)}
-										placeholder="nama@apps.ipb.ac.id"
+										placeholder="username@apps.ipb.ac.id atau username"
 										className="w-full pl-12 pr-4 py-3.5 bg-[#E8F1FF] border-none rounded-xl focus:ring-2 focus:ring-sky-500 outline-none transition-all font-medium text-sm text-zinc-800"
 									/>
 								</div>

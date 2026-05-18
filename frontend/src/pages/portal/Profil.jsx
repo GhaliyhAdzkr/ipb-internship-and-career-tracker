@@ -60,6 +60,7 @@ function Profil() {
 			// Handle different possible response shapes: { department_id, department_name } or { department: { id, name } }
 			const deptId = user.department_id || user.department?.id || "";
 			const deptName = user.department_name || user.department?.name || "";
+			// eslint-disable-next-line react-hooks/set-state-in-effect
 			setFormData({
 				full_name: user.full_name || "",
 				nim: user.nim || "",
@@ -79,6 +80,7 @@ function Profil() {
 		if (departments.length > 0 && formData.department_id && !formData.department_name) {
 			const found = departments.find((d) => String(d.id) === String(formData.department_id));
 			if (found) {
+				// eslint-disable-next-line react-hooks/set-state-in-effect
 				setFormData((s) => ({ ...s, department_name: found.name }));
 			}
 		}

@@ -458,7 +458,7 @@ function AdminVacancies() {
                                         className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-medium"
                                         placeholder="Contoh: Backend Engineer Intern"
                                         value={formData.title}
-                                        onChange={(e) => setFormData({...formData, title: e.target.value})}
+                                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -468,7 +468,7 @@ function AdminVacancies() {
                                             required
                                             className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-medium appearance-none cursor-pointer"
                                             value={formData.company_id}
-                                            onChange={(e) => setFormData({...formData, company_id: e.target.value})}
+                                            onChange={(e) => setFormData({ ...formData, company_id: e.target.value })}
                                         >
                                             <option value="">Pilih Perusahaan</option>
                                             {companies?.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -482,7 +482,7 @@ function AdminVacancies() {
                                         <select 
                                             className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-medium appearance-none cursor-pointer"
                                             value={formData.type}
-                                            onChange={(e) => setFormData({...formData, type: e.target.value})}
+                                            onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                                         >
                                             <option value="INTERNSHIP_GENERAL">Umum</option>
                                             <option value="MBKM_INTERNSHIP">MBKM Magang</option>
@@ -498,7 +498,7 @@ function AdminVacancies() {
                                         className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-medium"
                                         placeholder="Contoh: Jakarta, Remote"
                                         value={formData.location}
-                                        onChange={(e) => setFormData({...formData, location: e.target.value})}
+                                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -508,7 +508,7 @@ function AdminVacancies() {
                                         required
                                         className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-medium"
                                         value={formData.open_date}
-                                        onChange={(e) => setFormData({...formData, open_date: e.target.value})}
+                                        onChange={(e) => setFormData({ ...formData, open_date: e.target.value })}
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -518,7 +518,7 @@ function AdminVacancies() {
                                         required
                                         className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-medium"
                                         value={formData.close_date}
-                                        onChange={(e) => setFormData({...formData, close_date: e.target.value})}
+                                        onChange={(e) => setFormData({ ...formData, close_date: e.target.value })}
                                     />
                                 </div>
 
@@ -528,7 +528,7 @@ function AdminVacancies() {
                                         <select 
                                             className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-medium appearance-none cursor-pointer"
                                             value={formData.payment_type}
-                                            onChange={(e) => setFormData({...formData, payment_type: e.target.value})}
+                                            onChange={(e) => setFormData({ ...formData, payment_type: e.target.value })}
                                         >
                                             <option value="UNPAID">Unpaid (Sukarela)</option>
                                             <option value="PAID">Paid (Berbayar)</option>
@@ -544,7 +544,7 @@ function AdminVacancies() {
                                         className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-medium"
                                         placeholder="Contoh: Sesuai UMR, Negotiable"
                                         value={formData.compensation_note}
-                                        onChange={(e) => setFormData({...formData, compensation_note: e.target.value})}
+                                        onChange={(e) => setFormData({ ...formData, compensation_note: e.target.value })}
                                     />
                                 </div>
 
@@ -557,7 +557,7 @@ function AdminVacancies() {
                                                 className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-medium"
                                                 placeholder="0"
                                                 value={formData.compensation_min}
-                                                onChange={(e) => setFormData({...formData, compensation_min: e.target.value})}
+                                                onChange={(e) => setFormData({ ...formData, compensation_min: e.target.value })}
                                             />
                                         </div>
                                         <div className="space-y-2">
@@ -567,7 +567,7 @@ function AdminVacancies() {
                                                 className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-medium"
                                                 placeholder="0"
                                                 value={formData.compensation_max}
-                                                onChange={(e) => setFormData({...formData, compensation_max: e.target.value})}
+                                                onChange={(e) => setFormData({ ...formData, compensation_max: e.target.value })}
                                             />
                                         </div>
                                     </>
@@ -581,7 +581,7 @@ function AdminVacancies() {
                                         className="w-full p-6 bg-slate-50 border border-slate-200 rounded-[2rem] focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-medium leading-relaxed"
                                         placeholder="Jelaskan detail pekerjaan, kualifikasi, dan benefit..."
                                         value={formData.description}
-                                        onChange={(e) => setFormData({...formData, description: e.target.value})}
+                                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                     />
                                 </div>
                                 <div className="col-span-2 space-y-2">
@@ -590,7 +590,7 @@ function AdminVacancies() {
                                         className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-medium"
                                         placeholder="https://company.com/career/page"
                                         value={formData.source_url}
-                                        onChange={(e) => setFormData({...formData, source_url: e.target.value})}
+                                        onChange={(e) => setFormData({ ...formData, source_url: e.target.value })}
                                     />
                                 </div>
                             </div>

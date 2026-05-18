@@ -32,6 +32,32 @@ class ApplicationResponse(BaseModel):
     status: str
 
 
+class VacancyMinimalResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    title: str
+    type: str
+    location: Optional[str] = None
+    payment_type: Optional[str] = None
+    company_name: str
+    company_logo: Optional[str] = None
+
+
+class ApplicationDetailResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    vacancy_id: uuid.UUID
+    student_id: uuid.UUID
+    cv_snapshot_url: str
+    status: str
+    match_percentage: Optional[float] = None
+    applied_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+    vacancy: Optional[VacancyMinimalResponse] = None
+
+
 class ApplicationUpdateStatus(BaseModel):
     status: str
     reason: str | None = None

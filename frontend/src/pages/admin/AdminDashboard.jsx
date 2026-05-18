@@ -20,7 +20,7 @@ function AdminDashboard() {
         queryFn: adminService.getPendingVerifications
     });
 
-    const { data: companies, isLoading: loadingCompanies } = useQuery({
+    const { data: companies } = useQuery({
         queryKey: ["admin", "companies"],
         queryFn: adminService.getCompanies
     });
@@ -122,7 +122,7 @@ function AdminDashboard() {
                 {/* Quick Actions / Master Data Summary */}
                 <div className="space-y-6">
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 italic text-slate-500 text-sm">
-                        "Efisienkan proses administrasi untuk mempercepat karir mahasiswa IPB."
+                        &ldquo;Efisienkan proses administrasi untuk mempercepat karir mahasiswa IPB.&rdquo;
                     </div>
                     
                     <div className="grid grid-cols-2 gap-4">
