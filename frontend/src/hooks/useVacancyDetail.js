@@ -52,6 +52,13 @@ export function useVacancyDetail(vacancyId, token) {
         },
     });
 
+    const jobMatchQuery = useQuery({
+        queryKey: ["jobMatch", vacancyId],
+        queryFn: () => vacancyService.getJobMatch(vacancyId),
+        enabled: !!token && !!vacancyId,
+        retry: false,
+    });
+
     return {
         vacancy: vacancyQuery.data,
         isLoadingVacancy: vacancyQuery.isLoading,
@@ -61,6 +68,9 @@ export function useVacancyDetail(vacancyId, token) {
         wishlistData: wishlistQuery.data,
         isWishlisted,
         wishlistId,
-        toggleWishlistMutation
+        toggleWishlistMutation,
+
+        jobMatch: jobMatchQuery.data,
+        isLoadingJobMatch: jobMatchQuery.isLoading,
     };
 }

@@ -60,6 +60,7 @@ def parse_cv_skills(
 
         # Convert sharing link to direct download link
         direct_url = cv_url
+        is_external_link = "drive.google.com" in cv_url or "dropbox.com" in cv_url
         if "drive.google.com" in cv_url:
             match = re.search(r"/file/d/([a-zA-Z0-9_-]+)", cv_url)
             if match:
@@ -80,10 +81,47 @@ def parse_cv_skills(
         for page in reader.pages:
             text += page.extract_text() or ""
 
+        # Upload external CV to local S3 or directory to secure snapshot URL
+        new_cv_url = None
+        if is_external_link:
+            try:
+                import uuid
+                from app_backend.conf.settings import settings
+                from app_backend.shared.s3_storage import get_s3_client, upload_fileobj
+
+                unique_filename = f"{student_id}_{uuid.uuid4().hex[:8]}.pdf"
+                s3_key = f"cv/{unique_filename}"
+
+                if settings.storage_type == "s3":
+                    s3_client = get_s3_client()
+                    pdf_file.seek(0)
+                    success = upload_fileobj(s3_client, pdf_file, settings.s3_bucket, s3_key, content_type="application/pdf")
+                    if success:
+                        if "storage.supabase.co/storage/v1/s3" in settings.s3_endpoint:
+                            public_endpoint = settings.s3_endpoint.replace("/storage/v1/s3", "/storage/v1/object/public")
+                            new_cv_url = f"{public_endpoint}/{settings.s3_bucket}/{s3_key}"
+                        else:
+                            new_cv_url = f"{settings.s3_endpoint}/{settings.s3_bucket}/{s3_key}"
+                else:
+                    os.makedirs("uploads/cv", exist_ok=True)
+                    file_path = os.path.join("uploads/cv", unique_filename)
+                    pdf_file.seek(0)
+                    with open(file_path, "wb") as buffer:
+                        buffer.write(pdf_file.read())
+                    new_cv_url = f"/uploads/cv/{unique_filename}"
+            except Exception as upload_err:
+                print(f"Failed to auto-upload external CV: {upload_err}")
+
         # Query all master skills from database for matching
         Session = sessionmaker(bind=engine)
         session = Session()
         try:
+            if new_cv_url:
+                from app_backend.models.profiles_student import ProfilesStudent
+                student_profile = session.query(ProfilesStudent).filter(ProfilesStudent.user_id == student_id).first()
+                if student_profile:
+                    student_profile.cv_url = new_cv_url
+
             master_skills = session.query(MasterSkills).all()
 
             # Find which master skills exist in the text (case-insensitive keyword matching)

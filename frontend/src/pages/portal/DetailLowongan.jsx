@@ -32,7 +32,8 @@ export default function DetailLowongan() {
     isLoadingVacancy,
     isErrorVacancy,
     isWishlisted,
-    toggleWishlistMutation
+    toggleWishlistMutation,
+    jobMatch
   } = useVacancyDetail(vacancyId, token);
 
   const handleApply = async () => {
@@ -279,6 +280,73 @@ export default function DetailLowongan() {
 
           {/* Right Column: Sidebar */}
           <aside className="space-y-6">
+            {token && jobMatch && (
+              <div className="bg-gradient-to-br from-sky-900 to-indigo-950 text-white rounded-[32px] p-8 shadow-xl shadow-sky-950/10 space-y-6">
+                <div>
+                  <div className="flex items-center gap-2 text-sky-300 font-extrabold text-[11px] uppercase tracking-widest mb-2">
+                    <PiChartBarFill size={16} />
+                    Kesesuaian Profil AI
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl font-[1000] tracking-tight">{jobMatch.match_percentage}%</span>
+                    <span className="text-xs text-sky-200/70 font-medium">Cocok</span>
+                  </div>
+                </div>
+
+                {/* Progress Bar */}
+                <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-sky-400 to-emerald-400 rounded-full transition-all duration-1000"
+                    style={{ width: `${jobMatch.match_percentage}%` }}
+                  />
+                </div>
+
+                <div className="space-y-4 pt-2 border-t border-white/10 text-[13px]">
+                  <div>
+                    <span className="text-white/60 font-medium">Skill yang cocok: </span>
+                    <span className="font-bold text-sky-200">
+                      {jobMatch.matched_skills.length > 0 
+                        ? jobMatch.matched_skills.join(", ") 
+                        : "Belum ada"}
+                    </span>
+                  </div>
+                  {jobMatch.missing_mandatory_skills.length > 0 && (
+                    <div>
+                      <span className="text-white/60 font-medium">Skill wajib belum dimiliki: </span>
+                      <span className="font-bold text-rose-300">
+                        {jobMatch.missing_mandatory_skills.join(", ") }
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex gap-3 items-start">
+                  <PiInfo size={20} className="text-sky-300 shrink-0 mt-0.5" />
+                  <p className="text-[11px] text-sky-200/80 leading-relaxed font-medium">
+                    Skor kesesuaian ini dihitung secara otomatis oleh kecerdasan buatan (AI) berdasarkan keahlian pada profil CV Anda dengan kualifikasi lowongan.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {token && !jobMatch && (
+              <div className="bg-slate-50 border border-slate-100 rounded-[32px] p-8 space-y-6">
+                <div className="flex items-center gap-2 text-slate-500 font-extrabold text-[11px] uppercase tracking-widest">
+                  <PiChartBarFill size={16} className="text-sky-600 animate-pulse" />
+                  Kesesuaian Profil AI
+                </div>
+                <p className="text-[13px] text-slate-500 leading-relaxed font-medium">
+                  Belum ada data analisis kecocokan. Unggah CV di halaman profil Anda untuk mengaktifkan analisis kesesuaian profil otomatis dengan kecerdasan buatan!
+                </p>
+                <Link 
+                  to="/app/profile" 
+                  className="inline-flex w-full py-3 bg-sky-950 text-white rounded-xl text-xs font-bold items-center justify-center hover:bg-sky-900 transition-all active:scale-95 hover:shadow-lg hover:shadow-sky-950/20"
+                >
+                  Unggah CV Sekarang
+                </Link>
+              </div>
+            )}
+
             <div className="bg-white rounded-[32px] p-8 border border-slate-100 shadow-xl shadow-sky-950/[0.02] sticky top-24">
               <h3 className="text-lg font-[900] text-sky-950 mb-8 tracking-tight">Detail Informasi</h3>
               

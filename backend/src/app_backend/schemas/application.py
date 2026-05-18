@@ -30,6 +30,7 @@ class ApplicationResponse(BaseModel):
     student_id: uuid.UUID
     cv_snapshot_url: str
     status: str
+    match_percentage: Optional[float] = None
 
 
 class VacancyMinimalResponse(BaseModel):
@@ -136,6 +137,7 @@ class AdminApplicationResponse(BaseModel):
     created_at: datetime
     student: StudentMinimalResponse
     vacancy: VacancyAdminResponse
+    match_percentage: Optional[float] = None
 
     @model_validator(mode="before")
     @classmethod
@@ -143,6 +145,9 @@ class AdminApplicationResponse(BaseModel):
         if not isinstance(data, dict):
             applied_at = getattr(data, "applied_at", None)
             cv_snapshot_url = getattr(data, "cv_snapshot_url", "")
+            match_percentage = getattr(data, "match_percentage", None)
+            if match_percentage is not None:
+                match_percentage = float(match_percentage)
             return {
                 "id": data.id,
                 "vacancy_id": data.vacancy_id,
@@ -153,5 +158,6 @@ class AdminApplicationResponse(BaseModel):
                 "created_at": applied_at or datetime.now(),
                 "student": data.student,
                 "vacancy": data.vacancy,
+                "match_percentage": match_percentage,
             }
         return data
