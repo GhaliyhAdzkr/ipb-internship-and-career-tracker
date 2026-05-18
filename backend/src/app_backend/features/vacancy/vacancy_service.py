@@ -126,6 +126,10 @@ class VacancyService:
         if not vacancy:
             raise ValueError("Lowongan tidak ditemukan")
 
+        if data.company_id is not None:
+            if not self.company_repo.get_by_id(data.company_id):
+                raise ValueError("Perusahaan tidak ditemukan")
+            vacancy.company_id = data.company_id
         if data.title is not None:
             vacancy.title = data.title
         if data.description is not None:
@@ -150,6 +154,19 @@ class VacancyService:
             vacancy.source_url = str(data.source_url)
         if data.is_active is not None:
             vacancy.is_active = data.is_active
+
+        # Update skills if provided
+        if data.skills is not None:
+            # Delete existing skills
+            self.vacancy_skill_repo.session.query(VacancySkills).filter(VacancySkills.vacancy_id == vacancy.id).delete()
+            # Add new skills
+            for skill_item in data.skills:
+                vacancy_skill = VacancySkills(
+                    vacancy_id=vacancy.id,
+                    skill_id=skill_item.skill_id,
+                    is_mandatory=skill_item.is_mandatory if skill_item.is_mandatory is not None else True,
+                )
+                self.vacancy_skill_repo.create(vacancy_skill)
 
         vacancy.updated_at = datetime.now(timezone.utc)
         self.vacancy_repo.save_changes()

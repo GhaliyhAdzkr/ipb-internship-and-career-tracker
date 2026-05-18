@@ -632,7 +632,11 @@ function AdminVacancies() {
                                                 const isPerfectMatch = filteredSkills.some(s => s.name.toLowerCase() === skillSearchQuery.trim().toLowerCase());
 
                                                 return (
-                                                    <div key={index} className="flex gap-4 items-center bg-slate-50 p-4 rounded-2xl border border-slate-100 relative">
+                                                    <div 
+                                                        key={index} 
+                                                        className="flex gap-4 items-center bg-slate-50 p-4 rounded-2xl border border-slate-100 relative"
+                                                        style={{ zIndex: openSkillDropdownIndex === index ? 40 : 10 }}
+                                                    >
                                                         {/* Backdrop overlay to close dropdown if open */}
                                                         {openSkillDropdownIndex === index && (
                                                             <div className="fixed inset-0 z-20 cursor-default" onClick={() => setOpenSkillDropdownIndex(null)} />
