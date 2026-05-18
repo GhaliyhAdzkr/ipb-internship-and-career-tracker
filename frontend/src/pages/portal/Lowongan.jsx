@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMediaQuery } from "react-responsive";
 import { format } from "date-fns";
 import { vacancyService } from "../../services/vacancyService";
+import toast from "react-hot-toast";
 import {
   PiBookmarkSimple,
   PiLeaf,
@@ -63,34 +64,45 @@ function Lowongan() {
 		staleTime: 60 * 60 * 1000, // Durasi 1 jam
 	});
 
-	// Pembaruan optimistik untuk wishlist
-	const wishlistMutation = useMutation({
-		mutationFn: (vacancyId) => vacancyService.addToWishlist(vacancyId),
-		onMutate: async () => {
-			// Batalkan refetch berjalan agar tidak menimpa pembaruan optimistik
-			await queryClient.cancelQueries({ queryKey: ["vacancies"] });
+	const { data: wishlistData } = useQuery({
+		queryKey: ["wishlist"],
+		queryFn: () => vacancyService.getWishlist({ page: 1, perPage: 100 }),
+		enabled: !!token,
+	});
 
-			// Simpan snapshot nilai sebelumnya
-			const previousVacancies = queryClient.getQueryData(["vacancies"]);
+	const wishlistMap = new Map(wishlistData?.items?.map(w => [w.vacancy.id, w.id]) || []);
 
-			// Data listing belum memiliki is_wishlisted sehingga pembaruan optimistik difokuskan pada respons UI
-			
-			return { previousVacancies };
-		},
-		onSuccess: () => {
-			// Opsional: Menampilkan toast premium dibanding alert biasa
-			// alert("Berhasil ditambahkan ke wishlist!");
-		},
-		onError: (err, vacancyId, context) => {
-			// Jika mutasi gagal, gunakan konteks dari onMutate untuk mengembalikan data sebelumnya
-			if (context?.previousVacancies) {
-				queryClient.setQueryData(["vacancies"], context.previousVacancies);
+	// Pembaruan optimistik & interaktif untuk wishlist
+	const toggleWishlistMutation = useMutation({
+		mutationFn: async ({ vacancyId, isWishlisted }) => {
+			if (isWishlisted) {
+				const wishlistId = wishlistMap.get(vacancyId);
+				if (wishlistId) {
+					return await vacancyService.deleteWishlist(wishlistId);
+				}
+			} else {
+				return await vacancyService.addToWishlist(vacancyId);
 			}
-			alert("Gagal menambahkan ke wishlist. Mungkin sudah ada?");
 		},
-		onSettled: () => {
-			// Selalu ambil ulang data setelah error atau sukses untuk sinkronisasi server
+		onMutate: async () => {
+			await queryClient.cancelQueries({ queryKey: ["wishlist"] });
+			const previousWishlist = queryClient.getQueryData(["wishlist"]);
+			return { previousWishlist };
+		},
+		onSuccess: (data, variables) => {
 			queryClient.invalidateQueries({ queryKey: ["wishlist"] });
+			queryClient.invalidateQueries({ queryKey: ["vacancies"] });
+			if (variables.isWishlisted) {
+				toast.success("Berhasil dihapus dari wishlist!");
+			} else {
+				toast.success("Berhasil ditambahkan ke wishlist!");
+			}
+		},
+		onError: (err, variables, context) => {
+			if (context?.previousWishlist) {
+				queryClient.setQueryData(["wishlist"], context.previousWishlist);
+			}
+			toast.error(err.response?.data?.detail || "Gagal memperbarui wishlist.");
 		},
 	});
 
@@ -180,11 +192,13 @@ function Lowongan() {
 			}
 		}, [inView, item.id]);
 
+		const isWishlisted = wishlistMap.has(item.id);
+
 		return (
 			<div
 				ref={ref}
 				onClick={() => handleCardClick(item.id)}
-				className="p-6 bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] border border-slate-50 flex flex-col gap-4 hover:-translate-y-1 transition-transform cursor-pointer group"
+				className="h-full p-6 bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] border border-slate-50 flex flex-col gap-4 hover:-translate-y-1 transition-transform cursor-pointer group"
 			>
 				<div className="flex justify-between items-start mb-2">
 					<div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-sky-600 border border-slate-100 overflow-hidden group-hover:border-sky-100 transition-colors p-1.5">
@@ -207,12 +221,17 @@ function Lowongan() {
 								navigate("/login");
 								return;
 							}
-							wishlistMutation.mutate(item.id);
+							toggleWishlistMutation.mutate({ vacancyId: item.id, isWishlisted });
 						}}
-						className="p-1.5 text-zinc-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-all"
-						title="Simpan ke Wishlist"
+						disabled={toggleWishlistMutation.isPending}
+						className={`p-1.5 rounded-lg transition-all ${
+							isWishlisted 
+								? "text-amber-500 bg-amber-50 hover:bg-amber-100/80" 
+								: "text-zinc-400 hover:text-sky-600 hover:bg-sky-50"
+						}`}
+						title={isWishlisted ? "Hapus dari Wishlist" : "Simpan ke Wishlist"}
 					>
-						<PiBookmarkSimple size={22} />
+						<PiBookmarkSimple size={22} weight={isWishlisted ? "fill" : "regular"} />
 					</button>
 				</div>
 

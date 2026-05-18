@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
 import { 
     PiUsersThin, 
     PiBriefcaseThin, 
@@ -7,22 +6,13 @@ import {
     PiCheckCircleThin,
     PiClockThin
 } from "react-icons/pi";
-import adminService from "../../services/adminService";
+import { useAdminDashboard } from "../../hooks/useAdminDashboard";
 import { useAuth } from "../../hooks/useAuth";
 
 function AdminDashboard() {
     const { user } = useAuth();
     
-    // Fetch statistics/data for dashboard
-    const { data: pendingApplications, isLoading: loadingApps } = useQuery({
-        queryKey: ["admin", "pending-verifications"],
-        queryFn: adminService.getPendingVerifications
-    });
-
-    const { data: companies } = useQuery({
-        queryKey: ["admin", "companies"],
-        queryFn: adminService.getCompanies
-    });
+    const { pendingApplications, loadingApps, companies } = useAdminDashboard();
 
     const stats = [
         { 

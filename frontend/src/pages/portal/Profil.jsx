@@ -10,12 +10,12 @@ import {
 	PiCamera,
 	PiPhone,
 	PiLinkedinLogo,
-	PiChartLineUp,
 	PiSpinnerGap,
 	PiCheckCircle,
 	PiCaretDown,
 	PiMagnifyingGlass,
-	PiUpload
+	PiUpload,
+	PiWarningCircle
 } from "react-icons/pi";
 
 function Profil() {
@@ -39,6 +39,7 @@ function Profil() {
 	const [isDeptOpen, setIsDeptOpen] = useState(false);
 	const [deptSearch, setDeptSearch] = useState("");
 	const [showSuccess, setShowSuccess] = useState(false);
+	const [errorMessage, setErrorMessage] = useState("");
 	const dropdownRef = useRef(null);
 
 	// Fetch departments on mount
@@ -128,6 +129,7 @@ function Profil() {
 		}
 
 		try {
+			setErrorMessage("");
 			await updateProfile({
 				full_name: formData.full_name,
 				nim: formData.nim,
@@ -143,6 +145,9 @@ function Profil() {
 			setTimeout(() => setShowSuccess(false), 3000);
 		} catch (err) {
 			console.error("Update profile failed:", err);
+			const apiError = err.response?.data?.detail || err.message || "Gagal memperbarui profil";
+			setErrorMessage(apiError);
+			setTimeout(() => setErrorMessage(""), 5000);
 		}
 	};
 
@@ -252,6 +257,13 @@ function Profil() {
 							<div className="flex items-center gap-2 text-green-600 text-sm font-bold bg-green-50 px-4 py-2 rounded-full border border-green-100 animate-in fade-in zoom-in duration-300">
 								<PiCheckCircle weight="fill" size={18} />
 								<span>Berhasil Disimpan</span>
+							</div>
+						)}
+
+						{errorMessage && (
+							<div className="flex items-center gap-2 text-red-600 text-sm font-bold bg-red-50 px-4 py-2 rounded-full border border-red-100 animate-in fade-in zoom-in duration-300">
+								<PiWarningCircle weight="fill" size={18} />
+								<span>{errorMessage}</span>
 							</div>
 						)}
 					</div>
@@ -546,8 +558,9 @@ function Profil() {
 
 							{/* CV URL */}
 							<div className="flex flex-col gap-1.5">
-								<label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
-									URL CV (Portofolio/Drive)
+								<label className="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center justify-between">
+									<span>URL CV (Google Drive)</span>
+									<span className="text-[10px] text-amber-600 normal-case font-semibold">Wajib Link Drive</span>
 								</label>
 								<div className="relative">
 									<PiUpload
@@ -564,10 +577,15 @@ function Profil() {
 											})
 										}
 										disabled={!isEditMode}
-										placeholder="drive.google.com/..."
+										placeholder="https://drive.google.com/file/d/.../view?usp=sharing"
 										className="pl-10 w-full py-2.5 bg-zinc-50 border border-zinc-200 text-zinc-700 rounded text-sm focus:ring-2 focus:ring-sky-500 outline-none transition-all disabled:bg-zinc-100/50 disabled:text-zinc-500"
 									/>
 								</div>
+								{isEditMode && (
+									<span className="text-[10px] text-amber-700 font-bold mt-1 bg-amber-50 px-2 py-1 rounded border border-amber-100 block">
+										* WAJIB menggunakan tautan shareable Google Drive publik dalam format /view (contoh: https://drive.google.com/file/d/.../view)
+									</span>
+								)}
 							</div>
 						</div>
 

@@ -1,24 +1,24 @@
-import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
-import adminService from '../../services/adminService';
+import { useAdminPlacements } from '../../hooks/useAdminPlacements';
 import { 
   PiMagnifyingGlass,
   PiBuildings,
   PiCalendarBlank,
   PiUserList,
   PiSpinnerGap,
-  PiWarning
+  PiWarning 
 } from 'react-icons/pi';
 
 function AdminPlacements() {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { data: placements = [], isLoading, isError } = useQuery({
-    queryKey: ['admin', 'placements'],
-    queryFn: adminService.getPlacements,
-  });
+  const {
+    placements,
+    isLoadingPlacements: isLoading,
+    isErrorPlacements: isError
+  } = useAdminPlacements();
 
   const filteredPlacements = placements.filter(placement => {
     // We don't have student name in PlacementResponse by default unless backend joins it. 

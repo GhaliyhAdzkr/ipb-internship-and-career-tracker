@@ -51,3 +51,7 @@ def init_worker(*args, **kwargs):
 @worker_shutdown.connect
 def shutdown_worker(*args, **kwargs):
     """Cleanup worker connections."""
+
+
+# Alias for backward compatibility with tests
+celery = celery_app

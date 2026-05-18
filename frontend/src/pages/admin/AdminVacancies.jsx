@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
     PiPlusBold, 
     PiMagnifyingGlassBold, 
@@ -14,15 +13,14 @@ import {
     PiCloudArrowDownBold,
     PiFunnelBold,
     PiCaretDown,
-    PiCalendarBold
+    PiCalendarBold,
+    PiSpinnerGap
 } from "react-icons/pi";
-import adminService from "../../services/adminService";
+import { useAdminVacancies } from "../../hooks/useAdminVacancies";
 import vacancyService from "../../services/vacancyService";
 import ConfirmModal from "../../components/ConfirmModal";
-import toast from "react-hot-toast";
 
 function AdminVacancies() {
-    const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState("");
     const [activeTab, setActiveTab] = useState("all");
     const [typeFilter, setTypeFilter] = useState("all");
@@ -31,6 +29,8 @@ function AdminVacancies() {
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [selectedVacancy, setSelectedVacancy] = useState(null);
     const [isFormOpen, setIsFormOpen] = useState(false);
+    const [openSkillDropdownIndex, setOpenSkillDropdownIndex] = useState(null);
+    const [skillSearchQuery, setSkillSearchQuery] = useState("");
     const [formData, setFormData] = useState({
         title: "",
         company_id: "",
@@ -43,62 +43,23 @@ function AdminVacancies() {
         close_date: "",
         compensation_min: "",
         compensation_max: "",
-        compensation_note: ""
+        compensation_note: "",
+        skills: []
     });
 
-    // Data Fetching
-    const { data: vacancies, isLoading } = useQuery({
-        queryKey: ["admin", "vacancies"],
-        queryFn: () => vacancyService.getVacancies(1, 200)
-    });
-
-    const { data: companies } = useQuery({
-        queryKey: ["admin", "companies"],
-        queryFn: adminService.getCompanies
-    });
-
-    const { data: industries } = useQuery({
-        queryKey: ["industries"],
-        queryFn: () => vacancyService.getIndustries(),
-        staleTime: 60 * 60 * 1000,
-    });
-
-    // Mutations
-    const deleteMutation = useMutation({
-        mutationFn: adminService.deleteVacancy,
-        onSuccess: () => {
-            queryClient.invalidateQueries(["admin", "vacancies"]);
-            toast.success("Lowongan berhasil dihapus");
-        }
-    });
-
-    const createMutation = useMutation({
-        mutationFn: adminService.createVacancy,
-        onSuccess: () => {
-            queryClient.invalidateQueries(["admin", "vacancies"]);
-            setIsFormOpen(false);
-            toast.success("Lowongan baru berhasil ditambahkan");
-        }
-    });
-
-    const updateMutation = useMutation({
-        mutationFn: ({ id, data }) => adminService.updateVacancy(id, data),
-        onSuccess: () => {
-            queryClient.invalidateQueries(["admin", "vacancies"]);
-            setIsFormOpen(false);
-            toast.success("Lowongan berhasil diperbarui");
-        }
-    });
-
-    const scrapeMutation = useMutation({
-        mutationFn: async () => {
-            // Mocking scrape call
-            return new Promise(resolve => setTimeout(resolve, 2000));
-        },
-        onSuccess: () => {
-            toast.success("Sinkronisasi scraping selesai!");
-            queryClient.invalidateQueries(["admin", "vacancies"]);
-        }
+    const {
+        vacancies,
+        isLoadingVacancies: isLoading,
+        companies,
+        masterSkills,
+        industries,
+        deleteMutation,
+        createSkillMutation,
+        createMutation,
+        updateMutation,
+        scrapeMutation
+    } = useAdminVacancies(() => {
+        setIsFormOpen(false);
     });
 
     // Handlers
@@ -111,7 +72,7 @@ function AdminVacancies() {
         if (selectedVacancy) deleteMutation.mutate(selectedVacancy.id);
     };
 
-    const handleEdit = (v) => {
+    const handleEdit = async (v) => {
         setSelectedVacancy(v);
         setFormData({
             title: v.title,
@@ -125,17 +86,39 @@ function AdminVacancies() {
             close_date: v.close_date ? v.close_date.split('T')[0] : "",
             compensation_min: v.compensation_min || "",
             compensation_max: v.compensation_max || "",
-            compensation_note: v.compensation_note || ""
+            compensation_note: v.compensation_note || "",
+            skills: []
         });
         setIsFormOpen(true);
+
+        try {
+            const detail = await vacancyService.getVacancy(v.id);
+            if (detail && detail.skills) {
+                const formattedSkills = detail.skills.map(s => ({
+                    skill_id: s.skill_id,
+                    is_mandatory: s.is_mandatory
+                }));
+                setFormData(prev => ({ ...prev, skills: formattedSkills }));
+            }
+        } catch (err) {
+            console.error("Failed to fetch vacancy details:", err);
+        }
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        const cleanedSkills = (formData.skills || []).filter(s => s.skill_id !== "");
+        const payload = {
+            ...formData,
+            skills: cleanedSkills,
+            compensation_min: formData.compensation_min === "" ? null : formData.compensation_min,
+            compensation_max: formData.compensation_max === "" ? null : formData.compensation_max,
+        };
+
         if (selectedVacancy && isFormOpen) {
-            updateMutation.mutate({ id: selectedVacancy.id, data: formData });
+            updateMutation.mutate({ id: selectedVacancy.id, data: payload });
         } else {
-            createMutation.mutate(formData);
+            createMutation.mutate(payload);
         }
     };
 
@@ -203,7 +186,8 @@ function AdminVacancies() {
                                     title: "", company_id: "", location: "", type: "INTERNSHIP_GENERAL",
                                     payment_type: "UNPAID", description: "", source_url: "", close_date: "",
                                     open_date: new Date().toISOString().split('T')[0],
-                                    compensation_min: "", compensation_max: "", compensation_note: ""
+                                    compensation_min: "", compensation_max: "", compensation_note: "",
+                                    skills: []
                                 });
                                 setIsFormOpen(true);
                             }}
@@ -404,10 +388,22 @@ function AdminVacancies() {
                                                 close_date: vacancy.close_date ? vacancy.close_date.split('T')[0] : "",
                                                 compensation_min: vacancy.compensation_min || "",
                                                 compensation_max: vacancy.compensation_max || "",
-                                                compensation_note: vacancy.compensation_note || ""
+                                                compensation_note: vacancy.compensation_note || "",
+                                                skills: []
                                             });
                                             setIsFormOpen(true);
                                             setSelectedVacancy(null); // Set to null so it creates new
+
+                                            // Fetch detailed skills for duplicated vacancy
+                                            vacancyService.getVacancy(vacancy.id).then(detail => {
+                                                if (detail && detail.skills) {
+                                                    const formattedSkills = detail.skills.map(s => ({
+                                                        skill_id: s.skill_id,
+                                                        is_mandatory: s.is_mandatory
+                                                    }));
+                                                    setFormData(prev => ({ ...prev, skills: formattedSkills }));
+                                                }
+                                            }).catch(err => console.error("Failed to fetch duplicate skills:", err));
                                         }}
                                         className="p-4 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-2xl transition-all shadow-sm border border-transparent hover:border-amber-100" 
                                         title="Duplikat"
@@ -592,6 +588,150 @@ function AdminVacancies() {
                                         value={formData.source_url}
                                         onChange={(e) => setFormData({ ...formData, source_url: e.target.value })}
                                     />
+                                </div>
+
+                                {/* Kualifikasi & Skill Section */}
+                                <div className="col-span-2 space-y-4 border-t border-slate-100 pt-6">
+                                    <div className="flex justify-between items-center">
+                                        <label className="font-bold text-slate-700 uppercase tracking-wider text-[11px]">Kualifikasi & Keahlian (Skills)</label>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    skills: [...(prev.skills || []), { skill_id: "", is_mandatory: true }]
+                                                }));
+                                            }}
+                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-sky-50 text-sky-700 font-bold rounded-lg text-xs hover:bg-sky-100 transition-colors border border-sky-100"
+                                        >
+                                            <PiPlusBold /> Tambah Skill
+                                        </button>
+                                    </div>
+
+                                    {formData.skills && formData.skills.length > 0 ? (
+                                        <div className="space-y-3">
+                                            {formData.skills.map((skillItem, index) => {
+                                                const selectedSkill = masterSkills?.find(s => s.id === skillItem.skill_id);
+                                                const filteredSkills = masterSkills?.filter(s =>
+                                                    s.name.toLowerCase().includes(skillSearchQuery.toLowerCase())
+                                                ) || [];
+                                                const isPerfectMatch = filteredSkills.some(s => s.name.toLowerCase() === skillSearchQuery.trim().toLowerCase());
+
+                                                return (
+                                                    <div key={index} className="flex gap-4 items-center bg-slate-50 p-4 rounded-2xl border border-slate-100 relative">
+                                                        {/* Backdrop overlay to close dropdown if open */}
+                                                        {openSkillDropdownIndex === index && (
+                                                            <div className="fixed inset-0 z-20 cursor-default" onClick={() => setOpenSkillDropdownIndex(null)} />
+                                                        )}
+
+                                                        <div className="flex-1 relative z-30">
+                                                            <input
+                                                                type="text"
+                                                                required={!skillItem.skill_id}
+                                                                className="w-full p-3 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-medium text-xs pr-10 cursor-text"
+                                                                placeholder="Cari atau ketik keahlian baru..."
+                                                                value={openSkillDropdownIndex === index ? skillSearchQuery : (selectedSkill ? `${selectedSkill.name} (${selectedSkill.category || 'General'})` : "")}
+                                                                onFocus={() => {
+                                                                    setOpenSkillDropdownIndex(index);
+                                                                    setSkillSearchQuery("");
+                                                                }}
+                                                                onChange={(e) => setSkillSearchQuery(e.target.value)}
+                                                            />
+                                                            <PiCaretDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+
+                                                            {/* Dropdown Menu */}
+                                                            {openSkillDropdownIndex === index && (
+                                                                <div className="absolute top-full left-0 right-0 mt-1 max-h-60 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl p-2 space-y-1 z-30">
+                                                                    {filteredSkills.slice(0, 15).map(s => (
+                                                                        <button
+                                                                            key={s.id}
+                                                                            type="button"
+                                                                            onClick={() => {
+                                                                                const newSkills = [...formData.skills];
+                                                                                newSkills[index].skill_id = s.id;
+                                                                                setFormData({ ...formData, skills: newSkills });
+                                                                                setOpenSkillDropdownIndex(null);
+                                                                            }}
+                                                                            className="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-sky-50 hover:text-sky-800 rounded-lg transition-colors font-medium flex justify-between items-center"
+                                                                        >
+                                                                            <span>{s.name}</span>
+                                                                            <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded uppercase font-bold">{s.category || "General"}</span>
+                                                                        </button>
+                                                                    ))}
+
+                                                                    {skillSearchQuery.trim() !== "" && !isPerfectMatch && (
+                                                                        <button
+                                                                            type="button"
+                                                                            disabled={createSkillMutation.isPending}
+                                                                            onClick={async () => {
+                                                                                const newName = skillSearchQuery.trim();
+                                                                                try {
+                                                                                    const newSkill = await createSkillMutation.mutateAsync({
+                                                                                        name: newName,
+                                                                                        category: "Technical"
+                                                                                    });
+                                                                                    const newSkills = [...formData.skills];
+                                                                                    newSkills[index].skill_id = newSkill.id;
+                                                                                    setFormData({ ...formData, skills: newSkills });
+                                                                                    setOpenSkillDropdownIndex(null);
+                                                                                } catch (err) {
+                                                                                    console.error(err);
+                                                                                }
+                                                                            }}
+                                                                            className="w-full text-left px-3 py-2 text-xs text-amber-800 hover:bg-amber-50 rounded-lg transition-all font-bold flex items-center justify-between border border-dashed border-amber-200 bg-amber-50/50"
+                                                                        >
+                                                                            <span className="flex items-center gap-1.5">
+                                                                                {createSkillMutation.isPending ? (
+                                                                                    <PiSpinnerGap className="animate-spin text-amber-600" size={14} />
+                                                                                ) : "✨"}
+                                                                                Tambah Keahlian Baru: &quot;{skillSearchQuery}&quot;
+                                                                            </span>
+                                                                            <span className="text-[9px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-bold uppercase">Dynamic</span>
+                                                                        </button>
+                                                                    )}
+
+                                                                    {filteredSkills.length === 0 && skillSearchQuery.trim() === "" && (
+                                                                        <p className="text-center text-xs text-slate-400 py-3 italic">Ketik untuk mencari...</p>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                        </div>
+
+                                                        <div className="flex items-center gap-2 relative z-30">
+                                                            <input
+                                                                type="checkbox"
+                                                                id={`mandatory-${index}`}
+                                                                checked={skillItem.is_mandatory}
+                                                                onChange={(e) => {
+                                                                    const newSkills = [...formData.skills];
+                                                                    newSkills[index].is_mandatory = e.target.checked;
+                                                                    setFormData({ ...formData, skills: newSkills });
+                                                                }}
+                                                                className="w-4 h-4 text-sky-600 border-slate-300 rounded focus:ring-sky-500"
+                                                            />
+                                                            <label htmlFor={`mandatory-${index}`} className="text-xs text-slate-600 font-bold select-none cursor-pointer">Wajib</label>
+                                                        </div>
+
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const newSkills = formData.skills.filter((_, i) => i !== index);
+                                                                setFormData({ ...formData, skills: newSkills });
+                                                            }}
+                                                            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all relative z-30"
+                                                            title="Hapus"
+                                                        >
+                                                            <PiTrashBold size={16} />
+                                                        </button>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-6 border border-dashed border-slate-200 rounded-2xl bg-slate-50 text-xs text-slate-400 italic">
+                                            Belum ada kualifikasi skill yang ditentukan untuk lowongan ini.
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </form>

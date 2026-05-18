@@ -211,7 +211,7 @@ function ReportSection({ activePlacement }) {
         <div className="p-6 bg-white rounded-xl shadow-sm border border-slate-100 flex flex-col gap-4">
           <h3 className="font-bold text-slate-800 border-b border-slate-100 pb-3">Syarat Generate</h3>
           <ul className="space-y-3">
-            {["Masa magang telah selesai", "Jurnal harian telah diisi", "Tunggu maks 5 menit antar generate"].map((text, i) => (
+            {["Masa magang telah selesai", "Jurnal harian telah diisi", "Tunggu maksimal 5 menit setelah generate"].map((text, i) => (
               <li key={i} className="flex items-start gap-3">
                 <PiCheckCircle size={18} className="text-emerald-500 mt-0.5 shrink-0" />
                 <span className="text-sm text-zinc-600">{text}</span>
@@ -222,8 +222,8 @@ function ReportSection({ activePlacement }) {
       </div>
 
       {/* Sisi Kanan: Status Laporan Akhir */}
-      <div className="lg:col-span-2">
-        <div className="p-8 bg-white rounded-xl shadow-sm border border-slate-100 flex flex-col gap-6">
+      <div className="lg:col-span-2 h-full">
+        <div className="h-full p-8 bg-white rounded-xl shadow-sm border border-slate-100 flex flex-col gap-6">
           <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
             <PiFileText size={24} className="text-sky-950" />
             <h3 className="text-lg font-bold text-slate-800">Status Laporan</h3>

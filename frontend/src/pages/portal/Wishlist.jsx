@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { vacancyService } from "../../services/vacancyService";
+import toast from "react-hot-toast";
 import {
   PiTrash,
   PiBriefcase,
@@ -23,9 +24,11 @@ export default function Wishlist() {
 		mutationFn: (id) => vacancyService.deleteWishlist(id),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["wishlist"] });
-			// Using a simple toast replacement for now since real toast isn't requested yet
-			// alert("Berhasil dihapus dari wishlist!");
+			toast.success("Berhasil dihapus dari wishlist!");
 		},
+		onError: (err) => {
+			toast.error(err.response?.data?.detail || "Gagal menghapus dari wishlist.");
+		}
 	});
 
 	const displayType = (value) => {

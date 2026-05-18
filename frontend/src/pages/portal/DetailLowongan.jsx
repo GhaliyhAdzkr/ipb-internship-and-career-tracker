@@ -1,9 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams, Link } from "react-router-dom";
  
 import { motion } from "framer-motion";
-import { vacancyService } from "../../services/vacancyService";
 import { format } from 'date-fns';
+import { useApplications } from "../../hooks/useApplications";
+import { useVacancyDetail } from "../../hooks/useVacancyDetail";
+import toast from "react-hot-toast";
 import {
   PiBriefcase,
   PiMapPin,
@@ -23,43 +24,39 @@ import {
 
 export default function DetailLowongan() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const { vacancyId } = useParams();
   const token = localStorage.getItem('token');
+  const { apply, isApplying } = useApplications();
+  const {
+    vacancy,
+    isLoadingVacancy,
+    isErrorVacancy,
+    isWishlisted,
+    toggleWishlistMutation
+  } = useVacancyDetail(vacancyId, token);
 
-  const vacancyQuery = useQuery({
-    queryKey: ["vacancy", vacancyId],
-    queryFn: () => vacancyService.getVacancy(vacancyId),
-    enabled: !!vacancyId,
-  });
-
-  // Point 4: Optimistic Updates for Wishlist in Detail Page
-  const saveWishlistMutation = useMutation({
-    mutationFn: () => vacancyService.addToWishlist(vacancyId),
-    onMutate: async () => {
-      await queryClient.cancelQueries({ queryKey: ["vacancy", vacancyId] });
-      const previousVacancy = queryClient.getQueryData(["vacancy", vacancyId]);
+  const handleApply = async () => {
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+    
+    try {
+      await apply({ vacancy_id: vacancyId });
+      toast.success("Lamaran berhasil dikirim!");
       
-      // If we had is_wishlisted in the detail, we would toggle it here
-      // queryClient.setQueryData(["vacancy", vacancyId], { ...previousVacancy, is_wishlisted: true });
-
-      return { previousVacancy };
-    },
-    onSuccess: () => {
-      // Invalidate both vacancy and wishlist
-      queryClient.invalidateQueries({ queryKey: ["vacancy", vacancyId] });
-      queryClient.invalidateQueries({ queryKey: ["wishlist"] });
-      alert("Lowongan berhasil disimpan ke wishlist.");
-    },
-    onError: (error, variables, context) => {
-      if (context?.previousVacancy) {
-        queryClient.setQueryData(["vacancy", vacancyId], context.previousVacancy);
+      // If there is an external source URL, open it in a new tab
+      if (vacancy?.source_url) {
+        window.open(vacancy.source_url, "_blank", "noreferrer");
       }
-      alert(error.response?.data?.detail || "Gagal menyimpan ke wishlist.");
-    },
-  });
-
-  const vacancy = vacancyQuery.data;
+      
+      // Redirect to the applications tracking board
+      navigate("/app/lamaran");
+    } catch (error) {
+      console.error("Failed to apply:", error);
+      toast.error(error.response?.data?.detail || "Gagal melamar lowongan.");
+    }
+  };
 
   const displayType = (value) => {
     const types = {
@@ -80,7 +77,7 @@ export default function DetailLowongan() {
     return payments[value] || value || "-";
   };
 
-  if (vacancyQuery.isLoading) {
+  if (isLoadingVacancy) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="flex flex-col items-center gap-4">
@@ -91,7 +88,7 @@ export default function DetailLowongan() {
     );
   }
 
-  if (vacancyQuery.isError || !vacancy) {
+  if (isErrorVacancy || !vacancy) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-white p-6">
         <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center text-red-500 mb-6">
@@ -211,30 +208,33 @@ export default function DetailLowongan() {
                     navigate("/login");
                     return;
                   }
-                  saveWishlistMutation.mutate();
+                  toggleWishlistMutation.mutate();
                 }}
-                disabled={saveWishlistMutation.isPending}
-                className="bg-white text-sky-950 border border-slate-200 px-6 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-slate-50 transition-all active:scale-95"
+                disabled={toggleWishlistMutation.isPending}
+                className={`px-6 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 border ${
+                  isWishlisted 
+                    ? "bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100/80" 
+                    : "bg-white text-sky-950 border-slate-200 hover:bg-slate-50"
+                }`}
               >
-                <PiBookmarkSimple size={22} />
-                <span>Simpan</span>
+                <PiBookmarkSimple size={22} weight={isWishlisted ? "fill" : "regular"} />
+                <span>{isWishlisted ? "Tersimpan" : "Simpan"}</span>
               </button>
               
-              <a 
-                href={vacancy.source_url || "#"} 
-                target="_blank" 
-                rel="noreferrer"
-                onClick={(e) => {
-                  if (!token) {
-                    e.preventDefault();
-                    navigate("/login");
-                  }
-                }}
-                className="bg-sky-950 text-white px-10 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-sky-900 transition-all active:scale-95 shadow-xl shadow-sky-900/20"
+              <button 
+                onClick={handleApply}
+                disabled={isApplying}
+                className="bg-sky-950 text-white px-10 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-sky-900 transition-all active:scale-95 shadow-xl shadow-sky-900/20 disabled:opacity-70"
               >
-                <span>Lamar Sekarang</span>
-                <PiCaretRightBold size={18} />
-              </a>
+                {isApplying ? (
+                  <PiSpinnerGap size={20} className="animate-spin text-white" />
+                ) : (
+                  <>
+                    <span>Lamar Sekarang</span>
+                    <PiCaretRightBold size={18} />
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>

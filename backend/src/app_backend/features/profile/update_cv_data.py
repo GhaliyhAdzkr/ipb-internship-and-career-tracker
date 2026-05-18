@@ -67,6 +67,17 @@ def update_cv_data_command_handler(
 
         profile.updated_at = datetime.now(timezone.utc)
         session.commit()
+
+        # Trigger CV parsing task in background if cv_url was updated and is not empty
+        if payload.cv_url:
+            try:
+                from app_backend.shared.tasks.ai_tasks import parse_cv_skills
+
+                parse_cv_skills.delay(str(command.user_id), str(payload.cv_url))
+            except Exception as e:
+                # Do not block the profile save if Celery/Redis is not running
+                print(f"Failed to queue CV parsing: {e}")
+
         return UpdateCVDataResult(message="Data CV berhasil diperbarui")
 
     except Exception as exc:

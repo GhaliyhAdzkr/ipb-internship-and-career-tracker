@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
     PiCheckCircleFill, 
     PiXCircleFill, 
@@ -7,34 +6,20 @@ import {
     PiEyeFill,
     PiClockFill
 } from "react-icons/pi";
-import adminService from "../../services/adminService";
+import { useAdminVerification } from "../../hooks/useAdminVerification";
 
 function AdminVerification() {
-    const queryClient = useQueryClient();
     const [selectedApp, setSelectedApp] = useState(null);
     const [remarks, setRemarks] = useState("");
 
-    const { data: applications, isLoading } = useQuery({
-        queryKey: ["admin", "pending-verifications"],
-        queryFn: adminService.getPendingVerifications
-    });
-
-    const verifyMutation = useMutation({
-        mutationFn: ({ id, data }) => adminService.verifyApplication(id, data),
-        onSuccess: () => {
-            queryClient.invalidateQueries(["admin", "pending-verifications"]);
-            setSelectedApp(null);
-            setRemarks("");
-        }
-    });
-
-    const rejectMutation = useMutation({
-        mutationFn: ({ id, data }) => adminService.rejectApplication(id, data),
-        onSuccess: () => {
-            queryClient.invalidateQueries(["admin", "pending-verifications"]);
-            setSelectedApp(null);
-            setRemarks("");
-        }
+    const {
+        applications,
+        isLoadingApplications: isLoading,
+        verifyMutation,
+        rejectMutation
+    } = useAdminVerification(() => {
+        setSelectedApp(null);
+        setRemarks("");
     });
 
     const handleVerify = (id) => {

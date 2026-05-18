@@ -42,7 +42,11 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !originalRequest.url?.includes('/auth/login')
+    ) {
       if (isRefreshing) {
         return new Promise(function (resolve, reject) {
           failedQueue.push({ resolve, reject });
@@ -59,12 +63,13 @@ api.interceptors.response.use(
       originalRequest._retry = true;
       isRefreshing = true;
 
-      const refreshToken = localStorage.getItem('refresh_token');
+      const refreshToken = localStorage.getItem('refreshToken') || localStorage.getItem('refresh_token');
 
       if (!refreshToken) {
         isRefreshing = false;
         // Refresh token tidak ditemukan, paksa logout
         localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
         localStorage.removeItem('refresh_token');
         if (typeof window !== 'undefined') {
           window.location.href = '/login';
@@ -82,6 +87,7 @@ api.interceptors.response.use(
         const { access_token, refresh_token: newRefreshToken } = response.data;
 
         localStorage.setItem('token', access_token);
+        localStorage.setItem('refreshToken', newRefreshToken);
         localStorage.setItem('refresh_token', newRefreshToken);
 
         api.defaults.headers.common.Authorization = `Bearer ${access_token}`;
@@ -92,6 +98,7 @@ api.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null);
         localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
         localStorage.removeItem('refresh_token');
         if (typeof window !== 'undefined') {
           window.location.href = '/login';

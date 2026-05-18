@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { 
-    PiMagnifyingGlassBold, 
+import {
+    PiMagnifyingGlassBold,
     PiUserThin,
     PiIdentificationCardBold,
     PiGraduationCapBold,
@@ -19,38 +18,25 @@ import {
     PiClockThin,
     PiUsersThin
 } from "react-icons/pi";
-import adminService from "../../services/adminService";
+import { useAdminUsers } from "../../hooks/useAdminUsers";
 import ConfirmModal from "../../components/ConfirmModal";
-import toast from "react-hot-toast";
 
 function AdminUsers() {
-    const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [isDetailOpen, setIsDetailOpen] = useState(false);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [studentToToggle, setStudentToToggle] = useState(null);
-    
+
     const [sortBy, setSortBy] = useState("last_login"); // "last_login" or "name"
     const [deptFilter, setDeptFilter] = useState("all");
-    
-    const { data: students, isLoading } = useQuery({
-        queryKey: ["admin", "students"],
-        queryFn: adminService.getStudents
-    });
 
-    const { data: departments } = useQuery({
-        queryKey: ["admin", "departments"],
-        queryFn: adminService.getDepartments
-    });
-
-    const toggleActiveMutation = useMutation({
-        mutationFn: adminService.toggleUserActive,
-        onSuccess: () => {
-            queryClient.invalidateQueries(["admin", "students"]);
-            toast.success("Status akun berhasil diperbarui");
-        }
-    });
+    const {
+        students,
+        isLoadingStudents: isLoading,
+        departments,
+        toggleActiveMutation
+    } = useAdminUsers();
 
     const handleToggleClick = (student) => {
         setStudentToToggle(student);
@@ -67,15 +53,15 @@ function AdminUsers() {
     };
 
     const filteredStudents = students?.filter(s => {
-        const matchesSearch = 
+        const matchesSearch =
             s.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             s.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
             s.nim?.includes(searchTerm);
-        
+
         const matchesDept = deptFilter === "all" || s.department_id === deptFilter;
         // Backend now filters role=STUDENT, but we keep a safe check
         const isStudent = !s.role || s.role.toUpperCase() === "STUDENT";
-        
+
         return matchesSearch && matchesDept && isStudent;
     }).sort((a, b) => {
         if (sortBy === "last_login") {
@@ -102,7 +88,7 @@ function AdminUsers() {
                 <div className="flex flex-col md:flex-row gap-4 w-full xl:w-auto">
                     <div className="relative w-full md:w-80 group">
                         <PiMagnifyingGlassBold className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-sky-600 transition-colors" />
-                        <input 
+                        <input
                             type="text"
                             placeholder="Cari nama, NIM, atau email..."
                             className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-medium"
@@ -110,9 +96,9 @@ function AdminUsers() {
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
-                    
+
                     <div className="relative w-full md:w-64">
-                        <select 
+                        <select
                             className="w-full pl-4 pr-10 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm focus:ring-4 focus:ring-sky-500/10 outline-none transition-all font-bold appearance-none cursor-pointer"
                             value={deptFilter}
                             onChange={(e) => setDeptFilter(e.target.value)}
@@ -131,7 +117,7 @@ function AdminUsers() {
                         { id: "last_login", label: "Login Terakhir" },
                         { id: "name", label: "Nama (A-Z)" }
                     ].map(sort => (
-                        <button 
+                        <button
                             key={sort.id}
                             onClick={() => setSortBy(sort.id)}
                             className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl text-xs font-extrabold transition-all ${sortBy === sort.id ? 'bg-white text-sky-950 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-sky-900'}`}
@@ -197,24 +183,23 @@ function AdminUsers() {
                                             </div>
                                         </td>
                                         <td className="px-8 py-6">
-                                            <span className={`px-4 py-1.5 rounded-xl text-[10px] font-extrabold uppercase tracking-[0.15em] border ${
-                                                student.is_active 
-                                                ? 'bg-emerald-50 text-emerald-600 border-emerald-100' 
-                                                : 'bg-red-50 text-red-600 border-red-100'
-                                            }`}>
+                                            <span className={`px-4 py-1.5 rounded-xl text-[10px] font-extrabold uppercase tracking-[0.15em] border ${student.is_active
+                                                    ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                                                    : 'bg-red-50 text-red-600 border-red-100'
+                                                }`}>
                                                 {student.is_active ? 'Aktif' : 'Nonaktif'}
                                             </span>
                                         </td>
                                         <td className="px-8 py-6 text-right">
                                             <div className="flex justify-end gap-2">
-                                                <button 
+                                                <button
                                                     onClick={() => viewDetail(student)}
                                                     className="p-3 text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-xl transition-all shadow-sm border border-transparent hover:border-sky-100"
                                                     title="Lihat Profil Lengkap"
                                                 >
                                                     <PiEyeBold size={24} />
                                                 </button>
-                                                <button 
+                                                <button
                                                     onClick={() => handleToggleClick(student)}
                                                     className={`p-2 transition-all ${student.is_active ? 'text-emerald-600 hover:text-emerald-700' : 'text-slate-300 hover:text-slate-400'}`}
                                                     title={student.is_active ? 'Nonaktifkan Akun' : 'Aktifkan Akun'}
@@ -306,9 +291,9 @@ function AdminUsers() {
                                     <div className="space-y-3">
                                         <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Tautan Profesional</h4>
                                         <div className="flex flex-col gap-3">
-                                            <a 
-                                                href={selectedStudent.linkedin_url || "#"} 
-                                                target="_blank" 
+                                            <a
+                                                href={selectedStudent.linkedin_url || "#"}
+                                                target="_blank"
                                                 className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${selectedStudent.linkedin_url ? 'bg-sky-50 border-sky-100 text-sky-700 hover:bg-sky-100' : 'bg-slate-50 border-slate-100 text-slate-300 pointer-events-none'}`} rel="noreferrer"
                                             >
                                                 <div className="flex items-center gap-3">
@@ -316,9 +301,9 @@ function AdminUsers() {
                                                     <span className="text-sm font-bold">LinkedIn Profile</span>
                                                 </div>
                                             </a>
-                                            <a 
-                                                href={selectedStudent.cv_url || "#"} 
-                                                target="_blank" 
+                                            <a
+                                                href={selectedStudent.cv_url || "#"}
+                                                target="_blank"
                                                 className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${selectedStudent.cv_url ? 'bg-indigo-50 border-indigo-100 text-indigo-700 hover:bg-indigo-100' : 'bg-slate-50 border-slate-100 text-slate-300 pointer-events-none'}`} rel="noreferrer"
                                             >
                                                 <div className="flex items-center gap-3">
@@ -334,7 +319,7 @@ function AdminUsers() {
 
                         {/* Modal Footer */}
                         <div className="p-8 bg-slate-50 border-t border-slate-100">
-                            <button 
+                            <button
                                 onClick={() => setIsDetailOpen(false)}
                                 className="w-full py-4 bg-sky-950 text-white rounded-2xl font-extrabold shadow-xl shadow-sky-900/20"
                             >
@@ -345,7 +330,7 @@ function AdminUsers() {
                 </div>
             )}
 
-            <ConfirmModal 
+            <ConfirmModal
                 isOpen={isConfirmOpen}
                 onClose={() => setIsConfirmOpen(false)}
                 onConfirm={confirmToggle}

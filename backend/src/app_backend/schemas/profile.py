@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
 
 
 class DepartmentInfo(BaseModel):
@@ -22,7 +22,7 @@ class SkillInfo(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-    skill_id: UUID
+    id: UUID = Field(alias="skill_id")
     skill_name: str
     skill_category: Optional[str] = None
     level: int = Field(..., ge=1, le=5, description="Level keahlian 1-5")
@@ -57,7 +57,7 @@ class StudentProfileResponse(BaseModel):
     # Metadata
     updated_at: datetime
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
 
 class SkillUpdate(BaseModel):
@@ -72,8 +72,27 @@ class CVDataUpdate(BaseModel):
 
     phone_number: Optional[str] = Field(None, max_length=20, description="Nomor telepon")
     linkedin_url: Optional[HttpUrl] = Field(None, description="URL profil LinkedIn")
-    cv_url: Optional[HttpUrl] = Field(None, description="URL file CV (Google Drive, Dropbox, etc)")
+    cv_url: Optional[HttpUrl] = Field(None, description="URL file CV (Wajib Google Drive shareable link)")
     skills: Optional[List[SkillUpdate]] = Field(default=None, description="Daftar skills dengan level")
+
+    @field_validator("cv_url")
+    @classmethod
+    def validate_cv_url(cls, v: Optional[HttpUrl]) -> Optional[HttpUrl]:
+        if v is None:
+            return v
+
+        url_str = str(v)
+        # Check if Google Drive url
+        if "drive.google.com" not in url_str:
+            raise ValueError("URL CV wajib berupa link Google Drive (drive.google.com)")
+
+        # Check if it contains /file/d/ and /view
+        if "/file/d/" not in url_str or "/view" not in url_str:
+            raise ValueError(
+                "URL Google Drive wajib dalam format shareable link view (contoh: https://drive.google.com/file/d/.../view)"
+            )
+
+        return v
 
     model_config = ConfigDict(
         json_schema_extra={

@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { 
     PiPlusBold, 
     PiMagnifyingGlassBold, 
@@ -10,12 +9,12 @@ import {
     PiMapPinBold,
     PiXCircleFill
 } from "react-icons/pi";
+import { useAdminCompanies } from "../../hooks/useAdminCompanies";
 import adminService from "../../services/adminService";
 import ConfirmModal from "../../components/ConfirmModal";
 import toast from "react-hot-toast";
 
 function AdminCompanies() {
-    const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState("");
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [selectedCompany, setSelectedCompany] = useState(null);
@@ -29,35 +28,14 @@ function AdminCompanies() {
         logo_url: ""
     });
 
-    const { data: companies, isLoading } = useQuery({
-        queryKey: ["admin", "companies"],
-        queryFn: adminService.getCompanies
-    });
-
-    const deleteMutation = useMutation({
-        mutationFn: adminService.deleteCompany,
-        onSuccess: () => {
-            queryClient.invalidateQueries(["admin", "companies"]);
-            toast.success("Perusahaan berhasil dihapus");
-        }
-    });
-
-    const createMutation = useMutation({
-        mutationFn: adminService.createCompany,
-        onSuccess: () => {
-            queryClient.invalidateQueries(["admin", "companies"]);
-            setIsFormOpen(false);
-            toast.success("Perusahaan baru ditambahkan");
-        }
-    });
-
-    const updateMutation = useMutation({
-        mutationFn: ({ id, data }) => adminService.updateCompany(id, data),
-        onSuccess: () => {
-            queryClient.invalidateQueries(["admin", "companies"]);
-            setIsFormOpen(false);
-            toast.success("Data perusahaan diperbarui");
-        }
+    const {
+        companies,
+        isLoadingCompanies: isLoading,
+        deleteMutation,
+        createMutation,
+        updateMutation
+    } = useAdminCompanies(() => {
+        setIsFormOpen(false);
     });
 
     const handleDelete = (company) => {
