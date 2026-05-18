@@ -72,17 +72,12 @@ def request_reset_password_command_handler(
     from app_backend.shared.mailer import send_direct_email
 
     subject = "Your LARAS password reset token"
-    body = f"""
-A request was made to reset the password for the LARAS account associated with <strong>{user.email}</strong>.
-<br><br>
-Was this you? Enter this password reset token to proceed:
-<br><br>
-<div id="headline" style="font-size: 26px; font-weight: bold; color: #111827;">
-  {raw_token}
-</div>
-<br>
-This token is valid for 15 minutes. If you did not make this request, please ignore this email.
-"""
+    body = (
+        f"A request was made to reset the password for the LARAS account associated with <strong>{user.email}</strong>.<br/>"
+        "Was this you? Enter this password reset token to proceed:<br/><br/>"
+        f'<div id="headline" style="font-size: 26px; font-weight: bold; color: #111827;">{raw_token}</div><br/>'
+        "This token is valid for 15 minutes. If you did not make this request, please ignore this email."
+    )
     import threading
 
     threading.Thread(target=send_direct_email, args=(user.email, subject, body), daemon=True).start()

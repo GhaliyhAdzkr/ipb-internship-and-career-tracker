@@ -22,6 +22,7 @@ function Login() {
 
 	const [searchParams] = useSearchParams();
 	const isVerified = searchParams.get("verified") === "true";
+	const isRegistered = searchParams.get("registered") === "true";
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
@@ -65,6 +66,17 @@ function Login() {
 							<div>
 								<h4 className="text-sm font-bold text-green-800">Email Terverifikasi!</h4>
 								<p className="text-xs text-green-600 font-medium">Akun Anda sudah aktif, silakan masuk.</p>
+							</div>
+						</div>
+					)}
+					{isRegistered && (
+						<div className="p-4 bg-sky-50 border border-sky-100 rounded-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-500">
+							<div className="w-10 h-10 bg-sky-500 rounded-full flex items-center justify-center text-white shrink-0">
+								<PiCheckCircle size={24} weight="fill" />
+							</div>
+							<div>
+								<h4 className="text-sm font-bold text-sky-800">Registrasi Berhasil!</h4>
+								<p className="text-xs text-sky-600 font-medium">Silakan periksa kotak masuk email apps.ipb.ac.id Anda untuk verifikasi.</p>
 							</div>
 						</div>
 					)}

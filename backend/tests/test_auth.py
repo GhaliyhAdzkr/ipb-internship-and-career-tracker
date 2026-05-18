@@ -209,6 +209,19 @@ def test_login_inactive_account(client_no_auth):
         )
 
     assert resp.status_code == 401
+    assert resp.json()["detail"] == "Akun dinonaktifkan. Hubungi admin."
+
+
+def test_login_unverified_account(client_no_auth):
+    with patch("app_backend.features.auth.auth_service.AuthService.login") as mock_method:
+        mock_method.side_effect = PermissionError("Silakan verifikasi email Anda terlebih dahulu.")
+        resp = client_no_auth.post(
+            "/api/v1/auth/login",
+            json={"email": "student@ipb.ac.id", "password": "Password123"},
+        )
+
+    assert resp.status_code == 401
+    assert resp.json()["detail"] == "Silakan verifikasi email Anda terlebih dahulu."
 
 
 #  Refresh Token

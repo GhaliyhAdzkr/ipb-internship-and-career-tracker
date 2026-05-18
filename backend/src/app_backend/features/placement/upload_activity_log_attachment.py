@@ -84,7 +84,11 @@ def upload_activity_log_attachment_command_handler(
             if not success:
                 return UploadActivityLogAttachmentResult(error_message="Gagal mengunggah lampiran ke storage S3")
 
-            attachment_url = f"{settings.s3_endpoint}/{settings.s3_bucket}/{s3_key}"
+            if "storage.supabase.co/storage/v1/s3" in settings.s3_endpoint:
+                public_endpoint = settings.s3_endpoint.replace("/storage/v1/s3", "/storage/v1/object/public")
+                attachment_url = f"{public_endpoint}/{settings.s3_bucket}/{s3_key}"
+            else:
+                attachment_url = f"{settings.s3_endpoint}/{settings.s3_bucket}/{s3_key}"
         else:
             os.makedirs(f"uploads/{UPLOAD_DIR}", exist_ok=True)
             file_path = os.path.join(f"uploads/{UPLOAD_DIR}", unique_filename)

@@ -10,6 +10,10 @@ export const authService = {
     const response = await api.post('/auth/register/student', userData);
     return response.data;
   },
+  checkAvailability: async (identifier) => {
+    const response = await api.get(`/auth/register/check-availability?identifier=${identifier}`);
+    return response.data;
+  },
   requestPasswordReset: async (email) => {
     const response = await api.post('/auth/password/reset-request', { email });
     return response.data;

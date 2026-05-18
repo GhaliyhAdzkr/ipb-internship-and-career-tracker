@@ -76,7 +76,11 @@ def upload_application_proof_command_handler(
             if not success:
                 return UploadApplicationProofResult(error_message="Gagal mengunggah bukti ke storage S3")
 
-            proof_url = f"{settings.s3_endpoint}/{settings.s3_bucket}/{s3_key}"
+            if "storage.supabase.co/storage/v1/s3" in settings.s3_endpoint:
+                public_endpoint = settings.s3_endpoint.replace("/storage/v1/s3", "/storage/v1/object/public")
+                proof_url = f"{public_endpoint}/{settings.s3_bucket}/{s3_key}"
+            else:
+                proof_url = f"{settings.s3_endpoint}/{settings.s3_bucket}/{s3_key}"
         else:
             os.makedirs(f"uploads/{UPLOAD_DIR}", exist_ok=True)
             file_path = os.path.join(f"uploads/{UPLOAD_DIR}", unique_filename)
@@ -84,22 +88,17 @@ def upload_application_proof_command_handler(
                 buffer.write(file.file.read())
             proof_url = f"/uploads/{UPLOAD_DIR}/{unique_filename}"
 
-        # Trigger an update to insert into application_logs
-        from sqlalchemy import text
+        from app_backend.models.application_logs import ApplicationLogs
 
-        session.execute(
-            text("""
-            INSERT INTO application_logs (id, application_id, previous_status, new_status, changed_by, proof_url, reason)
-            VALUES (:id, :app_id, :status, :status, :by, :proof, 'Upload Bukti')
-            """),
-            {
-                "id": uuid.uuid4(),
-                "app_id": application.id,
-                "status": application.status,
-                "by": command.student_id,
-                "proof": proof_url,
-            },
+        app_log = ApplicationLogs(
+            application_id=application.id,
+            previous_status=application.status,
+            new_status=application.status,
+            changed_by=command.student_id,
+            proof_url=proof_url,
+            reason="Upload Bukti",
         )
+        session.add(app_log)
 
         session.commit()
         return UploadApplicationProofResult(proof_url=proof_url, message="Bukti berhasil diunggah")

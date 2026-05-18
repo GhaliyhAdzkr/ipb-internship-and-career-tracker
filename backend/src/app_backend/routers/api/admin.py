@@ -29,7 +29,7 @@ from datetime import datetime, timezone
 from http import HTTPStatus
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
 
 from app_backend.domain.user import User as DomainUser
 from app_backend.features.admin import (
@@ -406,6 +406,71 @@ async def delete_company(
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(exc))
     except Exception as exc:
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(exc))
+
+
+@router.post(
+    "/companies/upload-logo",
+    status_code=HTTPStatus.OK,
+    summary="Upload logo perusahaan ke storage S3/Lokal",
+)
+async def upload_company_logo(
+    file: UploadFile = File(...),
+    _: DomainUser = Depends(require_admin),
+) -> dict:
+    """
+    Unggah file logo perusahaan (JPEG/PNG/WEBP, max 10MB).
+    Mengembalikan URL publik file yang diunggah.
+    """
+    import os
+    from app_backend.conf.settings import settings
+    from app_backend.shared.s3_storage import get_s3_client, upload_fileobj
+
+    valid_content_types = ["image/jpeg", "image/png", "image/jpg", "image/gif", "image/webp"]
+    if file.content_type not in valid_content_types:
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="File harus berupa gambar (JPEG, PNG, WEBP, GIF)")
+
+    # Extension check
+    filename = file.filename.lower()
+    ext = os.path.splitext(filename)[1]
+    if ext not in [".jpg", ".jpeg", ".png", ".gif", ".webp"]:
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Ekstensi file tidak valid")
+
+    # Size check
+    file.file.seek(0, os.SEEK_END)
+    file_size = file.file.tell()
+    file.file.seek(0)
+
+    MAX_SIZE = 10 * 1024 * 1024  # 10MB
+    if file_size > MAX_SIZE:
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Ukuran logo melebihi batas maksimal 10MB")
+
+    unique_filename = f"logo_{uuid.uuid4().hex[:12]}{ext}"
+    s3_key = f"companies-logo/{unique_filename}"
+
+    try:
+        if settings.storage_type == "s3":
+            s3_client = get_s3_client()
+            success = upload_fileobj(s3_client, file.file, settings.s3_bucket, s3_key, content_type=file.content_type)
+            if not success:
+                raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Gagal mengunggah logo ke S3")
+
+            # Construct public URL (for Supabase Storage S3 gateway)
+            if "storage.supabase.co/storage/v1/s3" in settings.s3_endpoint:
+                public_endpoint = settings.s3_endpoint.replace("/storage/v1/s3", "/storage/v1/object/public")
+                logo_url = f"{public_endpoint}/{settings.s3_bucket}/{s3_key}"
+            else:
+                logo_url = f"{settings.s3_endpoint}/{settings.s3_bucket}/{s3_key}"
+        else:
+            # Fallback local
+            os.makedirs("uploads/companies-logo", exist_ok=True)
+            file_path = os.path.join("uploads/companies-logo", unique_filename)
+            with open(file_path, "wb") as buffer:
+                buffer.write(file.file.read())
+            logo_url = f"/uploads/companies-logo/{unique_filename}"
+
+        return {"logo_url": logo_url}
+    except Exception as exc:
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=f"Gagal mengunggah logo: {exc}")
 
 
 # Manage Applications (Section 4)

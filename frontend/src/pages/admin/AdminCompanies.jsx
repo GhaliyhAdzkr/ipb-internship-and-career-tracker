@@ -20,6 +20,7 @@ function AdminCompanies() {
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [selectedCompany, setSelectedCompany] = useState(null);
     const [isFormOpen, setIsFormOpen] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
     const [formData, setFormData] = useState({
         name: "",
         industry: "",
@@ -242,12 +243,68 @@ function AdminCompanies() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest">URL Logo</label>
-                                <input 
-                                    className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-medium"
-                                    value={formData.logo_url}
-                                    onChange={(e) => setFormData({ ...formData, logo_url: e.target.value })}
-                                />
+                                <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest block">Logo Perusahaan</label>
+                                <div className="flex items-center gap-6">
+                                    <div className="w-24 h-24 rounded-3xl bg-slate-50 border border-dashed border-slate-200 flex items-center justify-center p-3 shrink-0 overflow-hidden relative shadow-inner">
+                                        {formData.logo_url ? (
+                                            <img 
+                                                src={formData.logo_url} 
+                                                alt="Preview logo" 
+                                                className="w-full h-full object-contain"
+                                            />
+                                        ) : (
+                                            <div className="text-center space-y-1">
+                                                <div className="text-slate-400 text-xs font-semibold">No Logo</div>
+                                            </div>
+                                        )}
+                                        {isUploading && (
+                                            <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center">
+                                                <div className="w-6 h-6 border-2 border-sky-600 border-t-transparent rounded-full animate-spin"></div>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="flex-1 space-y-2">
+                                        <div className="relative">
+                                            <input 
+                                                type="file"
+                                                accept="image/*"
+                                                id="logo-upload"
+                                                className="hidden"
+                                                onChange={async (e) => {
+                                                    const file = e.target.files[0];
+                                                    if (!file) return;
+                                                    
+                                                    // Validate size
+                                                    if (file.size > 10 * 1024 * 1024) {
+                                                        toast.error("Ukuran logo maksimal 10MB");
+                                                        return;
+                                                    }
+                                                    
+                                                    try {
+                                                        setIsUploading(true);
+                                                        const res = await adminService.uploadCompanyLogo(file);
+                                                        setFormData(prev => ({ ...prev, logo_url: res.logo_url }));
+                                                        toast.success("Logo berhasil diunggah!");
+                                                    } catch (err) {
+                                                        toast.error(err?.response?.data?.detail || "Gagal mengunggah logo");
+                                                    } finally {
+                                                        setIsUploading(false);
+                                                    }
+                                                }}
+                                                disabled={isUploading}
+                                            />
+                                            <label 
+                                                htmlFor="logo-upload"
+                                                className={`inline-flex items-center justify-center px-5 py-3 rounded-xl border border-slate-200 bg-white text-xs font-extrabold text-slate-700 shadow-sm hover:bg-slate-50 cursor-pointer active:scale-95 transition-all gap-2 ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
+                                            >
+                                                {isUploading ? "Mengunggah..." : "Pilih File Logo"}
+                                            </label>
+                                        </div>
+                                        <p className="text-[10px] text-slate-400 font-medium leading-relaxed">
+                                            Format yang didukung: PNG, JPG, WEBP. Maksimal ukuran file 10MB.
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
 
                             <button 

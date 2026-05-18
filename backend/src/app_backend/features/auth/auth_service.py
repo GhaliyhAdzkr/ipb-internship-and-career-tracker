@@ -106,24 +106,18 @@ class AuthService:
 
             verification_link = f"{settings.frontend_url}/verify-email?token={raw_token}"
             subject = "Your LARAS verification link"
-            body = f"""
-A new registration attempt was made to create a LARAS account for <strong>{user.email}</strong>.
-<br><br>
-Was this you? Please click the verification button below to activate your account:
-<br><br>
-<div class="btn-container">
-    <a href="{verification_link}" class="btn-action">
-       Verify My Account
-    </a>
-</div>
-<br>
-Or copy and paste the following URL into your browser:
-<div class="raw-link">
-    <a href="{verification_link}">{verification_link}</a>
-</div>
-<br>
-This verification link is valid for 24 hours. If you did not make this request, please ignore this email.
-"""
+            body = (
+                f"A new registration attempt was made to create a LARAS account for <strong>{user.email}</strong>.<br/>"
+                "Was this you? Please click the verification button below to activate your account:<br/><br/>"
+                '<div class="btn-container">'
+                f'<a href="{verification_link}" class="btn-action">Verify My Account</a>'
+                "</div><br/>"
+                "Or copy and paste the following URL into your browser:<br/>"
+                '<div class="raw-link">'
+                f'<a href="{verification_link}">{verification_link}</a>'
+                "</div><br/>"
+                "This verification link is valid for 24 hours. If you did not make this request, please ignore this email."
+            )
             import threading
 
             threading.Thread(
@@ -212,6 +206,19 @@ This verification link is valid for 24 hours. If you did not make this request, 
             raise ValueError("Email atau password salah")
 
         if not user.is_active:
+            from app_backend.models.auth_action_tokens import AuthActionTokens
+
+            activation_token = (
+                self.user_repo.session.query(AuthActionTokens)
+                .filter(
+                    AuthActionTokens.user_id == user.id,
+                    AuthActionTokens.action_type == "ACTIVATE_ACCOUNT",
+                    AuthActionTokens.is_used.is_(False),
+                )
+                .first()
+            )
+            if activation_token:
+                raise PermissionError("Silakan verifikasi email Anda terlebih dahulu.")
             raise PermissionError("Akun dinonaktifkan. Hubungi admin.")
 
         now = datetime.now(timezone.utc)

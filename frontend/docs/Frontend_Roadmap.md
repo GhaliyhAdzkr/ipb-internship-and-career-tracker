@@ -214,26 +214,26 @@ Bagian ini menjadi peta kerja frontend untuk menentukan halaman mana yang sudah 
 
 ### Daftar Lamaran
 
-- [ ] Sambungkan halaman lamaran ke data application nyata
-- [ ] Tampilkan grouping status seperti applied, screening, interview, offered, accepted, dan rejected
-- [ ] Tambahkan empty state bila user belum memiliki aplikasi sama sekali
+- [x] Sambungkan halaman lamaran ke data application nyata
+- [x] Tampilkan grouping status seperti applied, screening, interview, offered, accepted, dan rejected
+- [x] Tambahkan empty state bila user belum memiliki aplikasi sama sekali
 
 ### Detail dan History
 
-- [ ] Tampilkan detail lamaran per item jika backend menyediakan endpoint detail
-- [ ] Tampilkan riwayat status dan proof data yang diperlukan mahasiswa
-- [ ] Pastikan label status konsisten dengan backend enum
+- [x] Tampilkan detail lamaran per item jika backend menyediakan endpoint detail
+- [x] Tampilkan riwayat status dan proof data yang diperlukan mahasiswa
+- [x] Pastikan label status konsisten dengan backend enum
 
 ### Aksi Self-Reporting
 
-- [ ] Tambahkan form update status lamaran sesuai lifecycle yang valid
-- [ ] Siapkan upload proof UI untuk status accepted jika diperlukan
+- [x] Tambahkan form update status lamaran sesuai lifecycle yang valid
+- [x] Siapkan upload proof UI untuk status accepted jika diperlukan
 
 ### Test Gate Phase 4
 
-- [ ] Status lamaran terbaca dari backend
-- [ ] Perubahan status menampilkan response API dan history terbaru
-- [ ] UI menolak state yang tidak valid secara visual sebelum request dikirim
+- [x] Status lamaran terbaca dari backend
+- [x] Perubahan status menampilkan response API dan history terbaru
+- [x] UI menolak state yang tidak valid secara visual sebelum request dikirim
 
 **Exit Criteria**: Pengguna dapat memantau dan memperbarui lamaran dari frontend secara jelas.
 
