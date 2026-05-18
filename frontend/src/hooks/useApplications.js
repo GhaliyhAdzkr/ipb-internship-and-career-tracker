@@ -2,12 +2,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import applicationService from '../services/applicationService';
 
 /**
- * Custom Hook for job application queries and mutations using TanStack Query.
+ * Hook Custom untuk Query dan Mutasi lamaran pekerjaan menggunakan TanStack Query
  */
 export const useApplications = () => {
   const queryClient = useQueryClient();
 
-  // 1. Query to fetch the current student's own applications list
+  // 1. Query untuk mengambil daftar lamaran milik Student saat ini
   const { 
     data: applications = [], 
     isLoading, 
@@ -17,22 +17,22 @@ export const useApplications = () => {
   } = useQuery({
     queryKey: ['applications', 'my'],
     queryFn: applicationService.getMyApplications,
-    staleTime: 5 * 60 * 1000, // 5 minutes stale time
+    staleTime: 5 * 60 * 1000, // Waktu stale 5 menit
     refetchOnWindowFocus: true,
   });
 
-  // 2. Mutation to update an application status (e.g. withdraw or accept offer)
+  // 2. Mutasi untuk memperbarui status lamaran: misalnya membatalkan atau menerima tawaran
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, data }) => applicationService.updateStatus(id, data),
     onSuccess: (updatedApp) => {
-      // Invalidate the application list to trigger automatic refresh
+      // Batalkan validasi daftar lamaran untuk memicu refresh otomatis
       queryClient.invalidateQueries({ queryKey: ['applications', 'my'] });
-      // Invalidate the specific application's audit history
+      // Batalkan validasi riwayat audit lamaran yang spesifik
       queryClient.invalidateQueries({ queryKey: ['applications', updatedApp.id, 'history'] });
     },
   });
 
-  // 3. Mutation to upload acceptance proof (Letter of Acceptance LoA)
+  // 3. Mutasi untuk mengunggah bukti penerimaan: Letter of Acceptance atau LoA
   const uploadProofMutation = useMutation({
     mutationFn: ({ id, file }) => applicationService.uploadProof(id, file),
     onSuccess: (data, variables) => {
@@ -55,15 +55,15 @@ export const useApplications = () => {
 };
 
 /**
- * Custom Hook to fetch history/audit trail of a specific application.
- * @param {string} applicationId - The application ID to fetch history for.
+ * Hook Custom untuk mengambil riwayat atau audit trail dari lamaran spesifik
+ * @param {string} applicationId: ID lamaran untuk mengambil riwayat
  */
 export const useApplicationHistory = (applicationId) => {
   return useQuery({
     queryKey: ['applications', applicationId, 'history'],
     queryFn: () => applicationService.getHistory(applicationId),
     enabled: !!applicationId,
-    staleTime: 60 * 1000, // 1 minute stale time
+    staleTime: 60 * 1000, // Waktu stale 1 menit
     refetchOnWindowFocus: false,
   });
 };

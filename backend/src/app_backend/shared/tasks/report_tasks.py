@@ -1,7 +1,3 @@
-"""
-Background tasks for generating PDF reports and documents.
-"""
-
 import datetime
 import os
 import io

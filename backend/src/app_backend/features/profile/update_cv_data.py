@@ -1,8 +1,3 @@
-"""
-Update CV Data Feature – Command Handler.
-Update data CV mahasiswa: info kontak, URL CV, dan skills (full replace).
-"""
-
 from __future__ import annotations
 
 import uuid
@@ -58,7 +53,7 @@ def update_cv_data_command_handler(
             profile.cv_url = str(payload.cv_url)
 
         if payload.skills is not None:
-            # Full replace – hapus semua skill lama, insert baru
+            # Full replace hapus semua skill lama, insert baru
             session.query(StudentSkills).filter(StudentSkills.student_id == command.user_id).delete(synchronize_session="fetch")
 
             for skill_data in payload.skills:

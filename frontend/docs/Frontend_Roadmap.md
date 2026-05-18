@@ -246,23 +246,23 @@ Bagian ini menjadi peta kerja frontend untuk menentukan halaman mana yang sudah 
 
 ### Placement Overview
 
-- [ ] Ambil placement aktif user dari backend
-- [ ] Tampilkan company, tanggal mulai-selesai, supervisor, dan status penempatan
-- [ ] Siapkan kondisi empty bila user belum ditempatkan
+- [x] Ambil placement aktif user dari backend
+- [x] Tampilkan company, tanggal mulai-selesai, supervisor, dan status penempatan
+- [x] Siapkan kondisi empty bila user belum ditempatkan
 
 ### Jurnal Harian
 
-- [ ] Ganti input jurnal statis dengan data harian nyata per placement
-- [ ] Tambahkan create/edit/delete flow jika endpoint tersedia
-- [ ] Sinkronkan calendar, work time, deskripsi, dan attachment ke backend
+- [x] Ganti input jurnal statis dengan data harian nyata per placement
+- [x] Tambahkan create/edit/delete flow jika endpoint tersedia
+- [x] Sinkronkan calendar, work time, deskripsi, dan attachment ke backend
 
 ### Test Gate Phase 5
 
-- [ ] Halaman jurnal tidak lagi berupa form dummy
-- [ ] Data placement aktif muncul di UI
-- [ ] Status empty state akurat saat user belum memiliki placement
+- [x] Halaman jurnal tidak lagi berupa form dummy
+- [x] Data placement aktif muncul di UI
+- [x] Status empty state akurat saat user belum memiliki placement
 
-**Exit Criteria**: Aktivitas internship terlihat sebagai data nyata dan bukan simulasi UI.
+**Exit Criteria**: Aktivitas internship terlihat sebagai data nyata dan bukan simulasi UI. ✅
 
 ---
 
@@ -273,23 +273,23 @@ Bagian ini menjadi peta kerja frontend untuk menentukan halaman mana yang sudah 
 
 ### Laporan Akhir
 
-- [ ] Hubungkan halaman laporan ke endpoint report generation dan report status
-- [ ] Tampilkan state not generated, generating, dan ready to download
-- [ ] Sediakan tombol unduh file saat URL report tersedia
+- [x] Hubungkan halaman laporan ke endpoint report generation dan report status
+- [x] Tampilkan state not generated, generating, dan ready to download
+- [x] Sediakan tombol unduh file saat URL report tersedia
 
 ### Document Request
 
-- [ ] Tambahkan UI untuk request surat pengantar dari frontend
-- [ ] Tampilkan riwayat request dokumen dan status prosesnya
-- [ ] Gunakan result backend untuk status sukses/gagal dan file generated
+- [x] Tambahkan UI untuk request surat pengantar dari frontend
+- [x] Tampilkan riwayat request dokumen dan status prosesnya
+- [x] Gunakan result backend untuk status sukses/gagal dan file generated
 
 ### Test Gate Phase 6
 
-- [ ] Laporan akhir dapat dilihat dari state backend
-- [ ] Document request dan history terbaca dari UI
-- [ ] Link PDF valid dapat dibuka dari frontend
+- [x] Laporan akhir dapat dilihat dari state backend
+- [x] Document request dan history terbaca dari UI
+- [x] Link PDF valid dapat dibuka dari frontend
 
-**Exit Criteria**: Fitur dokumen dan laporan dapat dipakai dari frontend secara end-to-end.
+**Exit Criteria**: Fitur dokumen dan laporan dapat dipakai dari frontend secara end-to-end. ✅
 
 ---
 

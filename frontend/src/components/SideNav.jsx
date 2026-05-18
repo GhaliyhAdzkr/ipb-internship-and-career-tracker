@@ -1,4 +1,3 @@
-import React from "react";
 import { NavLink } from "react-router-dom";
 import { 
 	PiSquaresFour, 
@@ -30,6 +29,7 @@ const Sidebar = () => {
 		{ to: "/app/admin/perusahaan", icon: PiBuildingsThin, label: "Kelola Perusahaan" },
 		{ to: "/app/admin/mahasiswa", icon: PiUsersThin, label: "Kelola Mahasiswa" },
 		{ to: "/app/admin/master-data", icon: PiFileTextThin, label: "Data Master" },
+		{ to: "/app/admin/penempatan", icon: PiBriefcaseThin, label: "Penempatan" },
 	] : [
 		{ to: "/app/home", icon: PiSquaresFour, label: "Beranda" },
 		{ to: "/app/lowongan", icon: PiMagnifyingGlass, label: "Cari Lowongan" },
@@ -42,7 +42,7 @@ const Sidebar = () => {
 
 	return (
 		<div className="sticky top-0 h-screen w-64 bg-indigo-50 border-r border-neutral-300/20 flex flex-col font-jakarta shrink-0">
-			{/* Brand */}
+			{/* Logo Aplikasi */}
 			<div className="p-6 flex items-center gap-3 mb-4">
 				<img 
 					src="/logo/laras.png" 
@@ -59,7 +59,7 @@ const Sidebar = () => {
 				</div>
 			</div>
 
-			{/* Navigation */}
+			{/* Navigasi */}
 			<div className="flex-1 px-4 flex flex-col gap-2">
 				{navItems.map((item) => (
 					<NavLink
@@ -75,12 +75,13 @@ const Sidebar = () => {
 				))}
 			</div>
 
-			{/* Logout */}
+			{/* Keluar */}
 			<div className="p-4 mt-auto">
 				<button 
 					onClick={logout}
 					className="flex items-center gap-3 w-full px-4 py-3 text-slate-500 hover:text-red-600 transition-colors text-sm font-bold"
 				>
+
 					<PiSignOut size={20} weight="bold" />
 					<span>Keluar</span>
 				</button>

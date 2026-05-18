@@ -1,9 +1,3 @@
-"""
-Refresh Token Feature – Command Handler.
-Token rotation: validasi refresh token di DB, terbitkan access + refresh baru,
-dan revoke refresh token lama (per-device session management).
-"""
-
 import uuid
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone

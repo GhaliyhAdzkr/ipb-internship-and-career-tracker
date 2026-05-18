@@ -3,8 +3,8 @@ import { fileService } from './fileService';
 
 export const applicationService = {
   /**
-   * Initialize a new job application.
-   * @param {Object} data - Application data (vacancy_id, documents, etc.)
+   * Inisialisasi lamaran pekerjaan baru
+   * @param {Object} data: Data Application
    */
   apply: async (data) => {
     const response = await api.post('/applications', data);
@@ -12,9 +12,9 @@ export const applicationService = {
   },
 
   /**
-   * Update application status (e.g., to REJECTED or ACCEPTED after LoA).
+   * Perbarui status lamaran: misalnya menjadi REJECTED atau ACCEPTED setelah LoA
    * @param {string} applicationId
-   * @param {Object} data - { status }
+   * @param {Object} data: Objek data berisi status
    */
   updateStatus: async (applicationId, data) => {
     const response = await api.patch(`/applications/${applicationId}/status`, data);
@@ -22,7 +22,7 @@ export const applicationService = {
   },
 
   /**
-   * Upload proof of acceptance (Screenshot LoA).
+   * Upload bukti penerimaan: Screenshot LoA
    * @param {string} applicationId
    * @param {File} file
    */
@@ -31,7 +31,7 @@ export const applicationService = {
   },
 
   /**
-   * Get audit logs/history for a specific application.
+   * Ambil log audit atau riwayat untuk Application tertentu
    * @param {string} applicationId
    */
   getHistory: async (applicationId) => {
@@ -40,7 +40,7 @@ export const applicationService = {
   },
 
   /**
-   * Get all applications for the current student.
+   * Ambil semua lamaran untuk Student saat ini
    */
   getMyApplications: async () => {
     const response = await api.get('/applications/my');

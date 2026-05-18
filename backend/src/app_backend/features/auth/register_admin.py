@@ -1,10 +1,3 @@
-"""
-Register Admin Feature – Command Handler.
-Registrasi fasilitator/admin: buat public.users + public.profiles_admin dalam satu transaksi.
-Endpoint ini sebaiknya hanya dipanggil oleh super-admin yang sudah login,
-atau dari internal script seeding.
-"""
-
 from __future__ import annotations
 
 import uuid

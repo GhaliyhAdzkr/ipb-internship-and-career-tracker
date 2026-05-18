@@ -27,11 +27,11 @@ export default function PublicLowongan() {
   
   const [showAllIndustries, setShowAllIndustries] = useState(false);
 
-  // Refs for uncontrolled inputs (zero re-renders on typing)
+  // Ref untuk input tidak terkontrol guna menghindari render ulang saat mengetik
   const queryRef = useRef(null);
   const locationRef = useRef(null);
 
-  // Derived state from URL (Single Source of Truth)
+  // State turunan dari URL sebagai acuan utama data
   const searchQuery = searchParams.get('query') || '';
   const location = searchParams.get('location') || '';
   const type = searchParams.get('type') || '';
@@ -55,7 +55,7 @@ export default function PublicLowongan() {
   const industriesQuery = useQuery({
     queryKey: ["industries"],
     queryFn: () => vacancyService.getIndustries(),
-    staleTime: 60 * 60 * 1000, // 1 hour
+    staleTime: 60 * 60 * 1000, // Durasi 1 jam
   });
 
   const updateFilters = (newFilters) => {
@@ -65,7 +65,7 @@ export default function PublicLowongan() {
       else nextParams.delete(key);
     });
 
-    // Only reset to page 1 if we're NOT explicitly setting a new page
+    // Hanya atur ulang ke halaman 1 jika tidak sedang memuat halaman spesifik
     if (!("page" in newFilters)) {
       nextParams.set("page", "1");
     }
@@ -112,7 +112,7 @@ export default function PublicLowongan() {
 
   return (
     <div className="font-jakarta text-sky-950 bg-[#F8F9FF] min-h-screen">
-      {/* Navbar */}
+      {/* Navigasi Utama */}
       <nav className="bg-white border-b border-slate-100 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-12">
@@ -141,7 +141,7 @@ export default function PublicLowongan() {
       </nav>
 
       <main className="max-w-7xl mx-auto px-6 py-12">
-        {/* Header Section */}
+        {/* Bagian Kepala */}
         <section className="mb-12">
           <h1 className="text-4xl font-[900] text-sky-950 mb-3 tracking-tight">Eksplorasi Karirmu</h1>
           <p className="text-[15px] font-medium text-slate-500 max-w-2xl leading-relaxed">
@@ -149,7 +149,7 @@ export default function PublicLowongan() {
           </p>
         </section>
 
-        {/* Search Bar Section */}
+        {/* Bagian Pencarian */}
         <section className="bg-white rounded-2xl p-3 shadow-xl shadow-sky-900/5 border border-slate-100 mb-12">
           <div className="flex flex-col md:flex-row gap-3">
             <div className="flex-[2] flex items-center gap-3 px-4 py-3 bg-slate-50/50 rounded-xl border border-slate-100">
@@ -215,7 +215,7 @@ export default function PublicLowongan() {
         </section>
 
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar Filter */}
+          {/* Filter Sisi Samping */}
           <aside className="lg:w-72 shrink-0">
             <div className="bg-white rounded-2xl p-6 shadow-xl shadow-sky-900/5 border border-slate-100 sticky top-28">
               <div className="flex items-center justify-between mb-8">
@@ -295,7 +295,7 @@ export default function PublicLowongan() {
             </div>
           </aside>
 
-          {/* Listing Content */}
+          {/* Daftar Lowongan */}
           <div className="flex-1">
             <div className="flex items-center justify-between mb-8">
               <span className="text-[14px] font-bold text-slate-400">
@@ -310,7 +310,7 @@ export default function PublicLowongan() {
               </div>
             </div>
 
-            {/* Grid */}
+            {/* Grid Kartu */}
             <div className="grid md:grid-cols-2 gap-6">
               {isLoading ? (
                 [1,2,3,4].map(i => (
@@ -342,7 +342,7 @@ export default function PublicLowongan() {
               )}
             </div>
 
-            {/* Pagination */}
+            {/* Navigasi Halaman */}
             {totalPages > 1 && (
               <div className="mt-16 flex items-center justify-center gap-3">
                 <button 
@@ -380,7 +380,7 @@ export default function PublicLowongan() {
         </div>
       </main>
 
-      {/* Footer */}
+      {/* Kaki Halaman */}
       <footer className="bg-white pt-24 pb-12 border-t border-slate-100 mt-20">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-start gap-12 mb-16">

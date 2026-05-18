@@ -1,10 +1,3 @@
-"""
-Model: public.notification_queue
-Antrian notifikasi in-app dan email.
-"""
-
-from __future__ import annotations
-
 import datetime
 import uuid
 from typing import TYPE_CHECKING, Optional

@@ -1,15 +1,10 @@
-"""
-AI Tasks – Background tasks untuk fitur AI menggunakan LangChain/LangGraph.
-Berjalan di queue terpisah untuk tidak blocking main API.
-"""
-
 from typing import Dict, List, Optional
 
 from celery import shared_task
 from langchain.prompts import PromptTemplate
 from pydantic import BaseModel
 
-# Simple in-memory LLM (bisa diganti dengan API key untuk production)
+# Simple inmemory LLM (bisa diganti dengan API key untuk production)
 # Untuk production, gunakan: from langchain.chat_models import ChatOpenAI
 
 
@@ -28,7 +23,7 @@ def get_llm():
     """
     # Placeholder, untuk production gunakan:
     # from langchain_community.chat_models import ChatOpenAI
-    # return ChatOpenAI(temperature=0.7, model="gpt-4")
+    # return ChatOpenAI(temperature=0.7, model="gpt4")
     return None
 
 
@@ -47,7 +42,7 @@ def parse_cv_skills(
         if not student_id or not cv_url:
             return TaskResult(success=False, error="Invalid inputs").dict()
 
-        # For now, return placeholder - implementasi lengkap memerlukan:
+        # For now, return placeholder implementasi lengkap memerlukan:
         # 1. Download PDF dari URL
         # 2. Extract text menggunakan pypdf
         # 3. Parse dengan LLM

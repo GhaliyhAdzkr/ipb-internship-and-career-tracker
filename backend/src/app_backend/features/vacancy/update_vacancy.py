@@ -1,8 +1,3 @@
-"""
-Update Vacancy Feature – Command Handler.
-Mengupdate data lowongan yang sudah ada.
-"""
-
 from __future__ import annotations
 
 import uuid

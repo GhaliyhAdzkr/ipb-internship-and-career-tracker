@@ -1,8 +1,3 @@
-"""
-Search Vacancies Feature – Command Handler.
-Mencari lowongan berdasarkan filter.
-"""
-
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -62,7 +57,7 @@ def search_vacancies_command_handler(
     # Filter by active status
     query = query.filter(Vacancies.is_active == command.is_active)
 
-    # Filter by query using Full-Text Search (Point 1 Optimization)
+    # Filter by query using FullText Search (Point 1 Optimization)
     if command.query:
         query = query.filter(Vacancies.search_vector.op("@@")(func.plainto_tsquery("indonesian", command.query)))
 

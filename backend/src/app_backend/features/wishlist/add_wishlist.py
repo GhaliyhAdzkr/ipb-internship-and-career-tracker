@@ -1,8 +1,3 @@
-"""
-Add Wishlist Feature – Command Handler.
-Menyimpan vacancy ke wishlist student.
-"""
-
 from __future__ import annotations
 
 import uuid

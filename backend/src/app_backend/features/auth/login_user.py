@@ -1,8 +1,3 @@
-"""
-Login User Feature – Command Handler.
-Autentikasi email+password, catat refresh token stateful ke DB.
-"""
-
 from __future__ import annotations
 
 from dataclasses import dataclass

@@ -1,8 +1,3 @@
-"""
-Register Student Feature – Command Handler.
-Registrasi mahasiswa: buat public.users + public.profiles_student dalam satu transaksi.
-"""
-
 from __future__ import annotations
 
 import uuid

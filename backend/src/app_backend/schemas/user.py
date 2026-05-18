@@ -1,7 +1,3 @@
-"""
-Pydantic schemas untuk validasi request/response API
-"""
-
 import uuid
 from datetime import datetime
 from enum import Enum

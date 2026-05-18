@@ -1,10 +1,3 @@
-"""
-Model: public.activity_logs
-Logbook harian aktivitas magang (raw dan yang sudah di-enhance AI).
-"""
-
-from __future__ import annotations
-
 import datetime
 import decimal
 import uuid

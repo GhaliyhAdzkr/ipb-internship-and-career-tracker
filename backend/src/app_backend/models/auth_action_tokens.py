@@ -1,10 +1,3 @@
-"""
-Model: auth.auth_action_tokens
-Tabel untuk one-time action tokens (reset password, aktivasi akun, dan lain-lain).
-"""
-
-from __future__ import annotations
-
 import datetime
 import uuid
 from typing import TYPE_CHECKING, Optional
@@ -54,7 +47,7 @@ class AuthActionTokens(Base):
     user: Mapped["Users"] = relationship("Users", back_populates="action_tokens")
 
     def is_valid(self) -> bool:
-        """Cek apakah token masih valid (belum expired dan belum dipakai)"""
+        # Cek apakah token masih valid (belum expired dan belum dipakai)
         import datetime as dt
 
         now = dt.datetime.now(dt.timezone.utc)
@@ -62,5 +55,5 @@ class AuthActionTokens(Base):
         return not self.is_used and now < expires
 
     def mark_used(self) -> None:
-        """Tandai token sebagai sudah digunakan"""
+        # Tandai token sebagai sudah digunakan
         self.is_used = True

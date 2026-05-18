@@ -1,8 +1,3 @@
-"""
-Manage External Companies Feature – Command Handlers.
-CRUD lengkap untuk tabel public.master_external_companies.
-"""
-
 from __future__ import annotations
 
 import uuid

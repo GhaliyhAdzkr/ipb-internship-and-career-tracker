@@ -4,7 +4,7 @@
 
 Integrated Internship and Career Tracker Platform for **IPB University**, built with **FastAPI** for backend and **React with Vite** for frontend.
 
-<img src="./LARAS_Logo.png" alt="LARAS Logo" width="450">
+<img src="./LARAS_Logo.png" alt="LARAS Logo" width="300">
 
 [![License](https://img.shields.io/badge/License-AFL--3.0-blue)](LICENSE)
 [![Python Version](https://img.shields.io/badge/Python-3.11-blue?logo=python)](https://www.python.org/)
@@ -33,29 +33,37 @@ Integrated Internship and Career Tracker Platform for **IPB University**, built 
 
 ## Project Structure
 
+```bash
+backend/
+├── src/
+│   └── app_backend/
+│       ├── conf/              # Konfigurasi aplikasi (settings backend dan environment)
+│       ├── domain/            # Aturan bisnis pada aplikasi
+│       ├── features/          # Fitur aplikasi atau services (dengan vertical slices)
+│       │   ├── auth/          # Autentikasi
+│       │   ├── admin/         # Manajemen admin
+│       │   ├── profile/        # Manajemen profil mahasiswa dan admin
+│       │   ├── vacancy/       # Lowongan kerja dan pencocokan kerja
+│       │   ├── wishlist/      # Wishlist mahasiswa
+│       │   └── application/   # Pelacakan lamaran (Self-Reported ATS)
+│       ├── models/            # Model database via ORM (1:1 dengan di database)
+│       ├── repositories/      # Layer akses data (CRUD)
+│       ├── routers/           # Endpoint router untuk request/response
+│       ├── schemas/           # Pydantic schemas untuk validasi format data
+│       ├── shared/            # Shared utilities (untuk security, cache, dan lainnya)
+│       └── main.py            # Entry point aplikasi
+├── tests/                     # Unit testing dan integration testing
+├── alembic/                   # Database migrations
+├── docs/                      # Dokumentasi fitur
+└── scripts/                   # Utility scripts
 ```
-ipb-internship-and-career-tracker/
-├── backend/
-│   ├── src/
-│   │   └── app_backend/
-│   │       ├── conf/              # Konfigurasi aplikasi
-│   │       ├── domain/            # Domain models dan business logic
-│   │       ├── features/          # Fitur aplikasi (vertical slices)
-│   │       ├── models/            # ORM models (database)
-│   │       ├── repositories/      # Layer akses data (Repository Pattern)
-│   │       ├── routers/           # API endpoints
-│   │       ├── schemas/           # Pydantic schemas (request/response)
-│   │       ├── shared/            # Shared utilities
-│   │       └── main.py            # Entry point aplikasi
-│   ├── tests/                     # Unit dan integration tests
-│   ├── alembic/                   # Database migrations
-│   └── docs/                      # Dokumentasi fitur
+```bash
 ├── frontend/
 │   ├── src/
-│   │   ├── components/            # Reusable UI components
-│   │   ├── pages/                 # Page components
-│   │   └── main.jsx               # Entry point aplikasi
-│   └── public/                    # Static assets
+│   │   ├── components/        # Reusable UI components
+│   │   ├── pages/             # Page components
+│   │   └── main.jsx           # Entry point aplikasi
+│   └── public/                # Static assets
 └── README.md
 ```
 

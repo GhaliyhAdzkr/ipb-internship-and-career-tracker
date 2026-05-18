@@ -1,10 +1,3 @@
-"""
-Model: public.master_external_companies
-Katalog perusahaan eksternal untuk referensi lowongan.
-"""
-
-from __future__ import annotations
-
 import datetime
 import uuid
 from typing import TYPE_CHECKING, Optional

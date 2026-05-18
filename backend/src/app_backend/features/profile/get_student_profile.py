@@ -1,8 +1,3 @@
-"""
-Get Student Profile Feature – Command Handler.
-Ambil profil lengkap mahasiswa: data akademik, kontak, CV, skills.
-"""
-
 from __future__ import annotations
 
 import uuid

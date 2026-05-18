@@ -1,7 +1,3 @@
-"""
-Pydantic schemas untuk validasi request/response API vacancy
-"""
-
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum

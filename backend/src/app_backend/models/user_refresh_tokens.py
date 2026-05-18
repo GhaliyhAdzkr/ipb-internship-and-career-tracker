@@ -1,10 +1,3 @@
-"""
-Model: auth.user_refresh_tokens
-Tabel untuk menyimpan refresh token yang stateful (revocable per-device session).
-"""
-
-from __future__ import annotations
-
 import datetime
 import uuid
 from typing import TYPE_CHECKING, Optional
@@ -44,7 +37,7 @@ class UserRefreshTokens(Base):
     user: Mapped["Users"] = relationship("Users", back_populates="refresh_tokens")
 
     def is_valid(self) -> bool:
-        """Cek apakah token masih valid (belum expired dan belum di-revoke)"""
+        # Cek apakah token masih valid (belum expired dan belum direvoke)
         import datetime as dt
 
         now = dt.datetime.now(dt.timezone.utc)
@@ -52,5 +45,5 @@ class UserRefreshTokens(Base):
         return not self.is_revoked and now < expires
 
     def revoke(self) -> None:
-        """Revoke token ini"""
+        # Revoke token ini
         self.is_revoked = True

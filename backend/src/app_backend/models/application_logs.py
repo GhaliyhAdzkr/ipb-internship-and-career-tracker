@@ -1,10 +1,3 @@
-"""
-Model: public.application_logs
-Audit trail setiap perubahan status lamaran (termasuk bukti proof_url).
-"""
-
-from __future__ import annotations
-
 import datetime
 import uuid
 from typing import TYPE_CHECKING, Optional

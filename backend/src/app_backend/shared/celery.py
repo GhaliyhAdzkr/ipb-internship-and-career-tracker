@@ -1,8 +1,3 @@
-"""
-Celery Configuration untuk Background Tasks.
-Mendefinisikan task queue dengan Redis sebagai message broker.
-"""
-
 import os
 
 from celery import Celery

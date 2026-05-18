@@ -1,7 +1,3 @@
-"""
-Pydantic schemas untuk validasi request/response API wishlist
-"""
-
 from datetime import datetime
 from typing import Optional
 from uuid import UUID

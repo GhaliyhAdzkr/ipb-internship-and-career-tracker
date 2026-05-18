@@ -319,7 +319,7 @@ class AuthService:
         if cached is not None:
             return {"available": cached == "available", "source": "cache"}
 
-        # 2. Database B-Tree Index Range Lookup
+        # 2. Database BTree Index Range Lookup
         from sqlalchemy import select, or_, and_
 
         if "@" in clean_identifier:

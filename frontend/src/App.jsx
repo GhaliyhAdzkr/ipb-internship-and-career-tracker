@@ -20,6 +20,7 @@ import AdminVacancies from "./pages/admin/AdminVacancies";
 import AdminCompanies from "./pages/admin/AdminCompanies";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminMasterData from "./pages/admin/AdminMasterData";
+import AdminPlacements from "./pages/admin/AdminPlacements";
 import PublicLowongan from "./pages/public/PublicLowongan";
 
 import { useAuth } from "./hooks/useAuth";
@@ -116,6 +117,7 @@ function App() {
           <Route path="admin/perusahaan" element={<RoleGuard allowedRoles={['ADMIN']}><AdminCompanies /></RoleGuard>} />
           <Route path="admin/mahasiswa" element={<RoleGuard allowedRoles={['ADMIN']}><AdminUsers /></RoleGuard>} />
           <Route path="admin/master-data" element={<RoleGuard allowedRoles={['ADMIN']}><AdminMasterData /></RoleGuard>} />
+          <Route path="admin/penempatan" element={<RoleGuard allowedRoles={['ADMIN']}><AdminPlacements /></RoleGuard>} />
           
           {/* Student Routes (Strictly guarded) */}
           <Route path="home" element={<RoleGuard allowedRoles={['STUDENT']}><Dashboard /></RoleGuard>} />

@@ -1,13 +1,3 @@
-"""
-Model: public.users
-Tabel pengguna utama.
-
-Note: We use public schema instead of auth schema because Supabase reserves
-the auth schema for their built-in authentication tables.
-"""
-
-from __future__ import annotations
-
 import datetime
 import uuid
 from typing import TYPE_CHECKING, Optional
@@ -60,7 +50,7 @@ class Users(Base):
     )
 
     def to_domain(self):
-        """Convert ke domain model User"""
+        # Convert ke domain model User
         from app_backend.domain.user import User as DomainUser
 
         return DomainUser(
@@ -76,7 +66,7 @@ class Users(Base):
 
     @classmethod
     def from_domain(cls, domain_user) -> "Users":
-        """Buat ORM model dari domain User"""
+        # Buat ORM model dari domain User
         return cls(
             id=domain_user.id,
             email=domain_user.email,

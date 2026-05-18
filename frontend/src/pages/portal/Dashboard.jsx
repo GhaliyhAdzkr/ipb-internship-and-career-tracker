@@ -1,4 +1,3 @@
-import React from "react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { PiBookmarkSimple } from "react-icons/pi";
@@ -9,7 +8,7 @@ function Dashboard() {
 
 	return (
 		<div className="font-jakarta">
-			{/* Welcome */}
+			{/* Sambutan */}
 			<div className="mb-8 bg-sky-950 py-7 px-10 rounded-xl text-white flex justify-between items-center shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)]">
 				<div className="w-full flex gap-2 justify-between items-center">
 					<div className="text-3xl font-bold">Selamat Datang Kembali, {displayName}</div>
@@ -22,7 +21,7 @@ function Dashboard() {
 				</div>
 			</div>
 
-			{/* Cards Progress */}
+			{/* Kartu Progres */}
 			<div className="grid grid-cols-1 md:grid-cols-3 mb-5 gap-5">
 				<div className="p-5 font-bold bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] flex flex-col gap-1">
 					<div className="text-black text-sm">Waktu Tersisa</div>
@@ -47,7 +46,7 @@ function Dashboard() {
 				</div>
 			</div>
 
-			{/* Lamaran & Rekomendasi */}
+			{/* Lamaran dan Rekomendasi */}
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 				{/* Lamaran */}
 				<div className="lg:col-span-1 flex flex-col h-full">

@@ -1,8 +1,3 @@
-"""
-Update Wishlist Feature – Command Handler.
-Mengupdate catatan wishlist.
-"""
-
 from __future__ import annotations
 
 import uuid

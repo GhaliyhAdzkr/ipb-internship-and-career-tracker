@@ -1,8 +1,3 @@
-"""
-Job Matching Feature – Command Handler.
-Menghitung persentase kecocokan profil mahasiswa dengan prasyarat lowongan.
-"""
-
 from __future__ import annotations
 
 import uuid
@@ -73,7 +68,7 @@ def _calculate_match(
     3. Formula: (matched_mandatory * 2 + matched_optional) / (total_mandatory * 2 + total_optional) * 100
     """
     if not vacancy_skills:
-        # Tidak ada skill requirement -> 100% match
+        # Tidak ada skill requirement > 100% match
         return {
             "match_percentage": 100.0,
             "matched_skills": [],

@@ -1,8 +1,3 @@
-"""
-Toggle User Active Feature – Command Handler.
-Admin dapat menonaktifkan atau mengaktifkan kembali akun user (Account Activation).
-"""
-
 from __future__ import annotations
 
 import uuid

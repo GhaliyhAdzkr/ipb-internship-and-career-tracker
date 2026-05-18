@@ -1,8 +1,3 @@
-"""
-Upload CV Feature – Command Handler.
-Upload file CV PDF dan simpan URL ke database.
-"""
-
 from __future__ import annotations
 
 import os

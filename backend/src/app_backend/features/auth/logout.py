@@ -1,8 +1,3 @@
-"""
-Logout Feature
-Revoke refresh token satu sesi tertentu (device logout).
-"""
-
 from __future__ import annotations
 
 from dataclasses import dataclass

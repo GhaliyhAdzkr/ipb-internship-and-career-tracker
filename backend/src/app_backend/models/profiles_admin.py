@@ -1,10 +1,3 @@
-"""
-Model: public.profiles_admin
-Data profil fasilitator/admin (CDA IPB, dll).
-"""
-
-from __future__ import annotations
-
 import datetime
 import uuid
 from typing import Optional

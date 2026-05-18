@@ -1,7 +1,3 @@
-"""
-S3-compatible storage wrapper untuk S3 Compatible Storage dengan boto3.
-"""
-
 from __future__ import annotations
 
 import logging

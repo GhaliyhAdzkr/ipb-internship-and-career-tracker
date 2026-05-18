@@ -1,7 +1,7 @@
 import api from '../api/axios';
 
 export const adminService = {
-  // Master Data: Departments
+  // Master Data: Departemen
   getDepartments: async () => {
     const response = await api.get('/admin/departments');
     return response.data;
@@ -19,7 +19,7 @@ export const adminService = {
     return response.data;
   },
 
-  // Master Data: Skills
+  // Master Data: Keahlian
   getSkills: async () => {
     const response = await api.get('/admin/skills');
     return response.data;
@@ -37,7 +37,7 @@ export const adminService = {
     return response.data;
   },
 
-  // Master Data: Companies
+  // Master Data: Perusahaan
   getCompanies: async () => {
     const response = await api.get('/admin/companies');
     return response.data;
@@ -65,7 +65,7 @@ export const adminService = {
     return response.data;
   },
 
-  // Vacancy Management (Admin Authority)
+  // Manajemen Lowongan: Otoritas Admin
   createVacancy: async (data) => {
     const response = await api.post('/vacancies', data);
     return response.data;
@@ -79,7 +79,7 @@ export const adminService = {
     return response.data;
   },
 
-  // User Management
+  // Manajemen User
   getStudents: async () => {
     const response = await api.get('/admin/users', { params: { role: 'STUDENT' } });
     return response.data;
@@ -89,7 +89,7 @@ export const adminService = {
     return response.data;
   },
 
-  // Application Verification
+  // Verifikasi Lamaran
   getPendingVerifications: async () => {
     const response = await api.get('/admin/applications/pending-verification');
     return response.data;
@@ -103,7 +103,7 @@ export const adminService = {
     return response.data;
   },
   
-  // Placements
+  // Placement
   getPlacements: async () => {
     const response = await api.get('/admin/placements');
     return response.data;

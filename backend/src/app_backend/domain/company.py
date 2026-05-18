@@ -1,8 +1,3 @@
-"""
-Domain Model untuk Company
-Model domain yang berisi business logic untuk perusahaan
-"""
-
 import uuid
 from dataclasses import dataclass
 from datetime import datetime

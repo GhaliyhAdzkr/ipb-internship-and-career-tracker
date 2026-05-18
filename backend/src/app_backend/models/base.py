@@ -1,7 +1,3 @@
-"""
-SQLAlchemy Declarative Base
-"""
-
 from sqlalchemy.orm import DeclarativeBase
 
 

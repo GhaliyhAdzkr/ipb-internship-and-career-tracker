@@ -1,25 +1,25 @@
 import api from '../api/axios';
 
 /**
- * Shared File Service for robust uploads
+ * Service File bersama untuk upload yang tangguh
  */
 export const fileService = {
   /**
-   * Upload a single file with validation and error handling
-   * @param {string} endpoint - API endpoint
-   * @param {File} file - File object
-   * @param {string} fieldName - Form field name (default: 'file')
-   * @param {object} additionalData - Extra form fields
+   * Upload file tunggal dengan validasi dan penanganan error
+   * @param {string} endpoint: Endpoint API
+   * @param {File} file: Objek File
+   * @param {string} fieldName: Nama field form (default: 'file')
+   * @param {object} additionalData: Data form tambahan
    * @returns {Promise<any>}
    */
   uploadSingle: async (endpoint, file, fieldName = 'file', additionalData = {}) => {
-    // 1. Validation (Max 10MB)
+    // 1. Validasi: Maksimal 10MB
     const MAX_SIZE = 10 * 1024 * 1024;
     if (file.size > MAX_SIZE) {
       throw new Error(`File "${file.name}" terlalu besar. Maksimal 10MB.`);
     }
 
-    // 2. Prepare FormData
+    // 2. Siapkan FormData
     const formData = new FormData();
     formData.append(fieldName, file);
     
@@ -27,7 +27,7 @@ export const fileService = {
       formData.append(key, additionalData[key]);
     });
 
-    // 3. Upload with Retry Logic (Simple 3x retry)
+    // 3. Upload dengan Logika Retry: Simple 3 kali percobaan
     let retries = 0;
     const maxRetries = 2;
 
@@ -37,14 +37,14 @@ export const fileService = {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
-          // timeout: 30000, // 30s timeout for large files
+          // timeout: 30000, // Timeout 30 detik untuk file besar
         });
         return response.data;
       } catch (error) {
         if (retries < maxRetries && (!error.response || error.response.status >= 500)) {
           retries++;
           console.warn(`Upload failed, retrying (${retries}/${maxRetries})...`);
-          await new Promise(resolve => setTimeout(resolve, 1000 * retries)); // Exponential backoff
+          await new Promise(resolve => setTimeout(resolve, 1000 * retries)); // Backoff eksponensial
           return attemptUpload();
         }
         throw error;
@@ -55,16 +55,16 @@ export const fileService = {
   },
 
   /**
-   * Upload multiple files in a batched/sequential manner to minimize errors
-   * @param {string} endpoint - API endpoint
-   * @param {File[]} files - Array of files
+   * Upload beberapa file secara berurutan untuk meminimalkan error
+   * @param {string} endpoint: Endpoint API
+   * @param {File[]} files: Array dari File
    * @returns {Promise<any[]>}
    */
   uploadBatch: async (endpoint, files, fieldName = 'file') => {
     const results = [];
     const errors = [];
 
-    // Process sequentially to avoid overwhelming connection/server
+    // Proses secara berurutan untuk menghindari beban berlebih pada koneksi atau server
     for (const file of files) {
       try {
         const res = await fileService.uploadSingle(endpoint, file, fieldName);

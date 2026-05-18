@@ -1,8 +1,3 @@
-"""
-Dependencies untuk Authentication & Authorization.
-Berisi FastAPI Depends yang digunakan pada protected routes.
-"""
-
 import uuid
 from typing import Optional
 

@@ -21,7 +21,7 @@ import {
 } from "react-icons/pi";
 import { useApplications, useApplicationHistory } from "../../hooks/useApplications";
 
-// Helper to format date cleanly
+// Utilitas pembantu untuk format tanggal secara rapi
 const formatDate = (dateString) => {
 	if (!dateString) return "-";
 	const date = new Date(dateString);
@@ -34,7 +34,7 @@ const formatDate = (dateString) => {
 	}).format(date);
 };
 
-// Map backend enum status to human-readable format & style
+// Pemetaan status enum backend ke format tampilan ramah pengguna
 const statusMap = {
 	APPLIED: {
 		label: "Applied",
@@ -73,7 +73,7 @@ const statusMap = {
 	}
 };
 
-// Map backend vacancy types
+// Pemetaan jenis lowongan backend
 const typeMap = {
 	INTERNSHIP_GENERAL: "Magang Umum",
 	MBKM_INTERNSHIP: "MBKM Magang",
@@ -81,7 +81,7 @@ const typeMap = {
 	FULL_TIME: "Full-Time"
 };
 
-// Kanban Board Columns
+// Kolom papan Kanban untuk pelacakan lamaran
 const columns = [
 	{
 		id: "applied_screening",
@@ -116,28 +116,28 @@ function Lamaran() {
 		refetch
 	} = useApplications();
 	
-	// Details slide-over drawer state
+	// State laci geser detail lamaran
 	const [selectedApp, setSelectedApp] = useState(null);
 	
-	// Hook to query history for the selected application
+	// Hook untuk query riwayat lamaran terpilih
 	const { data: history = [], isLoading: loadingHistory } = useApplicationHistory(selectedApp?.id);
 
-	// Get a dynamically updated live reference of selected application from the query list
+	// Mengambil referensi data dinamis lamaran aktif dari daftar query
 	const activeApp = applications.find(a => a.id === selectedApp?.id) || selectedApp;
 
-	// Local action/form states
+	// State lokal untuk form aksi lamaran
 	const [isSubmittingAction, setIsSubmittingAction] = useState(false);
 	const [withdrawReason, setWithdrawReason] = useState("");
 	const [selectedFile, setSelectedFile] = useState(null);
 
-	// Handle card selection
+	// Menangani pemilihan kartu lamaran
 	const handleCardClick = (app) => {
 		setSelectedApp(app);
 		setWithdrawReason("");
 		setSelectedFile(null);
 	};
 
-	// Handle withdraw application
+	// Menangani aksi pembatalan lamaran
 	const handleWithdraw = async () => {
 		if (!activeApp) return;
 		try {
@@ -159,7 +159,7 @@ function Lamaran() {
 		}
 	};
 
-	// Handle accept offer transition
+	// Menangani persetujuan penawaran pekerjaan
 	const handleAcceptOffer = async () => {
 		if (!activeApp) return;
 		try {
@@ -180,7 +180,7 @@ function Lamaran() {
 		}
 	};
 
-	// Handle proof upload
+	// Menangani unggah bukti penerimaan pekerjaan
 	const handleUploadProof = async (e) => {
 		e.preventDefault();
 		if (!activeApp || !selectedFile) return;
@@ -201,7 +201,7 @@ function Lamaran() {
 		}
 	};
 
-	// Render skeleton loading board
+	// Render papan loading skeleton
 	if (loading) {
 		return (
 			<div className="font-jakarta animate-pulse">
@@ -239,7 +239,7 @@ function Lamaran() {
 
 	return (
 		<div className="font-jakarta relative min-h-screen">
-			{/* Banner */}
+			{/* Banner Utama */}
 			<div className="mb-8 bg-sky-950 py-8 px-10 rounded-xl text-white flex justify-between items-center shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)]">
 				<div className="flex flex-col gap-2">
 					<div className="text-3xl font-bold tracking-tight">Lacak Lamaranmu</div>
@@ -249,10 +249,10 @@ function Lamaran() {
 				</div>
 			</div>
 
-			{/* Kanban Board Layout */}
+			{/* Tampilan Papan Kanban */}
 			<div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-start">
 				{columns.map((column) => {
-					// Filter applications belonging to this column's status list
+					// Filter lamaran berdasarkan daftar status kolom ini
 					const colApps = applications.filter((app) => column.statuses.includes(app.status));
 
 					return (
@@ -332,11 +332,11 @@ function Lamaran() {
 				})}
 			</div>
 
-			{/* Slide-Over Drawer Details */}
+			{/* Laci Geser Detail Lamaran */}
 			<AnimatePresence>
 				{activeApp && (
 					<>
-						{/* Backdrop overlay */}
+						{/* Hamparan Latar Belakang */}
 						<motion.div
 							initial={{ opacity: 0 }}
 							animate={{ opacity: 0.5 }}
@@ -345,7 +345,7 @@ function Lamaran() {
 							className="fixed inset-0 bg-black z-40"
 						></motion.div>
 
-						{/* Right Slide Panel */}
+						{/* Panel Geser Kanan */}
 						<motion.div
 							initial={{ x: "100%" }}
 							animate={{ x: 0 }}
@@ -353,7 +353,7 @@ function Lamaran() {
 							transition={{ type: "spring", damping: 25, stiffness: 220 }}
 							className="fixed top-0 right-0 h-full w-full sm:max-w-lg bg-white shadow-2xl z-50 overflow-y-auto flex flex-col border-l border-gray-100"
 						>
-							{/* Header */}
+							{/* Bagian Kepala Header */}
 							<div className="p-6 bg-sky-950 text-white flex justify-between items-start relative overflow-hidden">
 								<div className="absolute top-0 right-0 w-32 h-32 bg-sky-900 rounded-full translate-x-16 -translate-y-16 blur-2xl"></div>
 								<div className="flex flex-col gap-1 relative z-10">
@@ -373,9 +373,9 @@ function Lamaran() {
 								</button>
 							</div>
 
-							{/* Content Container */}
+							{/* Kontainer Konten Utama */}
 							<div className="p-6 flex flex-col gap-6 flex-1">
-								{/* Vacancy Details Card */}
+								{/* Kartu Detail Lowongan Pekerjaan */}
 								<div className="p-4 bg-slate-50 border border-slate-200/60 rounded-xl flex flex-col gap-3">
 									<h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Detail Pekerjaan</h3>
 									<div className="grid grid-cols-2 gap-4 text-sm text-gray-700">
@@ -407,13 +407,13 @@ function Lamaran() {
 									</div>
 								</div>
 
-								{/* Action Section */}
+								{/* Bagian Aksi Tindakan */}
 								<div className="border-t border-gray-100 pt-5">
 									<h3 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-1.5">
 										<PiSparkle className="text-sky-600" /> Aksi Lamaran
 									</h3>
 
-									{/* 1. If status is OFFERED */}
+									{/* Aksi khusus jika status penawaran diterima */}
 									{activeApp.status === "OFFERED" && (
 										<div className="p-4 border border-purple-100 bg-purple-50/40 rounded-xl flex flex-col gap-4">
 											<p className="text-xs text-purple-800 leading-relaxed">
@@ -441,7 +441,7 @@ function Lamaran() {
 										</div>
 									)}
 
-									{/* 2. If status is ACCEPTED - Upload LoA Proof Required */}
+									{/* Aksi khusus jika status disetujui: Unggah Bukti Penerimaan LoA */}
 									{activeApp.status === "ACCEPTED" && (
 										<div className="p-4 border border-emerald-100 bg-emerald-50/40 rounded-xl flex flex-col gap-4">
 											<div className="flex flex-col gap-1">
@@ -451,7 +451,7 @@ function Lamaran() {
 												</p>
 											</div>
 
-											{/* Timeline latest proof log link */}
+											{/* Tautan unduhan bukti LoA terbaru */}
 											{history.find(log => log.proof_url) && (
 												<div className="p-3 bg-white/80 rounded-lg border border-emerald-200/50 flex justify-between items-center text-xs">
 													<span className="font-medium text-emerald-800 flex items-center gap-1.5">
@@ -505,7 +505,7 @@ function Lamaran() {
 										</div>
 									)}
 
-									{/* 3. General active flow withdrawal option */}
+									{/* Pilihan pembatalan lamaran aktif */}
 									{["APPLIED", "SCREENING", "INTERVIEW"].includes(activeApp.status) && (
 										<div className="p-4 bg-slate-50 border border-slate-200 rounded-xl flex flex-col gap-3">
 											<span className="text-xs font-bold text-gray-500">Tarik Lamaran ini</span>
@@ -538,7 +538,7 @@ function Lamaran() {
 									)}
 								</div>
 
-								{/* Timeline Log Section */}
+								{/* Bagian Riwayat Perjalanan Lamaran */}
 								<div className="border-t border-gray-100 pt-5 flex-1 flex flex-col min-h-[220px]">
 									<h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-1.5">
 										<PiCalendarBlank className="text-sky-600" /> Riwayat Perjalanan Lamaran
@@ -556,7 +556,7 @@ function Lamaran() {
 										<div className="relative border-l border-gray-200 pl-4 ml-2 flex flex-col gap-5">
 											{history.map((log) => (
 												<div key={log.id} className="relative">
-													{/* Dot marker */}
+													{/* Penanda Titik Garis Waktu */}
 													<span className="absolute -left-[21px] top-1.5 bg-white border-2 border-sky-600 rounded-full w-2.5 h-2.5"></span>
 													<div className="flex flex-col gap-0.5">
 														<div className="flex justify-between items-center text-xs">

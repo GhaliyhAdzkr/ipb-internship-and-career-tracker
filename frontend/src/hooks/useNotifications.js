@@ -7,13 +7,13 @@ export const useNotifications = () => {
   const { data: notifications, isLoading } = useQuery({
     queryKey: ['notifications'],
     queryFn: notificationService.getNotifications,
-    refetchInterval: 1000 * 60, // Refetch every minute
+    refetchInterval: 1000 * 60, // Ambil ulang data setiap menit
   });
 
   const { data: unreadCount } = useQuery({
     queryKey: ['notifications', 'unread-count'],
     queryFn: notificationService.getUnreadCount,
-    refetchInterval: 1000 * 30, // Refetch every 30 seconds
+    refetchInterval: 1000 * 30, // Ambil ulang data setiap 30 detik
   });
 
   const markAsReadMutation = useMutation({

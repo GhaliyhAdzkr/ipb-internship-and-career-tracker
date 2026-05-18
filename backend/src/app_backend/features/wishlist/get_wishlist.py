@@ -1,8 +1,3 @@
-"""
-Get Wishlist Feature – Command Handler.
-Mengambil detail wishlist berdasarkan ID.
-"""
-
 from __future__ import annotations
 
 import uuid

@@ -1,8 +1,3 @@
-"""
-Notification Tasks – Background tasks untuk notifikasi dan email.
-Berjalan di queue terpisah untuk email sending dan cleanup.
-"""
-
 import email.message
 import smtplib
 from datetime import datetime, timedelta, timezone

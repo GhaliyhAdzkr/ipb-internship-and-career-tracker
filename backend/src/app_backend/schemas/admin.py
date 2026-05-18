@@ -1,12 +1,3 @@
-"""
-Pydantic schemas untuk Admin management endpoints.
-- Departments CRUD
-- Skills CRUD
-- External Companies CRUD
-- User account activation
-- Admin profile
-"""
-
 from __future__ import annotations
 
 from datetime import datetime

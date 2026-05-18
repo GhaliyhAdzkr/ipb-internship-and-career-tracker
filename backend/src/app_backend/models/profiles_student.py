@@ -1,10 +1,3 @@
-"""
-Model: public.profiles_student
-Data profil mahasiswa dengan relasi ke master_departments.
-"""
-
-from __future__ import annotations
-
 import datetime
 import decimal
 import uuid

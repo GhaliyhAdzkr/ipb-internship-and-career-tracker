@@ -1,7 +1,3 @@
-"""
-Wishlist Feature Package – Command Handlers untuk student wishlist.
-"""
-
 from app_backend.features.wishlist.add_wishlist import (
     AddWishlistCommand, AddWishlistResult, add_wishlist_command_handler)
 from app_backend.features.wishlist.delete_wishlist import (

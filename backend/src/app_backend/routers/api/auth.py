@@ -1,17 +1,3 @@
-"""
-Auth Router – API endpoints untuk authentication & session management.
-
-Endpoints:
-  POST /register/student    – Registrasi mahasiswa
-  POST /register/admin      – Registrasi admin/fasilitator (protected: admin only)
-  POST /login               – Login, kembalikan access + refresh token
-  POST /refresh-token       – Token rotation (stateful)
-  POST /logout              – Revoke refresh token (device logout)
-  POST /password/reset-request – Minta link reset password via email
-  POST /password/reset         – Reset password dengan action token
-  GET  /me                     – Info user yang sedang login
-"""
-
 from http import HTTPStatus
 from typing import Optional
 

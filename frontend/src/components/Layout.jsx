@@ -1,4 +1,3 @@
-import React from 'react';
 import Sidebar from './SideNav';
 import TopBar from './TopBar';
 import TheFooter from './TheFooter';

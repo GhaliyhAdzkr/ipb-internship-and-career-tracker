@@ -28,7 +28,6 @@ function Registration() {
 	const [showPassword, setShowPassword] = useState(false);
 
 	const [emailCheck, setEmailCheck] = useState({ isLoading: false, isAvailable: null, message: "" });
-	const [nimCheck, setNimCheck] = useState({ isLoading: false, isAvailable: null, message: "" });
 
 	useEffect(() => {
 		const timer = setTimeout(async () => {
@@ -44,33 +43,12 @@ function Registration() {
 					isAvailable: res.available, 
 					message: res.reason || (res.available ? "Email tersedia" : "Email sudah digunakan")
 				});
-			} catch (err) {
+			} catch {
 				setEmailCheck({ isLoading: false, isAvailable: null, message: "" });
 			}
 		}, 500);
 		return () => clearTimeout(timer);
 	}, [email]);
-
-	useEffect(() => {
-		const timer = setTimeout(async () => {
-			if (!nim || nim.length < 3) {
-				setNimCheck({ isLoading: false, isAvailable: null, message: "" });
-				return;
-			}
-			setNimCheck(prev => ({ ...prev, isLoading: true }));
-			try {
-				const res = await authService.checkAvailability(nim);
-				setNimCheck({ 
-					isLoading: false, 
-					isAvailable: res.available, 
-					message: res.reason || (res.available ? "NIM tersedia" : "NIM sudah terdaftar")
-				});
-			} catch (err) {
-				setNimCheck({ isLoading: false, isAvailable: null, message: "" });
-			}
-		}, 500);
-		return () => clearTimeout(timer);
-	}, [nim]);
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
@@ -127,21 +105,9 @@ function Registration() {
 											value={nim}
 											onChange={(e) => setNim(e.target.value)}
 											placeholder="G640120XXXX"
-											className={`w-full pl-12 pr-10 py-3.5 bg-[#E8F1FF] border-2 rounded-xl focus:ring-0 outline-none transition-all font-medium text-sm text-zinc-800 ${
-												nimCheck.isAvailable === false ? "border-red-400 focus:border-red-500" :
-												nimCheck.isAvailable === true ? "border-emerald-400 focus:border-emerald-500" :
-												"border-transparent focus:border-sky-500"
-											}`}
+											className="w-full pl-12 pr-4 py-3.5 bg-[#E8F1FF] border-none rounded-xl focus:ring-2 focus:ring-sky-500 outline-none transition-all font-medium text-sm text-zinc-800"
 										/>
-										<div className="absolute right-4 top-1/2 -translate-y-1/2">
-											{nimCheck.isLoading && <PiSpinnerGap className="animate-spin text-zinc-400" size={18} />}
-										</div>
 									</div>
-									{nimCheck.message && (
-										<p className={`text-[10px] font-bold ${nimCheck.isAvailable ? "text-emerald-600" : "text-red-500"}`}>
-											{nimCheck.message}
-										</p>
-									)}
 								</div>
 
 								{/* Semester */}

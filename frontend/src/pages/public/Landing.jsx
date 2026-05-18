@@ -226,10 +226,10 @@ export default function Landing() {
                   </motion.div>
                 </motion.div>
 
-                {/* Status Cards - Storytelling Sequence */}
+                {/* Kartu Status Alur Cerita */}
                 <div className="absolute bottom-10 left-0 w-80 z-20 pointer-events-none">
                   <AnimatePresence>
-                    {/* Stage 1: Application Submitted */}
+                    {/* Tahap 1: Lamaran Terkirim */}
                     <motion.div 
                       key="submitted"
                       initial={{ opacity: 0, scale: 0.8, y: 20 }}
@@ -255,7 +255,7 @@ export default function Landing() {
                       </div>
                     </motion.div>
 
-                    {/* Stage 2: Application Accepted */}
+                    {/* Tahap 2: Lamaran Diterima */}
                     <motion.div 
                       key="accepted"
                       initial={{ opacity: 0, scale: 0.8, y: 20 }}
@@ -283,7 +283,7 @@ export default function Landing() {
                   </AnimatePresence>
                 </div>
 
-                {/* Background Decorative Circles */}
+                {/* Lingkaran Dekoratif Latar Belakang */}
                 <motion.div 
                   animate={{ 
                     scale: [1, 1.1, 1],
@@ -298,7 +298,7 @@ export default function Landing() {
         </div>
       </header>
 
-      {/* Partners Section - Modern Carousel */}
+      {/* Bagian Partner Carousel Modern */}
       <section className="py-16 border-b border-slate-50 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6">
           <h2 className="text-center text-[12px] font-extrabold text-slate-400 uppercase tracking-[0.2em] mb-12">

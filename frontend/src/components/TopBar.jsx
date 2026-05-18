@@ -12,7 +12,7 @@ const TopBar = () => {
 	return (
 		<nav className="flex items-center justify-end w-full h-16 px-6 bg-white border-b border-gray-100 font-jakarta">
 			<div className="flex items-center gap-5">
-				{/* Notifications */}
+				{/* Notifikasi */}
 				<div className="relative group">
 					<button 
 						onClick={() => setShowNotifications(!showNotifications)}
@@ -24,7 +24,7 @@ const TopBar = () => {
 						)}
 					</button>
 
-					{/* Notifications Dropdown */}
+					{/* Dropdown Notifikasi */}
 					{showNotifications && (
 						<div className="absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.12)] border border-slate-100 overflow-hidden z-20">
 							<div className="p-4 border-b border-slate-100 flex justify-between items-center">
@@ -50,7 +50,7 @@ const TopBar = () => {
 					)}
 				</div>
 
-				{/* Profile */}
+				{/* Profil */}
 				<NavLink to="/app/profil" className="cursor-pointer">
 					<div className="w-10 h-10 overflow-hidden rounded-full border-2 border-transparent hover:border-sky-700 transition-all bg-slate-100 flex items-center justify-center">
 						{user?.avatar_url ? (
@@ -65,6 +65,7 @@ const TopBar = () => {
 						)}
 					</div>
 				</NavLink>
+
 			</div>
 		</nav>
 	);

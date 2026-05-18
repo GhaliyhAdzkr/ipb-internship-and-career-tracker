@@ -1,10 +1,3 @@
-"""
-Model: public.document_requests
-Permohonan surat pengantar/rekomendasi kampus.
-"""
-
-from __future__ import annotations
-
 import datetime
 import uuid
 from typing import TYPE_CHECKING, Optional

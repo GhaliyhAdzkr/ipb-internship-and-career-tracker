@@ -1,4 +1,3 @@
-import React from 'react';
 import { PiWarningCircleFill, PiXBold } from 'react-icons/pi';
 
 const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, confirmText = "Hapus", cancelText = "Batal", type = "danger" }) => {
@@ -6,14 +5,15 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, confirmText 
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      {/* Backdrop */}
+      {/* Latar Belakang */}
       <div 
         className="absolute inset-0 bg-sky-950/40 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       ></div>
 
-      {/* Modal Content */}
+      {/* Konten Modal */}
       <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+
         <div className="p-8">
           <div className="flex justify-between items-start mb-6">
             <div className={`p-3 rounded-2xl ${type === 'danger' ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-600'}`}>

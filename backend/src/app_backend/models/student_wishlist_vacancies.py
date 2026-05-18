@@ -1,10 +1,3 @@
-"""
-Model: public.student_wishlist_vacancies
-Lowongan yang di-bookmark oleh mahasiswa beserta catatan pribadi.
-"""
-
-from __future__ import annotations
-
 import datetime
 import uuid
 from typing import TYPE_CHECKING, Optional

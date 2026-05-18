@@ -10,24 +10,24 @@ Backend API untuk aplikasi IPB Internship and Career Tracker (LARAS) menggunakan
 backend/
 ├── src/
 │   └── app_backend/
-│       ├── conf/              # Konfigurasi aplikasi (settings, environment)
-│       ├── domain/            # Domain models dan business logic
-│       ├── features/          # Fitur aplikasi (vertical slices)
-│       │   ├── auth/          # Authentication (login, register, reset password)
-│       │   ├── admin/         # Admin management (departments, skills, companies)
-│       │   ├── profile/        # Student & Admin profile management
-│       │   ├── vacancy/       # Job vacancies & job matching
-│       │   ├── wishlist/      # Student wishlist
-│       │   └── application/   # Application tracking (Self-Reported ATS)
-│       ├── models/            # Database ORM models
-│       ├── repositories/      # Layer akses data (Repository Pattern)
-│       ├── routers/           # FastAPI endpoint routers
-│       ├── schemas/           # Pydantic schemas (request/response)
-│       ├── shared/            # Shared utilities (security, database, dependencies)
+│       ├── conf/              # Konfigurasi aplikasi (settings backend dan environment)
+│       ├── domain/            # Aturan bisnis pada aplikasi
+│       ├── features/          # Fitur aplikasi atau services (dengan vertical slices)
+│       │   ├── auth/          # Autentikasi
+│       │   ├── admin/         # Manajemen admin
+│       │   ├── profile/        # Manajemen profil mahasiswa dan admin
+│       │   ├── vacancy/       # Lowongan kerja dan pencocokan kerja
+│       │   ├── wishlist/      # Wishlist mahasiswa
+│       │   └── application/   # Pelacakan lamaran (Self-Reported ATS)
+│       ├── models/            # Model database via ORM (1:1 dengan di database)
+│       ├── repositories/      # Layer akses data (CRUD)
+│       ├── routers/           # Endpoint router untuk request/response
+│       ├── schemas/           # Pydantic schemas untuk validasi format data
+│       ├── shared/            # Shared utilities (untuk security, cache, dan lainnya)
 │       └── main.py            # Entry point aplikasi
-├── tests/                     # Unit dan integration tests
+├── tests/                     # Unit testing dan integration testing
 ├── alembic/                   # Database migrations
-├── docs/                      # Feature documentation
+├── docs/                      # Dokumentasi fitur
 └── scripts/                   # Utility scripts
 ```
 
@@ -35,11 +35,11 @@ backend/
 
 Project ini menggunakan pendekatan modern untuk menjaga skalabilitas dan maintainability:
 
-1. **Vertical Slice Architecture** - Setiap fitur (seperti `auth`, `vacancy`, `application`) diorganisir dalam satu folder `features`. Setiap slice berisi logic spesifik untuk fitur tersebut, mengurangi ketergantungan antar modul.
-2. **Command/Handler Pattern** - Logic bisnis kompleks diimplementasikan menggunakan Command (data) dan Handler (logic). Ini memisahkan *apa yang ingin dilakukan* dengan *bagaimana cara melakukannya*.
-3. **Repository Pattern** - Abstraksi akses database berada di folder `repositories`. Ini memudahkan unit testing dan memungkinkan penggantian implementasi database tanpa menyentuh business logic.
-4. **Dependency Injection (DI)** - Menggunakan sistem DI bawaan FastAPI. Semua Service dan Repository dikelola melalui `shared/dependencies_service.py` untuk memastikan manajemen instance yang bersih dan testable.
-5. **Domain-Driven Design (DDD)** - Logic inti bisnis dan aturan domain diletakkan di folder `domain`, terpisah dari detail infrastruktur (database/API).
+1. **Vertical Slice Architecture**: Setiap fitur (seperti `auth`, `vacancy`, `application`) diorganisir dalam satu folder `features`. Setiap slice berisi logic spesifik untuk fitur tersebut, mengurangi ketergantungan antar modul.
+2. **Command/Handler Pattern**: Logic bisnis kompleks diimplementasikan menggunakan Command (data) dan Handler (logic). Ini memisahkan *apa yang ingin dilakukan* dengan *bagaimana cara melakukannya*.
+3. **Repository Pattern**: Abstraksi akses database berada di folder `repositories`. Ini memudahkan unit testing dan memungkinkan penggantian implementasi database tanpa menyentuh business logic.
+4. **Dependency Injection (DI)**: Menggunakan sistem DI bawaan FastAPI. Semua Service dan Repository dikelola melalui `shared/dependencies_service.py` untuk memastikan manajemen instance yang bersih dan testable.
+5. **Domain-Driven Design (DDD)**: Logic inti bisnis dan aturan domain diletakkan di folder `domain`, terpisah dari detail infrastruktur (database/API).
 
 ## Tech Stack
 

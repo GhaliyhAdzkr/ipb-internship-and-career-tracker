@@ -1,8 +1,3 @@
-"""
-Vacancy Feature Package – Command Handlers untuk vacancy management.
-"""
-
-# Vacancy management commands
 from app_backend.features.vacancy.create_vacancy import (
     CreateVacancyCommand, CreateVacancyResult, create_vacancy_command_handler)
 from app_backend.features.vacancy.delete_vacancy import (

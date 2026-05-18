@@ -3,7 +3,7 @@ import { fileService } from './fileService';
 
 export const profileService = {
   /**
-   * Get current student profile details.
+   * Ambil detail profil Student saat ini
    */
   getProfile: async () => {
     const response = await api.get('/profile/me');
@@ -11,8 +11,8 @@ export const profileService = {
   },
 
   /**
-   * Update CV data (phone, linkedin, cv_url, skills).
-   * @param {Object} data - { phone_number, linkedin_url, cv_url, skills: [{ skill_id, level }] }
+   * Perbarui data CV: nomor telepon, LinkedIn, URL CV, dan keahlian
+   * @param {Object} data: Objek berisi phone_number, linkedin_url, cv_url, keahlian
    */
   updateCVData: async (data) => {
     const response = await api.put('/profile/cv-data', data);
@@ -20,7 +20,7 @@ export const profileService = {
   },
 
   /**
-   * Upload CV file to S3.
+   * Upload file CV ke S3
    * @param {File} file
    */
   uploadCV: async (file) => {

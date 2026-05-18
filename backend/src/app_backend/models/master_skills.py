@@ -1,10 +1,3 @@
-"""
-Model: public.master_skills
-Pustaka keahlian terstandarisasi untuk Matching Engine.
-"""
-
-from __future__ import annotations
-
 import uuid
 from typing import TYPE_CHECKING, Optional
 

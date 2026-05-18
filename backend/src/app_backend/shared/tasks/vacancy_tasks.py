@@ -1,8 +1,3 @@
-"""
-Vacancy Tasks – Background tasks untuk vacancy management.
-Berjalan di queue terpisah untuk scraping dan auto-close.
-"""
-
 from datetime import datetime, timezone
 from typing import Dict
 

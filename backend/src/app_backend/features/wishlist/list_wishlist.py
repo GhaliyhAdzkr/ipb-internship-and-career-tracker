@@ -1,8 +1,3 @@
-"""
-List Wishlist Feature – Command Handler.
-Mengambil semua wishlist student.
-"""
-
 from __future__ import annotations
 
 import uuid

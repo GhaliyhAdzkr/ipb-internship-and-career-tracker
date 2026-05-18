@@ -1,10 +1,3 @@
-"""
-Model: public.vacancies
-Lowongan magang/kerja yang dikurasi atau discraped dari portal publik.
-"""
-
-from __future__ import annotations
-
 import datetime
 import decimal
 import uuid

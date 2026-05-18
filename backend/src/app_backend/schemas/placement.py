@@ -1,5 +1,5 @@
-import datetime
 import uuid
+import datetime
 from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
@@ -11,6 +11,7 @@ class PlacementResponse(BaseModel):
     id: uuid.UUID
     student_id: uuid.UUID
     company_id: uuid.UUID
+    company_name: Optional[str] = None
     start_date: datetime.date
     end_date: datetime.date
     application_id: Optional[uuid.UUID] = None

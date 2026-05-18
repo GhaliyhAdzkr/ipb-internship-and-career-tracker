@@ -1,22 +1,3 @@
-"""
-Vacancy Router – API endpoints untuk vacancy management dan job discovery.
-
-Endpoints:
-  POST /vacancies           – Buat lowongan baru (admin only)
-  GET /vacancies            – List semua lowongan aktif
-  GET /vacancies/search     – Cari lowongan dengan filter
-  GET /vacancies/{id}       – Detail lowongan
-  PUT /vacancies/{id}       – Update lowongan (admin only)
-  DELETE /vacancies/{id}    – Hapus lowongan (admin only)
-  POST /wishlist            – Simpan ke wishlist
-  GET /wishlist             – List wishlist student
-  GET /wishlist/{id}        – Detail wishlist
-  PUT /wishlist/{id}        – Update catatan wishlist
-  DELETE /wishlist/{id}     – Hapus wishlist
-  GET /job-matching         – List kecocokan dengan semua lowongan
-  GET /job-matching/{id}    – Detail kecocokan dengan lowongan tertentu
-"""
-
 from http import HTTPStatus
 from typing import List, Optional
 from uuid import UUID

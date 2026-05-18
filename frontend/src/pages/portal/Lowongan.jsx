@@ -26,14 +26,14 @@ function Lowongan() {
 	const [searchParams, setSearchParams] = useSearchParams();
 	const token = localStorage.getItem("token");
 
-	// State for "Show More" industries
+	// State untuk tombol tampilkan lebih banyak industri
 	const [showAllIndustries, setShowAllIndustries] = useState(false);
 
-	// Refs for uncontrolled inputs (zero re-renders on typing)
+	// Ref untuk input tidak terkontrol guna menghindari render ulang saat mengetik
 	const queryRef = useRef(null);
 	const locationRef = useRef(null);
 
-	// Derived state from URL (Single Source of Truth)
+	// State turunan dari URL sebagai acuan utama data
 	const query = searchParams.get("query") || "";
 	const location = searchParams.get("location") || "";
 	const type = searchParams.get("type") || "";
@@ -60,38 +60,36 @@ function Lowongan() {
 	const industriesQuery = useQuery({
 		queryKey: ["industries"],
 		queryFn: () => vacancyService.getIndustries(),
-		staleTime: 60 * 60 * 1000, // 1 hour
+		staleTime: 60 * 60 * 1000, // Durasi 1 jam
 	});
 
-	// Point 4: Optimistic Updates for Wishlist
+	// Pembaruan optimistik untuk wishlist
 	const wishlistMutation = useMutation({
 		mutationFn: (vacancyId) => vacancyService.addToWishlist(vacancyId),
 		onMutate: async () => {
-			// Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+			// Batalkan refetch berjalan agar tidak menimpa pembaruan optimistik
 			await queryClient.cancelQueries({ queryKey: ["vacancies"] });
 
-			// Snapshot the previous value
+			// Simpan snapshot nilai sebelumnya
 			const previousVacancies = queryClient.getQueryData(["vacancies"]);
 
-			// We don't have is_wishlisted in the listing yet, 
-			// so optimistic update here is mainly about the UI feedback (alert/toast)
-			// But if we had a heart icon, we would toggle it here.
+			// Data listing belum memiliki is_wishlisted sehingga pembaruan optimistik difokuskan pada respons UI
 			
 			return { previousVacancies };
 		},
 		onSuccess: () => {
-			// Optional: Show a more premium toast instead of alert
+			// Opsional: Menampilkan toast premium dibanding alert biasa
 			// alert("Berhasil ditambahkan ke wishlist!");
 		},
 		onError: (err, vacancyId, context) => {
-			// If the mutation fails, use the context returned from onMutate to roll back
+			// Jika mutasi gagal, gunakan konteks dari onMutate untuk mengembalikan data sebelumnya
 			if (context?.previousVacancies) {
 				queryClient.setQueryData(["vacancies"], context.previousVacancies);
 			}
 			alert("Gagal menambahkan ke wishlist. Mungkin sudah ada?");
 		},
 		onSettled: () => {
-			// Always refetch after error or success to keep server sync
+			// Selalu ambil ulang data setelah error atau sukses untuk sinkronisasi server
 			queryClient.invalidateQueries({ queryKey: ["wishlist"] });
 		},
 	});
@@ -103,7 +101,7 @@ function Lowongan() {
 			else nextParams.delete(key);
 		});
 
-		// Only reset to page 1 if we're NOT explicitly setting a new page
+		// Hanya atur ulang ke halaman 1 jika tidak sedang memuat halaman spesifik
 		if (!("page" in newFilters)) {
 			nextParams.set("page", "1");
 		}
@@ -165,11 +163,11 @@ function Lowongan() {
 		navigate(`/detail/${vacancyId}`);
 	};
 
-	// Point 5: Smart Prefetching Component
+	// Komponen prefetching cerdas
 	const VacancyCard = ({ item }) => {
 		const { ref, inView } = useInView({
 			triggerOnce: true,
-			rootMargin: "200px 0px", // Prefetch when 200px before viewport
+			rootMargin: "200px 0px", // Prefetch saat berada 200px sebelum area pandang
 		});
 
 		useEffect(() => {
@@ -245,7 +243,7 @@ function Lowongan() {
 
 	return (
 		<div className="font-jakarta">
-			{/* Banner */}
+			{/* Banner Utama */}
 			<div className="mb-5 bg-sky-950 py-7 px-10 rounded-xl text-white flex justify-between items-center shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)]">
 				<div className="flex flex-col gap-2">
 					<div className="text-3xl font-bold">Eksplorasi Karirmu</div>
@@ -255,7 +253,7 @@ function Lowongan() {
 				</div>
 			</div>
 
-			{/* Search Section */}
+			{/* Area Pencarian */}
 			<div className="bg-white p-6 rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] mb-8 flex gap-4 items-end relative">
 				<div className="flex-1 flex flex-col gap-1.5 min-w-[200px]">
 					<label className="text-[11px] font-[900] text-slate-400 uppercase tracking-widest">Pencarian</label>
@@ -320,7 +318,7 @@ function Lowongan() {
 			</div>
 
 			<div className="flex flex-col lg:flex-row gap-8">
-				{/* Sidebar Filters */}
+				{/* Filter Sisi Samping */}
 				<aside className="w-full lg:w-72 flex flex-col gap-5">
 					<div className="p-6 bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] border border-slate-50 sticky top-24">
 						<div className="flex items-center justify-between mb-8">
@@ -398,7 +396,7 @@ function Lowongan() {
 					</div>
 				</aside>
 
-				{/* Listings */}
+				{/* Daftar Lowongan */}
 				<div className="flex-1">
 					<div className="mb-6 flex items-center justify-between text-sm text-zinc-500">
 						<span className="font-bold text-sky-950">
@@ -426,7 +424,7 @@ function Lowongan() {
 						)}
 					</div>
 
-					{/* Pagination */}
+					{/* Navigasi Halaman */}
 					<div className="flex justify-center mt-12 gap-2">
 						<button
 							disabled={currentPage === 1}

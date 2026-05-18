@@ -1,8 +1,3 @@
-"""
-Redis cache helper untuk analytics endpoints.
-Semua error Redis dibungkus silently agar tidak merusak request jika Redis down.
-"""
-
 import json
 import os
 from typing import Any, Optional

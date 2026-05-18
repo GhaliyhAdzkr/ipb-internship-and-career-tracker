@@ -1,29 +1,3 @@
-"""
-Admin Router – API endpoints untuk manajemen data master dan akun user.
-
-Endpoints:
-  PATCH /users/{user_id}/toggle-active  – Toggle aktif/nonaktif akun user
-  GET   /profile/me                     – Profil admin yang sedang login
-  PATCH /profile/me                     – Update profil admin
-
-  GET    /departments          – Daftar semua prodi
-  POST   /departments          – Tambah prodi baru
-  PATCH  /departments/{id}     – Update prodi
-  DELETE /departments/{id}     – Hapus prodi
-
-  GET    /skills               – Daftar semua skill
-  POST   /skills               – Tambah skill baru
-  PATCH  /skills/{id}          – Update skill
-  DELETE /skills/{id}          – Hapus skill
-
-  GET    /companies            – Daftar semua perusahaan eksternal
-  POST   /companies            – Tambah perusahaan baru
-  PATCH  /companies/{id}       – Update perusahaan
-  DELETE /companies/{id}       – Hapus perusahaan
-"""
-
-from __future__ import annotations
-
 import uuid
 from datetime import datetime, timezone
 from http import HTTPStatus
@@ -87,10 +61,8 @@ async def toggle_user_active(
     session=Depends(get_session),
     _: DomainUser = Depends(require_admin),
 ) -> UserResponse:
-    """
-    Admin menonaktifkan atau mengaktifkan kembali akun user.
-    Toggle: `is_active = True` → `False`, dan sebaliknya.
-    """
+    # Admin menonaktifkan atau mengaktifkan kembali akun user.
+    # Toggle: is_active = True, False, dan sebaliknya.
     result = toggle_user_active_command_handler(
         command=ToggleUserActiveCommand(user_id=user_id),
         session=session,
@@ -110,9 +82,7 @@ async def list_users(
     session=Depends(get_session),
     _: DomainUser = Depends(require_admin),
 ) -> List[UserResponse]:
-    """
-    Daftar semua user di sistem. Bisa difilter berdasarkan role.
-    """
+    # Daftar semua user di sistem. Bisa difilter berdasarkan role.
     result = list_users_command_handler(
         command=ListUsersCommand(role=role),
         session=session,
@@ -134,7 +104,7 @@ async def get_admin_profile(
     session=Depends(get_session),
     current_user: DomainUser = Depends(require_admin),
 ) -> AdminProfileResponse:
-    """Kembalikan data profil admin berdasarkan JWT access token."""
+    # Kembalikan data profil admin berdasarkan JWT access token.
     profile = session.query(ProfilesAdmin).filter(ProfilesAdmin.user_id == current_user.id).first()
     if not profile:
         raise HTTPException(
@@ -164,7 +134,7 @@ async def update_admin_profile(
     session=Depends(get_session),
     current_user: DomainUser = Depends(require_admin),
 ) -> AdminProfileResponse:
-    """Update nama, unit kerja, atau NIP admin yang sedang login."""
+    # Update nama, unit kerja, atau NIP admin yang sedang login.
     from sqlalchemy.exc import IntegrityError
 
     profile = session.query(ProfilesAdmin).filter(ProfilesAdmin.user_id == current_user.id).first()
@@ -417,10 +387,8 @@ async def upload_company_logo(
     file: UploadFile = File(...),
     _: DomainUser = Depends(require_admin),
 ) -> dict:
-    """
-    Unggah file logo perusahaan (JPEG/PNG/WEBP, max 10MB).
-    Mengembalikan URL publik file yang diunggah.
-    """
+    # Unggah file logo perusahaan (JPEG/PNG/WEBP, max 10MB).
+    # Mengembalikan URL publik file yang diunggah.
     import os
     from app_backend.conf.settings import settings
     from app_backend.shared.s3_storage import get_s3_client, upload_fileobj

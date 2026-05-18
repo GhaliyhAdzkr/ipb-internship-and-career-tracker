@@ -1,15 +1,15 @@
-import email.message
 import smtplib
 import os
+import email.message
 from datetime import datetime
 from app_backend.conf.settings import settings
 
 
 def send_direct_email(to_email: str, subject: str, body: str, user_name: str = "Pengguna LARAS"):
-    """
-    Kirim email secara langsung (synchronous) menggunakan SMTP.
-    Digunakan untuk pengetesan atau email kritikal.
-    """
+
+    # Kirim email secara langsung (synchronous) menggunakan SMTP.
+    # Digunakan untuk pengetesan atau email kritikal.
+
     # Load Template
     template_path = os.path.join(os.path.dirname(__file__), "templates", "email_base.html")
     logo_path = os.path.join(os.path.dirname(__file__), "templates", "logo.png")

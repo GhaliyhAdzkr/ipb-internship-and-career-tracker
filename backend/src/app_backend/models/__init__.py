@@ -1,11 +1,3 @@
-"""
-Models package – re-exports semua ORM entity dari file atomik.
-
-Import order penting: Base harus diimport pertama agar semua model
-teregistrasi ke metadata yang sama sebelum digunakan.
-"""
-
-from app_backend.models.activity_logs import ActivityLogs  # noqa: F401
 from app_backend.models.application_logs import ApplicationLogs  # noqa: F401
 
 from app_backend.models.applications import Applications  # noqa: F401

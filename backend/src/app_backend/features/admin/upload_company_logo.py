@@ -1,8 +1,3 @@
-"""
-Upload Company Logo
-Upload file logo perusahaan dan simpan URL s3.
-"""
-
 from __future__ import annotations
 
 import os
