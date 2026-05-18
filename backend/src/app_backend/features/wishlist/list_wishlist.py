@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from app_backend.models.student_wishlist_vacancies import StudentWishlistVacancies
 from app_backend.models.vacancies import Vacancies
-from app_backend.schemas.wishlist import WishlistDetailResponse, WishlistListResponse, WishlistSummary
+from app_backend.schemas.wishlist import WishlistDetailResponse, WishlistListResponse, WishlistSummary, CompanyMinimal
 
 
 class ListWishlistException(Exception):
@@ -59,6 +59,10 @@ def list_wishlist_command_handler(
     items = []
     for wishlist in wishlists:
         vacancy = wishlist.vacancy
+        company_info = None
+        if vacancy.company:
+            company_info = CompanyMinimal(id=vacancy.company.id, name=vacancy.company.name, logo_url=vacancy.company.logo_url)
+
         vacancy_summary = WishlistSummary(
             id=vacancy.id,
             title=vacancy.title,
@@ -67,6 +71,7 @@ def list_wishlist_command_handler(
             payment_type=vacancy.payment_type,
             open_date=vacancy.open_date,
             close_date=vacancy.close_date,
+            company=company_info,
         )
 
         items.append(

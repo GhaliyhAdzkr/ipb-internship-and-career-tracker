@@ -7,6 +7,16 @@ from pydantic import BaseModel, ConfigDict, Field
 # Nested Schemas
 
 
+class CompanyMinimal(BaseModel):
+    """Minimal info company untuk nested schemas"""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    name: str
+    logo_url: Optional[str] = None
+
+
 class VacancySummary(BaseModel):
     """Summary info vacancy untuk wishlist"""
 
@@ -19,6 +29,7 @@ class VacancySummary(BaseModel):
     payment_type: Optional[str] = None
     open_date: datetime
     close_date: datetime
+    company: Optional[CompanyMinimal] = None
 
 
 class WishlistSummary(VacancySummary):
@@ -31,6 +42,7 @@ class WishlistSummary(VacancySummary):
     payment_type: Optional[str] = None
     open_date: datetime
     close_date: datetime
+    company: Optional[CompanyMinimal] = None
 
 
 # Create Schemas

@@ -7,7 +7,14 @@ from app_backend.models.vacancy_skills import VacancySkills
 from app_backend.repositories.company_repository import CompanyRepository
 from app_backend.repositories.vacancy_repository import VacancyRepository
 from app_backend.repositories.vacancy_skill_repository import VacancySkillRepository
-from app_backend.schemas.vacancy import CompanyInfo, SkillRequirement, VacancyCreate, VacancyDetailResponse, VacancyResponse, VacancyUpdate
+from app_backend.schemas.vacancy import (
+    CompanyInfo,
+    SkillRequirement,
+    VacancyCreate,
+    VacancyDetailResponse,
+    VacancyResponse,
+    VacancyUpdate,
+)
 
 
 class IVacancyService(Protocol):
@@ -90,7 +97,7 @@ class VacancyService:
             SkillRequirement(
                 skill_id=s.skill_id,
                 skill_name=s.skill.name if s.skill else "Keahlian",
-                is_mandatory=s.is_mandatory if s.is_mandatory is not None else True
+                is_mandatory=s.is_mandatory if s.is_mandatory is not None else True,
             )
             for s in skills_raw
         ]

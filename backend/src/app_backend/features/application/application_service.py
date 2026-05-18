@@ -60,12 +60,38 @@ class ApplicationService:
             raise ValueError("Anda sudah melamar ke lowongan ini")
 
         try:
+            from app_backend.models.student_skills import StudentSkills
+            from app_backend.models.vacancy_skills import VacancySkills
+
+            stud_skills = self.student_repo.session.query(StudentSkills).filter(StudentSkills.student_id == student_id).all()
+            student_skill_ids = {s.skill_id for s in stud_skills}
+
+            vac_skills = self.student_repo.session.query(VacancySkills).filter(VacancySkills.vacancy_id == data.vacancy_id).all()
+
+            if not vac_skills:
+                match_percentage = 100.0
+            else:
+                mandatory_skills = [vs for vs in vac_skills if vs.is_mandatory]
+                optional_skills = [vs for vs in vac_skills if not vs.is_mandatory]
+
+                matched_mandatory = [vs for vs in mandatory_skills if vs.skill_id in student_skill_ids]
+                matched_optional = [vs for vs in optional_skills if vs.skill_id in student_skill_ids]
+
+                total_weight = len(mandatory_skills) * 2 + len(optional_skills)
+                matched_weight = len(matched_mandatory) * 2 + len(matched_optional)
+
+                if total_weight == 0:
+                    match_percentage = 100.0
+                else:
+                    match_percentage = round((matched_weight / total_weight) * 100, 1)
+
             application = Applications(
                 id=uuid.uuid4(),
                 vacancy_id=data.vacancy_id,
                 student_id=student_id,
                 cv_snapshot_url=student.cv_url,
                 status="APPLIED",
+                match_percentage=match_percentage,
             )
             self.application_repo.create(application)
             self.application_repo.save_changes()
@@ -90,20 +116,14 @@ class ApplicationService:
         if app.student_id != student_id:
             raise PermissionError("Bukan pemilik lamaran")
 
-        old_status = app.status
+        # Set variables for the event listener to catch and insert the single, perfect log!
+        app._changed_by = student_id
+        app._proof_url = data.proof_url
+        app._reason = data.reason
+
         app.status = data.status
         app.updated_at = datetime.now(timezone.utc)
 
-        log = ApplicationLogs(
-            id=uuid.uuid4(),
-            application_id=app.id,
-            old_status=old_status,
-            new_status=data.status,
-            proof_url=data.proof_url,
-            reason=data.reason,
-            changed_at=datetime.now(timezone.utc),
-        )
-        self.application_log_repo.create(log)
         self.application_repo.save_changes()
         return ApplicationResponse.model_validate(app)
 
@@ -117,7 +137,7 @@ class ApplicationService:
         query = (
             select(ApplicationLogs)
             .where(ApplicationLogs.application_id == application_id)
-            .order_by(ApplicationLogs.changed_at.desc())
+            .order_by(ApplicationLogs.created_at.desc())
         )
         logs = self.application_log_repo.session.scalars(query).all()
         return [ApplicationLogResponse.model_validate(log) for log in logs]

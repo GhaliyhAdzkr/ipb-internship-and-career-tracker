@@ -2,7 +2,7 @@ import uuid
 from datetime import date, datetime
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, model_validator
 
 
 class ApplicationCreate(BaseModel):
@@ -71,3 +71,87 @@ class ApplicationVerifyPayload(BaseModel):
 
 class ApplicationRejectPayload(BaseModel):
     reason: str
+
+
+class UserMinimal(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: uuid.UUID
+    email: str
+    full_name: str
+
+    @model_validator(mode="before")
+    @classmethod
+    def resolve_fields(cls, data):
+        if not isinstance(data, dict):
+            profile_student = getattr(data, "profile_student", None)
+            profile_admin = getattr(data, "profile_admin", None)
+            full_name = ""
+            if profile_student:
+                full_name = profile_student.full_name
+            elif profile_admin:
+                full_name = profile_admin.full_name
+            return {
+                "id": data.id,
+                "email": data.email,
+                "full_name": full_name,
+            }
+        return data
+
+
+class StudentMinimalResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    user_id: uuid.UUID
+    nim: str
+    full_name: str
+    user: UserMinimal
+
+
+class CompanyMinimal(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: uuid.UUID
+    name: str
+    logo_url: Optional[str] = None
+
+
+class VacancyAdminResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    title: str
+    type: str
+    location: Optional[str] = None
+    payment_type: Optional[str] = None
+    company: CompanyMinimal
+
+
+class AdminApplicationResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    vacancy_id: uuid.UUID
+    student_id: uuid.UUID
+    cv_snapshot_url: str
+    cv_url: str
+    status: str
+    created_at: datetime
+    student: StudentMinimalResponse
+    vacancy: VacancyAdminResponse
+
+    @model_validator(mode="before")
+    @classmethod
+    def map_created_at(cls, data):
+        if not isinstance(data, dict):
+            applied_at = getattr(data, "applied_at", None)
+            cv_snapshot_url = getattr(data, "cv_snapshot_url", "")
+            return {
+                "id": data.id,
+                "vacancy_id": data.vacancy_id,
+                "student_id": data.student_id,
+                "cv_snapshot_url": cv_snapshot_url,
+                "cv_url": cv_snapshot_url,
+                "status": data.status,
+                "created_at": applied_at or datetime.now(),
+                "student": data.student,
+                "vacancy": data.vacancy,
+            }
+        return data

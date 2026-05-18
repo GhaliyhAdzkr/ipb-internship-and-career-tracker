@@ -36,7 +36,12 @@ from app_backend.schemas.admin import (
     SkillResponse,
     SkillUpdate,
 )
-from app_backend.schemas.application import ApplicationRejectPayload, ApplicationResponse, ApplicationVerifyPayload
+from app_backend.schemas.application import (
+    ApplicationRejectPayload,
+    ApplicationResponse,
+    ApplicationVerifyPayload,
+    AdminApplicationResponse,
+)
 from app_backend.schemas.placement import PlacementResponse
 from app_backend.schemas.user import UserResponse
 from app_backend.shared.auth_dependencies import require_admin
@@ -446,13 +451,13 @@ async def upload_company_logo(
 
 @router.get(
     "/applications/pending-verification",
-    response_model=List[ApplicationResponse],
+    response_model=List[AdminApplicationResponse],
     summary="Daftar lamaran pending verifikasi",
 )
 async def list_pending_verification(
     session=Depends(get_session),
     _: DomainUser = Depends(require_admin),
-) -> List[ApplicationResponse]:
+) -> List[AdminApplicationResponse]:
     result = list_pending_verification_command_handler(ListPendingVerificationCommand(), session)
     if result.got_error():
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=result.error_message)
