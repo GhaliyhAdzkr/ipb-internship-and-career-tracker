@@ -1,9 +1,11 @@
-import React from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay } from 'swiper/modules';
- 
+import { Autoplay } from 'swiper/modules'; 
+import { useLandingVacancies } from '../../hooks/useVacancies';
+import { useAuth } from '../../hooks/useAuth';
+import PARTNERS from '../../data/partners.json';
 import { motion, AnimatePresence } from 'framer-motion';
 import 'swiper/css';
 
@@ -20,15 +22,13 @@ import {
   PiCursorClickFill
 } from 'react-icons/pi';
 
-import { useLandingVacancies } from '../../hooks/useVacancies';
-import PARTNERS from '../../data/partners.json';
-
 export default function Landing() {
   const navigate = useNavigate();
   const { data: vacanciesData, isLoading, isError, error } = useLandingVacancies();
+  const { user } = useAuth();
 
   // Log for debugging purposes
-  React.useEffect(() => {
+  useEffect(() => {
     if (vacanciesData) {
       console.log('Vacancies Data:', vacanciesData);
     }
@@ -72,8 +72,19 @@ export default function Landing() {
                 placeholder="Cari lowongan..."
               />
             </div>
-            <Link to="/login" className="text-sm font-semibold text-sky-900 hover:text-sky-600 transition-colors">Masuk</Link>
-            <Link to="/registration" className="bg-sky-950 text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-lg shadow-sky-900/10 hover:bg-sky-900 transition-all active:scale-95">Daftar</Link>
+            {user ? (
+              <Link 
+                to={user.role === 'ADMIN' ? '/app/admin/dashboard' : '/app/home'} 
+                className="bg-sky-950 text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-lg shadow-sky-900/10 hover:bg-sky-900 transition-all active:scale-95"
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link to="/login" className="text-sm font-semibold text-sky-900 hover:text-sky-600 transition-colors">Masuk</Link>
+                <Link to="/registration" className="bg-sky-950 text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-lg shadow-sky-900/10 hover:bg-sky-900 transition-all active:scale-95">Daftar</Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
@@ -417,7 +428,7 @@ export default function Landing() {
 }
 
 function JobCard({ id, title, company, companyLogo, icon, tags, deadline }) {
-  const [imgError, setImgError] = React.useState(false);
+  const [imgError, setImgError] = useState(false);
 
   return (
     <Link to={`/detail/${id}`} className="bg-white p-8 rounded-2xl border border-slate-100 shadow-xl shadow-sky-900/[0.03] flex flex-col group hover:shadow-sky-900/10 transition-all duration-300">
