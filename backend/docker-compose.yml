@@ -42,6 +42,8 @@ services:
       dockerfile: Dockerfile
     image: laras-backend:latest
     command: ["celery", "-A", "app_backend.shared.celery", "worker", "--loglevel=info", "-Q", "ai,vacancy,notification,report"]
+    healthcheck:
+      disable: true
     depends_on:
       redis:
         condition: service_healthy
