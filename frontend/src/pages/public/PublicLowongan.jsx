@@ -1,7 +1,7 @@
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
+import { useVacancies, useIndustries } from '../../hooks/useVacancies';
 import { 
   PiMagnifyingGlass, 
   PiMapPin, 
@@ -17,10 +17,8 @@ import {
   PiCaretLeft,
   PiCaretRight,
   PiXCircle,
-  PiCalendar,
   PiBookmarkSimple
 } from 'react-icons/pi';
-import { vacancyService } from '../../services/vacancyService';
 
 export default function PublicLowongan() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -40,23 +38,16 @@ export default function PublicLowongan() {
   const currentPage = Number(searchParams.get('page')) || 1;
   const itemsPerPage = 6;
 
-  const { data: vacanciesData, isLoading, isError, error } = useQuery({
-    queryKey: ['public-vacancies', currentPage, searchQuery, location, type, industry, academicLevel],
-    queryFn: () => vacancyService.getVacancies({ 
-      page: currentPage, 
-      perPage: itemsPerPage,
-      query: searchQuery || undefined,
-      location: location || undefined,
-      type: type || undefined,
-      industry: industry || undefined
-    }),
+  const { data: vacanciesData, isLoading, isError, error } = useVacancies({ 
+    page: currentPage, 
+    perPage: itemsPerPage,
+    query: searchQuery || undefined,
+    location: location || undefined,
+    type: type || undefined,
+    industry: industry || undefined
   });
 
-  const industriesQuery = useQuery({
-    queryKey: ["industries"],
-    queryFn: () => vacancyService.getIndustries(),
-    staleTime: 60 * 60 * 1000, // Durasi 1 jam
-  });
+  const industriesQuery = useIndustries();
 
   const updateFilters = (newFilters) => {
     const nextParams = new URLSearchParams(searchParams);
@@ -408,7 +399,7 @@ export default function PublicLowongan() {
 }
 
 function VacancyCard({ id, title, company, companyLogo, location, type, deadline, icon }) {
-  const [imgError, setImgError] = React.useState(false);
+  const [imgError, setImgError] = useState(false);
 
   return (
     <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xl shadow-sky-900/[0.03] flex flex-col group hover:shadow-sky-900/10 transition-all duration-300">

@@ -5,7 +5,6 @@ import {
     PiPencilSimpleBold, 
     PiTrashBold,
     PiGlobeBold,
-    PiIdentificationCardBold,
     PiMapPinBold,
     PiXCircleFill
 } from "react-icons/pi";

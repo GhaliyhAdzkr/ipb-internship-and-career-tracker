@@ -12,7 +12,7 @@ import { useAuth } from "../../hooks/useAuth";
 function AdminDashboard() {
     const { user } = useAuth();
     
-    const { pendingApplications, loadingApps, companies } = useAdminDashboard();
+    const { pendingApplications, loadingApps, companies, students, vacancyStats } = useAdminDashboard();
 
     const stats = [
         { 
@@ -31,14 +31,14 @@ function AdminDashboard() {
         },
         { 
             label: "Lowongan Aktif", 
-            value: "10", // Placeholder for now
+            value: vacancyStats?.total_active_vacancies ?? 0, 
             icon: PiBriefcaseThin, 
             color: "text-emerald-600",
             bg: "bg-emerald-50" 
         },
         { 
             label: "Total Mahasiswa", 
-            value: "142", // Placeholder for now
+            value: students?.length || 0, 
             icon: PiUsersThin, 
             color: "text-indigo-600",
             bg: "bg-indigo-50" 

@@ -1,6 +1,5 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
@@ -21,25 +20,12 @@ import {
   PiCursorClickFill
 } from 'react-icons/pi';
 
-import { vacancyService } from '../../services/vacancyService';
+import { useLandingVacancies } from '../../hooks/useVacancies';
 import PARTNERS from '../../data/partners.json';
-import mockVacancies from '../../data/vacancies.json';
 
 export default function Landing() {
   const navigate = useNavigate();
-  const { data: vacanciesData, isLoading, isError, error } = useQuery({
-    queryKey: ['landing-vacancies'],
-    queryFn: async () => {
-      try {
-        const data = await vacancyService.getVacancies({ perPage: 3 });
-        return { items: data.items || [], isMock: false };
-      } catch (err) {
-        console.error('API Fetch failed, using mock data:', err);
-        // Fallback to new realistic mock data
-        return { items: mockVacancies.items.slice(0, 3), isMock: true };
-      }
-    },
-  });
+  const { data: vacanciesData, isLoading, isError, error } = useLandingVacancies();
 
   // Log for debugging purposes
   React.useEffect(() => {

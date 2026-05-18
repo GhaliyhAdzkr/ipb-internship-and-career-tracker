@@ -1,16 +1,13 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { 
     PiPlusBold, 
     PiMagnifyingGlassBold, 
     PiPencilSimpleBold, 
     PiTrashBold,
-    PiBriefcaseThin,
     PiMapPinBold,
     PiBuildingsBold,
-    PiGlobeSimpleBold,
     PiCheckCircleFill,
     PiXCircleFill,
-    PiCloudArrowDownBold,
     PiFunnelBold,
     PiCaretDown,
     PiCalendarBold,

@@ -1,16 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMediaQuery } from "react-responsive";
 import { format } from "date-fns";
+import { useQueryClient } from "@tanstack/react-query";
+import { useVacancies, useIndustries, useWishlist, useWishlistMutations } from "../../hooks/useVacancies";
 import { vacancyService } from "../../services/vacancyService";
-import toast from "react-hot-toast";
 import {
   PiBookmarkSimple,
-  PiLeaf,
   PiBriefcase,
   PiMapPin,
-  PiShapes,
   PiCaretLeft,
   PiCaretRight,
   PiMagnifyingGlass,
@@ -45,66 +43,23 @@ function Lowongan() {
 	const isXl = useMediaQuery({ query: "(min-width: 1280px)" });
 	const itemsPerPage = isXl ? 9 : 6;
 
-	const vacanciesQuery = useQuery({
-		queryKey: ["vacancies", currentPage, itemsPerPage, query, location, type, paymentType, industry],
-		queryFn: () => vacancyService.getVacancies({
-			page: currentPage,
-			perPage: itemsPerPage,
-			query: query.trim() || undefined,
-			location: location.trim() || undefined,
-			type: type || undefined,
-			paymentType: paymentType || undefined,
-			industry: industry || undefined,
-		}),
+	const vacanciesQuery = useVacancies({
+		page: currentPage,
+		perPage: itemsPerPage,
+		query: query.trim() || undefined,
+		location: location.trim() || undefined,
+		type: type || undefined,
+		paymentType: paymentType || undefined,
+		industry: industry || undefined,
 	});
 
-	const industriesQuery = useQuery({
-		queryKey: ["industries"],
-		queryFn: () => vacancyService.getIndustries(),
-		staleTime: 60 * 60 * 1000, // Durasi 1 jam
-	});
+	const industriesQuery = useIndustries();
 
-	const { data: wishlistData } = useQuery({
-		queryKey: ["wishlist"],
-		queryFn: () => vacancyService.getWishlist({ page: 1, perPage: 100 }),
-		enabled: !!token,
-	});
+	const { data: wishlistData } = useWishlist(!!token);
 
 	const wishlistMap = new Map(wishlistData?.items?.map(w => [w.vacancy.id, w.id]) || []);
 
-	// Pembaruan optimistik & interaktif untuk wishlist
-	const toggleWishlistMutation = useMutation({
-		mutationFn: async ({ vacancyId, isWishlisted }) => {
-			if (isWishlisted) {
-				const wishlistId = wishlistMap.get(vacancyId);
-				if (wishlistId) {
-					return await vacancyService.deleteWishlist(wishlistId);
-				}
-			} else {
-				return await vacancyService.addToWishlist(vacancyId);
-			}
-		},
-		onMutate: async () => {
-			await queryClient.cancelQueries({ queryKey: ["wishlist"] });
-			const previousWishlist = queryClient.getQueryData(["wishlist"]);
-			return { previousWishlist };
-		},
-		onSuccess: (data, variables) => {
-			queryClient.invalidateQueries({ queryKey: ["wishlist"] });
-			queryClient.invalidateQueries({ queryKey: ["vacancies"] });
-			if (variables.isWishlisted) {
-				toast.success("Berhasil dihapus dari wishlist!");
-			} else {
-				toast.success("Berhasil ditambahkan ke wishlist!");
-			}
-		},
-		onError: (err, variables, context) => {
-			if (context?.previousWishlist) {
-				queryClient.setQueryData(["wishlist"], context.previousWishlist);
-			}
-			toast.error(err.response?.data?.detail || "Gagal memperbarui wishlist.");
-		},
-	});
+	const { toggleWishlist: toggleWishlistMutate, isToggling } = useWishlistMutations(wishlistMap);
 
 	const updateFilters = (newFilters) => {
 		const nextParams = new URLSearchParams(searchParams);
@@ -221,9 +176,9 @@ function Lowongan() {
 								navigate("/login");
 								return;
 							}
-							toggleWishlistMutation.mutate({ vacancyId: item.id, isWishlisted });
+							toggleWishlistMutate({ vacancyId: item.id, isWishlisted });
 						}}
-						disabled={toggleWishlistMutation.isPending}
+						disabled={isToggling}
 						className={`p-1.5 rounded-lg transition-all ${
 							isWishlisted 
 								? "text-amber-500 bg-amber-50 hover:bg-amber-100/80" 

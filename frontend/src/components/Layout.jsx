@@ -1,6 +1,6 @@
 import Sidebar from './SideNav';
 import TopBar from './TopBar';
-import TheFooter from './TheFooter';
+import Footer from './Footer';
 
 const Layout = ({ children }) => {
   return (
@@ -13,7 +13,7 @@ const Layout = ({ children }) => {
             {children}
           </div>
         </main>
-        <TheFooter />
+        <Footer />
       </div>
     </div>
   );

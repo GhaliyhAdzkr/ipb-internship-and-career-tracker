@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
     PiMagnifyingGlassBold,
-    PiUserThin,
     PiIdentificationCardBold,
     PiGraduationCapBold,
     PiToggleLeftFill,
@@ -15,8 +14,7 @@ import {
     PiCalendarBlankBold,
     PiBriefcaseBold,
     PiCaretDown,
-    PiClockThin,
-    PiUsersThin
+    PiClockThin
 } from "react-icons/pi";
 import { useAdminUsers } from "../../hooks/useAdminUsers";
 import ConfirmModal from "../../components/ConfirmModal";

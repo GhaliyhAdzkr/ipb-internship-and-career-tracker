@@ -19,8 +19,6 @@ import {
   PiGlobe,
   PiCaretRightBold,
   PiSealCheckFill,
-  PiChartBarFill,
-  PiSparkle,
   PiXCircle
 } from "react-icons/pi";
 

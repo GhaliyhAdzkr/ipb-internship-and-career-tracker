@@ -107,6 +107,12 @@ export const adminService = {
   getPlacements: async () => {
     const response = await api.get('/admin/placements');
     return response.data;
+  },
+
+  // Analytics
+  getVacancyStats: async () => {
+    const response = await api.get('/analytics/vacancies');
+    return response.data;
   }
 };
 

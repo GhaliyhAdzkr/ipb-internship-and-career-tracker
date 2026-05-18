@@ -12,10 +12,24 @@ export function useAdminDashboard() {
         queryFn: adminService.getCompanies
     });
 
+    const studentsQuery = useQuery({
+        queryKey: ["admin", "students"],
+        queryFn: adminService.getStudents
+    });
+
+    const vacancyStatsQuery = useQuery({
+        queryKey: ["admin", "vacancy-stats"],
+        queryFn: adminService.getVacancyStats
+    });
+
     return {
         pendingApplications: pendingVerificationsQuery.data || [],
         loadingApps: pendingVerificationsQuery.isLoading,
         companies: companiesQuery.data || [],
-        isLoadingCompanies: companiesQuery.isLoading
+        isLoadingCompanies: companiesQuery.isLoading,
+        students: studentsQuery.data || [],
+        isLoadingStudents: studentsQuery.isLoading,
+        vacancyStats: vacancyStatsQuery.data,
+        isLoadingVacancyStats: vacancyStatsQuery.isLoading
     };
 }

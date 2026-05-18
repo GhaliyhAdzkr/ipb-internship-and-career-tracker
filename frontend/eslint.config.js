@@ -46,7 +46,7 @@ export default defineConfig([
         'vars': 'all', 
         'args': 'after-used', 
         'ignoreRestSiblings': true,
-        'varsIgnorePattern': '^[A-Z_]' 
+        'varsIgnorePattern': '^_' 
       }],
 
       // Strict Formatting & Code Aesthetics (Google Style Guide)

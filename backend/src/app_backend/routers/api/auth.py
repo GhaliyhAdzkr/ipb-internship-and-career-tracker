@@ -410,7 +410,28 @@ async def update_profile(
         if payload.department_id:
             profile.department_id = payload.department_id
         if payload.cv_url is not None:
-            profile.cv_url = payload.cv_url
+            from app_backend.conf.settings import settings
+            has_run_sync = False
+            if settings.is_development:
+                try:
+                    from app_backend.shared.tasks.ai_tasks import parse_cv_skills_sync
+                    secured_cv_url = parse_cv_skills_sync(str(current_user.id), str(payload.cv_url), session)
+                    profile.cv_url = secured_cv_url
+                    has_run_sync = True
+                except Exception as sync_err:
+                    print(f"Failed to parse CV synchronously in dev: {sync_err}. Falling back to saving raw URL.")
+                    profile.cv_url = payload.cv_url
+            else:
+                profile.cv_url = payload.cv_url
+
+            session.commit()
+
+            if not has_run_sync:
+                try:
+                    from app_backend.shared.tasks.ai_tasks import parse_cv_skills
+                    parse_cv_skills.delay(str(current_user.id), str(payload.cv_url))
+                except Exception as e:
+                    print(f"Failed to queue CV parsing: {e}")
 
         profile.updated_at = now
 

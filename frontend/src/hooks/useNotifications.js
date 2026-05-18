@@ -31,8 +31,8 @@ export const useNotifications = () => {
   });
 
   return {
-    notifications: notifications?.notifications || [],
-    unreadCount: unreadCount?.count || 0,
+    notifications: Array.isArray(notifications) ? notifications : (notifications?.notifications || []),
+    unreadCount: unreadCount?.unread_count ?? unreadCount?.count ?? 0,
     isLoading,
     markAsRead: markAsReadMutation.mutate,
     deleteNotification: deleteMutation.mutate,

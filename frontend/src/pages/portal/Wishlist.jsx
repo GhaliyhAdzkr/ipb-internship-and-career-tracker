@@ -1,8 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { vacancyService } from "../../services/vacancyService";
-import toast from "react-hot-toast";
+import { useWishlist, useWishlistMutations } from "../../hooks/useVacancies";
 import {
   PiTrash,
   PiBriefcase,
@@ -13,23 +11,8 @@ import {
 
 export default function Wishlist() {
 	const navigate = useNavigate();
-	const queryClient = useQueryClient();
-
-	const { data, isLoading, isError } = useQuery({
-		queryKey: ["wishlist"],
-		queryFn: () => vacancyService.getWishlist({ page: 1, perPage: 50 }),
-	});
-
-	const removeMutation = useMutation({
-		mutationFn: (id) => vacancyService.deleteWishlist(id),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["wishlist"] });
-			toast.success("Berhasil dihapus dari wishlist!");
-		},
-		onError: (err) => {
-			toast.error(err.response?.data?.detail || "Gagal menghapus dari wishlist.");
-		}
-	});
+	const { data, isLoading, isError } = useWishlist();
+	const { removeWishlist } = useWishlistMutations();
 
 	const displayType = (value) => {
 		switch (value) {
@@ -119,7 +102,7 @@ export default function Wishlist() {
 										</div>
 									</div>
 									<button 
-										onClick={() => removeMutation.mutate(item.id)}
+										onClick={() => removeWishlist(item.id)}
 										className="p-2 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
 										title="Hapus dari Wishlist"
 									>

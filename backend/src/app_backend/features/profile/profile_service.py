@@ -96,8 +96,20 @@ class ProfileService:
                 profile.phone_number = data.phone_number
             if data.linkedin_url is not None:
                 profile.linkedin_url = str(data.linkedin_url)
+            has_run_sync = False
             if data.cv_url is not None:
-                profile.cv_url = str(data.cv_url)
+                from app_backend.conf.settings import settings
+                if settings.is_development:
+                    try:
+                        from app_backend.shared.tasks.ai_tasks import parse_cv_skills_sync
+                        secured_cv_url = parse_cv_skills_sync(str(user_id), str(data.cv_url), self.student_repo.session)
+                        profile.cv_url = secured_cv_url
+                        has_run_sync = True
+                    except Exception as sync_err:
+                        print(f"Failed to parse CV synchronously in dev: {sync_err}. Falling back to saving raw URL.")
+                        profile.cv_url = str(data.cv_url)
+                else:
+                    profile.cv_url = str(data.cv_url)
 
             if data.skills is not None:
                 self.student_skill_repo.delete_all_for_student(user_id)
@@ -106,6 +118,13 @@ class ProfileService:
 
             profile.updated_at = datetime.now(timezone.utc)
             self.student_repo.save_changes()
+
+            if data.cv_url is not None and not has_run_sync:
+                try:
+                    from app_backend.shared.tasks.ai_tasks import parse_cv_skills
+                    parse_cv_skills.delay(str(user_id), str(data.cv_url))
+                except Exception as e:
+                    print(f"Failed to queue CV parsing: {e}")
         except Exception as exc:
             self.student_repo.rollback()
             raise exc
