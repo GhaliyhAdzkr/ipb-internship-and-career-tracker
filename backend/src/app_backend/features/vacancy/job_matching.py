@@ -133,6 +133,9 @@ def job_match_command_handler(
     if not student:
         return JobMatchResult(error_message="Profil mahasiswa tidak ditemukan")
 
+    if not student.cv_url:
+        return JobMatchResult(error_message="Anda belum mengunggah CV. Silakan unggah CV terlebih dahulu di halaman profil.")
+
     student_skill_ids = {ss.skill_id for ss in student.student_skills}
 
     # Get vacancy with skills
@@ -187,6 +190,9 @@ def job_match_list_command_handler(
     )
     if not student:
         return JobMatchListResult(error_message="Profil mahasiswa tidak ditemukan")
+
+    if not student.cv_url:
+        return JobMatchListResult(error_message="Anda belum mengunggah CV. Silakan unggah CV terlebih dahulu di halaman profil.")
 
     student_skill_ids = {ss.skill_id for ss in student.student_skills}
 

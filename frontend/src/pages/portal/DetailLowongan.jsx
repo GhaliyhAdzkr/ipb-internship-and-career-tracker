@@ -280,67 +280,90 @@ export default function DetailLowongan() {
 
           {/* Right Column: Sidebar */}
           <aside className="space-y-6">
-            {token && jobMatch && (
-              <div className="bg-gradient-to-br from-sky-900 to-indigo-950 text-white rounded-[32px] p-8 shadow-xl shadow-sky-950/10 space-y-6">
+            {token && jobMatch && jobMatch.total_required_skills === 0 && (
+              <div className="bg-white rounded-[32px] p-8 border border-slate-100 shadow-xl shadow-sky-950/[0.02] space-y-4">
+                <div className="flex items-center gap-2 text-slate-400 font-extrabold text-[11px] uppercase tracking-widest">
+                  <PiChartBarFill size={16} />
+                  Kesesuaian Profil AI
+                </div>
+                <p className="text-[13px] text-slate-400 leading-relaxed font-medium">
+                  Lowongan ini belum memuat kualifikasi keahlian khusus secara spesifik di sistem, sehingga analisis kesesuaian AI tidak dapat dihitung.
+                </p>
+              </div>
+            )}
+
+            {token && jobMatch && jobMatch.total_required_skills > 0 && (
+              <div className="bg-white rounded-[32px] p-8 border border-slate-100 shadow-xl shadow-sky-950/[0.02] space-y-6">
                 <div>
-                  <div className="flex items-center gap-2 text-sky-300 font-extrabold text-[11px] uppercase tracking-widest mb-2">
+                  <div className="flex items-center gap-2 text-sky-600 font-extrabold text-[11px] uppercase tracking-widest">
                     <PiChartBarFill size={16} />
                     Kesesuaian Profil AI
                   </div>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-[1000] tracking-tight">{jobMatch.match_percentage}%</span>
-                    <span className="text-xs text-sky-200/70 font-medium">Cocok</span>
+                  <div className="flex items-baseline gap-2 mt-4">
+                    <span className="text-4xl font-[900] text-sky-950 tracking-tight">{jobMatch.match_percentage}%</span>
+                    <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Kecocokan</span>
                   </div>
                 </div>
 
                 {/* Progress Bar */}
-                <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden">
+                <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
                   <div 
-                    className="h-full bg-gradient-to-r from-sky-400 to-emerald-400 rounded-full transition-all duration-1000"
+                    className="h-full bg-sky-600 rounded-full transition-all duration-1000"
                     style={{ width: `${jobMatch.match_percentage}%` }}
                   />
                 </div>
 
-                <div className="space-y-4 pt-2 border-t border-white/10 text-[13px]">
-                  <div>
-                    <span className="text-white/60 font-medium">Skill yang cocok: </span>
-                    <span className="font-bold text-sky-200">
-                      {jobMatch.matched_skills.length > 0 
-                        ? jobMatch.matched_skills.join(", ") 
-                        : "Belum ada"}
-                    </span>
+                <div className="space-y-4 pt-4 border-t border-slate-100 text-[13px]">
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-slate-400 font-bold text-[11px] uppercase tracking-wider">Skill yang cocok:</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {jobMatch.matched_skills.length > 0 ? (
+                        jobMatch.matched_skills.map((skill) => (
+                          <span key={skill} className="px-2.5 py-1 bg-sky-50 text-sky-700 text-xs font-bold rounded-lg border border-sky-100/50">
+                            {skill}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-slate-400 italic">Belum ada skill yang cocok</span>
+                      )}
+                    </div>
                   </div>
+
                   {jobMatch.missing_mandatory_skills.length > 0 && (
-                    <div>
-                      <span className="text-white/60 font-medium">Skill wajib belum dimiliki: </span>
-                      <span className="font-bold text-rose-300">
-                        {jobMatch.missing_mandatory_skills.join(", ") }
-                      </span>
+                    <div className="flex flex-col gap-1.5 pt-2">
+                      <span className="text-slate-400 font-bold text-[11px] uppercase tracking-wider">Skill wajib belum dimiliki:</span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {jobMatch.missing_mandatory_skills.map((skill) => (
+                          <span key={skill} className="px-2.5 py-1 bg-rose-50 text-rose-600 text-xs font-bold rounded-lg border border-rose-100/50">
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
 
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex gap-3 items-start">
-                  <PiInfo size={20} className="text-sky-300 shrink-0 mt-0.5" />
-                  <p className="text-[11px] text-sky-200/80 leading-relaxed font-medium">
-                    Skor kesesuaian ini dihitung secara otomatis oleh kecerdasan buatan (AI) berdasarkan keahlian pada profil CV Anda dengan kualifikasi lowongan.
+                <div className="bg-slate-50 border border-slate-100/50 rounded-2xl p-4 flex gap-3 items-start">
+                  <PiInfo size={18} className="text-sky-600 shrink-0 mt-0.5" />
+                  <p className="text-[11px] text-slate-400 leading-relaxed font-medium">
+                    Skor ini dihitung secara otomatis oleh sistem AI dengan menganalisis kecocokan keahlian pada CV yang Anda unggah dengan kebutuhan lowongan ini.
                   </p>
                 </div>
               </div>
             )}
 
             {token && !jobMatch && (
-              <div className="bg-slate-50 border border-slate-100 rounded-[32px] p-8 space-y-6">
-                <div className="flex items-center gap-2 text-slate-500 font-extrabold text-[11px] uppercase tracking-widest">
-                  <PiChartBarFill size={16} className="text-sky-600 animate-pulse" />
+              <div className="bg-white rounded-[32px] p-8 border border-slate-100 shadow-xl shadow-sky-950/[0.02] space-y-4">
+                <div className="flex items-center gap-2 text-slate-400 font-extrabold text-[11px] uppercase tracking-widest">
+                  <PiChartBarFill size={16} />
                   Kesesuaian Profil AI
                 </div>
-                <p className="text-[13px] text-slate-500 leading-relaxed font-medium">
-                  Belum ada data analisis kecocokan. Unggah CV di halaman profil Anda untuk mengaktifkan analisis kesesuaian profil otomatis dengan kecerdasan buatan!
+                <p className="text-[13px] text-slate-400 leading-relaxed font-medium">
+                  Analisis kesesuaian otomatis belum aktif. Unggah CV di profil Anda agar sistem dapat menganalisis tingkat kecocokan profil Anda secara real-time.
                 </p>
                 <Link 
                   to="/app/profile" 
-                  className="inline-flex w-full py-3 bg-sky-950 text-white rounded-xl text-xs font-bold items-center justify-center hover:bg-sky-900 transition-all active:scale-95 hover:shadow-lg hover:shadow-sky-950/20"
+                  className="inline-flex w-full py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-bold items-center justify-center transition-all active:scale-95 shadow-md shadow-sky-600/10"
                 >
                   Unggah CV Sekarang
                 </Link>

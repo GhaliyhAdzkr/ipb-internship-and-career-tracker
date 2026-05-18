@@ -9,7 +9,7 @@ from langchain_openai import ChatOpenAI
 from pydantic import BaseModel
 import requests
 from pypdf import PdfReader
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 
 from app_backend.models.master_skills import MasterSkills
 from app_backend.models.student_skills import StudentSkills
@@ -43,6 +43,97 @@ def get_llm() -> Optional[ChatOpenAI]:
     )
 
 
+# Reusable synchronous CV processing function
+def parse_cv_skills_sync(student_id: str, cv_url: str, session: Session) -> str:
+    """
+    Secures an external CV by downloading and hosting it permanently in local S3 or uploads directory,
+    then parses its contents and matches against MasterSkills.
+    Returns the new hosted CV URL, or the original if it was not external or upload failed.
+    """
+    # Convert sharing link to direct download link
+    direct_url = cv_url
+    is_external_link = "drive.google.com" in cv_url or "dropbox.com" in cv_url
+    if "drive.google.com" in cv_url:
+        match = re.search(r"/file/d/([a-zA-Z0-9_-]+)", cv_url)
+        if match:
+            file_id = match.group(1)
+            direct_url = f"https://drive.google.com/uc?export=download&id={file_id}"
+    elif "dropbox.com" in cv_url:
+        direct_url = cv_url.replace("dl=0", "raw=1").replace("dl=1", "raw=1")
+
+    # Download file
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+    response = requests.get(direct_url, headers=headers, timeout=30)
+    response.raise_for_status()
+
+    # Read PDF content
+    pdf_file = io.BytesIO(response.content)
+    reader = PdfReader(pdf_file)
+    text = ""
+    for page in reader.pages:
+        text += page.extract_text() or ""
+
+    # Upload external CV to local S3 or directory to secure snapshot URL
+    new_cv_url = None
+    if is_external_link:
+        try:
+            import uuid
+            from app_backend.conf.settings import settings
+            from app_backend.shared.s3_storage import get_s3_client, upload_fileobj
+
+            unique_filename = f"{student_id}_{uuid.uuid4().hex[:8]}.pdf"
+            s3_key = f"cv/{unique_filename}"
+
+            if settings.storage_type == "s3":
+                s3_client = get_s3_client()
+                pdf_file.seek(0)
+                success = upload_fileobj(s3_client, pdf_file, settings.s3_bucket, s3_key, content_type="application/pdf")
+                if success:
+                    if "storage.supabase.co/storage/v1/s3" in settings.s3_endpoint:
+                        public_endpoint = settings.s3_endpoint.replace("/storage/v1/s3", "/storage/v1/object/public")
+                        new_cv_url = f"{public_endpoint}/{settings.s3_bucket}/{s3_key}"
+                    else:
+                        new_cv_url = f"{settings.s3_endpoint}/{settings.s3_bucket}/{s3_key}"
+            else:
+                os.makedirs("uploads/cv", exist_ok=True)
+                file_path = os.path.join("uploads/cv", unique_filename)
+                pdf_file.seek(0)
+                with open(file_path, "wb") as buffer:
+                    buffer.write(pdf_file.read())
+                new_cv_url = f"/uploads/cv/{unique_filename}"
+        except Exception as upload_err:
+            print(f"Failed to auto-upload external CV: {upload_err}")
+
+    # If S3 upload succeeded, update the student's cv_url
+    if new_cv_url:
+        from app_backend.models.profiles_student import ProfilesStudent
+        student_profile = session.query(ProfilesStudent).filter(ProfilesStudent.user_id == student_id).first()
+        if student_profile:
+            student_profile.cv_url = new_cv_url
+            cv_url = new_cv_url
+
+    # Query all master skills from database for matching
+    master_skills = session.query(MasterSkills).all()
+
+    # Find which master skills exist in the text (case-insensitive keyword matching)
+    extracted = []
+    text_lower = text.lower()
+    for skill in master_skills:
+        skill_name_lower = skill.name.lower()
+        pattern = rf"\b{re.escape(skill_name_lower)}\b"
+        if re.search(pattern, text_lower):
+            extracted.append(skill)
+
+    # Delete old student skills first to replace
+    session.query(StudentSkills).filter(StudentSkills.student_id == student_id).delete(synchronize_session="fetch")
+
+    # Add extracted skills with level 3 as default
+    for skill in extracted:
+        session.add(StudentSkills(student_id=student_id, skill_id=skill.id, level=3))
+
+    return cv_url
+
+
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)
 def parse_cv_skills(
     self,
@@ -58,95 +149,15 @@ def parse_cv_skills(
         if not student_id or not cv_url:
             return TaskResult(success=False, error="Invalid inputs").dict()
 
-        # Convert sharing link to direct download link
-        direct_url = cv_url
-        is_external_link = "drive.google.com" in cv_url or "dropbox.com" in cv_url
-        if "drive.google.com" in cv_url:
-            match = re.search(r"/file/d/([a-zA-Z0-9_-]+)", cv_url)
-            if match:
-                file_id = match.group(1)
-                direct_url = f"https://drive.google.com/uc?export=download&id={file_id}"
-        elif "dropbox.com" in cv_url:
-            direct_url = cv_url.replace("dl=0", "raw=1").replace("dl=1", "raw=1")
-
-        # Download file
-        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
-        response = requests.get(direct_url, headers=headers, timeout=30)
-        response.raise_for_status()
-
-        # Read PDF content
-        pdf_file = io.BytesIO(response.content)
-        reader = PdfReader(pdf_file)
-        text = ""
-        for page in reader.pages:
-            text += page.extract_text() or ""
-
-        # Upload external CV to local S3 or directory to secure snapshot URL
-        new_cv_url = None
-        if is_external_link:
-            try:
-                import uuid
-                from app_backend.conf.settings import settings
-                from app_backend.shared.s3_storage import get_s3_client, upload_fileobj
-
-                unique_filename = f"{student_id}_{uuid.uuid4().hex[:8]}.pdf"
-                s3_key = f"cv/{unique_filename}"
-
-                if settings.storage_type == "s3":
-                    s3_client = get_s3_client()
-                    pdf_file.seek(0)
-                    success = upload_fileobj(s3_client, pdf_file, settings.s3_bucket, s3_key, content_type="application/pdf")
-                    if success:
-                        if "storage.supabase.co/storage/v1/s3" in settings.s3_endpoint:
-                            public_endpoint = settings.s3_endpoint.replace("/storage/v1/s3", "/storage/v1/object/public")
-                            new_cv_url = f"{public_endpoint}/{settings.s3_bucket}/{s3_key}"
-                        else:
-                            new_cv_url = f"{settings.s3_endpoint}/{settings.s3_bucket}/{s3_key}"
-                else:
-                    os.makedirs("uploads/cv", exist_ok=True)
-                    file_path = os.path.join("uploads/cv", unique_filename)
-                    pdf_file.seek(0)
-                    with open(file_path, "wb") as buffer:
-                        buffer.write(pdf_file.read())
-                    new_cv_url = f"/uploads/cv/{unique_filename}"
-            except Exception as upload_err:
-                print(f"Failed to auto-upload external CV: {upload_err}")
-
-        # Query all master skills from database for matching
         Session = sessionmaker(bind=engine)
         session = Session()
         try:
-            if new_cv_url:
-                from app_backend.models.profiles_student import ProfilesStudent
-                student_profile = session.query(ProfilesStudent).filter(ProfilesStudent.user_id == student_id).first()
-                if student_profile:
-                    student_profile.cv_url = new_cv_url
-
-            master_skills = session.query(MasterSkills).all()
-
-            # Find which master skills exist in the text (case-insensitive keyword matching)
-            extracted = []
-            text_lower = text.lower()
-            for skill in master_skills:
-                skill_name_lower = skill.name.lower()
-                pattern = rf"\b{re.escape(skill_name_lower)}\b"
-                if re.search(pattern, text_lower):
-                    extracted.append(skill)
-
-            # Delete old student skills first to replace
-            session.query(StudentSkills).filter(StudentSkills.student_id == student_id).delete(synchronize_session="fetch")
-
-            # Add extracted skills with level 3 as default
-            for skill in extracted:
-                session.add(StudentSkills(student_id=student_id, skill_id=skill.id, level=3))
+            parse_cv_skills_sync(student_id, cv_url, session)
             session.commit()
-
-            result = {
-                "student_id": student_id,
-                "extracted_skills": [{"name": skill.name, "category": skill.category, "confidence": 1.0} for skill in extracted],
-                "status": "completed",
-            }
-            return TaskResult(success=True, result=result).dict()
+            return TaskResult(success=True, result={"status": "completed"}).dict()
+        except Exception as inner_err:
+            session.rollback()
+            raise inner_err
         finally:
             session.close()
 

@@ -49,8 +49,23 @@ def update_cv_data_command_handler(
             profile.phone_number = payload.phone_number
         if payload.linkedin_url is not None:
             profile.linkedin_url = str(payload.linkedin_url)
+        from app_backend.conf.settings import settings
+
+        has_run_sync = False
         if payload.cv_url is not None:
-            profile.cv_url = str(payload.cv_url)
+            if settings.is_development:
+                try:
+                    from app_backend.shared.tasks.ai_tasks import parse_cv_skills_sync
+
+                    secured_cv_url = parse_cv_skills_sync(str(command.user_id), str(payload.cv_url), session)
+                    profile.cv_url = secured_cv_url
+                    has_run_sync = True
+                except Exception as sync_err:
+                    print(f"Failed to parse CV synchronously in dev: {sync_err}. Falling back to saving raw URL.")
+                    profile.cv_url = str(payload.cv_url)
+            else:
+                # In Production/Staging: Save raw link immediately, background queue will host and parse it
+                profile.cv_url = str(payload.cv_url)
 
         if payload.skills is not None:
             # Full replace hapus semua skill lama, insert baru
@@ -68,8 +83,8 @@ def update_cv_data_command_handler(
         profile.updated_at = datetime.now(timezone.utc)
         session.commit()
 
-        # Trigger CV parsing task in background if cv_url was updated and is not empty
-        if payload.cv_url:
+        # Trigger CV parsing task in background only as fallback if synchronous execution failed
+        if payload.cv_url and not has_run_sync:
             try:
                 from app_backend.shared.tasks.ai_tasks import parse_cv_skills
 

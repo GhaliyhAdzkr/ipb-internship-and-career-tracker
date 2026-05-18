@@ -16,6 +16,7 @@ from app_backend.models.master_skills import MasterSkills  # noqa: F401
 from app_backend.models.notification_queue import \
     NotificationQueue  # noqa: F401
 
+from app_backend.models.activity_logs import ActivityLogs  # noqa: F401
 from app_backend.models.placements import Placements  # noqa: F401
 
 from app_backend.models.profiles_admin import ProfilesAdmin  # noqa: F401
