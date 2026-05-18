@@ -92,14 +92,16 @@ function AdminVacancies() {
 
         try {
             const detail = await vacancyService.getVacancy(v.id);
-            if (detail && detail.skills) {
-                const formattedSkills = detail.skills.map(s => ({
+            if (detail) {
+                const formattedSkills = (detail.skills || []).map(s => ({
                     skill_id: s.skill_id,
                     is_mandatory: s.is_mandatory
                 }));
-                setFormData(prev => ({ ...prev, skills: formattedSkills }));
-            } else {
-                setFormData(prev => ({ ...prev, skills: [] }));
+                setFormData(prev => ({ 
+                    ...prev, 
+                    description: detail.description || "",
+                    skills: formattedSkills 
+                }));
             }
         } catch (err) {
             console.error("Failed to fetch vacancy details:", err);

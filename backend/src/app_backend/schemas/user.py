@@ -168,6 +168,7 @@ class ProfileUpdate(BaseModel):
     linkedin_url: Optional[str] = None
     gpa: Optional[float] = Field(None, ge=0.0, le=4.0)
     department_id: Optional[uuid.UUID] = None
+    cv_url: Optional[str] = None
 
 
 # Response

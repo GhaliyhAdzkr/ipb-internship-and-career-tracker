@@ -49,7 +49,7 @@ class ApplicationService:
         if not student:
             raise ValueError("Profil mahasiswa tidak ditemukan")
         if not student.cv_url:
-            raise ValueError("Anda harus mengunggah CV sebelum melamar lowongan")
+            raise ValueError("Anda harus mengunggah CV sebelum melamar lowongan. Buka bagian Profil untuk mengunggah CV.")
 
         query = select(Applications).where(
             Applications.vacancy_id == data.vacancy_id,

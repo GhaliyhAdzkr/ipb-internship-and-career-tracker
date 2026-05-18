@@ -409,6 +409,8 @@ async def update_profile(
             profile.gpa = payload.gpa
         if payload.department_id:
             profile.department_id = payload.department_id
+        if payload.cv_url is not None:
+            profile.cv_url = payload.cv_url
 
         profile.updated_at = now
 
