@@ -56,8 +56,7 @@ function AdminVacancies() {
         deleteMutation,
         createSkillMutation,
         createMutation,
-        updateMutation,
-        scrapeMutation
+        updateMutation
     } = useAdminVacancies(() => {
         setIsFormOpen(false);
     });
@@ -192,14 +191,6 @@ function AdminVacancies() {
                         </p>
                     </div>
                     <div className="flex gap-3">
-                        <button 
-                            onClick={() => scrapeMutation.mutate()}
-                            disabled={scrapeMutation.isPending}
-                            className="bg-sky-500/10 backdrop-blur-md border border-sky-400/20 text-white px-6 py-4 rounded-[1.5rem] font-bold flex items-center gap-2 hover:bg-sky-500/20 transition-all active:scale-95 disabled:opacity-50"
-                        >
-                            <PiCloudArrowDownBold size={24} className={scrapeMutation.isPending ? "animate-bounce" : ""} />
-                            {scrapeMutation.isPending ? "Mensinkronkan..." : "Scrape Sekarang"}
-                        </button>
                         <button 
                             onClick={() => {
                                 setSelectedVacancy(null);
