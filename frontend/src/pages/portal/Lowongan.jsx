@@ -152,8 +152,7 @@ function Lowongan() {
 		return (
 			<div
 				ref={ref}
-				onClick={() => handleCardClick(item.id)}
-				className="h-full p-6 bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] border border-slate-50 flex flex-col gap-4 hover:-translate-y-1 transition-transform cursor-pointer group"
+				className="h-full p-6 bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] border border-slate-50 flex flex-col gap-4 hover:-translate-y-1 transition-transform group"
 			>
 				<div className="flex justify-between items-start mb-2">
 					<div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-sky-600 border border-slate-100 overflow-hidden group-hover:border-sky-100 transition-colors p-1.5">
@@ -191,7 +190,7 @@ function Lowongan() {
 				</div>
 
 				<div className="flex-1">
-					<h4 className="text-[17px] font-[900] text-sky-950 line-clamp-2 leading-snug group-hover:text-sky-600 transition-colors">{item.title}</h4>
+					<h4 onClick={() => handleCardClick(item.id)} className="text-[17px] cursor-pointer font-[900] text-sky-950 line-clamp-2 leading-snug hover:text-sky-600 transition-colors hover:underline">{item.title}</h4>
 					<p className="text-[14px] font-medium text-slate-400 mt-1">{item.company?.name || "Perusahaan"}</p>
 				</div>
 				
@@ -232,7 +231,7 @@ function Lowongan() {
 				<div className="flex-1 flex flex-col gap-1.5 min-w-[200px]">
 					<label className="text-[11px] font-[900] text-slate-400 uppercase tracking-widest">Pencarian</label>
 					<div className="relative">
-						<PiBriefcase className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={20} />
+						<PiBriefcase className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" size={20} />
 						<input
 							type="text"
 							ref={queryRef}
@@ -246,7 +245,7 @@ function Lowongan() {
 				<div className="flex-1 flex flex-col gap-1.5 min-w-[150px]">
 					<label className="text-[11px] font-[900] text-slate-400 uppercase tracking-widest">Lokasi</label>
 					<div className="relative">
-						<PiMapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={20} />
+						<PiMapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" size={20} />
 						<input
 							type="text"
 							ref={locationRef}

@@ -433,7 +433,7 @@ function VacancyCard({ id, title, company, companyLogo, location, type, deadline
       </div>
       
       <div className="flex-1 mb-6">
-        <h3 className="text-[17px] font-[900] text-sky-950 mb-1 group-hover:text-sky-600 transition-colors line-clamp-2 leading-snug">{title}</h3>
+        <Link to={`/detail/${id}`} className="text-[17px] cursor-pointer font-[900] text-sky-950 mb-1 hover:text-sky-600 transition-colors line-clamp-2 leading-snug hover:underline">{title}</Link>
         <p className="text-[14px] font-medium text-slate-400">{company}</p>
       </div>
       

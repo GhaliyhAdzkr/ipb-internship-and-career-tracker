@@ -2,6 +2,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useSearchParams } from "react-router-dom";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { 
   PiEnvelopeSimple, 
   PiLockKey, 
@@ -13,20 +16,26 @@ import {
   PiCheckCircle
 } from "react-icons/pi";
 
+const loginSchema = z.object({
+  email: z.string().min(1, "Email atau Username wajib diisi"),
+  password: z.string().min(1, "Kata sandi wajib diisi")
+});
+
 function Login() {
 	const navigate = useNavigate();
 	const { login, isLoggingIn, loginError } = useAuth();
-	const [email, setEmail] = useState("");
-	const [password, setPassword] = useState("");
 	const [showPassword, setShowPassword] = useState(false);
 
 	const [searchParams] = useSearchParams();
 	const isVerified = searchParams.get("verified") === "true";
 	const isRegistered = searchParams.get("registered") === "true";
 
-	const handleSubmit = async (e) => {
-		e.preventDefault();
-		login({ email, password });
+	const { register, handleSubmit, formState: { errors } } = useForm({
+		resolver: zodResolver(loginSchema)
+	});
+
+	const onSubmit = async (data) => {
+		login({ email: data.email, password: data.password });
 	};
 
 	return (
@@ -91,7 +100,7 @@ function Login() {
 						</div>
 					</div>
 
-					<form onSubmit={handleSubmit} className="space-y-6">
+					<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 						<div className="space-y-5">
 							{/* Email Input */}
 							<div className="space-y-2">
@@ -100,13 +109,12 @@ function Login() {
 									<PiEnvelopeSimple className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-sky-600 transition-colors" size={20} />
 									<input
 										type="text"
-										required
-										value={email}
-										onChange={(e) => setEmail(e.target.value)}
+										{...register("email")}
 										placeholder="username@apps.ipb.ac.id atau username"
 										className="w-full pl-12 pr-4 py-3.5 bg-[#E8F1FF] border-none rounded-xl focus:ring-2 focus:ring-sky-500 outline-none transition-all font-medium text-sm text-zinc-800"
 									/>
 								</div>
+								{errors.email && <p className="text-xs font-bold text-red-500">{errors.email.message}</p>}
 							</div>
 
 							{/* Password Input */}
@@ -125,9 +133,7 @@ function Login() {
 									<PiLockKey className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-sky-600 transition-colors" size={20} />
 									<input
 										type={showPassword ? "text" : "password"}
-										required
-										value={password}
-										onChange={(e) => setPassword(e.target.value)}
+										{...register("password")}
 										placeholder="••••••••"
 										className="w-full pl-12 pr-12 py-3.5 bg-[#E8F1FF] border-none rounded-xl focus:ring-2 focus:ring-sky-500 outline-none transition-all font-medium text-sm text-zinc-800"
 									/>
@@ -139,6 +145,7 @@ function Login() {
 										{showPassword ? <PiEyeSlash size={20} /> : <PiEye size={20} />}
 									</button>
 								</div>
+								{errors.password && <p className="text-xs font-bold text-red-500">{errors.password.message}</p>}
 							</div>
 						</div>
 
@@ -159,28 +166,16 @@ function Login() {
 								<PiSpinnerGap size={24} className="animate-spin" />
 							) : (
 								<>
-									<span>Masuk ke Dashboard</span>
+									<span>Masuk Sekarang</span>
 									<PiArrowRight size={20} weight="bold" />
 								</>
 							)}
 						</button>
 					</form>
 
-					<div className="relative py-2">
-						<div className="absolute inset-0 flex items-center">
-							<div className="w-full border-t border-zinc-100"></div>
-						</div>
-						<div className="relative flex justify-center text-[10px] uppercase font-bold tracking-[0.2em] text-zinc-300">
-							<span className="bg-white px-4">ATAU</span>
-						</div>
-					</div>
-
-					<div className="p-8 bg-[#F0F5FF] rounded-xl flex flex-col items-center gap-2">
-						<p className="text-sm text-zinc-500 font-medium">Belum memiliki akun LARAS?</p>
-						<button
-							onClick={() => navigate("/registration")}
-							className="text-[#0052CC] font-bold text-lg hover:underline"
-						>
+					<div className="text-center text-zinc-500 font-medium text-sm">
+						Belum memiliki akun LARAS?{" "}
+						<button onClick={() => navigate("/register")} className="text-[#002957] font-bold hover:underline">
 							Daftar Sekarang
 						</button>
 					</div>

@@ -431,7 +431,7 @@ function JobCard({ id, title, company, companyLogo, icon, tags, deadline }) {
   const [imgError, setImgError] = useState(false);
 
   return (
-    <Link to={`/detail/${id}`} className="bg-white p-8 rounded-2xl border border-slate-100 shadow-xl shadow-sky-900/[0.03] flex flex-col group hover:shadow-sky-900/10 transition-all duration-300">
+    <div className="bg-white p-8 rounded-2xl border border-slate-100 shadow-xl shadow-sky-900/[0.03] flex flex-col group hover:shadow-sky-900/10 transition-all duration-300">
       <div className="flex justify-between items-start mb-6">
         <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-sky-600 border border-slate-100 overflow-hidden group-hover:border-sky-100 transition-colors p-1.5">
           {companyLogo && !imgError ? (
@@ -455,7 +455,7 @@ function JobCard({ id, title, company, companyLogo, icon, tags, deadline }) {
       </div>
       
       <div className="flex-1 mb-8">
-        <h3 className="text-lg font-[900] text-sky-950 mb-1 group-hover:text-sky-600 transition-colors line-clamp-2">{title}</h3>
+        <Link to={`/detail/${id}`} className="text-lg cursor-pointer font-[900] text-sky-950 mb-1 hover:text-sky-600 transition-colors line-clamp-2 hover:underline">{title}</Link>
         <p className="text-sm font-medium text-slate-400">{company}</p>
         
         <div className="flex flex-wrap gap-2 mt-4">
@@ -467,10 +467,9 @@ function JobCard({ id, title, company, companyLogo, icon, tags, deadline }) {
         </div>
       </div>
       
-      <div className="pt-6 border-t border-slate-50 flex items-center justify-between mt-auto">
+      <div className="pt-6 border-t border-slate-50 mt-auto">
         <span className="text-[12px] font-bold text-slate-400 tracking-tight">Berakhir {deadline}</span>
-        <span className="text-[13px] font-[900] text-sky-950 group-hover:text-sky-600 transition-colors">Detail Lowongan</span>
       </div>
-    </Link>
+    </div>
   );
 }

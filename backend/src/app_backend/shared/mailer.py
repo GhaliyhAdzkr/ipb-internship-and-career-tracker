@@ -12,7 +12,7 @@ def send_direct_email(to_email: str, subject: str, body: str, user_name: str = "
 
     # Load Template
     template_path = os.path.join(os.path.dirname(__file__), "templates", "email_base.html")
-    logo_path = os.path.join(os.path.dirname(__file__), "templates", "logo.png")
+    logo_path = os.path.join(os.path.dirname(__file__), "templates", "laras.png")
 
     if os.path.exists(template_path):
         with open(template_path, "r") as f:
@@ -40,7 +40,7 @@ def send_direct_email(to_email: str, subject: str, body: str, user_name: str = "
     if os.path.exists(logo_path):
         with open(logo_path, "rb") as f:
             logo_data = f.read()
-            msg.get_payload()[1].add_related(logo_data, maintype="image", subtype="png", cid="logo")
+            msg.get_payload()[1].add_related(logo_data, maintype="image", subtype="png", cid="laras")
 
     try:
         if settings.smtp_port == 465:

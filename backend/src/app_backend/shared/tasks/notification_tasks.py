@@ -63,7 +63,7 @@ def send_email_notification(
 
         # Load Template
         template_path = os.path.join(os.path.dirname(__file__), "..", "templates", "email_base.html")
-        logo_path = os.path.join(os.path.dirname(__file__), "..", "templates", "logo.png")
+        logo_path = os.path.join(os.path.dirname(__file__), "..", "templates", "laras.png")
 
         if os.path.exists(template_path):
             with open(template_path, "r") as f:
@@ -96,7 +96,7 @@ def send_email_notification(
             with open(logo_path, "rb") as f:
                 logo_data = f.read()
                 # add_related transforms the part into multipart/related
-                html_part.add_related(logo_data, maintype="image", subtype="png", cid="logo")
+                html_part.add_related(logo_data, maintype="image", subtype="png", cid="laras")
 
         # Add the HTML (with its related images) as an alternative to the plain text
         if html_part.is_multipart():

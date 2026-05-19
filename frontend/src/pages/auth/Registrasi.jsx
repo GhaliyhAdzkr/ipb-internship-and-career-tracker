@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { authService } from "../../services/authService";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { 
   PiUser, 
   PiIdentificationCard, 
@@ -16,28 +19,37 @@ import {
   PiBookOpenText
 } from "react-icons/pi";
 
+const registrationSchema = z.object({
+  full_name: z.string().min(3, "Nama lengkap minimal 3 karakter"),
+  nim: z.string().regex(/^[A-Za-z][0-9]{8}$/, "Format NIM tidak valid. Harus diawali 1 huruf dan diikuti 8 angka (Contoh: G64012012)"),
+  semester: z.coerce.number().min(1, "Semester minimal 1").max(14, "Semester maksimal 14"),
+  email: z.string().email("Format email tidak valid").endsWith("@apps.ipb.ac.id", "Wajib menggunakan email institusi @apps.ipb.ac.id"),
+  password: z.string().min(8, "Kata sandi minimal 8 karakter")
+});
+
 function Registration() {
 	const navigate = useNavigate();
-	const { register, isRegistering, registerError } = useAuth();
+	const { register: registerAuth, isRegistering, registerError } = useAuth();
 	
-	const [fullName, setFullName] = useState("");
-	const [nim, setNim] = useState("");
-	const [email, setEmail] = useState("");
-	const [password, setPassword] = useState("");
-	const [semester, setSemester] = useState(1);
 	const [showPassword, setShowPassword] = useState(false);
-
 	const [emailCheck, setEmailCheck] = useState({ isLoading: false, isAvailable: null, message: "" });
+
+	const { register, handleSubmit, watch, formState: { errors } } = useForm({
+		resolver: zodResolver(registrationSchema),
+		defaultValues: { semester: 1 }
+	});
+
+	const emailValue = watch("email");
 
 	useEffect(() => {
 		const timer = setTimeout(async () => {
-			if (!email || email.length < 3) {
+			if (!emailValue || emailValue.length < 3) {
 				setEmailCheck({ isLoading: false, isAvailable: null, message: "" });
 				return;
 			}
 			setEmailCheck(prev => ({ ...prev, isLoading: true }));
 			try {
-				const res = await authService.checkAvailability(email);
+				const res = await authService.checkAvailability(emailValue);
 				setEmailCheck({ 
 					isLoading: false, 
 					isAvailable: res.available, 
@@ -48,17 +60,11 @@ function Registration() {
 			}
 		}, 500);
 		return () => clearTimeout(timer);
-	}, [email]);
+	}, [emailValue]);
 
-	const handleSubmit = (e) => {
-		e.preventDefault();
-		register({
-			full_name: fullName,
-			nim,
-			email,
-			password,
-			semester: parseInt(semester)
-		});
+	const onSubmit = (data) => {
+		if (emailCheck.isAvailable === false) return;
+		registerAuth(data);
 	};
 
 	return (
@@ -75,7 +81,7 @@ function Registration() {
 						</p>
 					</div>
 
-					<form onSubmit={handleSubmit} className="space-y-6">
+					<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 						<div className="space-y-5">
 							{/* Nama Lengkap */}
 							<div className="space-y-2">
@@ -84,13 +90,12 @@ function Registration() {
 									<PiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-sky-600 transition-colors" size={20} />
 									<input
 										type="text"
-										required
-										value={fullName}
-										onChange={(e) => setFullName(e.target.value)}
+										{...register("full_name")}
 										placeholder="Contoh: Windah Basudara"
 										className="w-full pl-12 pr-4 py-3.5 bg-[#E8F1FF] border-none rounded-xl focus:ring-2 focus:ring-sky-500 outline-none transition-all font-medium text-sm text-zinc-800"
 									/>
 								</div>
+								{errors.full_name && <p className="text-xs font-bold text-red-500">{errors.full_name.message}</p>}
 							</div>
 
 							<div className="grid grid-cols-2 gap-4">
@@ -101,13 +106,12 @@ function Registration() {
 										<PiIdentificationCard className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-sky-600 transition-colors" size={20} />
 										<input
 											type="text"
-											required
-											value={nim}
-											onChange={(e) => setNim(e.target.value)}
+											{...register("nim")}
 											placeholder="G640120XXXX"
 											className="w-full pl-12 pr-4 py-3.5 bg-[#E8F1FF] border-none rounded-xl focus:ring-2 focus:ring-sky-500 outline-none transition-all font-medium text-sm text-zinc-800"
 										/>
 									</div>
+									{errors.nim && <p className="text-xs font-bold text-red-500">{errors.nim.message}</p>}
 								</div>
 
 								{/* Semester */}
@@ -117,14 +121,11 @@ function Registration() {
 										<PiBookOpenText className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-sky-600 transition-colors" size={20} />
 										<input
 											type="number"
-											min="1"
-											max="14"
-											required
-											value={semester}
-											onChange={(e) => setSemester(e.target.value)}
+											{...register("semester")}
 											className="w-full pl-12 pr-4 py-3.5 bg-[#E8F1FF] border-none rounded-xl focus:ring-2 focus:ring-sky-500 outline-none transition-all font-medium text-sm text-zinc-800"
 										/>
 									</div>
+									{errors.semester && <p className="text-xs font-bold text-red-500">{errors.semester.message}</p>}
 								</div>
 							</div>
 
@@ -135,9 +136,7 @@ function Registration() {
 									<PiEnvelopeSimple className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-sky-600 transition-colors" size={20} />
 									<input
 										type="email"
-										required
-										value={email}
-										onChange={(e) => setEmail(e.target.value)}
+										{...register("email")}
 										placeholder="username@apps.ipb.ac.id"
 										className={`w-full pl-12 pr-10 py-3.5 bg-[#E8F1FF] border-2 rounded-xl focus:ring-0 outline-none transition-all font-medium text-sm text-zinc-800 ${
 											emailCheck.isAvailable === false ? "border-red-400 focus:border-red-500" :
@@ -149,7 +148,8 @@ function Registration() {
 										{emailCheck.isLoading && <PiSpinnerGap className="animate-spin text-zinc-400" size={18} />}
 									</div>
 								</div>
-								{emailCheck.message && (
+								{errors.email && <p className="text-xs font-bold text-red-500">{errors.email.message}</p>}
+								{!errors.email && emailCheck.message && (
 									<p className={`text-xs font-bold ${emailCheck.isAvailable ? "text-emerald-600" : "text-red-500"}`}>
 										{emailCheck.message}
 									</p>
@@ -163,9 +163,7 @@ function Registration() {
 									<PiLockKey className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-sky-600 transition-colors" size={20} />
 									<input
 										type={showPassword ? "text" : "password"}
-										required
-										value={password}
-										onChange={(e) => setPassword(e.target.value)}
+										{...register("password")}
 										placeholder="Minimal 8 karakter"
 										className="w-full pl-12 pr-11 py-3.5 bg-[#E8F1FF] border-none rounded-xl focus:ring-2 focus:ring-sky-500 outline-none transition-all font-medium text-sm text-zinc-800"
 									/>
@@ -177,6 +175,7 @@ function Registration() {
 										{showPassword ? <PiEyeSlash size={20} /> : <PiEye size={20} />}
 									</button>
 								</div>
+								{errors.password && <p className="text-xs font-bold text-red-500">{errors.password.message}</p>}
 							</div>
 						</div>
 

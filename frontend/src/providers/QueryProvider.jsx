@@ -1,6 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
-import { useBackendHealth } from '../hooks/useBackendHealth';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -13,7 +12,6 @@ const queryClient = new QueryClient({
 });
 
 export const QueryProvider = ({ children }) => {
-  useBackendHealth();
   return (
     <QueryClientProvider client={queryClient}>
       <Toaster
