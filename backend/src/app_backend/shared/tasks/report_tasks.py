@@ -1,7 +1,11 @@
 import datetime
 import os
 import io
+import shutil
+import tempfile
+import zipfile
 from typing import Dict
+from xml.etree import ElementTree as ET
 
 import pandas as pd
 from celery import shared_task
@@ -24,6 +28,165 @@ def get_db_session():
     engine = create_engine()
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     return SessionLocal()
+
+
+WORD_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+ET.register_namespace("w", WORD_NS)
+
+
+def _indonesian_date(value: datetime.datetime) -> str:
+    months = [
+        "Januari",
+        "Februari",
+        "Maret",
+        "April",
+        "Mei",
+        "Juni",
+        "Juli",
+        "Agustus",
+        "September",
+        "Oktober",
+        "November",
+        "Desember",
+    ]
+    return f"{value.day} {months[value.month - 1]} {value.year}"
+
+
+def _academic_period(value: datetime.datetime) -> tuple[str, str]:
+    if value.month >= 8:
+        return "Ganjil", f"{value.year}/{value.year + 1}"
+    return "Genap", f"{value.year - 1}/{value.year}"
+
+
+def _safe_text(value, fallback: str = "-") -> str:
+    if value is None:
+        return fallback
+    text = str(value).strip()
+    return text or fallback
+
+
+def _docx_paragraph_text(paragraph: ET.Element) -> str:
+    return "".join(node.text or "" for node in paragraph.findall(f".//{{{WORD_NS}}}t"))
+
+
+def _set_paragraph_text(paragraph: ET.Element, text: str) -> None:
+    text_nodes = paragraph.findall(f".//{{{WORD_NS}}}t")
+    if not text_nodes:
+        run = ET.SubElement(paragraph, f"{{{WORD_NS}}}r")
+        text_node = ET.SubElement(run, f"{{{WORD_NS}}}t")
+        text_nodes = [text_node]
+    text_nodes[0].text = text
+    if text.startswith(" ") or text.endswith(" "):
+        text_nodes[0].set("{http://www.w3.org/XML/1998/namespace}space", "preserve")
+    for node in text_nodes[1:]:
+        node.text = ""
+
+
+def _replace_after_label(paragraphs: list[ET.Element], label: str, value: str) -> bool:
+    for paragraph in paragraphs:
+        text = _docx_paragraph_text(paragraph)
+        if text.strip().startswith(label):
+            text_nodes = paragraph.findall(f".//{{{WORD_NS}}}t")
+            for node in reversed(text_nodes):
+                if "…" in (node.text or "") or "." in (node.text or ""):
+                    node.text = value
+                    return True
+            if text_nodes:
+                text_nodes[-1].text = value
+                return True
+    return False
+
+
+def _build_cover_letter_context(req: DocumentRequests) -> dict[str, str]:
+    now = datetime.datetime.now()
+    student = req.student
+    department = getattr(student, "department", None) if student else None
+    vacancy = req.reference_vacancy
+    company = getattr(vacancy, "company", None) if vacancy else None
+    term, academic_year = _academic_period(now)
+
+    purpose = _safe_text(req.purpose, "pendaftaran Magang Mandiri")
+    company_name = _safe_text(getattr(company, "name", None), "perusahaan/instansi tujuan")
+
+    return {
+        "date": _indonesian_date(now),
+        "department_name": _safe_text(getattr(department, "name", None), "Departemen"),
+        "faculty_name": _safe_text(getattr(department, "faculty", None), "Fakultas"),
+        "student_name": _safe_text(getattr(student, "full_name", None)),
+        "nim": _safe_text(getattr(student, "nim", None)),
+        "student_semester": _safe_text(getattr(student, "semester", None)),
+        "purpose": purpose,
+        "company_name": company_name,
+        "academic_term": term,
+        "academic_year": academic_year,
+    }
+
+
+def _render_cover_letter_docx(req: DocumentRequests) -> io.BytesIO:
+    template_path = os.path.join(os.path.dirname(__file__), "..", "templates", "surat_base.docx")
+    template_path = os.path.abspath(template_path)
+    context = _build_cover_letter_context(req)
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        extracted_dir = os.path.join(temp_dir, "docx")
+        output_path = os.path.join(temp_dir, "letter.docx")
+        with zipfile.ZipFile(template_path, "r") as source_zip:
+            source_zip.extractall(extracted_dir)
+
+        document_path = os.path.join(extracted_dir, "word", "document.xml")
+        tree = ET.parse(document_path)
+        root = tree.getroot()
+        paragraphs = root.findall(f".//{{{WORD_NS}}}p")
+
+        for paragraph in paragraphs:
+            text = _docx_paragraph_text(paragraph)
+            if text.startswith("Bogor,"):
+                _set_paragraph_text(paragraph, f"Bogor, {context['date']}")
+                break
+
+        for paragraph in paragraphs:
+            text = _docx_paragraph_text(paragraph).strip()
+            if text.startswith("Ketua "):
+                _set_paragraph_text(paragraph, f"Ketua {context['department_name']}")
+            elif text.startswith("Fakultas "):
+                _set_paragraph_text(paragraph, context["faculty_name"])
+
+        _replace_after_label(paragraphs, "Nama", context["student_name"])
+        _replace_after_label(paragraphs, "NIM", context["nim"])
+        _replace_after_label(paragraphs, "Semester", context["student_semester"])
+
+        body_text = (
+            "Mengajukan permohonan pembuatan Surat Keterangan Aktif Kuliah "
+            f"untuk keperluan {context['purpose']} di {context['company_name']} "
+            f"pada periode semester {context['academic_term']} TA {context['academic_year']}."
+        )
+        for paragraph in paragraphs:
+            text = _docx_paragraph_text(paragraph)
+            if "Mengajukan permohonan" in text or "engajukan permohonan" in text:
+                _set_paragraph_text(paragraph, body_text)
+                break
+
+        signature_fields = [p for p in paragraphs if _docx_paragraph_text(p).strip().startswith("NIM")]
+        if signature_fields:
+            _set_paragraph_text(signature_fields[-1], f"NIM {context['nim']}")
+        underline_fields = [p for p in paragraphs if ".........................................." in _docx_paragraph_text(p)]
+        if underline_fields:
+            _set_paragraph_text(underline_fields[-1], context["student_name"])
+
+        tree.write(document_path, encoding="UTF-8", xml_declaration=True)
+
+        with zipfile.ZipFile(output_path, "w", zipfile.ZIP_DEFLATED) as output_zip:
+            for folder, _, files in os.walk(extracted_dir):
+                for filename in files:
+                    file_path = os.path.join(folder, filename)
+                    arcname = os.path.relpath(file_path, extracted_dir)
+                    output_zip.write(file_path, arcname)
+
+        buffer = io.BytesIO()
+        with open(output_path, "rb") as generated_docx:
+            shutil.copyfileobj(generated_docx, buffer)
+        buffer.seek(0)
+        return buffer
 
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)
@@ -167,65 +330,21 @@ def generate_final_report(self, placement_id: str) -> Dict:
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)
 def generate_cover_letter(self, request_id: str) -> Dict:
-    """Generate cover letter PDF for document requests."""
+    """Generate cover letter DOCX from the official department template."""
     session = get_db_session()
     try:
         req = session.query(DocumentRequests).filter(DocumentRequests.id == request_id).first()
         if not req:
             return {"status": "failed", "error": "Request not found"}
 
-        # Generate PDF
-        filename = f"letter_{request_id}.pdf"
-
-        pdf_buffer = io.BytesIO()
-        doc = SimpleDocTemplate(pdf_buffer, pagesize=A4)
-        styles = getSampleStyleSheet()
-        elements = []
-
-        # IPB Header mock
-        header_style = ParagraphStyle(
-            "HeaderStyle",
-            parent=styles["Normal"],
-            alignment=1,
-            fontSize=14,
-            fontName="Helvetica-Bold",
-        )
-        elements.append(Paragraph("INSTITUT PERTANIAN BOGOR", header_style))
-        elements.append(Paragraph("Career Development and Assessment IPB", header_style))
-        elements.append(Spacer(1, 30))
-
-        # Content
-        elements.append(Paragraph("SURAT PENGANTAR / REKOMENDASI", styles["Heading2"]))
-        elements.append(Spacer(1, 20))
-
-        body_text = f"""
-        Yang bertanda tangan di bawah ini menerangkan bahwa mahasiswa dengan ID <b>{req.student_id}</b> 
-        adalah benar mahasiswa aktif Institut Pertanian Bogor.
-        <br/><br/>
-        Surat ini diberikan sebagai pengantar untuk keperluan: <b>{req.purpose}</b>.
-        <br/><br/>
-        Demikian surat pengantar ini dibuat untuk dapat dipergunakan sebagaimana mestinya.
-        """
-        elements.append(Paragraph(body_text, styles["Normal"]))
-        elements.append(Spacer(1, 50))
-
-        elements.append(
-            Paragraph(
-                "Bogor, " + datetime.datetime.now().strftime("%d %B %Y"),
-                styles["Normal"],
-            )
-        )
-        elements.append(Paragraph("Direktur Kemahasiswaan", styles["Normal"]))
-
-        doc.build(elements)
-
-        # Seek back and upload
-        pdf_buffer.seek(0)
+        filename = f"letter_{request_id}.docx"
+        docx_buffer = _render_cover_letter_docx(req)
         s3_key = f"documents/{filename}"
+        content_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 
         if settings.storage_type == "s3":
             s3_client = get_s3_client()
-            success = upload_fileobj(s3_client, pdf_buffer, settings.s3_bucket, s3_key, content_type="application/pdf")
+            success = upload_fileobj(s3_client, docx_buffer, settings.s3_bucket, s3_key, content_type=content_type)
             if not success:
                 return {"status": "failed", "error": "Failed to upload to S3"}
 
@@ -236,7 +355,7 @@ def generate_cover_letter(self, request_id: str) -> Dict:
             os.makedirs("uploads/documents", exist_ok=True)
             file_path = f"uploads/documents/{filename}"
             with open(file_path, "wb") as f:
-                f.write(pdf_buffer.read())
+                f.write(docx_buffer.read())
             public_url = f"/uploads/documents/{filename}"
 
         # Update Database

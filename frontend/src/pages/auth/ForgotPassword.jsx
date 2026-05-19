@@ -14,14 +14,14 @@ function ForgotPassword() {
 	};
 
 	return (
-		<div className="h-screen w-full bg-gradient-to-br from-[#F8FAFF] via-[#F0F5FF] to-[#E8F1FF] flex flex-col items-center justify-center p-6 font-jakarta overflow-hidden relative">
+		<div className="min-h-dvh w-full bg-gradient-to-br from-[#F8FAFF] via-[#F0F5FF] to-[#E8F1FF] flex flex-col items-center justify-center p-4 sm:p-6 font-jakarta overflow-y-auto relative">
 			{/* Decorative glows */}
 			<div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-200/20 rounded-full blur-[120px]" />
 			<div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-sky-200/20 rounded-full blur-[120px]" />
 
 			<div className="relative z-10 w-full max-w-lg flex flex-col items-center">
 				{/* Brand Header */}
-				<div className="mb-10 text-center space-y-4">
+				<div className="mb-8 sm:mb-10 text-center space-y-4">
 					<img 
 						src="/logo/laras.png" 
 						alt="LARAS Logo" 
@@ -36,9 +36,9 @@ function ForgotPassword() {
 				</div>
 
 				{/* Card */}
-				<div className="w-full bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,41,87,0.06)] border border-white/50 p-12 space-y-10">
+				<div className="w-full bg-white rounded-[1.75rem] sm:rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,41,87,0.06)] border border-white/50 p-6 sm:p-12 space-y-8 sm:space-y-10">
 					<div className="space-y-4">
-						<h2 className="text-3xl font-extrabold text-[#002957]">Lupa Password?</h2>
+						<h2 className="text-2xl sm:text-3xl font-extrabold text-[#002957]">Lupa Password?</h2>
 						<p className="text-zinc-500 font-medium leading-relaxed">
 							Masukkan email IPB Anda (@apps.ipb.ac.id). Kami akan mengirimkan tautan untuk mengatur ulang password Anda.
 						</p>

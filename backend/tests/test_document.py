@@ -87,18 +87,14 @@ def test_generate_cover_letter_task_updates_db(mock_session):
         "app_backend.shared.tasks.report_tasks.get_db_session",
         return_value=mock_session,
     ):
-        with patch("app_backend.shared.tasks.report_tasks.SimpleDocTemplate.build") as mock_build:
-            mock_session.query.return_value.filter.return_value.first.return_value = mock_doc
+        mock_session.query.return_value.filter.return_value.first.return_value = mock_doc
 
-            from app_backend.shared.tasks.report_tasks import generate_cover_letter
+        from app_backend.shared.tasks.report_tasks import generate_cover_letter
 
-            result = generate_cover_letter(str(doc_id))
+        result = generate_cover_letter(str(doc_id))
 
-            assert result["status"] == "completed"
-            assert f"letter_{doc_id}.pdf" in result["url"]
-            assert mock_doc.generated_url == result["url"]
-            assert mock_doc.status == "COMPLETED"
-
-            # Memastikan fungsi render PDF terpanggil (menghasilkan file PDF dengan kop)
-            mock_build.assert_called()
-            mock_session.commit.assert_called()
+        assert result["status"] == "completed"
+        assert f"letter_{doc_id}.docx" in result["url"]
+        assert mock_doc.generated_url == result["url"]
+        assert mock_doc.status == "COMPLETED"
+        mock_session.commit.assert_called()

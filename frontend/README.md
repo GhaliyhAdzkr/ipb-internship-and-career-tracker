@@ -23,7 +23,21 @@ Berikut adalah perkembangan penting dan perbaikan menyeluruh yang baru saja dite
    - Memperbaiki komponen filter pencarian pada Lowongan Portal dengan kelas `pointer-events-none` pada ikon-ikon SVG, menyelesaikan masalah tidak bisa ditekan/diinput-nya kolom search bar sebelumnya.
 
 4. **Mobile-First Responsive Design**
-   - Penyempurnaan responsivitas pada dashboard, menu *Jurnal Aktivitas*, *Laporan Magang*, *Master Data Admin*, serta tata letak navigasi *AppShell/TopBar/SideNav* agar tampil sempurna dan nyaman digunakan melalui perangkat smartphone/tablet.
+   - Penyempurnaan responsivitas pada halaman publik, portal mahasiswa, dan panel admin.
+   - Desktop tetap menjadi susunan dasar: sidebar kiri dan TopBar kanan tidak diubah pada viewport desktop.
+   - Mobile menggunakan bottom navigation, header yang lebih ringkas, modal bottom-sheet, form yang stack per kolom, dan tabel admin dengan horizontal scroll agar tetap dapat diakses.
+
+5. **Integrasi Flow Bisnis Utama**
+   - Landing page dan halaman lowongan publik mengambil data real dari endpoint public vacancies, tanpa fallback mock UUID.
+   - Detail lowongan publik tidak lagi memanggil endpoint privat `/applications/my` untuk guest user.
+   - Flow portal sudah terhubung dari lamaran, upload bukti LoA, perpindahan placement aktif, jurnal harian, upload lampiran, AI enhance deskripsi jurnal, hingga generate laporan.
+   - Admin sudah memakai endpoint `/admin/vacancies`, `/admin/vacancies/scrape`, pending verification, verify/reject proof, placement, analytics, dan master data.
+   - Kurasi lowongan admin memiliki modal Scrape URL yang mengirim daftar URL ke background task backend, lalu menampilkan hasil impor pending pada tab Hasil Scraping sebelum dipublikasi.
+
+6. **Auth & Session Handling**
+   - Token dan refresh token disimpan/dibersihkan konsisten.
+   - Guard route tidak memaksa logout saat state user masih loading.
+   - Interceptor mencoba refresh token untuk request terproteksi yang menerima `401`.
 
 ## Tech Stack & Dependencies
 

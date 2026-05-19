@@ -3,6 +3,7 @@ import { PiBell, PiUserCircle, PiTrash } from "react-icons/pi";
 import { useNotifications } from "../hooks/useNotifications";
 import { useAuth } from "../hooks/useAuth";
 import { NavLink } from "react-router-dom";
+import { resolveBackendAssetUrl } from "../utils/assetUrl";
 
 const TopBar = () => {
 	const { unreadCount, notifications, markAsRead, deleteNotification } = useNotifications();
@@ -134,7 +135,7 @@ const TopBar = () => {
 					<div className="w-10 h-10 overflow-hidden rounded-full border-2 border-transparent hover:border-sky-700 transition-all bg-slate-100 flex items-center justify-center shadow-sm">
 						{user?.avatar_url ? (
 							<img 
-								src={user.avatar_url} 
+								src={resolveBackendAssetUrl(user.avatar_url)} 
 								alt="Profile" 
 								className="w-full h-full object-cover"
 								referrerPolicy="no-referrer"

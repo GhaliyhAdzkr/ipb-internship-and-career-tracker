@@ -18,6 +18,7 @@ import {
 } from "react-icons/pi";
 import { useAdminUsers } from "../../hooks/useAdminUsers";
 import ConfirmModal from "../../components/ConfirmModal";
+import { resolveBackendAssetUrl } from "../../utils/assetUrl";
 
 function AdminUsers() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -300,7 +301,7 @@ function AdminUsers() {
                                                 </div>
                                             </a>
                                             <a
-                                                href={selectedStudent.cv_url || "#"}
+                                                href={resolveBackendAssetUrl(selectedStudent.cv_url) || "#"}
                                                 target="_blank"
                                                 className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${selectedStudent.cv_url ? 'bg-indigo-50 border-indigo-100 text-indigo-700 hover:bg-indigo-100' : 'bg-slate-50 border-slate-100 text-slate-300 pointer-events-none'}`} rel="noreferrer"
                                             >

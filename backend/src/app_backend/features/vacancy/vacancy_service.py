@@ -170,6 +170,10 @@ class VacancyService:
         if data.is_active is not None:
             vacancy.is_active = data.is_active
 
+        if vacancy.is_scraped:
+            vacancy.is_scraped = False
+            vacancy.is_active = True
+
         # Update skills if provided
         if data.skills is not None:
             # Delete existing skills

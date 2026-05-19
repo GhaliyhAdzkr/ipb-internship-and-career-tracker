@@ -12,6 +12,7 @@ import { useAdminCompanies } from "../../hooks/useAdminCompanies";
 import adminService from "../../services/adminService";
 import ConfirmModal from "../../components/ConfirmModal";
 import toast from "react-hot-toast";
+import { resolveBackendAssetUrl } from "../../utils/assetUrl";
 
 function AdminCompanies() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -123,7 +124,7 @@ function AdminCompanies() {
                         <div key={company.id} className="bg-white p-5 sm:p-7 rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row items-start gap-5 sm:gap-8 hover:shadow-xl hover:border-sky-100 transition-all group">
                             <div className="w-24 h-24 rounded-3xl bg-slate-50 flex items-center justify-center p-5 border border-slate-50 shrink-0 group-hover:scale-110 transition-transform duration-500 shadow-inner">
                                 <img 
-                                    src={company.logo_url || "/logo/placeholder-company.png"} 
+                                    src={resolveBackendAssetUrl(company.logo_url) || "/logo/placeholder-company.png"} 
                                     alt={company.name}
                                     className="w-full h-full object-contain mix-blend-multiply"
                                     onError={(e) => e.target.src = "/logo/placeholder-company.png"}
@@ -225,7 +226,7 @@ function AdminCompanies() {
                                     <div className="w-24 h-24 rounded-3xl bg-slate-50 border border-dashed border-slate-200 flex items-center justify-center p-3 shrink-0 overflow-hidden relative shadow-inner">
                                         {formData.logo_url ? (
                                             <img 
-                                                src={formData.logo_url} 
+                                                src={resolveBackendAssetUrl(formData.logo_url)} 
                                                 alt="Preview logo" 
                                                 className="w-full h-full object-contain"
                                             />

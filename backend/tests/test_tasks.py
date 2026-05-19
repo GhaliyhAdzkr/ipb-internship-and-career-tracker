@@ -127,18 +127,88 @@ def test_auto_close_expired_vacancies_task():
 
 def test_scrape_vacancies_task():
     """Test vacancy scraper task."""
+    from unittest.mock import MagicMock
+
     from app_backend.shared.tasks.vacancy_tasks import scrape_vacancies
+
+    class FakeQuery:
+        def __init__(self, model):
+            self.model = model
+
+        def filter(self, *args, **kwargs):
+            return self
+
+        def first(self):
+            return None
+
+        def all(self):
+            return []
+
+    class FakeSession:
+        def __init__(self):
+            self.objects = []
+
+        def query(self, model):
+            return FakeQuery(model)
+
+        def add(self, obj):
+            self.objects.append(obj)
+
+        def flush(self):
+            for obj in self.objects:
+                if getattr(obj, "id", None) is None:
+                    obj.id = uuid.uuid4()
+
+        def commit(self):
+            pass
+
+        def rollback(self):
+            pass
+
+        def close(self):
+            pass
 
     source_urls = [
         "https://example.com/jobs/1",
         "https://example.com/jobs/2",
     ]
 
-    result = scrape_vacancies(source_urls)
+    html = """
+    <html><head>
+      <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "JobPosting",
+        "title": "Backend Engineer Intern",
+        "description": "Mengembangkan API backend menggunakan Python dan SQL.",
+        "datePosted": "2026-02-01",
+        "validThrough": "2026-04-01",
+        "employmentType": "INTERN",
+        "hiringOrganization": {"name": "Contoh Teknologi", "sameAs": "https://example.com"},
+        "jobLocation": {"address": {"addressLocality": "Bogor", "addressCountry": "ID"}}
+      }
+      </script>
+    </head><body></body></html>
+    """
+    mock_response = MagicMock()
+    mock_response.text = html
+    mock_response.raise_for_status.return_value = None
+
+    with patch("app_backend.shared.tasks.vacancy_tasks.requests.get", return_value=mock_response):
+        with patch("app_backend.shared.tasks.vacancy_tasks.create_engine") as _:
+            with patch("app_backend.shared.tasks.vacancy_tasks.sessionmaker") as mock_sessionmaker:
+                fake_session = FakeSession()
+                mock_sessionmaker.return_value.return_value = fake_session
+                result = scrape_vacancies(source_urls)
 
     assert result["status"] == "completed"
     assert result["total"] == 2
+    assert result["imported_count"] == 2
     assert len(result["results"]) == 2
+    imported_vacancies = [obj for obj in fake_session.objects if obj.__class__.__name__ == "Vacancies"]
+    assert imported_vacancies
+    assert all(v.is_scraped is True for v in imported_vacancies)
+    assert all(v.is_active is False for v in imported_vacancies)
 
 
 #  Notification Tasks Tests

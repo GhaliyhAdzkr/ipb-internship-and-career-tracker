@@ -11,11 +11,13 @@ import {
     PiFunnelBold,
     PiCaretDown,
     PiCalendarBold,
-    PiSpinnerGap
+    PiSpinnerGap,
+    PiGlobe
 } from "react-icons/pi";
 import { useAdminVacancies } from "../../hooks/useAdminVacancies";
 import vacancyService from "../../services/vacancyService";
 import ConfirmModal from "../../components/ConfirmModal";
+import { resolveBackendAssetUrl } from "../../utils/assetUrl";
 
 function AdminVacancies() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -26,6 +28,8 @@ function AdminVacancies() {
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [selectedVacancy, setSelectedVacancy] = useState(null);
     const [isFormOpen, setIsFormOpen] = useState(false);
+    const [isScrapeOpen, setIsScrapeOpen] = useState(false);
+    const [scrapeUrls, setScrapeUrls] = useState("");
     const [openSkillDropdownIndex, setOpenSkillDropdownIndex] = useState(null);
     const [skillSearchQuery, setSkillSearchQuery] = useState("");
     const [formData, setFormData] = useState({
@@ -53,9 +57,11 @@ function AdminVacancies() {
         deleteMutation,
         createSkillMutation,
         createMutation,
-        updateMutation
+        updateMutation,
+        scrapeMutation
     } = useAdminVacancies(() => {
         setIsFormOpen(false);
+        setIsScrapeOpen(false);
     });
 
     // Handlers
@@ -141,6 +147,20 @@ function AdminVacancies() {
         }
     };
 
+    const handleScrapeSubmit = (e) => {
+        e.preventDefault();
+        const sourceUrls = scrapeUrls
+            .split(/\r?\n/)
+            .map((url) => url.trim())
+            .filter(Boolean);
+
+        if (sourceUrls.length === 0) return;
+        scrapeMutation.mutate({
+            source_urls: sourceUrls,
+            default_close_days: 30,
+        });
+    };
+
     // Filter Logic
     const filteredVacancies = vacancies?.items?.filter(v => {
         const titleMatch = v.title.toLowerCase().includes(searchTerm.toLowerCase());
@@ -151,13 +171,13 @@ function AdminVacancies() {
         let tabMatch = true;
         if (activeTab === "scraped") tabMatch = v.is_scraped;
         else if (activeTab === "manual") tabMatch = !v.is_scraped && v.created_by;
-        else if (activeTab === "verified") tabMatch = !v.is_scraped && !v.created_by;
+        else if (activeTab === "verified") tabMatch = !v.is_scraped && v.is_active;
 
         // Advanced Filtering
         const matchesType = typeFilter === "all" || v.type === typeFilter;
         const matchesIndustry = industryFilter === "all" || v.company?.industry === industryFilter;
         
-        const isClosed = new Date(v.close_date) < new Date();
+        const isClosed = !v.is_active || new Date(v.close_date) < new Date();
         const matchesStatus = statusFilter === "all" || (statusFilter === "closed" ? isClosed : !isClosed);
 
         return matchesSearch && tabMatch && matchesType && matchesIndustry && matchesStatus;
@@ -189,7 +209,14 @@ function AdminVacancies() {
                             Kelola ekosistem karir mahasiswa IPB. Verifikasi hasil scraping atau publikasikan lowongan eksklusif CDA.
                         </p>
                     </div>
-                    <div className="flex gap-3 w-full md:w-auto">
+                    <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                        <button
+                            onClick={() => setIsScrapeOpen(true)}
+                            className="w-full md:w-auto bg-white/10 text-white border border-white/20 px-6 sm:px-8 py-4 rounded-[1.5rem] font-extrabold flex items-center justify-center gap-2 hover:bg-white/15 transition-all shadow-xl shadow-sky-900/30 active:scale-95"
+                        >
+                            <PiGlobe size={20} />
+                            Scrape URL
+                        </button>
                         <button 
                             onClick={() => {
                                 setSelectedVacancy(null);
@@ -324,16 +351,17 @@ function AdminVacancies() {
                     </div>
                 ) : filteredVacancies?.length > 0 ? (
                     filteredVacancies.map((vacancy) => {
-                        const isClosed = new Date(vacancy.close_date) < new Date();
+                        const isPendingScrape = vacancy.is_scraped && !vacancy.is_active;
+                        const isClosed = !vacancy.is_active || new Date(vacancy.close_date) < new Date();
                         return (
-                            <div key={vacancy.id} className={`bg-white p-5 sm:p-6 rounded-[1.5rem] sm:rounded-[2.5rem] shadow-sm border ${isClosed ? 'border-red-100 opacity-80' : 'border-slate-100'} flex flex-col md:flex-row justify-between md:items-center gap-6 hover:shadow-xl hover:border-sky-100 transition-all group relative overflow-hidden`}>
+                            <div key={vacancy.id} className={`bg-white p-5 sm:p-6 rounded-[1.5rem] sm:rounded-[2.5rem] shadow-sm border ${isPendingScrape ? 'border-sky-100' : isClosed ? 'border-red-100 opacity-80' : 'border-slate-100'} flex flex-col md:flex-row justify-between md:items-center gap-6 hover:shadow-xl hover:border-sky-100 transition-all group relative overflow-hidden`}>
                                 {/* Source Indicator Line */}
                                 <div className={`absolute top-0 bottom-0 left-0 w-1.5 ${vacancy.is_scraped ? 'bg-sky-500' : 'bg-emerald-500'}`}></div>
                                 
                                 <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 sm:items-center w-full min-w-0">
                                     <div className="w-20 h-20 rounded-[1.5rem] bg-slate-50 flex items-center justify-center p-4 border border-slate-100 shrink-0 group-hover:scale-105 transition-transform duration-300">
                                         <img 
-                                            src={vacancy.company?.logo_url || "/logo/placeholder-company.png"} 
+                                            src={resolveBackendAssetUrl(vacancy.company?.logo_url) || "/logo/placeholder-company.png"} 
                                             alt="Logo"
                                             className="w-full h-full object-contain mix-blend-multiply"
                                             onError={(e) => e.target.src = "/logo/placeholder-company.png"}
@@ -343,7 +371,11 @@ function AdminVacancies() {
                                         <div className="flex flex-wrap items-center gap-2">
                                             <h3 className="font-extrabold text-slate-900 text-lg sm:text-xl tracking-tight leading-tight">{vacancy.title}</h3>
                                             <div className="flex gap-1.5">
-                                                {isClosed ? (
+                                                {isPendingScrape ? (
+                                                    <span className="flex items-center gap-1 bg-sky-50 text-sky-600 px-2 py-0.5 rounded-lg text-[9px] font-black uppercase border border-sky-100">
+                                                        <PiGlobe /> Pending Kurasi
+                                                    </span>
+                                                ) : isClosed ? (
                                                     <span className="flex items-center gap-1 bg-red-50 text-red-600 px-2 py-0.5 rounded-lg text-[9px] font-black uppercase border border-red-100">
                                                         <PiXCircleFill /> Closed
                                                     </span>
@@ -818,6 +850,65 @@ function AdminVacancies() {
                                     <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
                                 ) : (
                                     selectedVacancy ? "Simpan Perubahan" : "Publikasikan Lowongan"
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {isScrapeOpen && (
+                <div className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-4">
+                    <div className="absolute inset-0 bg-sky-950/60 backdrop-blur-md" onClick={() => setIsScrapeOpen(false)}></div>
+                    <div className="relative bg-white rounded-t-[2rem] sm:rounded-[2.5rem] shadow-2xl w-full max-w-xl max-h-[92dvh] overflow-hidden flex flex-col animate-in slide-in-from-bottom-10 duration-300">
+                        <div className="p-5 sm:p-8 border-b border-slate-100 bg-slate-50/50 flex justify-between items-start gap-4">
+                            <div>
+                                <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900">Scrape Lowongan</h2>
+                                <p className="text-slate-500 text-sm mt-1">Masukkan URL halaman lowongan, satu URL per baris.</p>
+                            </div>
+                            <button onClick={() => setIsScrapeOpen(false)} className="p-3 hover:bg-white rounded-2xl transition-all border border-transparent hover:border-slate-200">
+                                <PiXCircleFill size={32} className="text-slate-400" />
+                            </button>
+                        </div>
+
+                        <form id="scrape-form" onSubmit={handleScrapeSubmit} className="p-5 sm:p-8 space-y-4">
+                            <div className="space-y-2">
+                                <label className="font-bold text-slate-700 uppercase tracking-wider text-[11px]">URL Sumber</label>
+                                <textarea
+                                    required
+                                    rows={6}
+                                    className="w-full p-5 bg-slate-50 border border-slate-200 rounded-[1.5rem] focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-medium leading-relaxed"
+                                    placeholder={"https://company.com/careers/backend-intern\nhttps://job-portal.example/jobs/123"}
+                                    value={scrapeUrls}
+                                    onChange={(e) => setScrapeUrls(e.target.value)}
+                                />
+                            </div>
+                            <div className="rounded-2xl bg-sky-50 border border-sky-100 p-4 text-xs text-sky-900 font-semibold leading-relaxed">
+                                Sistem akan membaca JSON-LD JobPosting bila tersedia, lalu fallback ke metadata halaman. Data yang masuk ditandai sebagai hasil scraping dan bisa dikurasi lagi dari daftar lowongan.
+                            </div>
+                        </form>
+
+                        <div className="p-4 sm:p-6 bg-slate-50/80 border-t border-slate-100 flex flex-col sm:flex-row gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setIsScrapeOpen(false)}
+                                className="flex-1 py-4 px-6 rounded-2xl font-bold text-slate-500 hover:bg-white transition-all border border-transparent hover:border-slate-200"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                form="scrape-form"
+                                type="submit"
+                                disabled={scrapeMutation.isPending}
+                                className="flex-[2] py-4 px-6 rounded-2xl font-extrabold text-white bg-sky-950 hover:bg-sky-900 shadow-xl shadow-sky-900/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                            >
+                                {scrapeMutation.isPending ? (
+                                    <>
+                                        <PiSpinnerGap className="animate-spin" size={18} />
+                                        Memproses
+                                    </>
+                                ) : (
+                                    "Mulai Scraping"
                                 )}
                             </button>
                         </div>

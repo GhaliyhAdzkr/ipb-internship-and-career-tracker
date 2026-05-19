@@ -84,6 +84,10 @@ export const adminService = {
     const response = await api.delete(`/vacancies/${id}`);
     return response.data;
   },
+  scrapeVacancies: async (data) => {
+    const response = await api.post('/admin/vacancies/scrape', data);
+    return response.data;
+  },
 
   // Manajemen User
   getStudents: async () => {

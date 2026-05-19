@@ -34,8 +34,8 @@ function VerifyEmail() {
   }, [token, verifyEmail, navigate]);
 
   return (
-    <div className="h-screen w-full bg-[#F8FAFF] flex flex-col items-center justify-center p-6 font-jakarta">
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-xl p-10 text-center space-y-6 border border-zinc-100">
+    <div className="min-h-dvh w-full bg-[#F8FAFF] flex flex-col items-center justify-center p-4 sm:p-6 font-jakarta">
+      <div className="w-full max-w-md bg-white rounded-3xl shadow-xl p-6 sm:p-10 text-center space-y-6 border border-zinc-100">
         <div className="flex justify-center">
           <img src="/logo/laras.png" alt="LARAS" className="h-12 w-auto mb-4" />
         </div>

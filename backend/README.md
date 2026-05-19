@@ -20,7 +20,11 @@ backend/
 │       │   ├── profile/       # Manajemen profil mahasiswa dan admin
 │       │   ├── vacancy/       # Lowongan kerja dan pencocokan kerja
 │       │   ├── wishlist/      # Wishlist mahasiswa
-│       │   └── application/   # Pelacakan lamaran (Self-Reported ATS)
+│       │   ├── application/   # Pelacakan lamaran (Self-Reported ATS)
+│       │   ├── placement/     # Penempatan magang, jurnal, dan laporan
+│       │   ├── document/      # Pengajuan dokumen pendukung
+│       │   ├── notification/  # Inbox notifikasi user
+│       │   └── analytics/     # Statistik admin dan agregasi dashboard
 │       ├── models/            # Model database via ORM (1:1 dengan di database)
 │       ├── repositories/      # Layer akses data (CRUD)
 │       ├── routers/           # Endpoint router untuk request/response
@@ -101,6 +105,8 @@ REDIS_URL=redis://localhost:6379/2
 
 # Environment (development, staging, production)
 ENVIRONMENT=development
+CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+CREATE_TABLES_ON_STARTUP=false
 ```
 
 ### Menjalankan Aplikasi
@@ -174,13 +180,24 @@ poetry run alembic history
 
 ### Admin (`/api/v1/admin`)
 - `PATCH /users/{id}/toggle-active` - Mengubah status aktif/nonaktif user
+- `GET /users` - Daftar user mahasiswa/admin dengan filter role opsional
+- `GET /profile/me` - Ambil profil admin yang sedang login
+- `PATCH /profile/me` - Update profil admin
 - CRUD `/departments` - Pengelolaan data departemen
 - CRUD `/skills` - Pengelolaan data master skill
 - CRUD `/companies` - Pengelolaan data mitra/perusahaan
+- `POST /companies/upload-logo` - Upload logo perusahaan
+- `GET /vacancies` - Daftar semua lowongan untuk admin, termasuk inactive/closed
+- `POST /vacancies/scrape` - Queue background task untuk scrape URL eksternal; hasil dinormalisasi ke schema lowongan dan disimpan sebagai `is_scraped=true`, `is_active=false` sampai dikurasi admin
+- `GET /applications/pending-verification` - Daftar lamaran yang menunggu verifikasi bukti
+- `POST /applications/{id}/verify` - Verifikasi bukti penerimaan dan buat placement
+- `POST /applications/{id}/reject-proof` - Tolak bukti penerimaan dengan alasan
+- `GET /placements` - Daftar semua placement untuk admin
 
 ### Vacancies (`/api/v1/vacancies`)
 - `GET /vacancies` - List lowongan aktif (paginated)
 - `GET /vacancies/search` - Pencarian lowongan dengan filter detail
+- `GET /vacancies/industries` - Daftar industri lowongan aktif untuk filter publik
 - `GET /vacancies/{id}` - Ambil detail lowongan
 - `POST /vacancies` - Tambah lowongan baru (admin only)
 - `PUT /vacancies/{id}` - Update data lowongan (admin only)
@@ -202,6 +219,8 @@ poetry run alembic history
 - `POST /applications/{id}/proof` - Upload bukti screenshot Letter of Acceptance (LoA)
 - `GET /applications/{id}/history` - Riwayat perubahan status lamaran
 
+Catatan alur bisnis: lamaran hanya dapat dibuat untuk lowongan aktif; upload bukti dari status `OFFERED` akan memindahkan lamaran ke `ACCEPTED`; verifikasi admin membutuhkan `proof_url`, `start_date`, dan `end_date` valid sebelum placement dibuat.
+
 ### Placements (`/api/v1/placements`)
 - `GET /placements/me` - Ambil data penempatan magang aktif mahasiswa
 - `GET /placements/{id}/logs` - Ambil daftar log harian (jurnal) penempatan magang
@@ -218,6 +237,8 @@ poetry run alembic history
 - `GET /document-requests` - List riwayat pengajuan dokumen mahasiswa
 - `GET /document-requests/{id}` - Ambil rincian detail status dokumen
 
+Catatan dokumen: permohonan surat pengantar menjalankan task `generate_cover_letter` dan mengisi template DOCX `shared/templates/surat_base.docx`; laporan akhir magang menjalankan task `generate_final_report` dari data activity logs dan memakai deskripsi AI-enhanced bila tersedia.
+
 ### Notifications (`/api/v1/notifications`)
 - `GET /notifications` - Ambil semua notifikasi aktif untuk user
 - `GET /notifications/unread-count` - Hitung jumlah notifikasi belum dibaca
@@ -228,6 +249,14 @@ poetry run alembic history
 - `GET /analytics/distribution` - Distribusi penempatan magang (admin)
 - `GET /analytics/applications` - Analisis statistik lamaran masuk (admin)
 - `GET /analytics/vacancies` - Statistik keaktifan lowongan kerja (admin)
+
+## Catatan Produksi
+
+- Docker production menjalankan `alembic upgrade head` sebelum Uvicorn start.
+- `CREATE_TABLES_ON_STARTUP` default `false`; schema production harus berasal dari Alembic, bukan `create_all`.
+- Redis pada production compose dipakai internal untuk Celery dan tidak perlu diekspos ke host.
+- `CORS_ORIGINS` wajib diisi sesuai domain frontend production jika `allow_credentials` aktif.
+- Model ORM di `src/app_backend/models` adalah referensi schema terbaru; file SQL di `src/app_backend/scripts/database_schema.sql` hanya arsip legacy.
 
 ## Testing
 

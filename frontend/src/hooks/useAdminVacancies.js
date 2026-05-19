@@ -70,12 +70,28 @@ export function useAdminVacancies(onFormSuccess) {
     });
 
     const scrapeMutation = useMutation({
-        mutationFn: async () => {
-            return new Promise(resolve => setTimeout(resolve, 2000));
-        },
-        onSuccess: () => {
-            toast.success("Sinkronisasi scraping selesai!");
+        mutationFn: adminService.scrapeVacancies,
+        onSuccess: (result) => {
+            if (result?.status === "queued") {
+                toast.success("Scraping berjalan di background. Hasil akan muncul setelah selesai.");
+                [5000, 15000, 30000].forEach((delay) => {
+                    setTimeout(() => {
+                        queryClient.invalidateQueries({ queryKey: ["admin", "vacancies"] });
+                    }, delay);
+                });
+                if (onFormSuccess) onFormSuccess();
+                return;
+            }
+
+            const imported = result?.imported_count || 0;
+            const skipped = result?.skipped_count || 0;
+            const failed = result?.failed_count || 0;
+            toast.success(`Scraping selesai: ${imported} masuk, ${skipped} duplikat, ${failed} gagal.`);
             queryClient.invalidateQueries({ queryKey: ["admin", "vacancies"] });
+            if (onFormSuccess) onFormSuccess();
+        },
+        onError: (err) => {
+            toast.error(err.response?.data?.detail || "Gagal menjalankan scraping lowongan");
         }
     });
 

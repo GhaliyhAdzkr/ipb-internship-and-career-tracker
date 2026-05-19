@@ -179,6 +179,7 @@ class VacancySummaryResponse(BaseModel):
     is_scraped: bool
     is_auto_close: bool
     is_active: bool
+    created_by: Optional[UUID] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
@@ -191,6 +192,32 @@ class VacancyListResponse(BaseModel):
     page: int
     per_page: int
     total_pages: int
+
+
+class VacancyScrapeRequest(BaseModel):
+    """Payload untuk import lowongan hasil scraping dari URL sumber."""
+
+    source_urls: List[HttpUrl] = Field(..., min_length=1, max_length=10)
+    default_close_days: int = Field(30, ge=1, le=180)
+
+
+class VacancyScrapeResult(BaseModel):
+    source_url: str
+    status: str
+    message: str
+    vacancy_id: Optional[UUID] = None
+    title: Optional[str] = None
+
+
+class VacancyScrapeResponse(BaseModel):
+    status: str
+    message: Optional[str] = None
+    task_id: Optional[str] = None
+    total: int
+    imported_count: int = 0
+    skipped_count: int = 0
+    failed_count: int = 0
+    results: List[VacancyScrapeResult] = Field(default_factory=list)
 
 
 # Search/Filter Schemas

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { 
+import {
     PiCheckCircleFill, 
     PiXCircleFill, 
     PiFilePdfFill,
@@ -7,6 +7,7 @@ import {
     PiClockFill
 } from "react-icons/pi";
 import { useAdminVerification } from "../../hooks/useAdminVerification";
+import { resolveBackendAssetUrl } from "../../utils/assetUrl";
 
 function AdminVerification() {
     const [selectedApp, setSelectedApp] = useState(null);
@@ -113,7 +114,7 @@ function AdminVerification() {
                             
                             <div className="space-y-3">
                                 <a 
-                                    href={selectedApp.cv_url} 
+                                    href={resolveBackendAssetUrl(selectedApp.cv_url)} 
                                     target="_blank" 
                                     rel="noreferrer"
                                     className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors group"
@@ -126,7 +127,7 @@ function AdminVerification() {
                                 </a>
                                 {selectedApp.portfolio_url && (
                                     <a 
-                                        href={selectedApp.portfolio_url} 
+                                        href={resolveBackendAssetUrl(selectedApp.portfolio_url)} 
                                         target="_blank" 
                                         rel="noreferrer"
                                         className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors group"
@@ -140,7 +141,7 @@ function AdminVerification() {
                                 )}
                                 {selectedApp.proof_url && (
                                     <a
-                                        href={selectedApp.proof_url}
+                                        href={resolveBackendAssetUrl(selectedApp.proof_url)}
                                         target="_blank"
                                         rel="noreferrer"
                                         className="flex items-center gap-3 p-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 transition-colors group border border-emerald-100"

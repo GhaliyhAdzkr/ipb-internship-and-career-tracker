@@ -46,15 +46,26 @@ from app_backend.schemas.application import (
 )
 from app_backend.schemas.placement import PlacementResponse
 from app_backend.schemas.user import UserResponse
-from app_backend.schemas.vacancy import CompanyInfo, VacancyListResponse, VacancySummaryResponse
+from app_backend.schemas.vacancy import (
+    CompanyInfo,
+    VacancyListResponse,
+    VacancyScrapeRequest,
+    VacancyScrapeResponse,
+    VacancySummaryResponse,
+)
 from app_backend.shared.auth_dependencies import require_admin
 from app_backend.shared.database import get_session
 from app_backend.shared.dependencies import get_master_data_service
+from app_backend.shared.tasks.vacancy_tasks import scrape_vacancies
 
 router = APIRouter(
     prefix="/api/v1/admin",
     tags=["admin"],
 )
+
+
+def queue_scrape_vacancies(source_urls: List[str], default_close_days: int):
+    return scrape_vacancies.delay(source_urls, default_close_days=default_close_days)
 
 # User Account Activation (Section 1.2)
 
@@ -494,6 +505,7 @@ async def list_admin_vacancies(
             is_scraped=vacancy.is_scraped if vacancy.is_scraped is not None else False,
             is_auto_close=vacancy.is_auto_close if vacancy.is_auto_close is not None else True,
             is_active=vacancy.is_active if vacancy.is_active is not None else True,
+            created_by=vacancy.created_by,
             created_at=vacancy.created_at,
             updated_at=vacancy.updated_at,
         )
@@ -506,6 +518,27 @@ async def list_admin_vacancies(
         page=page,
         per_page=per_page,
         total_pages=(total + per_page - 1) // per_page if total > 0 else 1,
+    )
+
+
+@router.post(
+    "/vacancies/scrape",
+    response_model=VacancyScrapeResponse,
+    summary="Scrape dan import lowongan dari URL eksternal",
+)
+async def scrape_admin_vacancies(
+    payload: VacancyScrapeRequest,
+    _: DomainUser = Depends(require_admin),
+) -> VacancyScrapeResponse:
+    async_result = queue_scrape_vacancies(
+        [str(url) for url in payload.source_urls],
+        default_close_days=payload.default_close_days,
+    )
+    return VacancyScrapeResponse(
+        status="queued",
+        message="Scraping berjalan di background. Hasil akan muncul di tab Hasil Scraping setelah task selesai.",
+        task_id=str(async_result.id),
+        total=len(payload.source_urls),
     )
 
 

@@ -21,6 +21,7 @@ import {
   PiSealCheckFill,
   PiXCircle
 } from "react-icons/pi";
+import { resolveBackendAssetUrl } from "../../utils/assetUrl";
 
 export default function DetailLowongan() {
   const navigate = useNavigate();
@@ -148,7 +149,7 @@ export default function DetailLowongan() {
               >
                 {vacancy.company?.logo_url ? (
                   <img 
-                    src={vacancy.company.logo_url} 
+                    src={resolveBackendAssetUrl(vacancy.company.logo_url)} 
                     alt={vacancy.company.name} 
                     className="w-full h-auto max-h-full object-contain" 
                     referrerPolicy="no-referrer"

@@ -40,7 +40,7 @@ function Login() {
 	};
 
 	return (
-		<div className="grid h-screen bg-white grid-cols-1 md:grid-cols-2 font-jakarta overflow-hidden">
+		<div className="grid min-h-dvh bg-white grid-cols-1 md:grid-cols-2 font-jakarta overflow-hidden">
 			{/* Left Side: Hero Artwork Section (RESTORED) */}
 			<div className="hidden md:flex relative flex-col justify-end p-16 overflow-hidden">
 				<img
@@ -66,8 +66,8 @@ function Login() {
 			</div>
 
 			{/* Right Side: Login Form (Larger Sizing Maintained) */}
-			<div className="flex items-center justify-center bg-white p-8 md:p-20 overflow-y-auto">
-				<div className="w-full max-w-md space-y-10">
+			<div className="flex items-center justify-center bg-white p-5 sm:p-8 md:p-20 overflow-y-auto">
+				<div className="w-full max-w-md space-y-8 sm:space-y-10 py-8 md:py-0">
 					{isVerified && (
 						<div className="p-4 bg-green-50 border border-green-100 rounded-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-500">
 							<div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white shrink-0">
@@ -99,7 +99,7 @@ function Login() {
 							Kembali ke Beranda
 						</button>
 						<div className="space-y-3">
-							<h2 className="text-4xl font-extrabold text-[#002957] tracking-tight">
+							<h2 className="text-3xl sm:text-4xl font-extrabold text-[#002957] tracking-tight">
 								Selamat Datang Kembali
 							</h2>
 							<p className="text-zinc-500 font-medium text-base">

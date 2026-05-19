@@ -18,6 +18,7 @@ import {
 } from "react-icons/pi";
 
 import { useInView } from "react-intersection-observer";
+import { resolveBackendAssetUrl } from "../../utils/assetUrl";
 
 function Lowongan() {
 	const navigate = useNavigate();
@@ -158,7 +159,7 @@ function Lowongan() {
 					<div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-sky-600 border border-slate-100 overflow-hidden group-hover:border-sky-100 transition-colors p-1.5">
 						{item.company?.logo_url ? (
 							<img 
-								src={item.company.logo_url} 
+								src={resolveBackendAssetUrl(item.company.logo_url)} 
 								alt={item.company.name} 
 								className="w-full h-auto max-h-full object-contain"
 								onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}

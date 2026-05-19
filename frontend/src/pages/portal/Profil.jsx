@@ -17,6 +17,7 @@ import {
 	PiUpload,
 	PiWarningCircle
 } from "react-icons/pi";
+import { resolveBackendAssetUrl } from "../../utils/assetUrl";
 
 function Profil() {
 	const { user, updateProfile, isUpdating, uploadAvatar, isUploadingAvatar } = useAuth();
@@ -212,7 +213,7 @@ function Profil() {
 							<div className="w-32 h-32 bg-zinc-100 rounded-full flex items-center justify-center border-4 border-white shadow-sm overflow-hidden relative">
 								{user?.avatar_url ? (
 									<img
-										src={user.avatar_url}
+										src={resolveBackendAssetUrl(user.avatar_url)}
 										alt="Profile"
 										className="w-full h-full object-cover"
 										referrerPolicy="no-referrer"

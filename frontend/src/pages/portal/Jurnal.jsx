@@ -6,6 +6,7 @@ import { PiWarning, PiClock, PiUpload, PiCheckCircleFill, PiSpinner, PiFilePdf, 
 import toast from "react-hot-toast";
 
 import { usePlacements, useActivityLogs, useActivityLogMutations } from "../../hooks/usePlacements";
+import { resolveBackendAssetUrl } from "../../utils/assetUrl";
 
 function JurnalForm({ activeLog, selectedDate, onSave, onDelete, onEnhance, isSaving, isDeleting, isEnhancing }) {
 	const [startTimeStr, setStartTimeStr] = useState("08:00");
@@ -142,7 +143,7 @@ function JurnalForm({ activeLog, selectedDate, onSave, onDelete, onEnhance, isSa
 						<div className="flex items-center gap-2 text-emerald-800 text-sm font-bold">
 							<PiFilePdf size={20} className="text-red-500" /> Dokumen Terlampir
 						</div>
-						<a href={activeLog.attachment_url} target="_blank" rel="noopener noreferrer" className="text-xs text-sky-600 font-bold hover:underline">
+						<a href={resolveBackendAssetUrl(activeLog.attachment_url)} target="_blank" rel="noopener noreferrer" className="text-xs text-sky-600 font-bold hover:underline">
 							Lihat File
 						</a>
 					</div>

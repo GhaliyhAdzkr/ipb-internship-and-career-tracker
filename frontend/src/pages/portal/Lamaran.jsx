@@ -20,6 +20,7 @@ import {
   PiWarningCircle
 } from "react-icons/pi";
 import { useApplications, useApplicationHistory } from "../../hooks/useApplications";
+import { resolveBackendAssetUrl } from "../../utils/assetUrl";
 
 // Utilitas pembantu untuk format tanggal secara rapi
 const formatDate = (dateString) => {
@@ -398,7 +399,7 @@ function Lamaran() {
 										<div>
 											<p className="text-xs text-gray-400 font-medium">Snapshot CV</p>
 											<a 
-												href={activeApp.cv_snapshot_url} 
+												href={resolveBackendAssetUrl(activeApp.cv_snapshot_url)} 
 												target="_blank" 
 												rel="noopener noreferrer"
 												className="font-semibold text-sky-600 hover:text-sky-800 underline inline-flex items-center gap-1 mt-0.5"
@@ -475,7 +476,7 @@ function Lamaran() {
 														<PiFilePdf size={16} className="text-red-500" /> Bukti LoA Diunggah
 													</span>
 													<a 
-														href={history.find(log => log.proof_url).proof_url} 
+														href={resolveBackendAssetUrl(history.find(log => log.proof_url).proof_url)} 
 														target="_blank" 
 														rel="noopener noreferrer"
 														className="text-sky-600 font-bold hover:underline inline-flex items-center gap-0.5"
@@ -592,7 +593,7 @@ function Lamaran() {
 														)}
 														{log.proof_url && (
 															<a 
-																href={log.proof_url} 
+																href={resolveBackendAssetUrl(log.proof_url)} 
 																target="_blank" 
 																rel="noopener noreferrer"
 																className="text-[10px] text-sky-600 font-bold hover:underline inline-flex items-center gap-0.5 mt-1"

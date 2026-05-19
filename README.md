@@ -31,6 +31,7 @@ LARAS (Launchpad for Apprenticeship, Readiness, And Success) is an intelligent c
 - **Document Requests:** Permohonan surat pengantar dan dokumen magang lainnya (Phase 6)
 - **Notification System:** Notifikasi *real-time* untuk aktivitas akun dan lamaran (baca, hapus, kelola)
 - **Admin Analytics:** Dashboard visual untuk distribusi penempatan, statistik lamaran, dan kinerja lowongan
+- **Responsive Portal & Admin UI:** Navigasi portal/admin tetap desktop-first, dengan bottom navigation, modal bottom-sheet, dan layout stack khusus mobile
 
 ---
 
@@ -48,7 +49,11 @@ backend/
 │       │   ├── profile/       # Manajemen profil mahasiswa dan admin
 │       │   ├── vacancy/       # Lowongan kerja dan pencocokan kerja
 │       │   ├── wishlist/      # Wishlist mahasiswa
-│       │   └── application/   # Pelacakan lamaran (Self-Reported ATS)
+│       │   ├── application/   # Pelacakan lamaran (Self-Reported ATS)
+│       │   ├── placement/     # Penempatan magang, jurnal, dan laporan
+│       │   ├── document/      # Pengajuan dokumen pendukung
+│       │   ├── notification/  # Inbox notifikasi user
+│       │   └── analytics/     # Statistik admin dan agregasi dashboard
 │       ├── models/            # Model database via ORM (1:1 dengan di database)
 │       ├── repositories/      # Layer akses data (CRUD)
 │       ├── routers/           # Endpoint router untuk request/response
@@ -168,7 +173,18 @@ REFRESH_TOKEN_EXPIRE_DAYS=32
 
 # Environment
 ENVIRONMENT=development
+CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+CREATE_TABLES_ON_STARTUP=false
 ```
+
+## Status Integrasi Terbaru
+
+- Lowongan publik (`/api/v1/vacancies`) dipakai oleh landing page dan halaman lowongan publik tanpa memanggil endpoint privat.
+- Flow lamaran utama sudah terhubung: mahasiswa melamar, update status, upload bukti LoA, admin verifikasi, placement aktif, jurnal harian, lampiran, AI enhance, dan laporan otomatis.
+- Surat pengantar dan laporan akhir sudah digenerate oleh task backend; hasilnya disimpan sebagai URL dokumen/laporan dan dikirim via notifikasi.
+- Endpoint admin lowongan tersedia di `/api/v1/admin/vacancies`; scraping URL di `/api/v1/admin/vacancies/scrape` berjalan sebagai background task dan masuk sebagai pending kurasi, bukan langsung listing publik.
+- Docker backend menjalankan Alembic migration saat startup; schema production tidak bergantung pada `create_all`.
+- Frontend sudah diperkuat untuk session persistence, token refresh, dan layout mobile portal/admin tanpa mengubah susunan dasar desktop.
 
 ## Available Commands
 

@@ -95,6 +95,10 @@ def update_vacancy_command_handler(
         if payload.is_auto_close is not None:
             vacancy.is_auto_close = payload.is_auto_close
 
+        if vacancy.is_scraped:
+            vacancy.is_scraped = False
+            vacancy.is_active = True
+
         vacancy.updated_at = now
 
         # Update skills if provided

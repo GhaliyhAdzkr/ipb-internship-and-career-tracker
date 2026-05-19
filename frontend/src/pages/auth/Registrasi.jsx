@@ -75,10 +75,10 @@ function Registration() {
 	};
 
 	return (
-		<div className="grid h-screen bg-white grid-cols-1 md:grid-cols-2 font-jakarta overflow-hidden">
+		<div className="grid min-h-dvh bg-white grid-cols-1 md:grid-cols-2 font-jakarta overflow-hidden">
 			{/* Left Side: Form Section */}
-			<div className="flex items-center justify-center bg-white p-8 md:p-20 overflow-y-auto order-1">
-				<div className="w-full max-w-md space-y-10 py-10">
+			<div className="flex items-center justify-center bg-white p-5 sm:p-8 md:p-20 overflow-y-auto order-1">
+				<div className="w-full max-w-md space-y-8 sm:space-y-10 py-8 sm:py-10">
 					<div className="space-y-4">
 						<button 
 							onClick={() => navigate("/")}
@@ -88,7 +88,7 @@ function Registration() {
 							Kembali ke Beranda
 						</button>
 						<div className="space-y-3">
-							<h2 className="text-4xl font-extrabold text-[#002957] tracking-tight">
+							<h2 className="text-3xl sm:text-4xl font-extrabold text-[#002957] tracking-tight">
 								Daftar LARAS
 							</h2>
 							<p className="text-zinc-500 font-medium text-base">
@@ -114,7 +114,7 @@ function Registration() {
 								{errors.full_name && <p className="text-xs font-bold text-red-500">{errors.full_name.message}</p>}
 							</div>
 
-							<div className="grid grid-cols-2 gap-4">
+							<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 								{/* NIM */}
 								<div className="space-y-2">
 									<label className="text-sm font-bold text-[#002957] ml-1 uppercase tracking-wider">NIM</label>

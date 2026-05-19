@@ -159,6 +159,23 @@ def test_list_vacancies_with_pagination(client_as_student):
     assert resp.json()["page"] == 2
 
 
+def test_admin_scrape_vacancies_queues_background_task(client_as_admin):
+    with patch("app_backend.routers.api.admin.queue_scrape_vacancies") as mock_queue:
+        mock_queue.return_value = MagicMock(id="task-123")
+
+        resp = client_as_admin.post(
+            "/api/v1/admin/vacancies/scrape",
+            json={"source_urls": ["https://example.com/jobs/backend-intern"], "default_close_days": 30},
+        )
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "queued"
+    assert data["task_id"] == "task-123"
+    assert data["total"] == 1
+    mock_queue.assert_called_once()
+
+
 #  Vacancy: Search
 
 

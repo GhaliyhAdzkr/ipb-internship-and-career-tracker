@@ -9,11 +9,18 @@ import { id } from "date-fns/locale";
 import toast from "react-hot-toast";
 import { usePlacements, useReport } from "../../hooks/usePlacements";
 import { useDocuments } from "../../hooks/useDocuments";
+import { resolveBackendAssetUrl } from "../../utils/assetUrl";
 
 const DOCUMENT_TYPES = [
-  { value: "SURAT_PENGANTAR", label: "Surat Pengantar Magang" },
+  { value: "COVER_LETTER", label: "Surat Pengantar Magang" },
   { value: "SURAT_REKOMENDASI", label: "Surat Rekomendasi" },
 ];
+
+const DOCUMENT_TYPE_LABELS = {
+  COVER_LETTER: "Surat Pengantar Magang",
+  SURAT_PENGANTAR: "Surat Pengantar Magang",
+  SURAT_REKOMENDASI: "Surat Rekomendasi",
+};
 
 const STATUS_CONFIG = {
   PENDING:    { label: "Diproses",    className: "bg-amber-100 text-amber-800" },
@@ -133,7 +140,7 @@ function DocumentSection() {
                 <div key={doc.id} className="px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:bg-slate-50/50 transition-colors">
                   <div className="flex flex-col gap-1 min-w-0">
                     <p className="font-bold text-slate-800 text-sm truncate">
-                      {DOCUMENT_TYPES.find((t) => t.value === doc.document_type)?.label || doc.document_type}
+                      {DOCUMENT_TYPE_LABELS[doc.document_type] || doc.document_type}
                     </p>
                     <p className="text-xs text-slate-500 truncate">{doc.purpose}</p>
                     <p className="text-[11px] text-slate-400">
@@ -146,7 +153,7 @@ function DocumentSection() {
                     </span>
                     {doc.status === "COMPLETED" && doc.generated_url && (
                       <a
-                        href={doc.generated_url}
+                        href={resolveBackendAssetUrl(doc.generated_url)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-1.5 text-xs text-sky-700 font-bold hover:underline"
@@ -261,7 +268,7 @@ function ReportSection({ activePlacement }) {
                   <PiArrowClockwise size={18} /> Generate Ulang
                 </button>
                 <a
-                  href={report?.auto_generated_report_url}
+                  href={resolveBackendAssetUrl(report?.auto_generated_report_url)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 bg-sky-950 text-white font-bold rounded-lg text-sm hover:bg-sky-900 transition-colors shadow-md"
