@@ -75,7 +75,7 @@ class Settings(BaseSettings):
     @cached_property
     def cors_origin_list(self) -> list[str]:
         origins = [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
-        return origins or ["http://localhost:5173", "http://127.0.0.1:5173"]
+        return origins or ["http://localhost:5173", "https://larascareers.my.id"]
 
 
 settings = Settings()

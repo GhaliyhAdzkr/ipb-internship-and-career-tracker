@@ -61,7 +61,7 @@ function AdminVerification() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* List Area */}
-                <div className="lg:col-span-2 space-y-4">
+                <div className={`lg:col-span-2 space-y-4 ${selectedApp ? 'hidden lg:block' : 'block'}`}>
                     {isLoading ? (
                         <div className="p-10 text-center text-slate-400 bg-white rounded-2xl border border-slate-100 italic">
                             Memuat daftar lamaran...
@@ -98,10 +98,18 @@ function AdminVerification() {
                 </div>
 
                 {/* Detail/Action Area */}
-                <div className="lg:col-span-1">
+                <div className={`lg:col-span-1 ${selectedApp ? 'block' : 'hidden lg:block'}`}>
                     {selectedApp ? (
                         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 sm:p-6 lg:sticky lg:top-6 space-y-6">
-                            <h2 className="font-bold text-slate-900 text-lg border-b pb-4">Dokumen Pendukung</h2>
+                            <div className="flex items-center justify-between border-b pb-4">
+                                <h2 className="font-bold text-slate-900 text-lg">Dokumen Pendukung</h2>
+                                <button 
+                                    onClick={() => setSelectedApp(null)}
+                                    className="lg:hidden text-xs text-sky-700 font-extrabold hover:underline flex items-center gap-1"
+                                >
+                                    ← Kembali
+                                </button>
+                            </div>
                             
                             <div className="space-y-3">
                                 <a 

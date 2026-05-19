@@ -42,12 +42,12 @@ export default function Landing() {
       {/* Navbar */}
       <nav className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-12">
-            <Link to="/" className="flex items-center gap-2">
-              <img src="/logo/laras.png" alt="LARAS" className="w-10 h-10 object-contain" />
-              <span className="text-xl font-[900] tracking-tight">LARAS</span>
+          <div className="flex items-center gap-4 sm:gap-12">
+            <Link to="/" className="flex items-center gap-2 shrink-0">
+              <img src="/logo/laras.png" alt="LARAS" className="w-8 h-8 sm:w-10 sm:h-10 object-contain" />
+              <span className="text-lg sm:text-xl font-[900] tracking-tight">LARAS</span>
             </Link>
-            <div className="hidden md:flex items-center gap-8 text-[15px]">
+            <div className="flex items-center gap-4 sm:gap-8 text-[14px] sm:text-[15px]">
               <Link to="/" className="font-semibold text-sky-900 relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-full after:h-0.5 after:bg-sky-600">Beranda</Link>
               <Link to="/lowongan" className="font-medium text-slate-500 hover:text-sky-900 transition-colors">Lowongan</Link>
             </div>

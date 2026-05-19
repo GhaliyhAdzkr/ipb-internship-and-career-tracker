@@ -306,11 +306,12 @@ function Profil() {
 												full_name: e.target.value,
 											})
 										}
-										className="pl-10 w-full py-2.5 bg-zinc-50 border border-zinc-200 text-zinc-700 rounded text-sm focus:ring-2 focus:ring-sky-500 outline-none transition-all"
+										disabled={!isEditMode}
+										className="pl-10 w-full py-2.5 bg-zinc-50 border border-zinc-200 text-zinc-700 rounded text-sm focus:ring-2 focus:ring-sky-500 outline-none transition-all disabled:bg-zinc-100/50 disabled:text-zinc-500 disabled:cursor-not-allowed"
 									/>
 								</div>
 							</div>
-
+ 
 							{/* Email (Read Only) */}
 							<div className="flex flex-col gap-1.5">
 								<label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
@@ -329,7 +330,7 @@ function Profil() {
 									/>
 								</div>
 							</div>
-
+ 
 							{/* NIM */}
 							<div className="flex flex-col gap-1.5">
 								<label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
@@ -349,11 +350,12 @@ function Profil() {
 												nim: e.target.value,
 											})
 										}
-										className="pl-10 w-full py-2.5 bg-zinc-50 border border-zinc-200 text-zinc-700 rounded text-sm focus:ring-2 focus:ring-sky-500 outline-none transition-all"
+										disabled={!isEditMode}
+										className="pl-10 w-full py-2.5 bg-zinc-50 border border-zinc-200 text-zinc-700 rounded text-sm focus:ring-2 focus:ring-sky-500 outline-none transition-all disabled:bg-zinc-100/50 disabled:text-zinc-500 disabled:cursor-not-allowed"
 									/>
 								</div>
 							</div>
-
+ 
 							{/* Semester */}
 							<div className="flex flex-col gap-1.5">
 								<label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
@@ -373,7 +375,8 @@ function Profil() {
 												semester: e.target.value,
 											})
 										}
-										className="pl-10 w-full py-2.5 bg-zinc-50 border border-zinc-200 text-zinc-700 rounded text-sm focus:ring-2 focus:ring-sky-500 outline-none transition-all"
+										disabled={!isEditMode}
+										className="pl-10 w-full py-2.5 bg-zinc-50 border border-zinc-200 text-zinc-700 rounded text-sm focus:ring-2 focus:ring-sky-500 outline-none transition-all disabled:bg-zinc-100/50 disabled:text-zinc-500 disabled:cursor-not-allowed"
 									/>
 								</div>
 							</div>

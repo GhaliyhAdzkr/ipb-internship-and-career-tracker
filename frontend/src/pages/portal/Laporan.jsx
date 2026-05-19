@@ -130,7 +130,7 @@ function DocumentSection() {
             {documents.map((doc) => {
               const status = STATUS_CONFIG[doc.status] || { label: doc.status, className: "bg-slate-100 text-slate-700" };
               return (
-                <div key={doc.id} className="px-6 py-4 flex items-center justify-between gap-4 hover:bg-slate-50/50 transition-colors">
+                <div key={doc.id} className="px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:bg-slate-50/50 transition-colors">
                   <div className="flex flex-col gap-1 min-w-0">
                     <p className="font-bold text-slate-800 text-sm truncate">
                       {DOCUMENT_TYPES.find((t) => t.value === doc.document_type)?.label || doc.document_type}
@@ -140,7 +140,7 @@ function DocumentSection() {
                       {format(new Date(doc.created_at), "d MMM yyyy, HH:mm", { locale: id })}
                     </p>
                   </div>
-                  <div className="flex items-center gap-3 shrink-0">
+                  <div className="flex items-center gap-3 self-start sm:self-auto shrink-0">
                     <span className={`text-[10px] font-bold px-2.5 py-1 rounded uppercase ${status.className}`}>
                       {status.label}
                     </span>
@@ -252,11 +252,11 @@ function ReportSection({ activePlacement }) {
                   <p className="text-sm opacity-80 mt-0.5">Laporan otomatis Anda telah berhasil digenerate.</p>
                 </div>
               </div>
-              <div className="flex gap-3 justify-end">
+              <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
                 <button
                   onClick={handleGenerate}
                   disabled={isGenerating}
-                  className="flex items-center gap-2 px-4 py-2.5 border border-slate-200 text-slate-600 font-bold rounded-lg text-sm hover:bg-slate-50 transition-colors"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 border border-slate-200 text-slate-600 font-bold rounded-lg text-sm hover:bg-slate-50 transition-colors"
                 >
                   <PiArrowClockwise size={18} /> Generate Ulang
                 </button>
@@ -264,7 +264,7 @@ function ReportSection({ activePlacement }) {
                   href={report?.auto_generated_report_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-6 py-2.5 bg-sky-950 text-white font-bold rounded-lg text-sm hover:bg-sky-900 transition-colors shadow-md"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 bg-sky-950 text-white font-bold rounded-lg text-sm hover:bg-sky-900 transition-colors shadow-md"
                 >
                   <PiDownloadSimple size={18} /> Unduh Laporan
                 </a>
@@ -296,11 +296,11 @@ function ReportSection({ activePlacement }) {
                   <span>{generateError.response?.data?.detail || "Terjadi kesalahan."}</span>
                 </div>
               )}
-              <div className="flex justify-end">
+              <div className="flex sm:justify-end">
                 <button
                   onClick={handleGenerate}
                   disabled={isGenerating}
-                  className="flex items-center gap-2 px-8 py-3 bg-sky-950 text-white font-bold rounded-lg hover:bg-sky-900 transition-all shadow-md hover:shadow-lg disabled:opacity-70"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3 bg-sky-950 text-white font-bold rounded-lg hover:bg-sky-900 transition-all shadow-md hover:shadow-lg disabled:opacity-70"
                 >
                   {isGenerating
                     ? <><PiSpinner className="animate-spin" size={18} /> Memproses...</>
