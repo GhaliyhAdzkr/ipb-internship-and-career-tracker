@@ -13,7 +13,8 @@ import {
   PiEye, 
   PiEyeSlash, 
   PiGraduationCap,
-  PiCheckCircle
+  PiCheckCircle,
+  PiArrowLeft
 } from "react-icons/pi";
 
 const loginSchema = z.object({
@@ -90,6 +91,13 @@ function Login() {
 						</div>
 					)}
 					<div className="space-y-4">
+						<button 
+							onClick={() => navigate("/")}
+							className="text-xs font-bold text-sky-800 hover:text-[#001f42] flex items-center gap-1.5 transition-colors uppercase tracking-wider mb-2"
+						>
+							<PiArrowLeft size={16} />
+							Kembali ke Beranda
+						</button>
 						<div className="space-y-3">
 							<h2 className="text-4xl font-extrabold text-[#002957] tracking-tight">
 								Selamat Datang Kembali
@@ -175,7 +183,7 @@ function Login() {
 
 					<div className="text-center text-zinc-500 font-medium text-sm">
 						Belum memiliki akun LARAS?{" "}
-						<button onClick={() => navigate("/register")} className="text-[#002957] font-bold hover:underline">
+						<button onClick={() => navigate("/registration")} className="text-[#002957] font-bold hover:underline">
 							Daftar Sekarang
 						</button>
 					</div>

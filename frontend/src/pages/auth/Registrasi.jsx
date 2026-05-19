@@ -16,7 +16,8 @@ import {
   PiArrowRight,
   PiGraph,
   PiSpinnerGap,
-  PiBookOpenText
+  PiBookOpenText,
+  PiArrowLeft
 } from "react-icons/pi";
 
 const registrationSchema = z.object({
@@ -75,13 +76,22 @@ function Registration() {
 			{/* Left Side: Form Section */}
 			<div className="flex items-center justify-center bg-white p-8 md:p-20 overflow-y-auto order-1">
 				<div className="w-full max-w-md space-y-10 py-10">
-					<div className="space-y-3">
-						<h2 className="text-4xl font-extrabold text-[#002957] tracking-tight">
-							Daftar LARAS
-						</h2>
-						<p className="text-zinc-500 font-medium text-base">
-							Mulai langkah awal karir profesional Anda bersama IPB University.
-						</p>
+					<div className="space-y-4">
+						<button 
+							onClick={() => navigate("/")}
+							className="text-xs font-bold text-sky-800 hover:text-[#001f42] flex items-center gap-1.5 transition-colors uppercase tracking-wider mb-2"
+						>
+							<PiArrowLeft size={16} />
+							Kembali ke Beranda
+						</button>
+						<div className="space-y-3">
+							<h2 className="text-4xl font-extrabold text-[#002957] tracking-tight">
+								Daftar LARAS
+							</h2>
+							<p className="text-zinc-500 font-medium text-base">
+								Mulai langkah awal karir profesional Anda bersama IPB University.
+							</p>
+						</div>
 					</div>
 
 					<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

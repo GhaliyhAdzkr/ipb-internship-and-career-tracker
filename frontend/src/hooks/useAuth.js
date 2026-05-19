@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { authService } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
 
 const clearAuthStorage = () => {
   localStorage.removeItem('token');
@@ -27,7 +26,6 @@ export const useAuth = () => {
   const registerMutation = useMutation({
     mutationFn: authService.register,
     onSuccess: () => {
-      toast.success("Registrasi berhasil! Silakan periksa email Anda untuk verifikasi.");
       navigate('/login?registered=true');
     },
   });
