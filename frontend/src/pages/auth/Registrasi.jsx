@@ -245,23 +245,6 @@ function Registration() {
 							LARAS menghubungkan mahasiswa IPB University dengan peluang magang dan karir profesional terkurasi, menjembatani dunia akademik dengan industri.
 						</p>
 					</div>
-
-					<div className="pt-6 border-t border-zinc-100 flex items-center gap-4">
-						<div className="flex -space-x-3">
-							<div className="w-10 h-10 rounded-full border-2 border-white bg-zinc-200 overflow-hidden shadow-sm">
-								<img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User" />
-							</div>
-							<div className="w-10 h-10 rounded-full border-2 border-white bg-zinc-200 overflow-hidden shadow-sm">
-								<img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aria" alt="User" />
-							</div>
-							<div className="w-10 h-10 rounded-full border-2 border-white bg-[#E8F1FF] flex items-center justify-center text-[10px] font-bold text-sky-700 shadow-sm">
-								5k+
-							</div>
-						</div>
-						<span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
-							Mahasiswa Terdaftar
-						</span>
-					</div>
 				</div>
 			</div>
 		</div>
