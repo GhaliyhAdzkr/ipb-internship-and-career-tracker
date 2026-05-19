@@ -43,5 +43,7 @@ def get_report_command_handler(command: GetReportCommand, session: Session) -> G
             auto_generated_report_url=placement.auto_generated_report_url,
             status="generated",
         )
+    elif placement.last_report_generated_at:
+        return GetReportResult(status="processing")
     else:
         return GetReportResult(status="not_generated")

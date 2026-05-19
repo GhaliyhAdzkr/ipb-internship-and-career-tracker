@@ -66,7 +66,7 @@ def list_vacancies_command_handler(
             SkillRequirement(
                 skill_id=vs.skill_id,
                 skill_name=vs.skill.name if vs.skill else "Unknown",
-                is_mandatory=vs.is_mandatory if vs.is_mandatory else True,
+                is_mandatory=vs.is_mandatory if vs.is_mandatory is not None else True,
             )
             for vs in vacancy_skills
         ]
@@ -93,9 +93,9 @@ def list_vacancies_command_handler(
                 compensation_max=vacancy.compensation_max,
                 compensation_note=vacancy.compensation_note,
                 source_url=vacancy.source_url,
-                is_scraped=vacancy.is_scraped if vacancy.is_scraped else False,
-                is_auto_close=vacancy.is_auto_close if vacancy.is_auto_close else True,
-                is_active=vacancy.is_active if vacancy.is_active else True,
+                is_scraped=vacancy.is_scraped if vacancy.is_scraped is not None else False,
+                is_auto_close=vacancy.is_auto_close if vacancy.is_auto_close is not None else True,
+                is_active=vacancy.is_active if vacancy.is_active is not None else True,
                 skills=skills,
                 created_at=vacancy.created_at,
                 updated_at=vacancy.updated_at,

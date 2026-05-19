@@ -337,6 +337,7 @@ Setiap worker didaftarkan di `app/workers/` sebagai Celery task dengan signature
 - [x] Validasi: `log_date` harus dalam rentang `placement.start_date` dan `placement.end_date`
 - [x] Validasi: satu mahasiswa hanya boleh memiliki satu log per tanggal (`UNIQUE (placement_id, log_date)`)
 - [x] Schema Ref: Insert `public.activity_logs`
+- [x] Endpoint `POST /placements/:id/logs/:log_id/enhance`: Memoles `description_raw` dengan AI dan menyimpan hasil ke `description_ai_enhanced`
 
 ### Log Attachment Upload
 
@@ -370,9 +371,10 @@ Setiap worker didaftarkan di `app/workers/` sebagai Celery task dengan signature
 
 - [x] Endpoint `POST /placements/:id/report/generate`: Trigger pembuatan laporan akhir
 - [x] Guard: laporan hanya bisa digenerate jika `placement.end_date <= TODAY()`
+- [x] Endpoint `GET /placements/:id/report`: Return status `processing` setelah generate dimulai, `generated` saat URL tersedia, atau `not_generated`
 - [x] Celery task `generate_final_report(placement_id)`:
   - [x] Fetch semua `activity_logs` untuk placement tersebut, urut berdasarkan `log_date` ASC
-  - [x] Gunakan `description_raw` sebagai konten log
+  - [x] Gunakan `description_ai_enhanced` sebagai konten log jika tersedia, fallback ke `description_raw`
   - [x] Agregasi menggunakan Python Pandas: ringkasan per minggu, total jam, distribusi kegiatan
   - [x] Render ke PDF template kampus menggunakan ReportLab (kop surat, tanda tangan, format PPKI)
   - [x] Upload PDF hasil ke Object Storage lokal

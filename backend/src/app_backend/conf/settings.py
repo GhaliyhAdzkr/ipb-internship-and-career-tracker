@@ -1,4 +1,5 @@
 import os
+from functools import cached_property
 
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -44,6 +45,8 @@ class Settings(BaseSettings):
 
     # API Versioning
     api_version: str = "v1"
+    cors_origins: str = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
+    create_tables_on_startup: bool = os.getenv("CREATE_TABLES_ON_STARTUP", "false").lower() in ("1", "true", "yes")
 
     # S3 / Supabase Storage settings
     storage_type: str = os.getenv("STORAGE_TYPE", "local")
@@ -68,6 +71,11 @@ class Settings(BaseSettings):
     def is_production(self) -> bool:
         """Check if running in production mode."""
         return self.environment.lower() in ("production", "prod")
+
+    @cached_property
+    def cors_origin_list(self) -> list[str]:
+        origins = [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
+        return origins or ["http://localhost:5173", "http://127.0.0.1:5173"]
 
 
 settings = Settings()

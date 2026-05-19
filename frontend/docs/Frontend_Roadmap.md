@@ -255,12 +255,14 @@ Bagian ini menjadi peta kerja frontend untuk menentukan halaman mana yang sudah 
 - [x] Ganti input jurnal statis dengan data harian nyata per placement
 - [x] Tambahkan create/edit/delete flow jika endpoint tersedia
 - [x] Sinkronkan calendar, work time, deskripsi, dan attachment ke backend
+- [x] Tambahkan aksi AI Enhance untuk memoles deskripsi jurnal dan menampilkan hasil backend
 
 ### Test Gate Phase 5
 
 - [x] Halaman jurnal tidak lagi berupa form dummy
 - [x] Data placement aktif muncul di UI
 - [x] Status empty state akurat saat user belum memiliki placement
+- [x] Create/edit/delete/upload attachment dan AI Enhance memakai mutation backend nyata
 
 **Exit Criteria**: Aktivitas internship terlihat sebagai data nyata dan bukan simulasi UI. ✅
 
@@ -300,22 +302,22 @@ Bagian ini menjadi peta kerja frontend untuk menentukan halaman mana yang sudah 
 
 ### Dashboard Overview
 
-- [ ] Ganti angka statis dashboard dengan data ringkasan yang relevan dari backend
-- [ ] Tampilkan progress yang sesuai placement, jurnal, atau lamaran user
-- [ ] Tambahkan fallback jika user belum punya data aktivitas
+- [x] Ganti angka statis dashboard dengan data ringkasan yang relevan dari backend
+- [x] Tampilkan progress yang sesuai placement, jurnal, atau lamaran user
+- [x] Tambahkan fallback jika user belum punya data aktivitas
 
 ### Analytics Admin
 
-- [ ] Siapkan komponen visual untuk data analytics bila user role admin
-- [ ] Pastikan chart atau metric card dapat menerima payload backend tanpa hardcode
+- [x] Siapkan komponen visual untuk data analytics bila user role admin
+- [x] Pastikan chart atau metric card dapat menerima payload backend tanpa hardcode
 
 ### Test Gate Phase 7
 
-- [ ] Dashboard menampilkan angka yang berasal dari backend
-- [ ] Role-based view bekerja untuk student dan admin
-- [ ] Komponen statistik memiliki loading dan empty state
+- [x] Dashboard menampilkan angka yang berasal dari backend
+- [x] Role-based view bekerja untuk student dan admin
+- [x] Komponen statistik memiliki loading dan empty state
 
-**Exit Criteria**: Dashboard menjadi pusat ringkasan yang benar-benar reflektif terhadap data sistem.
+**Exit Criteria**: Dashboard menjadi pusat ringkasan yang benar-benar reflektif terhadap data sistem. ✅
 
 ---
 
@@ -326,22 +328,22 @@ Bagian ini menjadi peta kerja frontend untuk menentukan halaman mana yang sudah 
 
 ### Notification Dropdown
 
-- [ ] Sambungkan badge unread count ke backend secara konsisten
-- [ ] Pastikan list notifikasi menampilkan title, message, dan timestamp nyata
-- [ ] Tambahkan aksi read dan delete yang langsung ter-reflect di UI
+- [x] Sambungkan badge unread count ke backend secara konsisten
+- [x] Pastikan list notifikasi menampilkan title, message, dan timestamp nyata
+- [x] Tambahkan aksi read dan delete yang langsung ter-reflect di UI
 
 ### Notification Page / Drawer
 
-- [ ] Siapkan tampilan notifikasi yang lebih lengkap jika dropdown dirasa terlalu sempit
-- [ ] Tampilkan loading, empty state, dan error state
+- [x] Siapkan tampilan notifikasi operasional via dropdown
+- [x] Tampilkan loading, empty state, dan error state
 
 ### Test Gate Phase 8
 
-- [ ] Badge unread count ter-update saat notifikasi baru masuk
-- [ ] Read / delete mengubah tampilan secara benar
-- [ ] Notification center tidak crash saat backend kosong atau lambat
+- [x] Badge unread count ter-update saat notifikasi baru masuk
+- [x] Read / delete mengubah tampilan secara benar
+- [x] Notification center tidak crash saat backend kosong atau lambat
 
-**Exit Criteria**: Notifikasi cukup matang untuk dipakai sebagai kanal operasional utama di frontend.
+**Exit Criteria**: Notifikasi cukup matang untuk dipakai sebagai kanal operasional utama di frontend. ✅
 
 ---
 

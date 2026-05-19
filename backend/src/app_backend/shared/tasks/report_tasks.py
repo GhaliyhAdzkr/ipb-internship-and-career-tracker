@@ -48,11 +48,14 @@ def generate_final_report(self, placement_id: str) -> Dict:
         # Prepare data for pandas
         data = []
         for log in logs:
+            duration_hours = getattr(log, "duration_hours", None)
+            if duration_hours is None:
+                duration_hours = float(getattr(log, "duration_minutes", 0)) / 60.0
             data.append(
                 {
                     "Date": log.activity_date,
-                    "Duration": log.duration_minutes / 60.0,
-                    "Description": log.description_raw,
+                    "Duration": float(duration_hours),
+                    "Description": getattr(log, "description_ai_enhanced", None) or log.description_raw,
                 }
             )
 

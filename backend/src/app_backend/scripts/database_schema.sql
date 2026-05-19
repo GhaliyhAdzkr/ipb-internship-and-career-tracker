@@ -1,6 +1,16 @@
 -- ============================================================================
 -- IPB Internship & Career Tracker - Supabase Schema Migration
 -- ============================================================================
+-- LEGACY / DEPRECATED:
+-- File ini bukan sumber schema terbaru. Gunakan Alembic di backend/alembic
+-- sebagai satu-satunya jalur migrasi database. Model SQLAlchemy terbaru ada di
+-- backend/src/app_backend/models dan baseline Alembic membuat schema dari
+-- Base.metadata, lalu migration berikutnya menambahkan objek database yang
+-- tidak direpresentasikan penuh oleh metadata seperti trigger search vector.
+--
+-- Jangan jalankan file ini untuk environment baru karena enum, tabel, kolom,
+-- dan constraint di bawah sudah tertinggal dari model/Alembic terbaru.
+-- ============================================================================
 -- This script creates all tables and schemas for the application
 -- Execute this in Supabase SQL Editor (home > SQL Editor > Create New Query)
 -- ============================================================================

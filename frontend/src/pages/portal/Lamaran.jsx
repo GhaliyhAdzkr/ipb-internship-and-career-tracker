@@ -162,19 +162,21 @@ function Lamaran() {
 	// Menangani persetujuan penawaran pekerjaan
 	const handleAcceptOffer = async () => {
 		if (!activeApp) return;
+		if (!selectedFile) {
+			toast.error("Unggah bukti LoA terlebih dahulu sebelum menerima tawaran.");
+			return;
+		}
 		try {
 			setIsSubmittingAction(true);
-			await updateStatus({
+			await uploadProof({
 				id: activeApp.id,
-				data: {
-					status: "ACCEPTED",
-					reason: "Menerima tawaran pekerjaan / magang"
-				}
+				file: selectedFile
 			});
-			toast.success("Tawaran diterima! Silakan unggah bukti LoA Anda di bawah.");
+			toast.success("Tawaran diterima dan bukti penerimaan berhasil diunggah.");
+			setSelectedFile(null);
 		} catch (err) {
 			console.error("Accept offer failed:", err);
-			toast.error(err.response?.data?.detail || "Gagal menyetujui tawaran.");
+			toast.error(err.response?.data?.detail || err.message || "Gagal menyetujui tawaran.");
 		} finally {
 			setIsSubmittingAction(false);
 		}
@@ -417,15 +419,30 @@ function Lamaran() {
 									{activeApp.status === "OFFERED" && (
 										<div className="p-4 border border-purple-100 bg-purple-50/40 rounded-xl flex flex-col gap-4">
 											<p className="text-xs text-purple-800 leading-relaxed">
-												Selamat! Anda telah menerima penawaran pekerjaan / magang dari pihak perusahaan. Apakah Anda bersedia menyetujui tawaran ini?
+												Selamat! Unggah bukti LoA atau email penerimaan untuk menerima tawaran dan mengirimkannya ke antrean verifikasi CDA.
 											</p>
+											<label className="flex flex-col items-center justify-center w-full h-24 border-2 border-purple-300/40 border-dashed rounded-lg cursor-pointer bg-white hover:bg-purple-50/40 transition-colors">
+												<div className="flex flex-col items-center justify-center pt-2 pb-2 text-center">
+													<PiUploadSimple className="text-purple-500 mb-1" size={24} />
+													<p className="text-xs text-gray-500 font-medium">
+														{selectedFile ? selectedFile.name : "Pilih file LoA (PDF/Image)"}
+													</p>
+													<p className="text-[9px] text-gray-400 mt-0.5">Maksimal file 10MB</p>
+												</div>
+												<input
+													type="file"
+													accept=".pdf,.jpg,.jpeg,.png"
+													onChange={(e) => setSelectedFile(e.target.files[0])}
+													className="hidden"
+												/>
+											</label>
 											<div className="flex gap-3">
 												<button
 													onClick={handleAcceptOffer}
 													disabled={isSubmittingAction}
 													className="flex-1 px-4 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-bold text-sm shadow-sm transition-colors flex items-center justify-center gap-1"
 												>
-													{isSubmittingAction ? <PiSpinner className="animate-spin" /> : "Setuju & Terima"}
+													{isSubmittingAction ? <PiSpinner className="animate-spin" /> : "Terima & Unggah Bukti"}
 												</button>
 												<button
 													onClick={() => {

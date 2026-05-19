@@ -64,6 +64,8 @@ def generate_report_command_handler(command: GenerateReportCommand, session: Ses
             )
 
     # Trigger Celery Task
+    placement.last_report_generated_at = datetime.now(timezone.utc)
+    session.commit()
     generate_final_report.delay(str(placement.id))
 
     return GenerateReportResult(message="Proses pembuatan laporan sedang berjalan di background")

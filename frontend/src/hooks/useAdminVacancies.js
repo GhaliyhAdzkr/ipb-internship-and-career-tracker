@@ -9,7 +9,7 @@ export function useAdminVacancies(onFormSuccess) {
     // Data Fetching
     const vacanciesQuery = useQuery({
         queryKey: ["admin", "vacancies"],
-        queryFn: () => vacancyService.getVacancies(1, 200)
+        queryFn: () => adminService.getVacancies({ page: 1, perPage: 200 })
     });
 
     const companiesQuery = useQuery({

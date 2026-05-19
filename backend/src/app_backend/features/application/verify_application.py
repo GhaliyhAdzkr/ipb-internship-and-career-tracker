@@ -39,6 +39,12 @@ def verify_application_command_handler(
     if not application:
         return VerifyApplicationResult(error_message="Lamaran tidak ditemukan atau belum ACCEPTED")
 
+    if command.end_date < command.start_date:
+        return VerifyApplicationResult(error_message="Tanggal selesai penempatan tidak boleh sebelum tanggal mulai")
+
+    if not any(log.proof_url for log in application.application_logs):
+        return VerifyApplicationResult(error_message="Bukti penerimaan belum diunggah")
+
     # Ensure no placement exists
     existing = session.query(Placements).filter_by(application_id=command.application_id).first()
     if existing:

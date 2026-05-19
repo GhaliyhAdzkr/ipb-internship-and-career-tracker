@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 import app_backend.models  # noqa: F401 registrasi semua tabel ke metadata
+from app_backend.conf.settings import settings
 from app_backend.models.base import Base
 from app_backend.routers.api import admin, analytics, application, auth, document, notification, placement, profile, vacancy
 from app_backend.shared.database import engine
@@ -13,10 +14,7 @@ from app_backend.shared.database import engine
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    import os
-
-    # Buat semua tabel saat server start; dilewati ketika TESTING=1
-    if not os.environ.get("TESTING"):
+    if settings.create_tables_on_startup and not os.environ.get("TESTING"):
         Base.metadata.create_all(bind=engine)
     yield
 
@@ -31,8 +29,8 @@ app = FastAPI(
 # Konfigurasi CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
+    allow_origins=settings.cors_origin_list,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )

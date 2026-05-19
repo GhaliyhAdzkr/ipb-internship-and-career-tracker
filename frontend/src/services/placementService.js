@@ -56,6 +56,15 @@ export const placementService = {
     }
   },
 
+  enhanceLog: async (placementId, logId) => {
+    try {
+      const response = await api.post(`/placements/${placementId}/logs/${logId}/enhance`);
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Failed to enhance activity log');
+    }
+  },
+
   generateReport: async (placementId) => {
     try {
       const response = await api.post(`/placements/${placementId}/report/generate`);

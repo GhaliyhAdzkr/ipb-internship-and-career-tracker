@@ -15,10 +15,13 @@ from app_backend.features.placement import (
 from app_backend.features.placement.generate_report import GenerateReportCommand, generate_report_command_handler
 from app_backend.features.placement.get_report import GetReportCommand, get_report_command_handler
 from app_backend.features.placement.placement_service import PlacementService
+from app_backend.models.activity_logs import ActivityLogs
+from app_backend.models.placements import Placements
 from app_backend.schemas.placement import ActivityLogCreate, ActivityLogResponse, ActivityLogUpdate, PlacementResponse
 from app_backend.shared.auth_dependencies import require_student
 from app_backend.shared.database import get_session
 from app_backend.shared.dependencies import get_placement_service
+from app_backend.shared.tasks.ai_tasks import enhance_log_description
 
 router = APIRouter(prefix="/api/v1/placements", tags=["placements"])
 
@@ -154,6 +157,41 @@ def upload_activity_log_attachment(
         err_status = result.error_code if hasattr(result, "error_code") and result.error_code else status.HTTP_400_BAD_REQUEST
         raise HTTPException(status_code=err_status, detail=result.error_message)
     return {"message": result.message, "attachment_url": result.attachment_url}
+
+
+@router.post(
+    "/{placement_id}/logs/{log_id}/enhance",
+    response_model=ActivityLogResponse,
+    summary="Poles deskripsi jurnal harian dengan AI",
+)
+def enhance_activity_log_description(
+    placement_id: uuid.UUID,
+    log_id: uuid.UUID,
+    current_user=Depends(require_student),
+    session: Session = Depends(get_session),
+):
+    placement = session.query(Placements).filter_by(id=placement_id, student_id=current_user.id).first()
+    if not placement:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Placement tidak ditemukan")
+
+    log = session.query(ActivityLogs).filter_by(id=log_id, placement_id=placement.id).first()
+    if not log:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Activity log tidak ditemukan")
+
+    task_result = enhance_log_description(str(log.id), log.description_raw)
+    if not task_result.get("success"):
+        error = task_result.get("error") or "Gagal memoles deskripsi jurnal"
+        err_status = status.HTTP_429_TOO_MANY_REQUESTS if "Rate limit" in error else status.HTTP_400_BAD_REQUEST
+        raise HTTPException(status_code=err_status, detail=error)
+
+    enhanced = (task_result.get("result") or {}).get("enhanced")
+    if not enhanced:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="AI tidak mengembalikan hasil enhancement")
+
+    log.description_ai_enhanced = enhanced
+    session.commit()
+    session.refresh(log)
+    return log
 
 
 @router.post("/{placement_id}/report/generate", status_code=status.HTTP_202_ACCEPTED)

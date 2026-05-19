@@ -4,7 +4,8 @@ import {
     PiBriefcaseThin, 
     PiBuildingsThin, 
     PiCheckCircleThin,
-    PiClockThin
+    PiClockThin,
+    PiChartBarThin
 } from "react-icons/pi";
 import { useAdminDashboard } from "../../hooks/useAdminDashboard";
 import { useAuth } from "../../hooks/useAuth";
@@ -12,7 +13,15 @@ import { useAuth } from "../../hooks/useAuth";
 function AdminDashboard() {
     const { user } = useAuth();
     
-    const { pendingApplications, loadingApps, companies, students, vacancyStats } = useAdminDashboard();
+    const {
+        pendingApplications,
+        loadingApps,
+        companies,
+        students,
+        vacancyStats,
+        applicationStats,
+        distribution
+    } = useAdminDashboard();
 
     const stats = [
         { 
@@ -42,6 +51,13 @@ function AdminDashboard() {
             icon: PiUsersThin, 
             color: "text-indigo-600",
             bg: "bg-indigo-50" 
+        },
+        {
+            label: "Conversion Rate",
+            value: applicationStats?.conversion_rate != null ? `${Math.round(applicationStats.conversion_rate)}%` : "0%",
+            icon: PiChartBarThin,
+            color: "text-violet-600",
+            bg: "bg-violet-50"
         }
     ];
 
@@ -60,7 +76,7 @@ function AdminDashboard() {
             </div>
 
             {/* Statistics Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-6">
                 {stats.map((stat, idx) => (
                     <div key={idx} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-5 transition-all hover:shadow-md">
                         <div className={`${stat.bg} ${stat.color} p-4 rounded-xl`}>
@@ -129,6 +145,57 @@ function AdminDashboard() {
                             <PiCheckCircleThin size={32} className="text-sky-900" />
                             <span className="font-bold text-slate-900">Validasi</span>
                         </Link>
+                    </div>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div className="p-6 border-b border-slate-50">
+                        <h2 className="font-bold text-slate-900 text-lg">Status Lamaran</h2>
+                    </div>
+                    <div className="p-6 space-y-4">
+                        {(applicationStats?.status_breakdown || []).length > 0 ? (
+                            applicationStats.status_breakdown.map((item) => (
+                                <div key={item.status} className="flex items-center justify-between gap-4">
+                                    <span className="text-sm font-bold text-slate-600">{item.status}</span>
+                                    <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                                        <div
+                                            className="h-full bg-sky-700 rounded-full"
+                                            style={{
+                                                width: `${applicationStats.total_applications ? Math.min(100, (item.total / applicationStats.total_applications) * 100) : 0}%`
+                                            }}
+                                        />
+                                    </div>
+                                    <span className="text-sm font-bold text-slate-900 w-8 text-right">{item.total}</span>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="py-8 text-center text-slate-400 text-sm">Belum ada data lamaran.</div>
+                        )}
+                    </div>
+                </div>
+
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div className="p-6 border-b border-slate-50">
+                        <h2 className="font-bold text-slate-900 text-lg">Distribusi Penempatan</h2>
+                    </div>
+                    <div className="p-6 space-y-4">
+                        {(distribution?.top_companies || []).length > 0 ? (
+                            distribution.top_companies.slice(0, 5).map((company) => (
+                                <div key={company.company_id} className="flex items-center justify-between gap-4">
+                                    <div>
+                                        <p className="text-sm font-bold text-slate-800">{company.company_name}</p>
+                                        <p className="text-xs text-slate-400">{company.company_industry || "Industri belum diisi"}</p>
+                                    </div>
+                                    <span className="px-3 py-1 rounded-full bg-sky-50 text-sky-800 text-xs font-bold">
+                                        {company.total_students} mahasiswa
+                                    </span>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="py-8 text-center text-slate-400 text-sm">Belum ada data penempatan.</div>
+                        )}
                     </div>
                 </div>
             </div>

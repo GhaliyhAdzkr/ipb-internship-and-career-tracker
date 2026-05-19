@@ -6,6 +6,7 @@ from sqlalchemy import select
 
 from app_backend.models.application_logs import ApplicationLogs
 from app_backend.models.applications import Applications
+from app_backend.models.vacancies import Vacancies
 from app_backend.repositories.application_log_repository import ApplicationLogRepository
 from app_backend.repositories.application_repository import ApplicationRepository
 from app_backend.repositories.placement_repository import PlacementRepository
@@ -50,6 +51,12 @@ class ApplicationService:
             raise ValueError("Profil mahasiswa tidak ditemukan")
         if not student.cv_url:
             raise ValueError("Anda harus mengunggah CV sebelum melamar lowongan. Buka bagian Profil untuk mengunggah CV.")
+
+        vacancy = self.application_repo.session.get(Vacancies, data.vacancy_id)
+        if not vacancy:
+            raise ValueError("Lowongan tidak ditemukan")
+        if not vacancy.is_active:
+            raise ValueError("Lowongan sudah ditutup")
 
         query = select(Applications).where(
             Applications.vacancy_id == data.vacancy_id,
@@ -116,6 +123,8 @@ class ApplicationService:
         if app.student_id != student_id:
             raise PermissionError("Bukan pemilik lamaran")
 
+        self._validate_status_transition(app.status, data.status, data.proof_url)
+
         # Set variables for the event listener to catch and insert the single, perfect log!
         app._changed_by = student_id
         app._proof_url = data.proof_url
@@ -126,6 +135,33 @@ class ApplicationService:
 
         self.application_repo.save_changes()
         return ApplicationResponse.model_validate(app)
+
+    def _validate_status_transition(self, current_status: str, next_status: str, proof_url: Optional[str]) -> None:
+        order = {
+            "APPLIED": 0,
+            "SCREENING": 1,
+            "INTERVIEW": 2,
+            "OFFERED": 3,
+            "ACCEPTED": 4,
+            "REJECTED": 4,
+        }
+        valid_statuses = set(order) | {"WITHDRAWN"}
+        if next_status not in valid_statuses:
+            raise ValueError("Status lamaran tidak valid")
+        if current_status in {"ACCEPTED", "REJECTED", "WITHDRAWN"}:
+            raise ValueError("Status lamaran final tidak dapat diubah")
+        if next_status == "WITHDRAWN":
+            return
+        if next_status == "ACCEPTED":
+            if current_status != "OFFERED":
+                raise ValueError("Status ACCEPTED hanya dapat dipilih setelah OFFERED")
+            if not proof_url:
+                raise ValueError("Bukti penerimaan wajib diunggah sebelum status menjadi ACCEPTED")
+            return
+        if next_status == "REJECTED":
+            return
+        if order[next_status] < order.get(current_status, 0):
+            raise ValueError("Status lamaran tidak boleh mundur")
 
     def get_history(self, application_id: uuid.UUID, student_id: Optional[uuid.UUID] = None) -> List[ApplicationLogResponse]:
         app = self.application_repo.get_by_id(application_id)

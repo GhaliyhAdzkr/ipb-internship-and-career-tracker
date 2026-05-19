@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { authService } from "../../services/authService";
 import { z } from "zod";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { 
   PiUser, 
@@ -34,12 +34,15 @@ function Registration() {
 	const [showPassword, setShowPassword] = useState(false);
 	const [emailCheck, setEmailCheck] = useState({ isLoading: false, isAvailable: null, message: "" });
 
-	const { register, handleSubmit, watch, formState: { errors } } = useForm({
+	const { register, handleSubmit, control, formState: { errors } } = useForm({
 		resolver: zodResolver(registrationSchema),
 		defaultValues: { semester: 1 }
 	});
 
-	const emailValue = watch("email");
+	const emailValue = useWatch({
+		control,
+		name: "email",
+	});
 
 	useEffect(() => {
 		const timer = setTimeout(async () => {

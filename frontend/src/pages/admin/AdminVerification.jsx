@@ -11,6 +11,8 @@ import { useAdminVerification } from "../../hooks/useAdminVerification";
 function AdminVerification() {
     const [selectedApp, setSelectedApp] = useState(null);
     const [remarks, setRemarks] = useState("");
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
 
     const {
         applications,
@@ -20,10 +22,16 @@ function AdminVerification() {
     } = useAdminVerification(() => {
         setSelectedApp(null);
         setRemarks("");
+        setStartDate("");
+        setEndDate("");
     });
 
     const handleVerify = (id) => {
-        verifyMutation.mutate({ id, data: { remarks } });
+        if (!startDate || !endDate) {
+            alert("Harap isi tanggal mulai dan tanggal selesai penempatan.");
+            return;
+        }
+        verifyMutation.mutate({ id, data: { start_date: startDate, end_date: endDate } });
     };
 
     const handleReject = (id) => {
@@ -31,7 +39,7 @@ function AdminVerification() {
             alert("Harap isi alasan penolakan pada catatan.");
             return;
         }
-        rejectMutation.mutate({ id, data: { remarks } });
+        rejectMutation.mutate({ id, data: { reason: remarks } });
     };
 
     return (
@@ -122,6 +130,45 @@ function AdminVerification() {
                                         </div>
                                     </a>
                                 )}
+                                {selectedApp.proof_url && (
+                                    <a
+                                        href={selectedApp.proof_url}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="flex items-center gap-3 p-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 transition-colors group border border-emerald-100"
+                                    >
+                                        <PiFilePdfFill className="text-emerald-600" size={24} />
+                                        <div className="flex-1">
+                                            <p className="text-sm font-bold text-slate-900">Bukti LoA / Penerimaan</p>
+                                            <p className="text-[10px] text-slate-500 uppercase">Klik untuk pratinjau</p>
+                                        </div>
+                                    </a>
+                                )}
+                            </div>
+
+                            <div className="space-y-3">
+                                <label className="text-xs font-bold text-slate-500 uppercase">Periode Penempatan</label>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase">Mulai</span>
+                                        <input
+                                            type="date"
+                                            value={startDate}
+                                            onChange={(e) => setStartDate(e.target.value)}
+                                            className="mt-1 w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-sky-500 outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase">Selesai</span>
+                                        <input
+                                            type="date"
+                                            value={endDate}
+                                            min={startDate || undefined}
+                                            onChange={(e) => setEndDate(e.target.value)}
+                                            className="mt-1 w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-sky-500 outline-none"
+                                        />
+                                    </div>
+                                </div>
                             </div>
 
                             <div className="space-y-3">

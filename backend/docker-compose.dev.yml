@@ -16,6 +16,7 @@ services:
       REDIS_URL: ${REDIS_URL}
       CELERY_BROKER_URL: ${CELERY_BROKER_URL}
       CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
+      CREATE_TABLES_ON_STARTUP: "false"
     restart: unless-stopped
 
 volumes:

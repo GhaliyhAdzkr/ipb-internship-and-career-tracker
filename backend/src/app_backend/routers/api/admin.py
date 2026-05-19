@@ -3,7 +3,8 @@ from datetime import datetime, timezone
 from http import HTTPStatus
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, File, Query, UploadFile
+from sqlalchemy.orm import joinedload
 
 from app_backend.domain.user import User as DomainUser
 from app_backend.features.admin import (
@@ -23,6 +24,7 @@ from app_backend.features.application import (
 )
 from app_backend.features.placement import ListAdminPlacementsCommand, list_admin_placements_command_handler
 from app_backend.models.profiles_admin import ProfilesAdmin
+from app_backend.models.vacancies import Vacancies
 from app_backend.schemas.admin import (
     AdminProfileResponse,
     AdminProfileUpdate,
@@ -44,6 +46,7 @@ from app_backend.schemas.application import (
 )
 from app_backend.schemas.placement import PlacementResponse
 from app_backend.schemas.user import UserResponse
+from app_backend.schemas.vacancy import CompanyInfo, VacancyListResponse, VacancySummaryResponse
 from app_backend.shared.auth_dependencies import require_admin
 from app_backend.shared.database import get_session
 from app_backend.shared.dependencies import get_master_data_service
@@ -447,6 +450,63 @@ async def upload_company_logo(
 
 
 # Manage Applications (Section 4)
+
+
+@router.get(
+    "/vacancies",
+    response_model=VacancyListResponse,
+    summary="Daftar semua lowongan untuk admin",
+)
+async def list_admin_vacancies(
+    is_active: Optional[bool] = None,
+    page: int = Query(1, ge=1),
+    per_page: int = Query(50, ge=1, le=200),
+    session=Depends(get_session),
+    _: DomainUser = Depends(require_admin),
+) -> VacancyListResponse:
+    query = session.query(Vacancies).options(joinedload(Vacancies.company))
+    if is_active is not None:
+        query = query.filter(Vacancies.is_active.is_(is_active))
+
+    total = query.count()
+    vacancies = query.order_by(Vacancies.created_at.desc()).offset((page - 1) * per_page).limit(per_page).all()
+
+    items = [
+        VacancySummaryResponse(
+            id=vacancy.id,
+            company=CompanyInfo(
+                id=vacancy.company.id,
+                name=vacancy.company.name,
+                industry=vacancy.company.industry,
+                website_url=vacancy.company.website_url,
+                logo_url=vacancy.company.logo_url,
+            ),
+            title=vacancy.title,
+            type=vacancy.type,
+            open_date=vacancy.open_date,
+            close_date=vacancy.close_date,
+            location=vacancy.location,
+            payment_type=vacancy.payment_type,
+            compensation_min=vacancy.compensation_min,
+            compensation_max=vacancy.compensation_max,
+            compensation_note=vacancy.compensation_note,
+            source_url=vacancy.source_url,
+            is_scraped=vacancy.is_scraped if vacancy.is_scraped is not None else False,
+            is_auto_close=vacancy.is_auto_close if vacancy.is_auto_close is not None else True,
+            is_active=vacancy.is_active if vacancy.is_active is not None else True,
+            created_at=vacancy.created_at,
+            updated_at=vacancy.updated_at,
+        )
+        for vacancy in vacancies
+    ]
+
+    return VacancyListResponse(
+        items=items,
+        total=total,
+        page=page,
+        per_page=per_page,
+        total_pages=(total + per_page - 1) // per_page if total > 0 else 1,
+    )
 
 
 @router.get(

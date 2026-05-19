@@ -33,10 +33,13 @@ def list_pending_verification_command_handler(
         .options(
             joinedload(Applications.student).joinedload(ProfilesStudent.user),
             joinedload(Applications.vacancy).joinedload(Vacancies.company),
+            joinedload(Applications.application_logs),
         )
         .filter(Applications.status == "ACCEPTED")
         .order_by(Applications.updated_at.asc())
         .all()
     )
 
-    return ListPendingVerificationResult(items=applications)
+    applications_with_proof = [app for app in applications if any(log.proof_url for log in app.application_logs)]
+
+    return ListPendingVerificationResult(items=applications_with_proof)

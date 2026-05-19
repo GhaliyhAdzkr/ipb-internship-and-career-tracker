@@ -66,6 +66,12 @@ export const adminService = {
   },
 
   // Manajemen Lowongan: Otoritas Admin
+  getVacancies: async ({ page = 1, perPage = 100, isActive } = {}) => {
+    const params = { page, per_page: perPage };
+    if (typeof isActive === 'boolean') params.is_active = isActive;
+    const response = await api.get('/admin/vacancies', { params });
+    return response.data;
+  },
   createVacancy: async (data) => {
     const response = await api.post('/vacancies', data);
     return response.data;
@@ -112,6 +118,14 @@ export const adminService = {
   // Analytics
   getVacancyStats: async () => {
     const response = await api.get('/analytics/vacancies');
+    return response.data;
+  },
+  getApplicationStats: async () => {
+    const response = await api.get('/analytics/applications');
+    return response.data;
+  },
+  getDistribution: async () => {
+    const response = await api.get('/analytics/distribution');
     return response.data;
   }
 };

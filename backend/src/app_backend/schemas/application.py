@@ -138,6 +138,7 @@ class AdminApplicationResponse(BaseModel):
     student: StudentMinimalResponse
     vacancy: VacancyAdminResponse
     match_percentage: Optional[float] = None
+    proof_url: Optional[str] = None
 
     @model_validator(mode="before")
     @classmethod
@@ -148,6 +149,9 @@ class AdminApplicationResponse(BaseModel):
             match_percentage = getattr(data, "match_percentage", None)
             if match_percentage is not None:
                 match_percentage = float(match_percentage)
+            logs = list(getattr(data, "application_logs", []) or [])
+            logs_with_proof = [log for log in logs if getattr(log, "proof_url", None)]
+            logs_with_proof.sort(key=lambda log: str(getattr(log, "created_at", "") or ""), reverse=True)
             return {
                 "id": data.id,
                 "vacancy_id": data.vacancy_id,
@@ -159,5 +163,6 @@ class AdminApplicationResponse(BaseModel):
                 "student": data.student,
                 "vacancy": data.vacancy,
                 "match_percentage": match_percentage,
+                "proof_url": logs_with_proof[0].proof_url if logs_with_proof else None,
             }
         return data

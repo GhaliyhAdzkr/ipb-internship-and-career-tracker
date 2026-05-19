@@ -38,14 +38,15 @@ def upload_application_proof_command_handler(
     Business Rules:
     1. Hanya menerima image/jpeg, image/png, application/pdf.
     2. Ukuran maksimum 10MB.
-    3. Endpoint ini hanya bisa dipanggil jika application.status = ACCEPTED
+    3. Endpoint ini hanya bisa dipanggil jika application.status = OFFERED atau ACCEPTED.
+       Untuk OFFERED, upload bukti sekaligus mengubah status menjadi ACCEPTED.
     """
     application = session.query(Applications).filter_by(id=command.application_id, student_id=command.student_id).first()
     if not application:
         return UploadApplicationProofResult(error_message="Lamaran tidak ditemukan")
 
-    if application.status != "ACCEPTED":
-        return UploadApplicationProofResult(error_message="Status lamaran harus ACCEPTED untuk mengunggah bukti")
+    if application.status not in {"OFFERED", "ACCEPTED"}:
+        return UploadApplicationProofResult(error_message="Status lamaran harus OFFERED atau ACCEPTED untuk mengunggah bukti")
 
     file = command.file
     valid_content_types = ["image/jpeg", "image/png", "application/pdf"]
@@ -88,17 +89,23 @@ def upload_application_proof_command_handler(
                 buffer.write(file.file.read())
             proof_url = f"/uploads/{UPLOAD_DIR}/{unique_filename}"
 
-        from app_backend.models.application_logs import ApplicationLogs
+        if application.status == "OFFERED":
+            application._changed_by = command.student_id
+            application._proof_url = proof_url
+            application._reason = "Menerima tawaran dan mengunggah bukti penerimaan"
+            application.status = "ACCEPTED"
+        else:
+            from app_backend.models.application_logs import ApplicationLogs
 
-        app_log = ApplicationLogs(
-            application_id=application.id,
-            previous_status=application.status,
-            new_status=application.status,
-            changed_by=command.student_id,
-            proof_url=proof_url,
-            reason="Upload Bukti",
-        )
-        session.add(app_log)
+            app_log = ApplicationLogs(
+                application_id=application.id,
+                previous_status=application.status,
+                new_status=application.status,
+                changed_by=command.student_id,
+                proof_url=proof_url,
+                reason="Upload Bukti",
+            )
+            session.add(app_log)
 
         session.commit()
         return UploadApplicationProofResult(proof_url=proof_url, message="Bukti berhasil diunggah")

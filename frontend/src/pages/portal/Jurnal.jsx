@@ -2,12 +2,12 @@ import { useState, useMemo } from "react";
 import { DayPicker } from "react-day-picker";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
-import { PiWarning, PiClock, PiUpload, PiCheckCircleFill, PiSpinner, PiFilePdf, PiTrash } from "react-icons/pi";
+import { PiWarning, PiClock, PiUpload, PiCheckCircleFill, PiSpinner, PiFilePdf, PiTrash, PiSparkle } from "react-icons/pi";
 import toast from "react-hot-toast";
 
-import { usePlacements, useActivityLogs } from "../../hooks/usePlacements";
+import { usePlacements, useActivityLogs, useActivityLogMutations } from "../../hooks/usePlacements";
 
-function JurnalForm({ activeLog, selectedDate, onSave, onDelete, isSaving, isDeleting }) {
+function JurnalForm({ activeLog, selectedDate, onSave, onDelete, onEnhance, isSaving, isDeleting, isEnhancing }) {
 	const [startTimeStr, setStartTimeStr] = useState("08:00");
 	
 	// Inisialisasi waktu selesai berdasarkan durasi activeLog
@@ -123,6 +123,14 @@ function JurnalForm({ activeLog, selectedDate, onSave, onDelete, isSaving, isDel
 					placeholder="Jelaskan kegiatan yang dijalankan secara detail..."
 					className="w-full h-40 p-4 text-slate-700 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-sky-500 outline-none resize-none transition-all"
 				/>
+				{activeLog?.description_ai_enhanced && (
+					<div className="mt-2 p-3 bg-sky-50 border border-sky-100 rounded-lg">
+						<div className="flex items-center gap-1.5 text-xs font-bold text-sky-800 mb-1">
+							<PiSparkle size={14} /> Hasil AI Enhance
+						</div>
+						<p className="text-sm text-slate-700 leading-relaxed">{activeLog.description_ai_enhanced}</p>
+					</div>
+				)}
 			</div>
 
 			{/* Upload */}
@@ -158,12 +166,22 @@ function JurnalForm({ activeLog, selectedDate, onSave, onDelete, isSaving, isDel
 			{/* Tombol Aksi */}
 			<div className="flex gap-3 justify-end mt-2 pt-5 border-t border-slate-100">
 				{activeLog && (
-					<button 
-						onClick={onDelete}
-						className="px-4 py-2 font-bold text-rose-600 hover:bg-rose-50 rounded-lg transition-colors flex items-center gap-2 text-sm"
-					>
-						<PiTrash size={18} /> Hapus
-					</button>
+					<>
+						<button
+							onClick={onEnhance}
+							disabled={isEnhancing || isSaving || isDeleting}
+							className="px-4 py-2 font-bold text-sky-700 hover:bg-sky-50 rounded-lg transition-colors flex items-center gap-2 text-sm disabled:opacity-70 disabled:cursor-not-allowed"
+						>
+							{isEnhancing ? <PiSpinner className="animate-spin" size={18} /> : <PiSparkle size={18} />} AI Enhance
+						</button>
+						<button
+							onClick={onDelete}
+							disabled={isDeleting || isSaving || isEnhancing}
+							className="px-4 py-2 font-bold text-rose-600 hover:bg-rose-50 rounded-lg transition-colors flex items-center gap-2 text-sm disabled:opacity-70 disabled:cursor-not-allowed"
+						>
+							<PiTrash size={18} /> Hapus
+						</button>
+					</>
 				)}
 				<button 
 					onClick={() => {
@@ -176,7 +194,7 @@ function JurnalForm({ activeLog, selectedDate, onSave, onDelete, isSaving, isDel
 				</button>
 				<button 
 					onClick={handleLocalSave}
-					disabled={isSaving || isDeleting}
+					disabled={isSaving || isDeleting || isEnhancing}
 					className="px-6 py-2.5 bg-sky-950 text-white font-bold rounded-lg shadow-md hover:bg-sky-900 hover:shadow-lg transition-all text-sm flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
 				>
 					{(isSaving || isDeleting) && <PiSpinner className="animate-spin" size={18} />}
@@ -191,16 +209,19 @@ function Jurnal() {
 	const { data: placements = [], isLoading: isLoadingPlacements } = usePlacements();
 	const activePlacement = placements.length > 0 ? placements[0] : null;
 
-	const { 
-		logs = [], 
-		createLog, 
-		updateLog, 
+	const { data: logs = [] } = useActivityLogs(activePlacement?.id);
+	const {
+		createLog,
+		updateLog,
 		deleteLog,
 		uploadAttachment,
+		enhanceLog,
 		isCreating,
 		isUpdating,
-		isUploading 
-	} = useActivityLogs(activePlacement?.id);
+		isUploading,
+		isDeleting,
+		isEnhancing
+	} = useActivityLogMutations(activePlacement?.id);
 
 	const [selectedDate, setSelectedDate] = useState(new Date());
 
@@ -261,6 +282,16 @@ function Jurnal() {
 			} catch {
 				toast.error("Gagal menghapus jurnal");
 			}
+		}
+	};
+
+	const handleEnhance = async () => {
+		if (!activeLog) return;
+		try {
+			await enhanceLog(activeLog.id);
+			toast.success("Deskripsi jurnal berhasil dipoles AI.");
+		} catch (err) {
+			toast.error(err.response?.data?.detail || err.message || "Gagal memoles deskripsi jurnal");
 		}
 	};
 
@@ -373,8 +404,10 @@ function Jurnal() {
 						selectedDate={selectedDate}
 						onSave={handleSave}
 						onDelete={handleDelete}
+						onEnhance={handleEnhance}
 						isSaving={isCreating || isUpdating || isUploading}
-						isDeleting={false} // Aksi hapus memiliki state internal sendiri atau kita bisa mempassingnya jika dibutuhkan
+						isDeleting={isDeleting}
+						isEnhancing={isEnhancing}
 					/>
 				</div>
 			</div>

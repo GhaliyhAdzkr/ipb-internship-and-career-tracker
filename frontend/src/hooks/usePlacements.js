@@ -66,6 +66,13 @@ export const useActivityLogMutations = (placementId) => {
     },
   });
 
+  const enhanceLog = useMutation({
+    mutationFn: (logId) => placementService.enhanceLog(placementId, logId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['placements', placementId, 'logs'] });
+    },
+  });
+
   return {
     createLog: createLog.mutateAsync,
     isCreating: createLog.isPending,
@@ -75,6 +82,8 @@ export const useActivityLogMutations = (placementId) => {
     isDeleting: deleteLog.isPending,
     uploadAttachment: uploadAttachment.mutateAsync,
     isUploading: uploadAttachment.isPending,
+    enhanceLog: enhanceLog.mutateAsync,
+    isEnhancing: enhanceLog.isPending,
   };
 };
 

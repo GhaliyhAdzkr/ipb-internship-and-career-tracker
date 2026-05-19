@@ -58,9 +58,9 @@ USER app
 # Expose port used by Uvicorn
 EXPOSE 8000
 
-# Healthcheck using UDS would be better; keep simple TCP check
+# Healthcheck using UDS would be better, keep simple TCP check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
   CMD python -c "import socket; s=socket.socket(); s.settimeout(2); s.connect((\"127.0.0.1\",8000))" || exit 1
 
-# Default command - run uvicorn with the app
-CMD ["uvicorn", "app_backend.main:app", "--host", "0.0.0.0", "--port", "8000", "--log-level", "info"]
+# Default command, migrate first, then run Uvicorn.
+CMD ["sh", "-c", "alembic upgrade head && uvicorn app_backend.main:app --host 0.0.0.0 --port 8000 --log-level info"]
