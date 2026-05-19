@@ -1,5 +1,7 @@
 # LARAS: IPB Internship and Career Tracker - Frontend
 
+LARAS (Launchpad for Apprenticeship, Readiness, And Success) is an intelligent career tracker with state-driven process management, turning fragmented application data into a unified pathway for internship success.
+
 Frontend aplikasi LARAS (Lintasan Arah dan Rencana Aktualisasi Studi) dikembangkan menggunakan **React 19** dan **Vite**, dikombinasikan dengan **Tailwind CSS v4** dan **DaisyUI v5** untuk performa serta estetika UI yang moderen dan premium.
 
 ## Perkembangan & Fitur Utama Saat Ini

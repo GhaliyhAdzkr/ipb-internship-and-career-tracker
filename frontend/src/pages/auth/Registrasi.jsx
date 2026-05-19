@@ -22,7 +22,10 @@ import {
 
 const registrationSchema = z.object({
   full_name: z.string().min(3, "Nama lengkap minimal 3 karakter"),
-  nim: z.string().regex(/^[A-Za-z][0-9]{8}$/, "Format NIM tidak valid. Harus diawali 1 huruf dan diikuti 8 angka (Contoh: G64012012)"),
+  nim: z.string()
+    .min(6, "NIM minimal 6 karakter")
+    .max(20, "NIM maksimal 20 karakter")
+    .regex(/^[A-Za-z][A-Za-z0-9]+$/, "Format NIM tidak valid. Harus diawali dengan huruf dan hanya berisi huruf/angka (Contoh: G64012012)"),
   semester: z.coerce.number().min(1, "Semester minimal 1").max(14, "Semester maksimal 14"),
   email: z.string().email("Format email tidak valid").endsWith("@apps.ipb.ac.id", "Wajib menggunakan email institusi @apps.ipb.ac.id"),
   password: z.string().min(8, "Kata sandi minimal 8 karakter")

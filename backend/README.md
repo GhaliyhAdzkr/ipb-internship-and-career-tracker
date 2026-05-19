@@ -2,6 +2,8 @@
 
 ## Deskripsi
 
+LARAS (Launchpad for Apprenticeship, Readiness, And Success) is an intelligent career tracker with state-driven process management, turning fragmented application data into a unified pathway for internship success.
+
 Backend API untuk aplikasi IPB Internship and Career Tracker (LARAS) menggunakan FastAPI dengan Vertical Slice Architecture dan Domain-Driven Design.
 
 ## Struktur Folder
