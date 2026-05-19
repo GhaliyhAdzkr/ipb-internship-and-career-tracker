@@ -34,7 +34,7 @@ const TopBar = () => {
 				<img src="/logo/laras.png" alt="LARAS" className="w-8 h-8 object-contain" />
 				<span className="text-base font-[900] tracking-tight text-sky-950">LARAS</span>
 			</div>
-			<div className="flex items-center gap-3 sm:gap-5">
+			<div className="flex items-center gap-3 sm:gap-5 ml-auto">
 				{/* Notifikasi */}
 				<div className="relative">
 					<button 
