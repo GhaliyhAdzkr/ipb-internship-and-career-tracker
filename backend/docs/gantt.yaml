@@ -1,0 +1,132 @@
+show-today: false
+headers:
+  - month
+  - week
+start: 2026-01-26
+end: 2026-06-05
+tasks:
+  - name: "1. Kickoff dan penyelarasan scope"
+    id: t1
+    start: 2026-01-26
+    end: 2026-01-27
+  - name: "2. Setup lingkungan dev dan struktur repo"
+    id: t2
+    start: 2026-01-28
+    end: 2026-02-06
+    dependencies:
+      - id: t1
+  - name: "3. Baseline database dan migrasi"
+    id: t3
+    start: 2026-02-07
+    end: 2026-02-20
+    dependencies:
+      - id: t2
+  - name: "4. Implementasi auth dan RBAC"
+    id: t4
+    start: 2026-02-21
+    end: 2026-03-05
+    dependencies:
+      - id: t3
+  - name: "5. Profile management dan master data"
+    id: t5
+    start: 2026-03-06
+    end: 2026-03-19
+    dependencies:
+      - id: t4
+  - name: "6. Job board dan vacancy management"
+    id: t6
+    start: 2026-03-20
+    end: 2026-04-03
+    dependencies:
+      - id: t5
+  - name: "7. Wishlist dan job matching"
+    id: t7
+    start: 2026-04-04
+    end: 2026-04-10
+    dependencies:
+      - id: t6
+  - name: "8. Application tracking (ATS)"
+    id: t8
+    start: 2026-04-04
+    end: 2026-04-17
+    dependencies:
+      - id: t6
+  - name: "9. Notification system"
+    id: t11
+    start: 2026-04-04
+    end: 2026-04-11
+    dependencies:
+      - id: t4
+  - name: "10. Placement dan activity log"
+    id: t9
+    start: 2026-04-18
+    end: 2026-04-27
+    dependencies:
+      - id: t8
+  - name: "11. Auto report dan document request"
+    id: t10
+    start: 2026-04-28
+    end: 2026-05-10
+    dependencies:
+      - id: t9
+  - name: "12. Frontend integrasi API per phase"
+    id: t12
+    start: 2026-04-18
+    end: 2026-05-20
+    dependencies:
+      - id: t7
+      - id: t8
+  - name: "13. Dashboard dan analytics"
+    id: t13
+    start: 2026-05-21
+    end: 2026-05-27
+    dependencies:
+      - id: t12
+  - name: "14. Testing dan QA"
+    id: t14
+    start: 2026-05-21
+    end: 2026-05-31
+    dependencies:
+      - id: t13
+      - id: t17
+      - id: t10
+      - id: t11
+  - name: "15. CI/CD dan staging"
+    id: t15
+    start: 2026-02-07
+    end: 2026-02-20
+    dependencies:
+      - id: t2
+  - name: "16. Monitoring dan hardening security"
+    id: t16
+    start: 2026-02-21
+    end: 2026-03-06
+    dependencies:
+      - id: t15
+  - name: "17. Data prefill untuk validasi UI"
+    id: t17
+    start: 2026-02-21
+    end: 2026-02-28
+    dependencies:
+      - id: t3
+  - name: "18. UX polish dan aksesibilitas"
+    id: t18
+    start: 2026-05-21
+    end: 2026-05-31
+    dependencies:
+      - id: t12
+  - name: "19. Performance tuning"
+    id: t19
+    start: 2026-04-28
+    end: 2026-05-08
+    dependencies:
+      - id: t9
+  - name: "20. UAT, rilis, dan handover"
+    id: t20
+    start: 2026-06-01
+    end: 2026-06-05
+    dependencies:
+      - id: t14
+      - id: t16
+      - id: t18
+      - id: t19
