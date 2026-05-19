@@ -29,8 +29,12 @@ const TopBar = () => {
 	};
 
 	return (
-		<nav className="flex items-center justify-end w-full h-16 px-6 bg-white border-b border-gray-100 font-jakarta relative">
-			<div className="flex items-center gap-5">
+		<nav className="flex items-center justify-between w-full h-14 px-4 sm:h-16 sm:px-6 bg-white border-b border-gray-100 font-jakarta relative">
+			<div className="flex items-center gap-2 lg:hidden">
+				<img src="/logo/laras.png" alt="LARAS" className="w-8 h-8 object-contain" />
+				<span className="text-base font-[900] tracking-tight text-sky-950">LARAS</span>
+			</div>
+			<div className="flex items-center gap-3 sm:gap-5">
 				{/* Notifikasi */}
 				<div className="relative">
 					<button 
@@ -49,7 +53,7 @@ const TopBar = () => {
 							{/* Overlay to close on click outside */}
 							<div className="fixed inset-0 z-10" onClick={() => setShowNotifications(false)}></div>
 							
-							<div className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.12)] border border-slate-100 overflow-hidden z-20">
+							<div className="fixed left-4 right-4 top-16 bg-white rounded-2xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.12)] border border-slate-100 overflow-hidden z-20 sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-3 sm:w-80">
 								<div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
 									<div className="flex items-center gap-2">
 										<span className="font-bold text-sky-950 text-sm">Notifikasi</span>

@@ -28,7 +28,7 @@ import { PiSpinnerGap } from "react-icons/pi";
 
 // Component to protect routes that require specific roles
 const RoleGuard = ({ children, allowedRoles }) => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isError } = useAuth();
   const token = localStorage.getItem('token');
 
   if (!token) return <Navigate to="/login" replace />;
@@ -38,7 +38,14 @@ const RoleGuard = ({ children, allowedRoles }) => {
     </div>
   );
 
-  if (!allowedRoles.includes(user?.role)) {
+  if (isError || !user) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('refresh_token');
+    return <Navigate to="/login" replace />;
+  }
+
+  if (!allowedRoles.includes(user.role)) {
     // Redirect based on role if they try to access unauthorized area
     return user?.role === 'ADMIN' 
       ? <Navigate to="/app/admin/dashboard" replace /> 
@@ -71,6 +78,8 @@ const ProtectedRoute = ({ children }) => {
   if (isError) {
     // Jika ada token tapi API return error (misal expired), bersihkan token & login ulang
     localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('refresh_token');
     return <Navigate to="/login" replace />;
   }
 

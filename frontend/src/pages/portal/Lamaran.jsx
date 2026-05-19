@@ -242,9 +242,9 @@ function Lamaran() {
 	return (
 		<div className="font-jakarta relative min-h-screen">
 			{/* Banner Utama */}
-			<div className="mb-8 bg-sky-950 py-8 px-10 rounded-xl text-white flex justify-between items-center shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)]">
+			<div className="mb-8 bg-sky-950 py-6 px-5 sm:py-8 sm:px-10 rounded-xl text-white flex flex-col sm:flex-row justify-between sm:items-center gap-4 shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)]">
 				<div className="flex flex-col gap-2">
-					<div className="text-3xl font-bold tracking-tight">Lacak Lamaranmu</div>
+					<div className="text-2xl sm:text-3xl font-bold tracking-tight">Lacak Lamaranmu</div>
 					<div className="text-sm opacity-80 font-medium">
 						Pantau status lamaran magang dan karir kamu secara real-time. Kelola penawaran dan unggah bukti penerimaan dengan aman.
 					</div>
@@ -252,7 +252,7 @@ function Lamaran() {
 			</div>
 
 			{/* Tampilan Papan Kanban */}
-			<div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-start">
+			<div className="grid grid-cols-1 xl:grid-cols-3 gap-5 items-start">
 				{columns.map((column) => {
 					// Filter lamaran berdasarkan daftar status kolom ini
 					const colApps = applications.filter((app) => column.statuses.includes(app.status));
@@ -260,7 +260,7 @@ function Lamaran() {
 					return (
 						<div 
 							key={column.id} 
-							className={`p-5 bg-white border border-gray-200/60 rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.03)] flex flex-col gap-4 min-h-[500px] ${column.color}`}
+							className={`p-4 sm:p-5 bg-white border border-gray-200/60 rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.03)] flex flex-col gap-4 min-h-[280px] xl:min-h-[500px] ${column.color}`}
 						>
 							<div className="flex justify-between items-center border-b border-gray-100 pb-3">
 								<div className="flex items-center gap-2 font-bold text-gray-900">
@@ -353,10 +353,10 @@ function Lamaran() {
 							animate={{ x: 0 }}
 							exit={{ x: "100%" }}
 							transition={{ type: "spring", damping: 25, stiffness: 220 }}
-							className="fixed top-0 right-0 h-full w-full sm:max-w-lg bg-white shadow-2xl z-50 overflow-y-auto flex flex-col border-l border-gray-100"
+							className="fixed inset-x-0 bottom-0 h-[92dvh] w-full rounded-t-3xl sm:inset-y-0 sm:left-auto sm:right-0 sm:h-full sm:max-w-lg sm:rounded-none bg-white shadow-2xl z-50 overflow-y-auto flex flex-col border-l border-gray-100"
 						>
 							{/* Bagian Kepala Header */}
-							<div className="p-6 bg-sky-950 text-white flex justify-between items-start relative overflow-hidden">
+							<div className="p-5 sm:p-6 bg-sky-950 text-white flex justify-between items-start relative overflow-hidden">
 								<div className="absolute top-0 right-0 w-32 h-32 bg-sky-900 rounded-full translate-x-16 -translate-y-16 blur-2xl"></div>
 								<div className="flex flex-col gap-1 relative z-10">
 									<span className={`self-start px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-white/20 text-white border border-white/10 mb-2`}>
@@ -376,11 +376,11 @@ function Lamaran() {
 							</div>
 
 							{/* Kontainer Konten Utama */}
-							<div className="p-6 flex flex-col gap-6 flex-1">
+							<div className="p-4 sm:p-6 flex flex-col gap-6 flex-1">
 								{/* Kartu Detail Lowongan Pekerjaan */}
 								<div className="p-4 bg-slate-50 border border-slate-200/60 rounded-xl flex flex-col gap-3">
 									<h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Detail Pekerjaan</h3>
-									<div className="grid grid-cols-2 gap-4 text-sm text-gray-700">
+									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-700">
 										<div>
 											<p className="text-xs text-gray-400 font-medium">Tipe Lowongan</p>
 											<p className="font-semibold text-gray-800 mt-0.5">{typeMap[activeApp.vacancy?.type] || activeApp.vacancy?.type}</p>
@@ -436,7 +436,7 @@ function Lamaran() {
 													className="hidden"
 												/>
 											</label>
-											<div className="flex gap-3">
+											<div className="flex flex-col sm:flex-row gap-3">
 												<button
 													onClick={handleAcceptOffer}
 													disabled={isSubmittingAction}

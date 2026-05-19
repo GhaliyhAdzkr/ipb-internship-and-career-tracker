@@ -41,9 +41,9 @@ const Sidebar = () => {
 	];
 
 	return (
-		<div className="sticky top-0 h-screen w-64 bg-indigo-50 border-r border-neutral-300/20 flex flex-col font-jakarta shrink-0">
+		<div className="fixed inset-x-0 bottom-0 z-40 h-20 bg-indigo-50 border-t border-neutral-300/20 flex font-jakarta lg:sticky lg:top-0 lg:h-screen lg:w-64 lg:border-t-0 lg:border-r lg:flex-col lg:shrink-0">
 			{/* Logo Aplikasi */}
-			<div className="p-6 flex items-center gap-3 mb-4">
+			<div className="hidden p-6 lg:flex items-center gap-3 mb-4">
 				<img 
 					src="/logo/laras.png" 
 					alt="LARAS Logo" 
@@ -60,23 +60,23 @@ const Sidebar = () => {
 			</div>
 
 			{/* Navigasi */}
-			<div className="flex-1 px-4 flex flex-col gap-2">
+			<div className="flex-1 px-2 py-2 flex items-center gap-1 overflow-x-auto lg:items-stretch lg:px-4 lg:py-0 lg:flex-col lg:gap-2">
 				{navItems.map((item) => (
 					<NavLink
 						key={item.to}
 						to={item.to}
 						className={({ isActive }) =>
-							`${isActive ? activeStyle : inactiveStyle} flex items-center gap-3 px-4 py-3 rounded-lg text-sm`
+							`${isActive ? activeStyle : inactiveStyle} flex min-w-[76px] flex-col items-center justify-center gap-1 px-2 py-2 rounded-lg text-[10px] leading-tight lg:min-w-0 lg:flex-row lg:justify-start lg:gap-3 lg:px-4 lg:py-3 lg:text-sm`
 						}
 					>
 						<item.icon size={20} weight="bold" />
-						<span>{item.label}</span>
+						<span className="max-w-[70px] truncate lg:max-w-none">{item.label}</span>
 					</NavLink>
 				))}
 			</div>
 
 			{/* Keluar */}
-			<div className="p-4 mt-auto">
+			<div className="hidden p-4 mt-auto lg:block">
 				<button 
 					onClick={logout}
 					className="flex items-center gap-3 w-full px-4 py-3 text-slate-500 hover:text-red-600 transition-colors text-sm font-bold"

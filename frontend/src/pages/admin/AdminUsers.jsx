@@ -71,10 +71,10 @@ function AdminUsers() {
     return (
         <div className="font-jakarta space-y-8 pb-20">
             {/* Header Banner */}
-            <div className="bg-sky-950 py-12 px-10 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
+            <div className="bg-sky-950 py-8 px-5 sm:py-12 sm:px-10 rounded-[1.5rem] sm:rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
                 <div className="relative z-10">
-                    <h1 className="text-3xl font-extrabold mb-2 tracking-tight">Manajemen Mahasiswa</h1>
-                    <p className="text-sky-200 max-w-xl text-lg opacity-80 font-medium">
+                    <h1 className="text-2xl sm:text-3xl font-extrabold mb-2 tracking-tight">Manajemen Mahasiswa</h1>
+                    <p className="text-sky-200 max-w-xl text-sm sm:text-lg opacity-80 font-medium">
                         Pantau aktivitas akademik, verifikasi data profil, dan kelola aksesibilitas akun mahasiswa IPB.
                     </p>
                 </div>
@@ -129,7 +129,7 @@ function AdminUsers() {
             {/* Students Table */}
             <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
+                    <table className="w-full min-w-[920px] text-left border-collapse">
                         <thead className="bg-slate-50/50 border-b border-slate-100">
                             <tr>
                                 <th className="px-8 py-5 text-[10px] font-extrabold text-slate-400 uppercase tracking-[0.2em]">Mahasiswa</th>
@@ -220,12 +220,12 @@ function AdminUsers() {
 
             {/* Student Detail Modal */}
             {isDetailOpen && selectedStudent && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4">
                     <div className="absolute inset-0 bg-sky-950/60 backdrop-blur-md" onClick={() => setIsDetailOpen(false)}></div>
-                    <div className="relative bg-white rounded-[2.5rem] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-300">
+                    <div className="relative bg-white rounded-t-[2rem] sm:rounded-[2.5rem] shadow-2xl w-full max-w-2xl max-h-[92dvh] sm:max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-300">
                         {/* Modal Cover */}
                         <div className="h-32 bg-sky-950 relative shrink-0">
-                            <div className="absolute -bottom-12 left-10 w-24 h-24 rounded-[2rem] bg-white p-2 shadow-xl">
+                            <div className="absolute -bottom-12 left-5 sm:left-10 w-24 h-24 rounded-[2rem] bg-white p-2 shadow-xl">
                                 <div className="w-full h-full rounded-[1.5rem] bg-sky-100 text-sky-700 flex items-center justify-center text-3xl font-extrabold">
                                     {selectedStudent.full_name?.charAt(0)}
                                 </div>
@@ -236,21 +236,21 @@ function AdminUsers() {
                         </div>
 
                         {/* Modal Body */}
-                        <div className="pt-16 p-10 overflow-y-auto space-y-10">
-                            <div className="flex justify-between items-start">
+                        <div className="pt-16 p-5 sm:p-10 overflow-y-auto space-y-8 sm:space-y-10">
+                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-5">
                                 <div>
-                                    <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">{selectedStudent.full_name}</h2>
+                                    <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">{selectedStudent.full_name}</h2>
                                     <p className="text-sky-600 font-bold flex items-center gap-2 mt-1">
                                         <PiIdentificationCardBold /> {selectedStudent.nim || 'NIM Tidak Tersedia'}
                                     </p>
                                 </div>
-                                <div className="text-right">
+                                <div className="sm:text-right">
                                     <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Akademik GPA</p>
                                     <p className="text-3xl font-black text-sky-950">{selectedStudent.gpa?.toFixed(2) || '0.00'}</p>
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-8">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                                 <div className="space-y-6">
                                     <div className="space-y-3">
                                         <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest flex items-center gap-2">
@@ -316,7 +316,7 @@ function AdminUsers() {
                         </div>
 
                         {/* Modal Footer */}
-                        <div className="p-8 bg-slate-50 border-t border-slate-100">
+                        <div className="p-4 sm:p-8 bg-slate-50 border-t border-slate-100">
                             <button
                                 onClick={() => setIsDetailOpen(false)}
                                 className="w-full py-4 bg-sky-950 text-white rounded-2xl font-extrabold shadow-xl shadow-sky-900/20"

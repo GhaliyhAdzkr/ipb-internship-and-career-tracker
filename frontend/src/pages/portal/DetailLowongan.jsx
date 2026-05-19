@@ -26,7 +26,7 @@ export default function DetailLowongan() {
   const navigate = useNavigate();
   const { vacancyId } = useParams();
   const token = localStorage.getItem('token');
-  const { apply, isApplying } = useApplications();
+  const { apply, isApplying } = useApplications({ enabled: false });
   const {
     vacancy,
     isLoadingVacancy,
@@ -113,7 +113,7 @@ export default function DetailLowongan() {
     <div className="min-h-screen bg-[#FBFDFF] font-jakarta pb-20">
       {/* Header / Navigation */}
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <button 
             onClick={() => navigate(-1)} 
             className="group flex items-center gap-2 text-slate-500 hover:text-sky-950 transition-colors font-bold text-sm"
@@ -138,9 +138,9 @@ export default function DetailLowongan() {
         {/* Decorative Background */}
         <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-sky-50/50 to-transparent pointer-events-none" />
         
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-            <div className="flex gap-6 items-start md:items-center">
+            <div className="flex flex-col sm:flex-row gap-5 sm:gap-6 items-start md:items-center">
               <motion.div 
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -179,7 +179,7 @@ export default function DetailLowongan() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
-                  className="text-3xl md:text-4xl font-[1000] text-sky-950 mb-2 tracking-tight"
+                  className="text-2xl sm:text-3xl md:text-4xl font-[1000] text-sky-950 mb-2 tracking-tight"
                 >
                   {vacancy.title}
                 </motion.h1>
@@ -242,17 +242,17 @@ export default function DetailLowongan() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 mt-12">
-        <div className="grid lg:grid-cols-3 gap-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 mt-10 sm:mt-12">
+        <div className="grid lg:grid-cols-3 gap-8 sm:gap-12">
           {/* Left Column: Details */}
-          <div className="lg:col-span-2 space-y-12">
+          <div className="lg:col-span-2 space-y-8 sm:space-y-12">
 
             <section className="space-y-6">
               <h2 className="text-xl font-[900] text-sky-950 flex items-center gap-3">
                 <div className="w-1.5 h-6 bg-sky-600 rounded-full" />
                 Deskripsi Pekerjaan
               </h2>
-              <div className="text-[16px] leading-relaxed text-slate-600 whitespace-pre-line bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
+              <div className="text-[15px] sm:text-[16px] leading-relaxed text-slate-600 whitespace-pre-line bg-white rounded-3xl p-5 sm:p-8 border border-slate-100 shadow-sm">
                 {vacancy.description}
               </div>
             </section>
@@ -262,7 +262,7 @@ export default function DetailLowongan() {
                 <div className="w-1.5 h-6 bg-sky-600 rounded-full" />
                 Kualifikasi & Skill
               </h2>
-              <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm space-y-8">
+              <div className="bg-white rounded-3xl p-5 sm:p-8 border border-slate-100 shadow-sm space-y-8">
                 <div className="flex flex-wrap gap-2">
                   {vacancy.skills?.length > 0 ? vacancy.skills.map((skill) => (
                     <span key={skill.skill_id} className="flex items-center gap-2 bg-sky-50/50 text-sky-950 px-4 py-2.5 rounded-2xl text-[13px] font-bold border border-sky-100/50">
@@ -282,13 +282,13 @@ export default function DetailLowongan() {
           <aside className="space-y-6">
             {/* Case 1: Token exists but student hasn't uploaded their CV (jobMatch has null match_percentage or !jobMatch) */}
             {token && (!jobMatch || jobMatch.match_percentage === null) && (
-              <div className="bg-white rounded-[32px] p-8 border border-slate-100 shadow-xl shadow-sky-950/[0.02]">
+              <div className="bg-white rounded-[32px] p-5 sm:p-8 border border-slate-100 shadow-xl shadow-sky-950/[0.02]">
                 <h3 className="text-lg font-[900] text-sky-950 mb-6 tracking-tight">Kesesuaian Profil</h3>
                 <p className="text-[13px] text-slate-500 leading-relaxed font-medium mb-6">
                   Sistem dapat menganalisis kesesuaian keahlian Anda dengan lowongan ini secara otomatis. Unggah CV di profil Anda untuk memulai!
                 </p>
                 <Link 
-                  to="/app/profile" 
+                  to="/app/profil" 
                   className="inline-flex w-full py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-2xl text-xs font-bold items-center justify-center transition-all active:scale-95 shadow-md shadow-sky-600/10"
                 >
                   Unggah CV Sekarang
@@ -298,7 +298,7 @@ export default function DetailLowongan() {
 
             {/* Case 2: Token exists, CV uploaded, but vacancy has no skill requirements */}
             {token && jobMatch && jobMatch.match_percentage !== null && jobMatch.total_required_skills === 0 && (
-              <div className="bg-white rounded-[32px] p-8 border border-slate-100 shadow-xl shadow-sky-950/[0.02]">
+              <div className="bg-white rounded-[32px] p-5 sm:p-8 border border-slate-100 shadow-xl shadow-sky-950/[0.02]">
                 <h3 className="text-lg font-[900] text-sky-950 mb-6 tracking-tight">Kesesuaian Profil</h3>
                 <p className="text-[13px] text-slate-500 leading-relaxed font-medium">
                   Lowongan ini belum memuat kualifikasi keahlian khusus secara spesifik di sistem, sehingga analisis kesesuaian tidak dapat dihitung.
@@ -308,7 +308,7 @@ export default function DetailLowongan() {
 
             {/* Case 3: Token exists, CV uploaded, and vacancy has skill requirements */}
             {token && jobMatch && jobMatch.match_percentage !== null && jobMatch.total_required_skills > 0 && (
-              <div className="bg-white rounded-[32px] p-8 border border-slate-100 shadow-xl shadow-sky-950/[0.02]">
+              <div className="bg-white rounded-[32px] p-5 sm:p-8 border border-slate-100 shadow-xl shadow-sky-950/[0.02]">
                 <div className="flex items-center justify-between mb-8">
                   <h3 className="text-lg font-[900] text-sky-950 tracking-tight">Kesesuaian Profil</h3>
                   <span className="text-[10px] bg-sky-50 text-sky-700 font-bold px-2 py-0.5 rounded-full border border-sky-100/50 flex items-center gap-0.5">
@@ -373,7 +373,7 @@ export default function DetailLowongan() {
               </div>
             )}
 
-            <div className="bg-white rounded-[32px] p-8 border border-slate-100 shadow-xl shadow-sky-950/[0.02] sticky top-24">
+            <div className="bg-white rounded-[32px] p-5 sm:p-8 border border-slate-100 shadow-xl shadow-sky-950/[0.02] lg:sticky lg:top-24">
               <h3 className="text-lg font-[900] text-sky-950 mb-8 tracking-tight">Detail Informasi</h3>
               
               <div className="space-y-8">

@@ -166,7 +166,7 @@ function AdminVacancies() {
     return (
         <div className="font-jakarta space-y-8 pb-32">
             {/* Header Banner */}
-            <div className="bg-sky-950 py-12 px-10 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden">
+            <div className="bg-sky-950 py-8 px-5 sm:py-12 sm:px-10 rounded-[1.5rem] sm:rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden">
                 <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                     <div>
                         <div className="flex items-center gap-3 mb-4">
@@ -184,12 +184,12 @@ function AdminVacancies() {
                                 })} WIB
                             </span>
                         </div>
-                        <h1 className="text-4xl font-extrabold mb-3 tracking-tight">Kurasi Lowongan</h1>
-                        <p className="text-sky-100/70 max-w-xl text-lg leading-relaxed">
+                        <h1 className="text-3xl sm:text-4xl font-extrabold mb-3 tracking-tight">Kurasi Lowongan</h1>
+                        <p className="text-sky-100/70 max-w-xl text-sm sm:text-lg leading-relaxed">
                             Kelola ekosistem karir mahasiswa IPB. Verifikasi hasil scraping atau publikasikan lowongan eksklusif CDA.
                         </p>
                     </div>
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 w-full md:w-auto">
                         <button 
                             onClick={() => {
                                 setSelectedVacancy(null);
@@ -202,7 +202,7 @@ function AdminVacancies() {
                                 });
                                 setIsFormOpen(true);
                             }}
-                            className="bg-white text-sky-950 px-8 py-4 rounded-[1.5rem] font-extrabold flex items-center gap-2 hover:bg-sky-50 transition-all shadow-xl shadow-sky-900/40 active:scale-95"
+                            className="w-full md:w-auto bg-white text-sky-950 px-6 sm:px-8 py-4 rounded-[1.5rem] font-extrabold flex items-center justify-center gap-2 hover:bg-sky-50 transition-all shadow-xl shadow-sky-900/40 active:scale-95"
                         >
                             <PiPlusBold size={20} />
                             Tambah Manual
@@ -254,7 +254,7 @@ function AdminVacancies() {
                     </div>
 
                     {/* Status Filter */}
-                    <div className="relative min-w-[160px]">
+                    <div className="relative w-full sm:w-auto sm:min-w-[160px]">
                         <select 
                             className="w-full pl-4 pr-10 py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:ring-2 focus:ring-sky-500/20 outline-none appearance-none cursor-pointer"
                             value={statusFilter}
@@ -268,7 +268,7 @@ function AdminVacancies() {
                     </div>
 
                     {/* Type Filter */}
-                    <div className="relative min-w-[180px]">
+                    <div className="relative w-full sm:w-auto sm:min-w-[180px]">
                         <select 
                             className="w-full pl-4 pr-10 py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:ring-2 focus:ring-sky-500/20 outline-none appearance-none cursor-pointer"
                             value={typeFilter}
@@ -284,7 +284,7 @@ function AdminVacancies() {
                     </div>
 
                     {/* Industry Filter */}
-                    <div className="relative min-w-[200px]">
+                    <div className="relative w-full sm:w-auto sm:min-w-[200px]">
                         <select 
                             className="w-full pl-4 pr-10 py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:ring-2 focus:ring-sky-500/20 outline-none appearance-none cursor-pointer"
                             value={industryFilter}
@@ -306,7 +306,7 @@ function AdminVacancies() {
                             setIndustryFilter("all");
                             setActiveTab("all");
                         }}
-                        className="ml-auto text-[10px] font-extrabold text-slate-400 hover:text-red-500 uppercase tracking-widest transition-colors"
+                        className="w-full sm:w-auto sm:ml-auto text-[10px] font-extrabold text-slate-400 hover:text-red-500 uppercase tracking-widest transition-colors"
                     >
                         Reset Filter
                     </button>
@@ -316,7 +316,7 @@ function AdminVacancies() {
             {/* Content List */}
             <div className="grid grid-cols-1 gap-5">
                 {isLoading ? (
-                    <div className="p-32 text-center text-slate-400 bg-white rounded-[2rem] border border-dashed border-slate-200">
+                    <div className="p-12 sm:p-32 text-center text-slate-400 bg-white rounded-[2rem] border border-dashed border-slate-200">
                         <div className="flex flex-col items-center gap-4">
                             <div className="w-12 h-12 border-4 border-sky-100 border-t-sky-600 rounded-full animate-spin"></div>
                             <p className="font-bold tracking-widest uppercase text-xs">Memuat Basis Data...</p>
@@ -326,11 +326,11 @@ function AdminVacancies() {
                     filteredVacancies.map((vacancy) => {
                         const isClosed = new Date(vacancy.close_date) < new Date();
                         return (
-                            <div key={vacancy.id} className={`bg-white p-6 rounded-[2.5rem] shadow-sm border ${isClosed ? 'border-red-100 opacity-80' : 'border-slate-100'} flex flex-col md:flex-row justify-between items-center gap-6 hover:shadow-xl hover:border-sky-100 transition-all group relative overflow-hidden`}>
+                            <div key={vacancy.id} className={`bg-white p-5 sm:p-6 rounded-[1.5rem] sm:rounded-[2.5rem] shadow-sm border ${isClosed ? 'border-red-100 opacity-80' : 'border-slate-100'} flex flex-col md:flex-row justify-between md:items-center gap-6 hover:shadow-xl hover:border-sky-100 transition-all group relative overflow-hidden`}>
                                 {/* Source Indicator Line */}
                                 <div className={`absolute top-0 bottom-0 left-0 w-1.5 ${vacancy.is_scraped ? 'bg-sky-500' : 'bg-emerald-500'}`}></div>
                                 
-                                <div className="flex gap-6 items-center w-full">
+                                <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 sm:items-center w-full min-w-0">
                                     <div className="w-20 h-20 rounded-[1.5rem] bg-slate-50 flex items-center justify-center p-4 border border-slate-100 shrink-0 group-hover:scale-105 transition-transform duration-300">
                                         <img 
                                             src={vacancy.company?.logo_url || "/logo/placeholder-company.png"} 
@@ -339,9 +339,9 @@ function AdminVacancies() {
                                             onError={(e) => e.target.src = "/logo/placeholder-company.png"}
                                         />
                                     </div>
-                                    <div className="flex-1 space-y-3">
+                                    <div className="flex-1 space-y-3 min-w-0">
                                         <div className="flex flex-wrap items-center gap-2">
-                                            <h3 className="font-extrabold text-slate-900 text-xl tracking-tight leading-tight">{vacancy.title}</h3>
+                                            <h3 className="font-extrabold text-slate-900 text-lg sm:text-xl tracking-tight leading-tight">{vacancy.title}</h3>
                                             <div className="flex gap-1.5">
                                                 {isClosed ? (
                                                     <span className="flex items-center gap-1 bg-red-50 text-red-600 px-2 py-0.5 rounded-lg text-[9px] font-black uppercase border border-red-100">
@@ -375,10 +375,10 @@ function AdminVacancies() {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex gap-2 shrink-0">
+                                <div className="grid grid-cols-3 gap-2 w-full md:w-auto shrink-0">
                                     <button 
                                         onClick={() => handleEdit(vacancy)}
-                                        className="p-4 text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-2xl transition-all shadow-sm border border-transparent hover:border-sky-100" 
+                                        className="p-3 sm:p-4 text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-2xl transition-all shadow-sm border border-transparent hover:border-sky-100 flex items-center justify-center" 
                                         title="Edit Detail"
                                     >
                                         <PiPencilSimpleBold size={24} />
@@ -421,14 +421,14 @@ function AdminVacancies() {
                                                 setFormData(prev => ({ ...prev, skills: [] }));
                                             });
                                         }}
-                                        className="p-4 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-2xl transition-all shadow-sm border border-transparent hover:border-amber-100" 
+                                        className="p-3 sm:p-4 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-2xl transition-all shadow-sm border border-transparent hover:border-amber-100 flex items-center justify-center" 
                                         title="Duplikat"
                                     >
                                         <PiPlusBold size={24} />
                                     </button>
                                     <button 
                                         onClick={() => handleDelete(vacancy)}
-                                        className="p-4 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-2xl transition-all shadow-sm border border-transparent hover:border-red-100" 
+                                        className="p-3 sm:p-4 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-2xl transition-all shadow-sm border border-transparent hover:border-red-100 flex items-center justify-center" 
                                         title="Hapus"
                                     >
                                         <PiTrashBold size={24} />
@@ -438,7 +438,7 @@ function AdminVacancies() {
                         );
                     })
                 ) : (
-                    <div className="p-32 text-center text-slate-400 bg-white rounded-[2rem] border border-dashed border-slate-200 italic">
+                    <div className="p-12 sm:p-32 text-center text-slate-400 bg-white rounded-[2rem] border border-dashed border-slate-200 italic">
                         Tidak ada lowongan dalam kategori ini.
                     </div>
                 )}
@@ -446,13 +446,13 @@ function AdminVacancies() {
 
             {/* Add/Edit Modal */}
             {isFormOpen && (
-                <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-4">
                     <div className="absolute inset-0 bg-sky-950/60 backdrop-blur-md" onClick={() => setIsFormOpen(false)}></div>
-                    <div className="relative bg-white rounded-[2.5rem] shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col animate-in slide-in-from-bottom-10 duration-300">
+                    <div className="relative bg-white rounded-t-[2rem] sm:rounded-[2.5rem] shadow-2xl w-full max-w-3xl max-h-[92dvh] sm:max-h-[90vh] overflow-hidden flex flex-col animate-in slide-in-from-bottom-10 duration-300">
                         {/* Modal Header */}
-                        <div className="p-10 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                        <div className="p-5 sm:p-10 border-b border-slate-100 bg-slate-50/50 flex justify-between items-start gap-4">
                             <div>
-                                <h2 className="text-2xl font-extrabold text-slate-900">{selectedVacancy ? "Perbarui Lowongan" : "Tambah Lowongan Baru"}</h2>
+                                <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900">{selectedVacancy ? "Perbarui Lowongan" : "Tambah Lowongan Baru"}</h2>
                                 <p className="text-slate-500 text-sm mt-1">Lengkapi data untuk publikasi ke portal mahasiswa.</p>
                             </div>
                             <button onClick={() => setIsFormOpen(false)} className="p-3 hover:bg-white rounded-2xl transition-all border border-transparent hover:border-slate-200">
@@ -461,9 +461,9 @@ function AdminVacancies() {
                         </div>
 
                         {/* Modal Body */}
-                        <form id="vacancy-form" onSubmit={handleSubmit} className="p-10 pb-44 overflow-y-auto flex-1 space-y-8 text-sm">
-                            <div className="grid grid-cols-2 gap-6">
-                                <div className="col-span-2 space-y-2">
+                        <form id="vacancy-form" onSubmit={handleSubmit} className="p-5 sm:p-10 pb-40 sm:pb-44 overflow-y-auto flex-1 space-y-8 text-sm">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
+                                <div className="sm:col-span-2 space-y-2">
                                     <label className="font-bold text-slate-700 uppercase tracking-wider text-[11px]">Judul Posisi</label>
                                     <input 
                                         required
@@ -585,7 +585,7 @@ function AdminVacancies() {
                                     </>
                                 )}
 
-                                <div className="col-span-2 space-y-2">
+                                <div className="sm:col-span-2 space-y-2">
                                     <label className="font-bold text-slate-700 uppercase tracking-wider text-[11px]">Deskripsi Pekerjaan</label>
                                     <textarea 
                                         required
@@ -596,7 +596,7 @@ function AdminVacancies() {
                                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                     />
                                 </div>
-                                <div className="col-span-2 space-y-2">
+                                <div className="sm:col-span-2 space-y-2">
                                     <label className="font-bold text-slate-700 uppercase tracking-wider text-[11px]">URL Sumber (Opsional)</label>
                                     <input 
                                         className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-sky-500/10 focus:border-sky-500 outline-none transition-all font-medium"
@@ -607,8 +607,8 @@ function AdminVacancies() {
                                 </div>
 
                                 {/* Kualifikasi & Skill Section */}
-                                <div className="col-span-2 space-y-4 border-t border-slate-100 pt-6">
-                                    <div className="flex justify-between items-center">
+                                <div className="sm:col-span-2 space-y-4 border-t border-slate-100 pt-6">
+                                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                                         <label className="font-bold text-slate-700 uppercase tracking-wider text-[11px]">Kualifikasi & Keahlian (Skills)</label>
                                     </div>
 
@@ -626,7 +626,7 @@ function AdminVacancies() {
                                                 return (
                                                     <div 
                                                         key={index} 
-                                                        className="flex gap-4 items-center bg-slate-50 p-4 rounded-2xl border border-slate-100 relative"
+                                                        className="flex flex-col sm:flex-row gap-4 sm:items-center bg-slate-50 p-4 rounded-2xl border border-slate-100 relative"
                                                         style={{ zIndex: openSkillDropdownIndex === index ? 40 : 10 }}
                                                     >
                                                         {/* Backdrop overlay to close dropdown if open */}
@@ -704,7 +704,7 @@ function AdminVacancies() {
                                                                     {skillSearchQuery.trim() !== "" && !isPerfectMatch && (
                                                                         <div className="p-2 border border-slate-100 rounded-xl bg-slate-50 space-y-2 mt-1 relative z-30">
                                                                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-1">Tambah Keahlian Baru &quot;{skillSearchQuery}&quot; sebagai:</p>
-                                                                            <div className="flex gap-2">
+                                                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                                                                                 {["Technical", "Soft Skill", "General"].map(cat => (
                                                                                     <button
                                                                                         key={cat}
@@ -800,7 +800,7 @@ function AdminVacancies() {
                         </form>
 
                         {/* Modal Footer */}
-                        <div className="p-8 bg-slate-50/80 border-t border-slate-100 flex gap-4">
+                        <div className="p-4 sm:p-8 bg-slate-50/80 border-t border-slate-100 flex flex-col sm:flex-row gap-3 sm:gap-4">
                             <button 
                                 type="button"
                                 onClick={() => setIsFormOpen(false)}

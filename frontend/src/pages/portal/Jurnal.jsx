@@ -312,10 +312,10 @@ function Jurnal() {
 	return (
 		<div className="font-jakarta">
 			{/* Banner */}
-			<div className="mb-5 bg-sky-950 py-7 px-10 rounded-xl text-white flex justify-between items-center shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] relative overflow-hidden">
+			<div className="mb-5 bg-sky-950 py-6 px-5 sm:py-7 sm:px-10 rounded-xl text-white flex flex-col sm:flex-row justify-between sm:items-center gap-4 shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] relative overflow-hidden">
 				<div className="flex flex-col gap-2 relative z-10">
-					<div className="text-3xl font-bold">Jurnal Harian</div>
-					<div className="text-justify opacity-90 max-w-2xl">
+					<div className="text-2xl sm:text-3xl font-bold">Jurnal Harian</div>
+					<div className="text-sm sm:text-base opacity-90 max-w-2xl">
 						Catat aktivitas internship harian Anda di <strong>{activePlacement.company_name || "Perusahaan"}</strong> secara rutin untuk mempermudah penyusunan laporan akhir.
 					</div>
 				</div>
@@ -370,7 +370,7 @@ function Jurnal() {
 					</div>
 
 					{/* Kalender */}
-					<div className="bg-white text-black rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] border border-slate-100 overflow-hidden flex justify-center p-2">
+					<div className="bg-white text-black rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] border border-slate-100 overflow-x-auto flex justify-center p-2">
 						<DayPicker
 							locale={id}
 							mode="single"

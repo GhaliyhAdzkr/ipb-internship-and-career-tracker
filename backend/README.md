@@ -164,37 +164,68 @@ poetry run alembic history
 - `POST /logout` - Logout
 - `POST /password/reset-request` - Request reset password
 - `POST /password/reset` - Reset password
-- `GET /me` - Get current user info
+- `GET /me` - Ambil info user yang sedang login
 
 ### Profile (`/api/v1/profile`)
-- `GET /student/me` - Get student profile
-- `PATCH /student/me` - Update student profile
+- `GET /student/me` - Ambil profil mahasiswa
+- `PATCH /student/me` - Update profil mahasiswa (skill, CV url, dll)
 
 ### Admin (`/api/v1/admin`)
-- `PATCH /users/{id}/toggle-active` - Toggle user active status
-- CRUD `/departments` - Manage departments
-- CRUD `/skills` - Manage master skills
-- CRUD `/companies` - Manage external companies
+- `PATCH /users/{id}/toggle-active` - Mengubah status aktif/nonaktif user
+- CRUD `/departments` - Pengelolaan data departemen
+- CRUD `/skills` - Pengelolaan data master skill
+- CRUD `/companies` - Pengelolaan data mitra/perusahaan
 
 ### Vacancies (`/api/v1/vacancies`)
-- `GET /vacancies` - List vacancies
-- `GET /vacancies/search` - Search with filters
-- `GET /vacancies/{id}` - Get vacancy detail
-- `POST /vacancies` - Create vacancy (admin only)
-- `PUT /vacancies/{id}` - Update vacancy (admin only)
-- `DELETE /vacancies/{id}` - Delete vacancy (admin only)
+- `GET /vacancies` - List lowongan aktif (paginated)
+- `GET /vacancies/search` - Pencarian lowongan dengan filter detail
+- `GET /vacancies/{id}` - Ambil detail lowongan
+- `POST /vacancies` - Tambah lowongan baru (admin only)
+- `PUT /vacancies/{id}` - Update data lowongan (admin only)
+- `DELETE /vacancies/{id}` - Hapus lowongan (admin only)
 
 ### Wishlist (`/api/v1/wishlist`)
-- `GET /wishlist` - List student wishlist
-- `POST /wishlist` - Add to wishlist
-- `DELETE /wishlist/{id}` - Remove from wishlist
+- `GET /wishlist` - List wishlist mahasiswa
+- `POST /wishlist` - Tambah lowongan ke wishlist
+- `DELETE /wishlist/{id}` - Hapus dari wishlist
 
 ### Job Matching (`/api/v1/job-matching`)
-- `GET /job-matching` - List job matches for student
-- `GET /job-matching/{vacancy_id}` - Get match detail
+- `GET /job-matching` - Pencocokan lowongan sesuai dengan CV & profil mahasiswa
+- `GET /job-matching/{vacancy_id}` - Detail analisis kecocokan (analisis AI)
 
 ### Applications (`/api/v1/applications`)
-- `POST /applications/initialize` - Initialize external application
+- `POST /applications` - Inisialisasi lamaran mahasiswa
+- `GET /applications/my` - Daftar seluruh riwayat lamaran mahasiswa saat ini
+- `PATCH /applications/{id}/status` - Update status lamaran (self-reported)
+- `POST /applications/{id}/proof` - Upload bukti screenshot Letter of Acceptance (LoA)
+- `GET /applications/{id}/history` - Riwayat perubahan status lamaran
+
+### Placements (`/api/v1/placements`)
+- `GET /placements/me` - Ambil data penempatan magang aktif mahasiswa
+- `GET /placements/{id}/logs` - Ambil daftar log harian (jurnal) penempatan magang
+- `POST /placements/{id}/logs` - Input log harian (jurnal) baru
+- `PATCH /placements/{id}/logs/{log_id}` - Update entri log harian
+- `DELETE /placements/{id}/logs/{log_id}` - Hapus entri log harian
+- `POST /placements/{id}/logs/{log_id}/attachment` - Unggah dokumen/gambar lampiran log harian
+- `POST /placements/{id}/logs/{log_id}/enhance` - Optimasi deskripsi jurnal harian menggunakan AI
+- `POST /placements/{id}/report/generate` - Ajukan pembuatan laporan magang otomatis
+- `GET /placements/{id}/report` - Ambil status & link unduhan laporan magang otomatis
+
+### Document Requests (`/api/v1/document-requests`)
+- `POST /document-requests` - Ajukan permohonan dokumen baru (e.g. Surat Pengantar)
+- `GET /document-requests` - List riwayat pengajuan dokumen mahasiswa
+- `GET /document-requests/{id}` - Ambil rincian detail status dokumen
+
+### Notifications (`/api/v1/notifications`)
+- `GET /notifications` - Ambil semua notifikasi aktif untuk user
+- `GET /notifications/unread-count` - Hitung jumlah notifikasi belum dibaca
+- `PATCH /notifications/{id}/read` - Tandai satu notifikasi sudah dibaca
+- `DELETE /notifications/{id}` - Hapus notifikasi dari inbox (soft-delete)
+
+### Analytics (`/api/v1/analytics`)
+- `GET /analytics/distribution` - Distribusi penempatan magang (admin)
+- `GET /analytics/applications` - Analisis statistik lamaran masuk (admin)
+- `GET /analytics/vacancies` - Statistik keaktifan lowongan kerja (admin)
 
 ## Testing
 

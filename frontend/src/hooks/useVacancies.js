@@ -10,19 +10,12 @@ export const useVacancies = (params) => {
   });
 };
 
-import mockVacancies from "../data/vacancies.json";
-
 export const useLandingVacancies = () => {
   return useQuery({
     queryKey: ["landing-vacancies"],
     queryFn: async () => {
-      try {
-        const data = await vacancyService.getVacancies({ perPage: 3 });
-        return { items: data.items || [], isMock: false };
-      } catch (err) {
-        console.error("API Fetch failed, using mock data:", err);
-        return { items: mockVacancies.items.slice(0, 3), isMock: true };
-      }
+      const data = await vacancyService.getVacancies({ page: 1, perPage: 3 });
+      return { items: data.items || [] };
     },
     staleTime: 5 * 60 * 1000,
   });

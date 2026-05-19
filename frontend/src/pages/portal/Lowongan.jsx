@@ -217,18 +217,18 @@ function Lowongan() {
 	return (
 		<div className="font-jakarta">
 			{/* Banner Utama */}
-			<div className="mb-5 bg-sky-950 py-7 px-10 rounded-xl text-white flex justify-between items-center shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)]">
+			<div className="mb-5 bg-sky-950 py-6 px-5 sm:py-7 sm:px-10 rounded-xl text-white flex flex-col sm:flex-row justify-between sm:items-center gap-4 shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)]">
 				<div className="flex flex-col gap-2">
-					<div className="text-3xl font-bold">Eksplorasi Karirmu</div>
-					<div className="text-justify text-sm opacity-90">
+					<div className="text-2xl sm:text-3xl font-bold">Eksplorasi Karirmu</div>
+					<div className="text-sm opacity-90">
 						Temukan peluang magang dan karir profesional yang telah dikurasi khusus untuk mahasiswa dan alumni IPB University.
 					</div>
 				</div>
 			</div>
 
 			{/* Area Pencarian */}
-			<div className="bg-white p-6 rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] mb-8 flex gap-4 items-end relative">
-				<div className="flex-1 flex flex-col gap-1.5 min-w-[200px]">
+			<div className="bg-white p-4 sm:p-6 rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] mb-8 flex flex-col sm:flex-row sm:flex-wrap gap-4 sm:items-end relative">
+				<div className="flex-1 flex flex-col gap-1.5 min-w-0 sm:min-w-[200px]">
 					<label className="text-[11px] font-[900] text-slate-400 uppercase tracking-widest">Pencarian</label>
 					<div className="relative">
 						<PiBriefcase className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" size={20} />
@@ -242,7 +242,7 @@ function Lowongan() {
 						/>
 					</div>
 				</div>
-				<div className="flex-1 flex flex-col gap-1.5 min-w-[150px]">
+				<div className="flex-1 flex flex-col gap-1.5 min-w-0 sm:min-w-[150px]">
 					<label className="text-[11px] font-[900] text-slate-400 uppercase tracking-widest">Lokasi</label>
 					<div className="relative">
 						<PiMapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" size={20} />
@@ -256,7 +256,7 @@ function Lowongan() {
 						/>
 					</div>
 				</div>
-				<div className="w-48 flex flex-col gap-1.5 relative">
+				<div className="w-full sm:w-48 flex flex-col gap-1.5 relative">
 					<label className="text-[11px] font-[900] text-slate-400 uppercase tracking-widest">Tipe</label>
 					<div className="relative">
 						<select
@@ -273,10 +273,11 @@ function Lowongan() {
 						<PiCaretDown className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
 					</div>
 				</div>
+				<div className="grid grid-cols-2 gap-3 sm:flex sm:gap-4">
 				<button 
 					type="button" 
 					onClick={handleReset} 
-					className="bg-white text-zinc-400 border border-zinc-100 p-2.5 rounded-lg hover:bg-zinc-50 transition-colors shadow-sm"
+					className="bg-white text-zinc-400 border border-zinc-100 p-2.5 rounded-lg hover:bg-zinc-50 transition-colors shadow-sm flex items-center justify-center"
 					title="Reset Filter"
 				>
 					<PiXCircle size={22} weight="bold" />
@@ -284,16 +285,17 @@ function Lowongan() {
 				<button 
 					type="button" 
 					onClick={handleSearch}
-					className="bg-sky-950 text-white p-2.5 rounded-lg hover:bg-sky-900 transition-colors shadow-lg shadow-sky-900/10"
+					className="bg-sky-950 text-white p-2.5 rounded-lg hover:bg-sky-900 transition-colors shadow-lg shadow-sky-900/10 flex items-center justify-center"
 				>
 					<PiMagnifyingGlass size={22} weight="bold" />
 				</button>
+				</div>
 			</div>
 
 			<div className="flex flex-col lg:flex-row gap-8">
 				{/* Filter Sisi Samping */}
 				<aside className="w-full lg:w-72 flex flex-col gap-5">
-					<div className="p-6 bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] border border-slate-50 sticky top-24">
+					<div className="p-5 sm:p-6 bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] border border-slate-50 lg:sticky lg:top-24">
 						<div className="flex items-center justify-between mb-8">
 							<h3 className="font-[900] text-sky-950 tracking-tight uppercase text-xs tracking-[0.1em]">Filter Detail</h3>
 							<button onClick={handleReset} className="text-[11px] font-bold text-sky-600 hover:underline">Reset</button>
@@ -371,7 +373,7 @@ function Lowongan() {
 
 				{/* Daftar Lowongan */}
 				<div className="flex-1">
-					<div className="mb-6 flex items-center justify-between text-sm text-zinc-500">
+					<div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm text-zinc-500">
 						<span className="font-bold text-sky-950">
 							{vacanciesQuery.isLoading ? "Memuat lowongan..." : `${totalItems} lowongan ditemukan`}
 						</span>
@@ -398,7 +400,7 @@ function Lowongan() {
 					</div>
 
 					{/* Navigasi Halaman */}
-					<div className="flex justify-center mt-12 gap-2">
+					<div className="flex justify-center mt-12 gap-2 overflow-x-auto pb-2">
 						<button
 							disabled={currentPage === 1}
 							onClick={() => updateFilters({ page: currentPage - 1 })}
@@ -406,7 +408,7 @@ function Lowongan() {
 						>
 							<PiCaretLeft size={20} weight="bold" />
 						</button>
-						<div className="flex gap-1">
+						<div className="flex gap-1 shrink-0">
 							{paginationRange.map((page, index) => (
 								<button
 									key={index}

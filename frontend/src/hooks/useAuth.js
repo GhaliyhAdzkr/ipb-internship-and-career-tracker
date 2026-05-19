@@ -3,6 +3,12 @@ import { authService } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
+const clearAuthStorage = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('refreshToken');
+  localStorage.removeItem('refresh_token');
+};
+
 export const useAuth = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -12,6 +18,7 @@ export const useAuth = () => {
     onSuccess: (data) => {
       localStorage.setItem('token', data.access_token);
       localStorage.setItem('refreshToken', data.refresh_token);
+      localStorage.setItem('refresh_token', data.refresh_token);
       queryClient.setQueryData(['user'], data.user);
       navigate('/app/home');
     },
@@ -28,8 +35,7 @@ export const useAuth = () => {
   const logoutMutation = useMutation({
     mutationFn: authService.logout,
     onSettled: () => {
-      localStorage.removeItem('token');
-      localStorage.removeItem('refreshToken');
+      clearAuthStorage();
       queryClient.clear();
       navigate('/login');
     },
@@ -75,7 +81,7 @@ export const useAuth = () => {
     isRegistering: registerMutation.isPending,
     registerError: registerMutation.error,
     logout: () => {
-      const refreshToken = localStorage.getItem('refreshToken');
+      const refreshToken = localStorage.getItem('refreshToken') || localStorage.getItem('refresh_token');
       logoutMutation.mutate(refreshToken);
     },
     forgotPassword: forgotPasswordMutation.mutate,

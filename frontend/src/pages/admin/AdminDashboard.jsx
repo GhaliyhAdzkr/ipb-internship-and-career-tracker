@@ -64,9 +64,9 @@ function AdminDashboard() {
     return (
         <div className="font-jakarta space-y-8">
             {/* Header / Welcome Area */}
-            <div className="bg-sky-950 py-10 px-10 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
+            <div className="bg-sky-950 py-8 px-5 sm:py-10 sm:px-10 rounded-[1.5rem] sm:rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
                 <div className="relative z-10">
-                    <h1 className="text-3xl font-bold mb-2">Panel Administrator CDA</h1>
+                    <h1 className="text-2xl sm:text-3xl font-bold mb-2">Panel Administrator CDA</h1>
                     <p className="text-sky-200 max-w-xl">
                         Selamat datang kembali, {user?.full_name || 'Admin'}. Kelola data master, verifikasi dokumen, dan pantau aktivitas karir mahasiswa IPB di sini.
                     </p>
@@ -94,7 +94,7 @@ function AdminDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Verification Queue Preview */}
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden text-sm">
-                    <div className="p-6 border-b border-slate-50 flex justify-between items-center">
+                    <div className="p-5 sm:p-6 border-b border-slate-50 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                         <h2 className="font-bold text-slate-900 text-lg">Verifikasi Perlu Tindakan</h2>
                         <button className="text-sky-700 font-bold hover:underline">Lihat Semua</button>
                     </div>
@@ -103,7 +103,7 @@ function AdminDashboard() {
                             <div className="p-10 text-center text-slate-400">Memuat antrean...</div>
                         ) : pendingApplications?.length > 0 ? (
                             pendingApplications.slice(0, 5).map((app) => (
-                                <div key={app.id} className="p-4 hover:bg-slate-50 flex justify-between items-center transition-colors">
+                                <div key={app.id} className="p-4 hover:bg-slate-50 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 transition-colors">
                                     <div className="flex gap-4 items-center">
                                         <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-600">
                                             {app.student?.user?.full_name?.charAt(0)}
@@ -113,7 +113,7 @@ function AdminDashboard() {
                                             <p className="text-slate-500 text-xs">{app.vacancy?.title} • {app.vacancy?.company?.name}</p>
                                         </div>
                                     </div>
-                                    <button className="bg-sky-950 text-white px-4 py-2 rounded-lg font-bold text-xs hover:bg-sky-900">
+                                    <button className="w-full sm:w-auto bg-sky-950 text-white px-4 py-2 rounded-lg font-bold text-xs hover:bg-sky-900">
                                         Periksa
                                     </button>
                                 </div>
@@ -130,7 +130,7 @@ function AdminDashboard() {
                         &ldquo;Efisienkan proses administrasi untuk mempercepat karir mahasiswa IPB.&rdquo;
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <Link 
                             to="/app/admin/perusahaan"
                             className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:border-sky-200 hover:bg-sky-50 transition-all flex flex-col items-center gap-3"

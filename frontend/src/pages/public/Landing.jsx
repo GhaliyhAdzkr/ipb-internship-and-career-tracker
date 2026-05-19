@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -27,16 +27,6 @@ export default function Landing() {
   const { data: vacanciesData, isLoading, isError, error } = useLandingVacancies();
   const { user } = useAuth();
 
-  // Log for debugging purposes
-  useEffect(() => {
-    if (vacanciesData) {
-      console.log('Vacancies Data:', vacanciesData);
-    }
-    if (error) {
-      console.error('Vacancies Fetch Error:', error);
-    }
-  }, [vacanciesData, error]);
-
   const displayType = (value) => {
     switch (value) {
       case 'INTERNSHIP_GENERAL': return 'Magang Umum';
@@ -51,7 +41,7 @@ export default function Landing() {
     <div className="font-jakarta text-sky-950 bg-white min-h-screen">
       {/* Navbar */}
       <nav className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-slate-50">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-4">
           <div className="flex items-center gap-12">
             <Link to="/" className="flex items-center gap-2">
               <img src="/logo/laras.png" alt="LARAS" className="w-10 h-10 object-contain" />
@@ -63,7 +53,7 @@ export default function Landing() {
             </div>
           </div>
 
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3 sm:gap-6">
             <div className="hidden lg:flex items-center bg-sky-50/50 border border-sky-100/50 rounded-full px-4 py-2 w-72 group focus-within:ring-2 focus-within:ring-sky-200 transition-all">
               <PiMagnifyingGlass className="text-slate-400 group-focus-within:text-sky-600" size={18} />
               <input
@@ -82,7 +72,7 @@ export default function Landing() {
             ) : (
               <>
                 <Link to="/login" className="text-sm font-semibold text-sky-900 hover:text-sky-600 transition-colors">Masuk</Link>
-                <Link to="/registration" className="bg-sky-950 text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-lg shadow-sky-900/10 hover:bg-sky-900 transition-all active:scale-95">Daftar</Link>
+                <Link to="/registration" className="bg-sky-950 text-white px-4 sm:px-6 py-2.5 rounded-lg text-sm font-bold shadow-lg shadow-sky-900/10 hover:bg-sky-900 transition-all active:scale-95">Daftar</Link>
               </>
             )}
           </div>
@@ -100,14 +90,14 @@ export default function Landing() {
           <div className="absolute inset-0 bg-gradient-to-r from-white via-white/90 to-white/40"></div>
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-6 py-20 w-full">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 w-full">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="max-w-xl">
               <div className="inline-flex items-center bg-sky-50 border border-sky-100 rounded-full px-4 py-1.5 mb-6">
                 <span className="text-[13px] font-bold text-sky-700 tracking-wide">Portal Resmi IPB University</span>
               </div>
               
-              <h1 className="text-5xl md:text-6xl font-[900] leading-[1.1] text-sky-950 mb-6">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-[900] leading-[1.1] text-sky-950 mb-6">
                 Bangun Karier <br />
                 <span className="text-sky-600">Profesional</span> Anda
               </h1>
@@ -150,9 +140,9 @@ export default function Landing() {
                 </form>
               </div>
               
-              <div className="mt-6 flex items-center gap-2 text-[13px]">
+              <div className="mt-6 flex flex-wrap items-center gap-2 text-[13px]">
                 <span className="text-slate-400 font-medium tracking-tight">Pencarian populer:</span>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   {['Data Analyst', 'Agronomi', 'Management Trainee'].map((item) => (
                     <button 
                       key={item} 
@@ -355,9 +345,9 @@ export default function Landing() {
       </section>
 
       {/* Jobs Section */}
-      <main className="max-w-7xl mx-auto px-6 py-24">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
         <section>
-          <div className="flex items-end justify-between mb-12">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-10 sm:mb-12">
             <div>
               <h2 className="text-3xl font-[900] text-sky-950 mb-3 tracking-tight">Temukan karir yang sesuai dengan anda</h2>
               <p className="text-[15px] font-medium text-slate-500">Rekomendasi lowongan magang terbaru untuk Anda</p>

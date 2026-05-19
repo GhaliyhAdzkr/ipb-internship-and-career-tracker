@@ -10,6 +10,12 @@ const api = axios.create({
 let isRefreshing = false;
 let failedQueue = [];
 
+const clearAuthStorage = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('refreshToken');
+  localStorage.removeItem('refresh_token');
+};
+
 const processQueue = (error, token = null) => {
   failedQueue.forEach((prom) => {
     if (error) {
@@ -43,6 +49,7 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     if (
+      originalRequest &&
       error.response?.status === 401 &&
       !originalRequest._retry &&
       !originalRequest.url?.includes('/auth/login')
@@ -68,9 +75,7 @@ api.interceptors.response.use(
       if (!refreshToken) {
         isRefreshing = false;
         // Refresh token tidak ditemukan, paksa logout
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('refresh_token');
+        clearAuthStorage();
         if (typeof window !== 'undefined') {
           window.location.href = '/login';
         }
@@ -97,9 +102,7 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('refresh_token');
+        clearAuthStorage();
         if (typeof window !== 'undefined') {
           window.location.href = '/login';
         }

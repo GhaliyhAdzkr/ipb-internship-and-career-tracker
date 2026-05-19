@@ -45,13 +45,13 @@ function AdminVerification() {
     return (
         <div className="font-jakarta space-y-8 pb-20">
             {/* Header Banner */}
-            <div className="bg-sky-950 py-12 px-10 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
+            <div className="bg-sky-950 py-8 px-5 sm:py-12 sm:px-10 rounded-[1.5rem] sm:rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
                 <div className="relative z-10">
-                    <h1 className="text-3xl font-extrabold mb-2 tracking-tight">Verifikasi Lamaran</h1>
-                    <p className="text-sky-200 max-w-xl text-lg opacity-80 font-medium leading-relaxed">
+                    <h1 className="text-2xl sm:text-3xl font-extrabold mb-2 tracking-tight">Verifikasi Lamaran</h1>
+                    <p className="text-sky-200 max-w-xl text-sm sm:text-lg opacity-80 font-medium leading-relaxed">
                         Tinjau dokumen pendukung dan syarat lamaran mahasiswa. Pastikan semua data valid sebelum menyetujui penempatan magang.
                     </p>
-                    <div className="mt-8 inline-flex bg-white/10 backdrop-blur-md px-6 py-3 rounded-2xl text-sm font-bold items-center gap-3 border border-white/10 shadow-lg shadow-sky-900/20">
+                    <div className="mt-6 sm:mt-8 inline-flex bg-white/10 backdrop-blur-md px-4 sm:px-6 py-3 rounded-2xl text-sm font-bold items-center gap-3 border border-white/10 shadow-lg shadow-sky-900/20">
                         <PiClockFill className="text-amber-400" size={20} />
                         <span>{applications?.length || 0} Perlu Diverifikasi</span>
                     </div>
@@ -71,23 +71,23 @@ function AdminVerification() {
                             <div 
                                 key={app.id} 
                                 onClick={() => setSelectedApp(app)}
-                                className={`p-5 bg-white rounded-2xl border transition-all cursor-pointer flex justify-between items-center ${
+                                className={`p-4 sm:p-5 bg-white rounded-2xl border transition-all cursor-pointer flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 ${
                                     selectedApp?.id === app.id ? 'border-sky-500 shadow-md ring-1 ring-sky-500/20' : 'border-slate-100 hover:border-sky-200 shadow-sm'
                                 }`}
                             >
-                                <div className="flex gap-4">
+                                <div className="flex gap-4 w-full min-w-0">
                                     <div className="w-12 h-12 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center font-bold text-lg">
                                         {app.student?.user?.full_name?.charAt(0)}
                                     </div>
-                                    <div>
-                                        <h3 className="font-bold text-slate-900">{app.student?.user?.full_name}</h3>
+                                    <div className="min-w-0">
+                                        <h3 className="font-bold text-slate-900 truncate">{app.student?.user?.full_name}</h3>
                                         <p className="text-slate-500 text-xs">{app.vacancy?.title} • {app.vacancy?.company?.name}</p>
                                         <div className="mt-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
                                             Diunggah: {new Date(app.created_at).toLocaleDateString('id-ID')}
                                         </div>
                                     </div>
                                 </div>
-                                <PiEyeFill size={20} className={selectedApp?.id === app.id ? 'text-sky-500' : 'text-slate-300'} />
+                                <PiEyeFill size={20} className={`${selectedApp?.id === app.id ? 'text-sky-500' : 'text-slate-300'} self-end sm:self-auto`} />
                             </div>
                         ))
                     ) : (
@@ -100,7 +100,7 @@ function AdminVerification() {
                 {/* Detail/Action Area */}
                 <div className="lg:col-span-1">
                     {selectedApp ? (
-                        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sticky top-6 space-y-6">
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 sm:p-6 lg:sticky lg:top-6 space-y-6">
                             <h2 className="font-bold text-slate-900 text-lg border-b pb-4">Dokumen Pendukung</h2>
                             
                             <div className="space-y-3">
@@ -148,7 +148,7 @@ function AdminVerification() {
 
                             <div className="space-y-3">
                                 <label className="text-xs font-bold text-slate-500 uppercase">Periode Penempatan</label>
-                                <div className="grid grid-cols-2 gap-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div>
                                         <span className="text-[10px] font-bold text-slate-400 uppercase">Mulai</span>
                                         <input
@@ -181,7 +181,7 @@ function AdminVerification() {
                                 />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3 pt-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4">
                                 <button 
                                     onClick={() => handleReject(selectedApp.id)}
                                     disabled={rejectMutation.isPending || verifyMutation.isPending}

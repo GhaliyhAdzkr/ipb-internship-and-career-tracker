@@ -55,9 +55,9 @@ export default function Wishlist() {
 	return (
 		<div className="font-jakarta pb-12">
 			{/* Banner */}
-			<div className="mb-8 bg-sky-950 py-8 px-10 rounded-xl text-white flex justify-between items-center shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)]">
+			<div className="mb-8 bg-sky-950 py-6 px-5 sm:py-8 sm:px-10 rounded-xl text-white flex flex-col sm:flex-row justify-between sm:items-center gap-4 shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)]">
 				<div className="flex flex-col gap-2">
-					<div className="text-3xl font-bold tracking-tight">Wishlist Saya</div>
+					<div className="text-2xl sm:text-3xl font-bold tracking-tight">Wishlist Saya</div>
 					<div className="text-sm opacity-80 font-medium">
 						Daftar lowongan yang telah kamu simpan untuk dilamar nanti. Pastikan jangan sampai terlewat batas waktu pendaftaran!
 					</div>

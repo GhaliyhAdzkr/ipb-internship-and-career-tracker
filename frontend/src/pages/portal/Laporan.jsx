@@ -196,7 +196,11 @@ function ReportSection({ activePlacement }) {
             <div>
               <dt className="text-xs text-slate-500 font-medium">Periode</dt>
               <dd className="font-bold text-slate-800 mt-0.5">
-                {activePlacement?.start_date} s/d {activePlacement?.end_date}
+                {activePlacement ? (
+                  `${format(new Date(activePlacement.start_date), "dd MMM yyyy", { locale: id })} s/d ${format(new Date(activePlacement.end_date), "dd MMM yyyy", { locale: id })}`
+                ) : (
+                  "–"
+                )}
               </dd>
             </div>
             {activePlacement?.external_supervisor_name && (
@@ -223,7 +227,7 @@ function ReportSection({ activePlacement }) {
 
       {/* Sisi Kanan: Status Laporan Akhir */}
       <div className="lg:col-span-2 h-full">
-        <div className="h-full p-8 bg-white rounded-xl shadow-sm border border-slate-100 flex flex-col gap-6">
+        <div className="h-full p-5 sm:p-8 bg-white rounded-xl shadow-sm border border-slate-100 flex flex-col gap-6">
           <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
             <PiFileText size={24} className="text-sky-950" />
             <h3 className="text-lg font-bold text-slate-800">Status Laporan</h3>
@@ -335,10 +339,10 @@ function Laporan() {
   return (
     <div className="font-jakarta">
       {/* Banner Utama */}
-      <div className="mb-6 bg-sky-950 py-7 px-10 rounded-xl text-white shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] relative overflow-hidden">
+      <div className="mb-6 bg-sky-950 py-6 px-5 sm:py-7 sm:px-10 rounded-xl text-white shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] relative overflow-hidden">
         <div className="relative z-10">
-          <div className="text-3xl font-bold">Laporan & Dokumen</div>
-          <div className="opacity-90 mt-2 max-w-2xl">
+          <div className="text-2xl sm:text-3xl font-bold">Laporan & Dokumen</div>
+          <div className="text-sm sm:text-base opacity-90 mt-2 max-w-2xl">
             Generate laporan akhir internship dan ajukan permohonan surat pengantar secara otomatis.
           </div>
         </div>
@@ -346,12 +350,12 @@ function Laporan() {
       </div>
 
       {/* Tab Navigasi */}
-      <div className="flex gap-1 mb-6 bg-white p-1.5 rounded-xl shadow-sm border border-slate-100 w-fit">
+      <div className="flex gap-1 mb-6 bg-white p-1.5 rounded-xl shadow-sm border border-slate-100 w-full sm:w-fit overflow-x-auto">
         {TABS.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all ${
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold whitespace-nowrap transition-all ${
               activeTab === tab.id
                 ? "bg-sky-950 text-white shadow-md"
                 : "text-slate-500 hover:text-sky-800 hover:bg-sky-50"

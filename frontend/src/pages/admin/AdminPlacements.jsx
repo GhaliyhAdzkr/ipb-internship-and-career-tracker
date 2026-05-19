@@ -51,12 +51,12 @@ function AdminPlacements() {
   return (
     <div className="font-jakarta">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-sky-950">Data Penempatan (Placement)</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-sky-950">Data Penempatan (Placement)</h1>
         <p className="text-zinc-500 mt-2">Daftar seluruh mahasiswa yang sedang menjalankan program magang.</p>
       </div>
 
       {/* Header Actions */}
-      <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6 bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+      <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-6 bg-white p-4 rounded-xl shadow-sm border border-slate-100">
         <div className="relative w-full md:w-96">
           <PiMagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={20} />
           <input
@@ -67,7 +67,7 @@ function AdminPlacements() {
             className="w-full pl-12 pr-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-lg text-sm focus:ring-2 focus:ring-sky-500 outline-none transition-all"
           />
         </div>
-        <div className="flex items-center gap-2 text-sm font-bold text-sky-950 bg-sky-50 px-4 py-2.5 rounded-lg border border-sky-100">
+        <div className="w-full md:w-auto flex items-center justify-center gap-2 text-sm font-bold text-sky-950 bg-sky-50 px-4 py-2.5 rounded-lg border border-sky-100">
           <PiUserList size={20} />
           Total Penempatan: {filteredPlacements.length}
         </div>
@@ -83,7 +83,7 @@ function AdminPlacements() {
       ) : (
         <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
+            <table className="w-full min-w-[760px] text-left text-sm">
               <thead className="bg-sky-950 text-white">
                 <tr>
                   <th className="p-4 font-bold">Mahasiswa (ID)</th>

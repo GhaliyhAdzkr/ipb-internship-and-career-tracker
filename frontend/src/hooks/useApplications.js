@@ -4,8 +4,10 @@ import applicationService from '../services/applicationService';
 /**
  * Hook Custom untuk Query dan Mutasi lamaran pekerjaan menggunakan TanStack Query
  */
-export const useApplications = () => {
+export const useApplications = ({ enabled } = {}) => {
   const queryClient = useQueryClient();
+  const hasAccessToken = Boolean(localStorage.getItem('token'));
+  const shouldFetchApplications = enabled ?? hasAccessToken;
 
   // 1. Query untuk mengambil daftar lamaran milik Student saat ini
   const { 
@@ -17,6 +19,7 @@ export const useApplications = () => {
   } = useQuery({
     queryKey: ['applications', 'my'],
     queryFn: applicationService.getMyApplications,
+    enabled: shouldFetchApplications,
     staleTime: 5 * 60 * 1000, // Waktu stale 5 menit
     refetchOnWindowFocus: true,
   });

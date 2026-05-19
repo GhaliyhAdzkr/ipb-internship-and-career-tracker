@@ -105,7 +105,7 @@ export default function PublicLowongan() {
     <div className="font-jakarta text-sky-950 bg-[#F8F9FF] min-h-screen">
       {/* Navigasi Utama */}
       <nav className="bg-white border-b border-slate-100 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-4">
           <div className="flex items-center gap-12">
             <Link to="/" className="flex items-center gap-2">
               <img src="/logo/laras.png" alt="LARAS" className="w-10 h-10 object-contain" />
@@ -117,7 +117,7 @@ export default function PublicLowongan() {
             </div>
           </div>
 
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3 sm:gap-6">
             <div className="hidden lg:flex items-center bg-sky-50/50 border border-sky-100/50 rounded-full px-4 py-2 w-72 group focus-within:ring-2 focus-within:ring-sky-200 transition-all">
               <PiMagnifyingGlass className="text-slate-400 group-focus-within:text-sky-600" size={18} />
               <input
@@ -126,15 +126,15 @@ export default function PublicLowongan() {
               />
             </div>
             <Link to="/login" className="text-sm font-semibold text-sky-900 hover:text-sky-600 transition-colors">Masuk</Link>
-            <Link to="/registration" className="bg-sky-950 text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-lg shadow-sky-900/10 hover:bg-sky-900 transition-all active:scale-95">Daftar</Link>
+            <Link to="/registration" className="bg-sky-950 text-white px-4 sm:px-6 py-2.5 rounded-lg text-sm font-bold shadow-lg shadow-sky-900/10 hover:bg-sky-900 transition-all active:scale-95">Daftar</Link>
           </div>
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-6 py-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-12">
         {/* Bagian Kepala */}
         <section className="mb-12">
-          <h1 className="text-4xl font-[900] text-sky-950 mb-3 tracking-tight">Eksplorasi Karirmu</h1>
+          <h1 className="text-3xl sm:text-4xl font-[900] text-sky-950 mb-3 tracking-tight">Eksplorasi Karirmu</h1>
           <p className="text-[15px] font-medium text-slate-500 max-w-2xl leading-relaxed">
             Temukan peluang magang dan karir profesional yang telah dikurasi khusus untuk mahasiswa dan alumni IPB University.
           </p>
@@ -186,9 +186,9 @@ export default function PublicLowongan() {
             </button>
           </div>
           
-          <div className="mt-4 flex items-center gap-3 px-2 text-[13px]">
+          <div className="mt-4 flex flex-wrap items-center gap-3 px-2 text-[13px]">
             <span className="text-slate-400 font-medium tracking-tight">Pencarian Populer:</span>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {['Data Analyst', 'Agronomi', 'Marketing'].map((tag) => (
                 <button 
                   key={tag} 
@@ -288,7 +288,7 @@ export default function PublicLowongan() {
 
           {/* Daftar Lowongan */}
           <div className="flex-1">
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-8">
               <span className="text-[14px] font-bold text-slate-400">
                 Menampilkan <span className="text-sky-950">{totalItems}</span> lowongan
               </span>

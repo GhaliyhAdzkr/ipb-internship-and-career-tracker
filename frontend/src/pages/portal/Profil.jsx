@@ -194,10 +194,10 @@ function Profil() {
 	return (
 		<div className="font-jakarta pb-10">
 			{/* Banner */}
-			<div className="mb-8 bg-sky-950 py-7 px-10 rounded-xl text-white flex justify-between items-center shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)]">
+			<div className="mb-8 bg-sky-950 py-6 px-5 sm:py-7 sm:px-10 rounded-xl text-white flex flex-col sm:flex-row justify-between sm:items-center gap-4 shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)]">
 				<div className="flex flex-col gap-2">
-					<div className="text-3xl font-bold">Profil Saya</div>
-					<div className="text-justify text-zinc-200">
+					<div className="text-2xl sm:text-3xl font-bold">Profil Saya</div>
+					<div className="text-sm sm:text-base text-zinc-200">
 						Kelola informasi pribadi dan akademik Anda untuk
 						verifikasi internship.
 					</div>
@@ -207,7 +207,7 @@ function Profil() {
 			<div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 				{/* Avatar Card */}
 				<div className="lg:col-span-4">
-					<div className="p-8 bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] flex flex-col items-center text-center gap-6">
+					<div className="p-5 sm:p-8 bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] flex flex-col items-center text-center gap-6">
 						<div className="relative group">
 							<div className="w-32 h-32 bg-zinc-100 rounded-full flex items-center justify-center border-4 border-white shadow-sm overflow-hidden relative">
 								{user?.avatar_url ? (
@@ -273,9 +273,9 @@ function Profil() {
 				<div className="lg:col-span-8">
 					<form
 						onSubmit={handleSubmit}
-						className="p-8 bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] flex flex-col gap-8"
+						className="p-5 sm:p-8 bg-white rounded-xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.06)] flex flex-col gap-8"
 					>
-						<div className="flex items-center gap-3 border-b pb-4">
+						<div className="flex items-start sm:items-center gap-3 border-b pb-4">
 							<PiIdentificationCard
 								size={24}
 								className="text-sky-950"
@@ -589,12 +589,12 @@ function Profil() {
 							</div>
 						</div>
 
-						<div className="flex justify-end mt-4 border-t pt-6 gap-3">
+						<div className="flex flex-col-reverse sm:flex-row sm:justify-end mt-4 border-t pt-6 gap-3">
 							{!isEditMode ? (
 								<button
 									type="button"
 									onClick={() => setIsEditMode(true)}
-									className="px-6 py-2.5 bg-sky-900 text-white font-bold rounded-lg hover:bg-sky-800 transition-all shadow-sm"
+									className="w-full sm:w-auto px-6 py-2.5 bg-sky-900 text-white font-bold rounded-lg hover:bg-sky-800 transition-all shadow-sm"
 								>
 									Edit Profil
 								</button>
@@ -603,14 +603,14 @@ function Profil() {
 									<button
 										type="button"
 										onClick={handleCancel}
-										className="px-6 py-2.5 bg-zinc-100 text-zinc-700 font-bold rounded-lg hover:bg-zinc-200 transition-all"
+										className="w-full sm:w-auto px-6 py-2.5 bg-zinc-100 text-zinc-700 font-bold rounded-lg hover:bg-zinc-200 transition-all"
 									>
 										Batal
 									</button>
 									<button
 										type="submit"
 										disabled={isUpdating}
-										className="px-6 py-2.5 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-700 transition-all shadow-sm disabled:opacity-50 flex items-center gap-2"
+										className="w-full sm:w-auto px-6 py-2.5 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-700 transition-all shadow-sm disabled:opacity-50 flex items-center justify-center gap-2"
 									>
 										{isUpdating && <PiSpinnerGap className="animate-spin" />}
 										Simpan Perubahan

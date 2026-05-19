@@ -103,10 +103,10 @@ function Dashboard() {
 	return (
 		<div className="font-jakarta pb-10">
 			{/* Welcoming Banner */}
-			<div className="mb-8 bg-gradient-to-r from-sky-950 to-blue-900 py-8 px-10 rounded-2xl text-white flex justify-between items-center shadow-lg relative overflow-hidden">
+			<div className="mb-8 bg-gradient-to-r from-sky-950 to-blue-900 py-6 px-5 sm:py-8 sm:px-10 rounded-2xl text-white flex justify-between items-center shadow-lg relative overflow-hidden">
 				<div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between w-full gap-4">
 					<div>
-						<h1 className="text-3xl font-bold">Selamat Datang Kembali, {displayName}!</h1>
+						<h1 className="text-2xl sm:text-3xl font-bold">Selamat Datang Kembali, {displayName}!</h1>
 						<p className="text-blue-100 text-sm mt-2">
 							Pantau progres penempatan magang, kelola harian jurnal, dan temukan karir terbaikmu.
 						</p>
@@ -114,7 +114,7 @@ function Dashboard() {
 					{placement && (
 						<NavLink 
 							to="/app/jurnal"
-							className="self-start md:self-center bg-white text-sm font-bold py-2.5 px-6 text-sky-950 rounded-xl hover:bg-sky-50 hover:scale-[1.02] transition-all shadow-md flex items-center gap-2"
+							className="w-full sm:w-auto self-start md:self-center bg-white text-sm font-bold py-2.5 px-6 text-sky-950 rounded-xl hover:bg-sky-50 hover:scale-[1.02] transition-all shadow-md flex items-center justify-center gap-2"
 						>
 							Tulis Jurnal
 						</NavLink>
@@ -137,7 +137,7 @@ function Dashboard() {
 					</div>
 					<NavLink
 						to="/app/lowongan"
-						className="bg-sky-950 text-white text-xs font-bold py-2 px-4 rounded-lg hover:bg-sky-900 transition-all shrink-0"
+						className="w-full sm:w-auto text-center bg-sky-950 text-white text-xs font-bold py-2 px-4 rounded-lg hover:bg-sky-900 transition-all shrink-0"
 					>
 						Cari Lowongan
 					</NavLink>
@@ -315,7 +315,7 @@ function Dashboard() {
 								</div>
 							))
 						) : (
-							<div className="col-span-2 bg-white rounded-2xl border border-slate-100 flex flex-col justify-center items-center text-center p-8 gap-2">
+							<div className="md:col-span-2 bg-white rounded-2xl border border-slate-100 flex flex-col justify-center items-center text-center p-8 gap-2">
 								<p className="text-xs text-zinc-400">Tidak ada rekomendasi lowongan magang saat ini.</p>
 							</div>
 						)}

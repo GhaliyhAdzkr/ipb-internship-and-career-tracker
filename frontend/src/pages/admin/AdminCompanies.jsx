@@ -75,11 +75,11 @@ function AdminCompanies() {
     return (
         <div className="font-jakarta space-y-8 pb-20">
             {/* Header Banner */}
-            <div className="bg-sky-950 py-12 px-10 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
-                <div className="relative z-10 flex justify-between items-center">
+            <div className="bg-sky-950 py-8 px-5 sm:py-12 sm:px-10 rounded-[1.5rem] sm:rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
+                <div className="relative z-10 flex flex-col md:flex-row justify-between md:items-center gap-6">
                     <div>
-                        <h1 className="text-3xl font-extrabold mb-2 tracking-tight">Kemitraan Strategis</h1>
-                        <p className="text-sky-200 max-w-xl text-lg opacity-80 font-medium">
+                        <h1 className="text-2xl sm:text-3xl font-extrabold mb-2 tracking-tight">Kemitraan Strategis</h1>
+                        <p className="text-sky-200 max-w-xl text-sm sm:text-lg opacity-80 font-medium">
                             Kelola data perusahaan mitra CDA IPB untuk mendukung ekosistem karir mahasiswa.
                         </p>
                     </div>
@@ -89,7 +89,7 @@ function AdminCompanies() {
                             setFormData({ name: "", industry: "", website_url: "", address: "", logo_url: "" });
                             setIsFormOpen(true);
                         }}
-                        className="bg-white text-sky-950 px-8 py-4 rounded-2xl font-extrabold flex items-center gap-2 hover:bg-sky-50 transition-all shadow-xl shadow-sky-900/30 active:scale-95"
+                        className="w-full md:w-auto bg-white text-sky-950 px-8 py-4 rounded-2xl font-extrabold flex items-center justify-center gap-2 hover:bg-sky-50 transition-all shadow-xl shadow-sky-900/30 active:scale-95"
                     >
                         <PiPlusBold size={20} />
                         Tambah Mitra
@@ -115,12 +115,12 @@ function AdminCompanies() {
             {/* Companies Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {isLoading ? (
-                    <div className="lg:col-span-2 p-32 text-center text-slate-400 bg-white rounded-2xl border border-dashed border-slate-200">
+                    <div className="lg:col-span-2 p-12 sm:p-32 text-center text-slate-400 bg-white rounded-2xl border border-dashed border-slate-200">
                         Memuat data mitra...
                     </div>
                 ) : filteredCompanies?.length > 0 ? (
                     filteredCompanies.map((company) => (
-                        <div key={company.id} className="bg-white p-7 rounded-2xl shadow-sm border border-slate-100 flex items-start gap-8 hover:shadow-xl hover:border-sky-100 transition-all group">
+                        <div key={company.id} className="bg-white p-5 sm:p-7 rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row items-start gap-5 sm:gap-8 hover:shadow-xl hover:border-sky-100 transition-all group">
                             <div className="w-24 h-24 rounded-3xl bg-slate-50 flex items-center justify-center p-5 border border-slate-50 shrink-0 group-hover:scale-110 transition-transform duration-500 shadow-inner">
                                 <img 
                                     src={company.logo_url || "/logo/placeholder-company.png"} 
@@ -129,13 +129,13 @@ function AdminCompanies() {
                                     onError={(e) => e.target.src = "/logo/placeholder-company.png"}
                                 />
                             </div>
-                            <div className="flex-1 space-y-4">
-                                <div className="flex justify-between items-start">
-                                    <div>
-                                        <h3 className="font-extrabold text-slate-900 text-xl leading-tight tracking-tight">{company.name}</h3>
+                            <div className="flex-1 space-y-4 w-full min-w-0">
+                                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+                                    <div className="min-w-0">
+                                        <h3 className="font-extrabold text-slate-900 text-lg sm:text-xl leading-tight tracking-tight">{company.name}</h3>
                                         <p className="text-sky-600 text-[10px] font-extrabold uppercase tracking-[0.2em] mt-1.5">{company.industry || "Industri Belum Diatur"}</p>
                                     </div>
-                                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
+                                    <div className="flex gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all transform sm:translate-x-2 group-hover:translate-x-0">
                                         <button 
                                             onClick={() => handleEdit(company)}
                                             className="p-3 text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-xl transition-all shadow-sm border border-transparent hover:border-sky-100" title="Edit"
@@ -166,7 +166,7 @@ function AdminCompanies() {
                         </div>
                     ))
                 ) : (
-                    <div className="lg:col-span-2 p-32 text-center text-slate-400 bg-white rounded-[2.5rem] border border-dashed border-slate-200 italic font-medium">
+                    <div className="lg:col-span-2 p-12 sm:p-32 text-center text-slate-400 bg-white rounded-[1.5rem] sm:rounded-[2.5rem] border border-dashed border-slate-200 italic font-medium">
                         Tidak ada mitra yang ditemukan.
                     </div>
                 )}
@@ -174,17 +174,17 @@ function AdminCompanies() {
 
             {/* Add/Edit Modal */}
             {isFormOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4">
                     <div className="absolute inset-0 bg-sky-950/60 backdrop-blur-md" onClick={() => setIsFormOpen(false)}></div>
-                    <div className="relative bg-white rounded-[2.5rem] shadow-2xl w-full max-w-xl animate-in slide-in-from-bottom-10 duration-300 overflow-hidden">
-                        <div className="p-10 border-b border-slate-100 flex justify-between items-center">
-                            <h2 className="text-2xl font-extrabold text-slate-900">{selectedCompany ? "Perbarui Mitra" : "Tambah Mitra Baru"}</h2>
+                    <div className="relative bg-white rounded-t-[2rem] sm:rounded-[2.5rem] shadow-2xl w-full max-w-xl max-h-[92dvh] overflow-y-auto animate-in slide-in-from-bottom-10 duration-300 overflow-hidden">
+                        <div className="p-5 sm:p-10 border-b border-slate-100 flex justify-between items-start gap-4">
+                            <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900">{selectedCompany ? "Perbarui Mitra" : "Tambah Mitra Baru"}</h2>
                             <button onClick={() => setIsFormOpen(false)} className="p-2 hover:bg-slate-50 rounded-2xl transition-all">
                                 <PiXCircleFill size={32} className="text-slate-400" />
                             </button>
                         </div>
                         
-                        <form onSubmit={handleSubmit} className="p-10 space-y-6">
+                        <form onSubmit={handleSubmit} className="p-5 sm:p-10 space-y-6">
                             <div className="space-y-2">
                                 <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest">Nama Perusahaan</label>
                                 <input 
@@ -221,7 +221,7 @@ function AdminCompanies() {
                             </div>
                             <div className="space-y-2">
                                 <label className="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest block">Logo Perusahaan</label>
-                                <div className="flex items-center gap-6">
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-6">
                                     <div className="w-24 h-24 rounded-3xl bg-slate-50 border border-dashed border-slate-200 flex items-center justify-center p-3 shrink-0 overflow-hidden relative shadow-inner">
                                         {formData.logo_url ? (
                                             <img 

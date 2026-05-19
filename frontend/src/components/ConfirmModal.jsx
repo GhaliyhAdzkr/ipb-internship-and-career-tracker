@@ -4,7 +4,7 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, confirmText 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4">
       {/* Latar Belakang */}
       <div 
         className="absolute inset-0 bg-sky-950/40 backdrop-blur-sm transition-opacity"
@@ -12,9 +12,9 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, confirmText 
       ></div>
 
       {/* Konten Modal */}
-      <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div className="relative bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
 
-        <div className="p-8">
+        <div className="p-5 sm:p-8">
           <div className="flex justify-between items-start mb-6">
             <div className={`p-3 rounded-2xl ${type === 'danger' ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-600'}`}>
               <PiWarningCircleFill size={32} />
@@ -33,7 +33,7 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, confirmText 
           </p>
         </div>
 
-        <div className="px-8 py-6 bg-slate-50 flex gap-3">
+        <div className="px-5 sm:px-8 py-5 sm:py-6 bg-slate-50 flex flex-col-reverse sm:flex-row gap-3">
           <button
             onClick={onClose}
             className="flex-1 px-6 py-3 rounded-2xl font-bold text-slate-600 hover:bg-slate-100 transition-all text-sm"

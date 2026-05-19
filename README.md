@@ -24,10 +24,13 @@ Integrated Internship and Career Tracker Platform for **IPB University**, built 
 - **Authentication & Authorization:** Sistem login JWT dengan role-based access control (ADMIN & STUDENT)
 - **Profile Management:** Pengelolaan profil mahasiswa dengan skill tagging dan upload CV
 - **Job Board:** Papan lowongan terpusat dengan fitur pencarian dan filter
-- **Job Matching:** Pencocokan otomatis profil mahasiswa dengan requirement lowongan
+- **Job Matching via CV Parsing:** Pencocokan otomatis profil mahasiswa dengan requirement lowongan menggunakan parsing CV
 - **Application Tracking:** Pelacakan status lamaran secara mandiri (Self-Reported ATS)
 - **Wishlist:** Simpan lowongan incaran dengan catatan pribadi
-- **Activity Logging:** Pencatatan aktivitas harian selama magang
+- **Placement & Activity Logging:** Pencatatan aktivitas harian selama magang dengan fitur pemoles berbasis AI
+- **Document Requests:** Permohonan surat pengantar dan dokumen magang lainnya (Phase 6)
+- **Notification System:** Notifikasi *real-time* untuk aktivitas akun dan lamaran (baca, hapus, kelola)
+- **Admin Analytics:** Dashboard visual untuk distribusi penempatan, statistik lamaran, dan kinerja lowongan
 
 ---
 
