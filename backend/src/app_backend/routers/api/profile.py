@@ -1,13 +1,3 @@
-"""
-Profile Router – API endpoints untuk manajemen profil mahasiswa.
-
-Endpoints:
-  GET /me          – Profil lengkap mahasiswa yang sedang login
-  PUT /cv-data     – Update info kontak, URL CV, dan skills
-"""
-
-from __future__ import annotations
-
 from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
@@ -35,14 +25,12 @@ async def get_my_profile(
     profile_service: ProfileService = Depends(get_profile_service),
     current_user: DomainUser = Depends(require_student),
 ) -> StudentProfileResponse:
-    """
-    Kembalikan profil lengkap mahasiswa:
-    - Data akademik: NIM, nama, semester, IPK, prodi
-    - Data kontak: telepon, LinkedIn, URL CV
-    - Skills dengan level expertise (1=Beginner … 5=Expert)
+    # Kembalikan profil lengkap mahasiswa:
+    # Data akademik: NIM, nama, semester, IPK, prodi
+    # Data kontak: telepon, LinkedIn, URL CV
+    # Skills dengan level expertise (1: Beginner, 5: Expert)
 
-    Hanya dapat diakses oleh **STUDENT**.
-    """
+    # Hanya dapat diakses oleh STUDENT.
     profile = profile_service.get_student_profile(current_user.id)
     if not profile:
         raise HTTPException(
@@ -62,20 +50,18 @@ async def update_cv_data(
     profile_service: ProfileService = Depends(get_profile_service),
     current_user: DomainUser = Depends(require_student),
 ) -> dict:
-    """
-    Update data CV mahasiswa (PATCH semantics).
+    # Update data CV mahasiswa (PATCH semantics).
 
-    - **phone_number**: Nomor telepon (opsional)
-    - **linkedin_url**: URL profil LinkedIn (opsional)
-    - **cv_url**: URL file CV – Google Drive, Dropbox, dll (opsional)
-    - **skills**: Daftar skills dengan level 1–5. Jika dikirim,
-      **menggantikan seluruh skills** yang sudah ada (full replace).
+    # phone_number: Nomor telepon (opsional)
+    # linkedin_url: URL profil LinkedIn (opsional)
+    # cv_url: URL file CV: Google Drive, Dropbox, dll (opsional)
+    # skills: Daftar skills dengan level 1: 5. Jika dikirim,
+    # menggantikan seluruh skills yang sudah ada (full replace).
 
-    Field yang tidak dikirim tidak akan diubah.
-    Data akademik (NIM, prodi, IPK) tidak dapat diubah melalui endpoint ini.
+    # Field yang tidak dikirim tidak akan diubah.
+    # Data akademik (NIM, prodi, IPK) tidak dapat diubah melalui endpoint ini.
 
-    Hanya dapat diakses oleh **STUDENT**.
-    """
+    # Hanya dapat diakses oleh STUDENT.
     try:
         profile_service.update_cv_data(current_user.id, cv_data)
         return {"message": "Data CV berhasil diperbarui"}
@@ -101,10 +87,8 @@ async def upload_cv(
     session=Depends(get_session),
     current_user: DomainUser = Depends(require_student),
 ) -> dict:
-    """
-    Upload CV mahasiswa dalam format PDF.
-    - **file**: File PDF CV (max 5MB, format aplikasi PDF).
-    """
+    # Upload CV mahasiswa dalam format PDF.
+    # file: File PDF CV (max 5MB, format aplikasi PDF).
     result = upload_cv_command_handler(
         command=UploadCVCommand(
             user_id=current_user.id,

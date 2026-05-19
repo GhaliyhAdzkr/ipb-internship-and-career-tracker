@@ -1,8 +1,3 @@
-"""
-FastAPI Application
-Entry point aplikasi FastAPI
-"""
-
 import os
 from contextlib import asynccontextmanager
 
@@ -10,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-import app_backend.models  # noqa: F401 – registrasi semua tabel ke metadata
+import app_backend.models  # noqa: F401 registrasi semua tabel ke metadata
 from app_backend.models.base import Base
 from app_backend.routers.api import admin, analytics, application, auth, document, notification, placement, profile, vacancy
 from app_backend.shared.database import engine

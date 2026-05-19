@@ -1,10 +1,3 @@
-"""
-Register Admin Feature – Command Handler.
-Registrasi fasilitator/admin: buat public.users + public.profiles_admin dalam satu transaksi.
-Endpoint ini sebaiknya hanya dipanggil oleh super-admin yang sudah login,
-atau dari internal script seeding.
-"""
-
 from __future__ import annotations
 
 import uuid
@@ -61,9 +54,17 @@ def register_admin_command_handler(
         now = datetime.now(timezone.utc)
         user_id = uuid.uuid4()
 
+        base_username = command.payload.email.split("@")[0]
+        username = base_username
+        suffix = 1
+        while session.query(Users).filter(Users.username == username).first():
+            username = f"{base_username}{suffix}"
+            suffix += 1
+
         user = Users(
             id=user_id,
             email=command.payload.email,
+            username=username,
             password_hash=hash_password(command.payload.password),
             role=UserRole.ADMIN.value,  # HARDCODED
             is_active=True,

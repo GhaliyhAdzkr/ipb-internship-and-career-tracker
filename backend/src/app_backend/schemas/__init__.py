@@ -1,8 +1,3 @@
-"""
-Pydantic schemas package – re-exports semua schema untuk convenience.
-"""
-
-# Admin schemas
 from app_backend.schemas.admin import AdminProfileResponse  # noqa: F401
 # Profile schemas
 from app_backend.schemas.profile import CVDataUpdate  # noqa: F401

@@ -1,10 +1,3 @@
-"""
-Model: public.applications
-Rekaman pelamaran mahasiswa ke lowongan (Self-Reported ATS).
-"""
-
-from __future__ import annotations
-
 import datetime
 import decimal
 import uuid

@@ -7,7 +7,14 @@ from app_backend.models.vacancy_skills import VacancySkills
 from app_backend.repositories.company_repository import CompanyRepository
 from app_backend.repositories.vacancy_repository import VacancyRepository
 from app_backend.repositories.vacancy_skill_repository import VacancySkillRepository
-from app_backend.schemas.vacancy import CompanyInfo, VacancyCreate, VacancyDetailResponse, VacancyResponse, VacancyUpdate
+from app_backend.schemas.vacancy import (
+    CompanyInfo,
+    SkillRequirement,
+    VacancyCreate,
+    VacancyDetailResponse,
+    VacancyResponse,
+    VacancyUpdate,
+)
 
 
 class IVacancyService(Protocol):
@@ -15,7 +22,7 @@ class IVacancyService(Protocol):
     def get_vacancy(self, vacancy_id: uuid.UUID) -> Optional[VacancyDetailResponse]: ...
     def update_vacancy(self, vacancy_id: uuid.UUID, data: VacancyUpdate) -> VacancyResponse: ...
     def delete_vacancy(self, vacancy_id: uuid.UUID) -> None: ...
-    def list_active_vacancies(self, skip: int = 0, limit: int = 100) -> List[VacancyResponse]: ...
+    def list_active_vacancies(self, skip: int = 0, limit: int = 100) -> List[VacancyDetailResponse]: ...
 
 
 class VacancyService:
@@ -80,19 +87,30 @@ class VacancyService:
             raise exc
 
     def get_vacancy(self, vacancy_id: uuid.UUID) -> Optional[VacancyDetailResponse]:
-        vacancy = self.vacancy_repo.get_by_id(vacancy_id)
+        vacancy = self.vacancy_repo.get_with_company(vacancy_id)
         if not vacancy:
             return None
 
-        company = self.company_repo.get_by_id(vacancy.company_id)
+        # Fetch skills for detail view
+        skills_raw = self.vacancy_skill_repo.get_by_vacancy_id(vacancy_id)
+        skills = [
+            SkillRequirement(
+                skill_id=s.skill_id,
+                skill_name=s.skill.name if s.skill else "Keahlian",
+                is_mandatory=s.is_mandatory if s.is_mandatory is not None else True,
+            )
+            for s in skills_raw
+        ]
+
         company_info = (
             CompanyInfo(
-                id=company.id,
-                name=company.name,
-                industry=company.industry,
-                website_url=company.website_url,
+                id=vacancy.company.id,
+                name=vacancy.company.name,
+                industry=vacancy.company.industry,
+                website_url=vacancy.company.website_url,
+                logo_url=vacancy.company.logo_url,
             )
-            if company
+            if vacancy.company
             else None
         )
 
@@ -113,7 +131,7 @@ class VacancyService:
             is_scraped=vacancy.is_scraped if vacancy.is_scraped is not None else False,
             is_auto_close=(vacancy.is_auto_close if vacancy.is_auto_close is not None else True),
             is_active=vacancy.is_active if vacancy.is_active is not None else True,
-            skills=[],  # Need to fetch skills if detail requires them
+            skills=skills,
             created_at=vacancy.created_at,
             updated_at=vacancy.updated_at,
         )
@@ -123,6 +141,10 @@ class VacancyService:
         if not vacancy:
             raise ValueError("Lowongan tidak ditemukan")
 
+        if data.company_id is not None:
+            if not self.company_repo.get_by_id(data.company_id):
+                raise ValueError("Perusahaan tidak ditemukan")
+            vacancy.company_id = data.company_id
         if data.title is not None:
             vacancy.title = data.title
         if data.description is not None:
@@ -148,6 +170,19 @@ class VacancyService:
         if data.is_active is not None:
             vacancy.is_active = data.is_active
 
+        # Update skills if provided
+        if data.skills is not None:
+            # Delete existing skills
+            self.vacancy_skill_repo.session.query(VacancySkills).filter(VacancySkills.vacancy_id == vacancy.id).delete()
+            # Add new skills
+            for skill_item in data.skills:
+                vacancy_skill = VacancySkills(
+                    vacancy_id=vacancy.id,
+                    skill_id=skill_item.skill_id,
+                    is_mandatory=skill_item.is_mandatory if skill_item.is_mandatory is not None else True,
+                )
+                self.vacancy_skill_repo.create(vacancy_skill)
+
         vacancy.updated_at = datetime.now(timezone.utc)
         self.vacancy_repo.save_changes()
         return self._map_to_response(vacancy)
@@ -162,12 +197,15 @@ class VacancyService:
         vacancy.updated_at = datetime.now(timezone.utc)
         self.vacancy_repo.save_changes()
 
-    def list_active_vacancies(self, skip: int = 0, limit: int = 100) -> List[VacancyResponse]:
+    def list_active_vacancies(self, skip: int = 0, limit: int = 100) -> List[VacancyDetailResponse]:
         vacancies = self.vacancy_repo.list_active(skip, limit)
-        return [self._map_to_response(v) for v in vacancies]
+        return [self._map_to_detail_response(v) for v in vacancies]
 
     def count_active_vacancies(self) -> int:
         return self.vacancy_repo.count_active()
+
+    def list_industries(self) -> List[str]:
+        return self.company_repo.get_distinct_industries()
 
     def _map_to_response(self, vacancy: Vacancies) -> VacancyResponse:
         return VacancyResponse(
@@ -187,6 +225,49 @@ class VacancyService:
             is_scraped=vacancy.is_scraped if vacancy.is_scraped is not None else False,
             is_auto_close=(vacancy.is_auto_close if vacancy.is_auto_close is not None else True),
             is_active=vacancy.is_active if vacancy.is_active is not None else True,
+            created_at=vacancy.created_at,
+            updated_at=vacancy.updated_at,
+        )
+
+    def _map_to_detail_response(self, vacancy: Vacancies) -> VacancyDetailResponse:
+        company_info = None
+        if vacancy.company:
+            company_info = CompanyInfo(
+                id=vacancy.company.id,
+                name=vacancy.company.name,
+                industry=vacancy.company.industry,
+                website_url=vacancy.company.website_url,
+                logo_url=vacancy.company.logo_url,
+            )
+        elif vacancy.company_id:
+            company = self.company_repo.get_by_id(vacancy.company_id)
+            if company:
+                company_info = CompanyInfo(
+                    id=company.id,
+                    name=company.name,
+                    industry=company.industry,
+                    website_url=company.website_url,
+                    logo_url=company.logo_url,
+                )
+
+        return VacancyDetailResponse(
+            id=vacancy.id,
+            company=company_info,
+            title=vacancy.title,
+            description=vacancy.description,
+            type=vacancy.type,
+            open_date=vacancy.open_date,
+            close_date=vacancy.close_date,
+            location=vacancy.location,
+            payment_type=vacancy.payment_type,
+            compensation_min=vacancy.compensation_min,
+            compensation_max=vacancy.compensation_max,
+            compensation_note=vacancy.compensation_note,
+            source_url=vacancy.source_url,
+            is_scraped=vacancy.is_scraped if vacancy.is_scraped is not None else False,
+            is_auto_close=(vacancy.is_auto_close if vacancy.is_auto_close is not None else True),
+            is_active=vacancy.is_active if vacancy.is_active is not None else True,
+            skills=[],  # Skills empty for list view to save bandwidth
             created_at=vacancy.created_at,
             updated_at=vacancy.updated_at,
         )

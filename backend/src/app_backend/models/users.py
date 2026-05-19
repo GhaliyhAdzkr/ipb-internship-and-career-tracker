@@ -1,13 +1,3 @@
-"""
-Model: public.users
-Tabel pengguna utama.
-
-Note: We use public schema instead of auth schema because Supabase reserves
-the auth schema for their built-in authentication tables.
-"""
-
-from __future__ import annotations
-
 import datetime
 import uuid
 from typing import TYPE_CHECKING, Optional
@@ -23,6 +13,8 @@ if TYPE_CHECKING:
     from app_backend.models.notification_queue import NotificationQueue
     from app_backend.models.user_refresh_tokens import UserRefreshTokens
     from app_backend.models.vacancies import Vacancies
+    from app_backend.models.profiles_student import ProfilesStudent
+    from app_backend.models.profiles_admin import ProfilesAdmin
 
 
 class Users(Base):
@@ -31,6 +23,7 @@ class Users(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     email: Mapped[str] = mapped_column(String(255), nullable=False)
+    username: Mapped[Optional[str]] = mapped_column(String(100), unique=True, nullable=True)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     role: Mapped[str] = mapped_column(Enum("ADMIN", "STUDENT", name="user_role_enum"), nullable=False)
     is_active: Mapped[Optional[bool]] = mapped_column(Boolean, server_default=text("true"))
@@ -49,8 +42,15 @@ class Users(Base):
     vacancies: Mapped[list["Vacancies"]] = relationship("Vacancies", back_populates="users")
     application_logs: Mapped[list["ApplicationLogs"]] = relationship("ApplicationLogs", back_populates="users")
 
+    profile_student: Mapped[Optional["ProfilesStudent"]] = relationship(
+        "ProfilesStudent", backref="user", uselist=False, cascade="all, delete-orphan"
+    )
+    profile_admin: Mapped[Optional["ProfilesAdmin"]] = relationship(
+        "ProfilesAdmin", backref="user", uselist=False, cascade="all, delete-orphan"
+    )
+
     def to_domain(self):
-        """Convert ke domain model User"""
+        # Convert ke domain model User
         from app_backend.domain.user import User as DomainUser
 
         return DomainUser(
@@ -66,7 +66,7 @@ class Users(Base):
 
     @classmethod
     def from_domain(cls, domain_user) -> "Users":
-        """Buat ORM model dari domain User"""
+        # Buat ORM model dari domain User
         return cls(
             id=domain_user.id,
             email=domain_user.email,

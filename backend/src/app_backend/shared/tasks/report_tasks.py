@@ -1,7 +1,3 @@
-"""
-Background tasks for generating PDF reports and documents.
-"""
-
 import datetime
 import os
 import io
@@ -20,7 +16,7 @@ from app_backend.models.document_requests import DocumentRequests
 from app_backend.models.notification_queue import NotificationQueue
 from app_backend.models.placements import Placements
 from app_backend.shared.database import create_engine
-from app_backend.shared.s3_storage import get_s3_client, upload_fileobj
+from app_backend.shared.s3_storage import get_s3_client, upload_fileobj, generate_presigned_url
 from app_backend.conf.settings import settings
 
 
@@ -122,7 +118,7 @@ def generate_final_report(self, placement_id: str) -> Dict:
         # Seek back to beginning of buffer
         pdf_buffer.seek(0)
 
-        # Determine upload path
+        # Determine upload path (PRIVATE)
         s3_key = f"reports/{filename}"
 
         if settings.storage_type == "s3":
@@ -131,7 +127,8 @@ def generate_final_report(self, placement_id: str) -> Dict:
             if not success:
                 return {"status": "failed", "error": "Failed to upload to S3"}
 
-            public_url = f"{settings.s3_endpoint}/{settings.s3_bucket}/{s3_key}"
+            # Generate Presigned URL (Valid for 1 week)
+            public_url = generate_presigned_url(s3_client, settings.s3_bucket, s3_key, expiration=604800)
         else:
             # Fallback to local
             os.makedirs("uploads/reports", exist_ok=True)
@@ -229,7 +226,8 @@ def generate_cover_letter(self, request_id: str) -> Dict:
             if not success:
                 return {"status": "failed", "error": "Failed to upload to S3"}
 
-            public_url = f"{settings.s3_endpoint}/{settings.s3_bucket}/{s3_key}"
+            # Generate Presigned URL (Valid for 1 week)
+            public_url = generate_presigned_url(s3_client, settings.s3_bucket, s3_key, expiration=604800)
         else:
             # Fallback to local
             os.makedirs("uploads/documents", exist_ok=True)

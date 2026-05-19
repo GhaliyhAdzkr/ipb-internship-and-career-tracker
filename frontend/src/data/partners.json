@@ -1,0 +1,56 @@
+[
+  {
+    "name": "Bank Central Asia",
+    "logo": "/assets/companies/bca.png",
+    "alt": "Logo Bank Central Asia",
+    "website": "https://www.bca.co.id"
+  },
+  {
+    "name": "Bank Mandiri (Persero) Tbk.",
+    "logo": "/assets/companies/bmri.png",
+    "alt": "Logo Bank Mandiri",
+    "website": "https://www.bankmandiri.co.id"
+  },
+  {
+    "name": "Bank Negara Indonesia (Persero) Tbk.",
+    "logo": "/assets/companies/bni.png",
+    "alt": "Logo BNI",
+    "website": "https://www.bni.co.id"
+  },
+  {
+    "name": "Bank Rakyat Indonesia (Persero) Tbk.",
+    "logo": "/assets/companies/bri.png",
+    "alt": "Logo BRI",
+    "website": "https://www.bankbri.co.id"
+  },
+  {
+    "name": "Pertamina",
+    "logo": "/assets/companies/pertamina.png",
+    "alt": "Logo Pertamina",
+    "website": "https://www.pertamina.com"
+  },
+  {
+    "name": "Telkom Indonesia",
+    "logo": "/assets/companies/telkom.png",
+    "alt": "Logo Telkom Indonesia",
+    "website": "https://www.telkom.co.id"
+  },
+  {
+    "name": "Gojek",
+    "logo": "/assets/companies/gojek.png",
+    "alt": "Logo Gojek",
+    "website": "https://www.gojek.com"
+  },
+  {
+    "name": "Traveloka",
+    "logo": "/assets/companies/traveloka.png",
+    "alt": "Logo Traveloka",
+    "website": "https://www.traveloka.com"
+  },
+  {
+    "name": "Shopee Indonesia",
+    "logo": "/assets/companies/shopee.png",
+    "alt": "Logo Shopee",
+    "website": "https://shopee.co.id"
+  }
+]

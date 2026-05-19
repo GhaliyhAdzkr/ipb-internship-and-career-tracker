@@ -1,8 +1,3 @@
-"""
-Login User Feature – Command Handler.
-Autentikasi email+password, catat refresh token stateful ke DB.
-"""
-
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -56,6 +51,19 @@ def login_user_command_handler(
         return LoginUserResult(error_message="Email atau password salah")
 
     if not user.is_active:
+        from app_backend.models.auth_action_tokens import AuthActionTokens
+
+        activation_token = (
+            session.query(AuthActionTokens)
+            .filter(
+                AuthActionTokens.user_id == user.id,
+                AuthActionTokens.action_type == "ACTIVATE_ACCOUNT",
+                AuthActionTokens.is_used.is_(False),
+            )
+            .first()
+        )
+        if activation_token:
+            return LoginUserResult(error_message="Silakan verifikasi email Anda terlebih dahulu.")
         return LoginUserResult(error_message="Akun dinonaktifkan. Hubungi admin.")
 
     token_payload = {

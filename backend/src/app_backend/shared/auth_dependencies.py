@@ -1,8 +1,3 @@
-"""
-Dependencies untuk Authentication & Authorization.
-Berisi FastAPI Depends yang digunakan pada protected routes.
-"""
-
 import uuid
 from typing import Optional
 
@@ -105,9 +100,26 @@ async def get_current_student(
 
 async def get_current_active_user(
     current_user: DomainUser = Depends(get_current_user),
+    session: Session = Depends(get_session),
 ) -> DomainUser:
     """Pastikan user aktif."""
     if not current_user.is_active:
+        from app_backend.models.auth_action_tokens import AuthActionTokens
+
+        activation_token = (
+            session.query(AuthActionTokens)
+            .filter(
+                AuthActionTokens.user_id == current_user.id,
+                AuthActionTokens.action_type == "ACTIVATE_ACCOUNT",
+                AuthActionTokens.is_used.is_(False),
+            )
+            .first()
+        )
+        if activation_token:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Silakan verifikasi email Anda terlebih dahulu.",
+            )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Akun dinonaktifkan. Hubungi admin.",
@@ -169,6 +181,22 @@ async def get_current_active_student(
         raise credentials_exception
 
     if not user.is_active:
+        from app_backend.models.auth_action_tokens import AuthActionTokens
+
+        activation_token = (
+            session.query(AuthActionTokens)
+            .filter(
+                AuthActionTokens.user_id == user.id,
+                AuthActionTokens.action_type == "ACTIVATE_ACCOUNT",
+                AuthActionTokens.is_used.is_(False),
+            )
+            .first()
+        )
+        if activation_token:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Silakan verifikasi email Anda terlebih dahulu.",
+            )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Akun dinonaktifkan. Hubungi admin.",

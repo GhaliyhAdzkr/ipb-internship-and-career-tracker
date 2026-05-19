@@ -1,8 +1,3 @@
-"""
-Domain Model untuk Vacancy
-Model domain yang berisi business logic untuk lowongan kerja/magang
-"""
-
 import uuid
 from dataclasses import dataclass
 from datetime import datetime

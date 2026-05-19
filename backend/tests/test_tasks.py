@@ -243,20 +243,20 @@ def test_process_notification_queue_task():
 
 def test_celery_app_configuration():
     """Test Celery app is properly configured."""
-    from app_backend.shared.celery_app import celery_app
+    from app_backend.shared.celery import celery
 
     # Verify celery config
-    assert celery_app.conf.task_serializer == "json"
-    assert celery_app.conf.result_serializer == "json"
-    assert celery_app.conf.timezone == "UTC"
-    assert celery_app.conf.enable_utc is True
+    assert celery.conf.task_serializer == "json"
+    assert celery.conf.result_serializer == "json"
+    assert celery.conf.timezone == "UTC"
+    assert celery.conf.enable_utc is True
 
 
 def test_celery_task_routes_configured():
     """Test task routes are configured for separate queues."""
-    from app_backend.shared.celery_app import celery_app
+    from app_backend.shared.celery import celery
 
-    routes = celery_app.conf.task_routes
+    routes = celery.conf.task_routes
 
     # Verify routes are configured
     assert "app_backend.shared.tasks.ai_tasks.*" in routes

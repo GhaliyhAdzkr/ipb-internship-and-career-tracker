@@ -1,8 +1,3 @@
-"""
-Domain Model untuk Placement
-Model domain yang berisi business logic untuk penempatan magang/kerja
-"""
-
 import uuid
 from dataclasses import dataclass
 from datetime import date, datetime

@@ -1,8 +1,3 @@
-"""
-Security utilities untuk password hashing dan JWT tokens.
-Berisi fungsi untuk hash password, generate JWT token, dan token utilities.
-"""
-
 import hashlib
 import secrets
 import uuid

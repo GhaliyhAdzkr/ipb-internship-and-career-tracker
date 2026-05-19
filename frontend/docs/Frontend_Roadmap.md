@@ -184,28 +184,24 @@ Bagian ini menjadi peta kerja frontend untuk menentukan halaman mana yang sudah 
 **For**: @Raihan
 
 ### Listing Lowongan
-
-- [ ] Ganti data lokal lowongan dengan fetch ke endpoint vacancy list/search
-- [ ] Tambahkan pagination, search, filter lokasi, tipe, dan pembayaran sesuai dukungan backend
-- [ ] Pastikan card lowongan menampilkan data yang berasal dari backend, termasuk status aktif dan company
+- [x] Ganti data lokal lowongan dengan fetch ke endpoint vacancy list/search
+- [x] Tambahkan pagination, search, filter lokasi, tipe, dan pembayaran sesuai dukungan backend
+- [x] Pastikan card lowongan menampilkan data yang berasal dari backend, termasuk status aktif dan company
 
 ### Detail Lowongan
-
-- [ ] Hubungkan halaman detail lowongan ke endpoint detail vacancy berdasarkan ID
-- [ ] Tampilkan requirement, skill, company, lokasi, dan CTA yang sesuai
-- [ ] Sediakan empty state jika vacancy tidak ditemukan
+- [x] Hubungkan halaman detail lowongan ke endpoint detail vacancy berdasarkan ID
+- [x] Tampilkan requirement, skill, company, lokasi, dan CTA yang sesuai
+- [x] Sediakan empty state jika vacancy tidak ditemukan
 
 ### Wishlist dan Match
-
-- [ ] Integrasikan wishlist student ke backend
-- [ ] Tampilkan indikator match percentage jika endpoint match tersedia dan data student lengkap
-- [ ] Buat aksi simpan/hapus wishlist yang terhubung dengan perubahan optimis di UI
+- [x] Integrasikan wishlist student ke backend
+- [x] Tampilkan indikator match percentage jika endpoint match tersedia dan data student lengkap
+- [x] Buat aksi simpan/hapus wishlist yang terhubung dengan perubahan optimis di UI
 
 ### Test Gate Phase 3
-
-- [ ] Job board menampilkan vacancy backend dengan pagination
-- [ ] Search dan filter mengubah hasil secara benar
-- [ ] Detail lowongan tidak lagi bergantung pada data JSON lokal
+- [x] Job board menampilkan vacancy backend dengan pagination
+- [x] Search dan filter mengubah hasil secara benar
+- [x] Detail lowongan tidak lagi bergantung pada data JSON lokal
 
 **Exit Criteria**: Halaman discovery sudah hidup dengan data backend, bukan mock item.
 
@@ -218,26 +214,26 @@ Bagian ini menjadi peta kerja frontend untuk menentukan halaman mana yang sudah 
 
 ### Daftar Lamaran
 
-- [ ] Sambungkan halaman lamaran ke data application nyata
-- [ ] Tampilkan grouping status seperti applied, screening, interview, offered, accepted, dan rejected
-- [ ] Tambahkan empty state bila user belum memiliki aplikasi sama sekali
+- [x] Sambungkan halaman lamaran ke data application nyata
+- [x] Tampilkan grouping status seperti applied, screening, interview, offered, accepted, dan rejected
+- [x] Tambahkan empty state bila user belum memiliki aplikasi sama sekali
 
 ### Detail dan History
 
-- [ ] Tampilkan detail lamaran per item jika backend menyediakan endpoint detail
-- [ ] Tampilkan riwayat status dan proof data yang diperlukan mahasiswa
-- [ ] Pastikan label status konsisten dengan backend enum
+- [x] Tampilkan detail lamaran per item jika backend menyediakan endpoint detail
+- [x] Tampilkan riwayat status dan proof data yang diperlukan mahasiswa
+- [x] Pastikan label status konsisten dengan backend enum
 
 ### Aksi Self-Reporting
 
-- [ ] Tambahkan form update status lamaran sesuai lifecycle yang valid
-- [ ] Siapkan upload proof UI untuk status accepted jika diperlukan
+- [x] Tambahkan form update status lamaran sesuai lifecycle yang valid
+- [x] Siapkan upload proof UI untuk status accepted jika diperlukan
 
 ### Test Gate Phase 4
 
-- [ ] Status lamaran terbaca dari backend
-- [ ] Perubahan status menampilkan response API dan history terbaru
-- [ ] UI menolak state yang tidak valid secara visual sebelum request dikirim
+- [x] Status lamaran terbaca dari backend
+- [x] Perubahan status menampilkan response API dan history terbaru
+- [x] UI menolak state yang tidak valid secara visual sebelum request dikirim
 
 **Exit Criteria**: Pengguna dapat memantau dan memperbarui lamaran dari frontend secara jelas.
 
@@ -250,23 +246,23 @@ Bagian ini menjadi peta kerja frontend untuk menentukan halaman mana yang sudah 
 
 ### Placement Overview
 
-- [ ] Ambil placement aktif user dari backend
-- [ ] Tampilkan company, tanggal mulai-selesai, supervisor, dan status penempatan
-- [ ] Siapkan kondisi empty bila user belum ditempatkan
+- [x] Ambil placement aktif user dari backend
+- [x] Tampilkan company, tanggal mulai-selesai, supervisor, dan status penempatan
+- [x] Siapkan kondisi empty bila user belum ditempatkan
 
 ### Jurnal Harian
 
-- [ ] Ganti input jurnal statis dengan data harian nyata per placement
-- [ ] Tambahkan create/edit/delete flow jika endpoint tersedia
-- [ ] Sinkronkan calendar, work time, deskripsi, dan attachment ke backend
+- [x] Ganti input jurnal statis dengan data harian nyata per placement
+- [x] Tambahkan create/edit/delete flow jika endpoint tersedia
+- [x] Sinkronkan calendar, work time, deskripsi, dan attachment ke backend
 
 ### Test Gate Phase 5
 
-- [ ] Halaman jurnal tidak lagi berupa form dummy
-- [ ] Data placement aktif muncul di UI
-- [ ] Status empty state akurat saat user belum memiliki placement
+- [x] Halaman jurnal tidak lagi berupa form dummy
+- [x] Data placement aktif muncul di UI
+- [x] Status empty state akurat saat user belum memiliki placement
 
-**Exit Criteria**: Aktivitas internship terlihat sebagai data nyata dan bukan simulasi UI.
+**Exit Criteria**: Aktivitas internship terlihat sebagai data nyata dan bukan simulasi UI. ✅
 
 ---
 
@@ -277,23 +273,23 @@ Bagian ini menjadi peta kerja frontend untuk menentukan halaman mana yang sudah 
 
 ### Laporan Akhir
 
-- [ ] Hubungkan halaman laporan ke endpoint report generation dan report status
-- [ ] Tampilkan state not generated, generating, dan ready to download
-- [ ] Sediakan tombol unduh file saat URL report tersedia
+- [x] Hubungkan halaman laporan ke endpoint report generation dan report status
+- [x] Tampilkan state not generated, generating, dan ready to download
+- [x] Sediakan tombol unduh file saat URL report tersedia
 
 ### Document Request
 
-- [ ] Tambahkan UI untuk request surat pengantar dari frontend
-- [ ] Tampilkan riwayat request dokumen dan status prosesnya
-- [ ] Gunakan result backend untuk status sukses/gagal dan file generated
+- [x] Tambahkan UI untuk request surat pengantar dari frontend
+- [x] Tampilkan riwayat request dokumen dan status prosesnya
+- [x] Gunakan result backend untuk status sukses/gagal dan file generated
 
 ### Test Gate Phase 6
 
-- [ ] Laporan akhir dapat dilihat dari state backend
-- [ ] Document request dan history terbaca dari UI
-- [ ] Link PDF valid dapat dibuka dari frontend
+- [x] Laporan akhir dapat dilihat dari state backend
+- [x] Document request dan history terbaca dari UI
+- [x] Link PDF valid dapat dibuka dari frontend
 
-**Exit Criteria**: Fitur dokumen dan laporan dapat dipakai dari frontend secara end-to-end.
+**Exit Criteria**: Fitur dokumen dan laporan dapat dipakai dari frontend secara end-to-end. ✅
 
 ---
 

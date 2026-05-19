@@ -209,6 +209,19 @@ def test_login_inactive_account(client_no_auth):
         )
 
     assert resp.status_code == 401
+    assert resp.json()["detail"] == "Akun dinonaktifkan. Hubungi admin."
+
+
+def test_login_unverified_account(client_no_auth):
+    with patch("app_backend.features.auth.auth_service.AuthService.login") as mock_method:
+        mock_method.side_effect = PermissionError("Silakan verifikasi email Anda terlebih dahulu.")
+        resp = client_no_auth.post(
+            "/api/v1/auth/login",
+            json={"email": "student@ipb.ac.id", "password": "Password123"},
+        )
+
+    assert resp.status_code == 401
+    assert resp.json()["detail"] == "Silakan verifikasi email Anda terlebih dahulu."
 
 
 #  Refresh Token
@@ -371,3 +384,29 @@ def test_get_me_admin(client_as_admin):
 def test_get_me_unauthenticated(client_no_auth):
     resp = client_no_auth.get("/api/v1/auth/me")
     assert resp.status_code == 401  # HTTPBearer returns 401 when no token
+
+
+#  Check Availability
+
+
+def test_check_availability_available(client_no_auth):
+    with patch("app_backend.features.auth.auth_service.AuthService.check_availability") as mock_method:
+        mock_method.return_value = {"available": True, "source": "db"}
+        resp = client_no_auth.get("/api/v1/auth/register/check-availability?identifier=newstudent")
+
+    assert resp.status_code == 200
+    assert resp.json() == {"available": True, "source": "db"}
+
+
+def test_check_availability_too_short(client_no_auth):
+    resp = client_no_auth.get("/api/v1/auth/register/check-availability?identifier=ab")
+    assert resp.status_code == 200
+    assert resp.json()["available"] is False
+    assert "minimal 3 karakter" in resp.json()["reason"]
+
+
+def test_check_availability_invalid_domain(client_no_auth):
+    resp = client_no_auth.get("/api/v1/auth/register/check-availability?identifier=student@gmail.com")
+    assert resp.status_code == 200
+    assert resp.json()["available"] is False
+    assert "Domain email harus @ipb.ac.id" in resp.json()["reason"]

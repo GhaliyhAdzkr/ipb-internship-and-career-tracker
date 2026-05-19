@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { authService } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 export const useAuth = () => {
   const queryClient = useQueryClient();
@@ -19,7 +20,8 @@ export const useAuth = () => {
   const registerMutation = useMutation({
     mutationFn: authService.register,
     onSuccess: () => {
-      navigate('/login');
+      toast.success("Registrasi berhasil! Silakan periksa email Anda untuk verifikasi.");
+      navigate('/login?registered=true');
     },
   });
 
@@ -43,6 +45,13 @@ export const useAuth = () => {
 
   const updateProfileMutation = useMutation({
     mutationFn: authService.updateProfile,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user'] });
+    },
+  });
+  
+  const uploadAvatarMutation = useMutation({
+    mutationFn: authService.uploadAvatar,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user'] });
     },
@@ -77,5 +86,7 @@ export const useAuth = () => {
     isVerifying: verifyEmailMutation.isPending,
     updateProfile: updateProfileMutation.mutateAsync,
     isUpdating: updateProfileMutation.isPending,
+    uploadAvatar: uploadAvatarMutation.mutateAsync,
+    isUploadingAvatar: uploadAvatarMutation.isPending,
   };
 };

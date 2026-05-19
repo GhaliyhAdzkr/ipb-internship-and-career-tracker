@@ -1,8 +1,3 @@
-"""
-Manage Departments Feature – Command Handlers.
-CRUD lengkap untuk tabel public.master_departments.
-"""
-
 from __future__ import annotations
 
 import uuid

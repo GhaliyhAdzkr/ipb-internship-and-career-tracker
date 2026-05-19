@@ -11,6 +11,7 @@ from app_backend.schemas.application import (
     ApplicationLogResponse,
     ApplicationResponse,
     ApplicationUpdateStatus,
+    ApplicationDetailResponse,
 )
 from app_backend.shared.auth_dependencies import require_student
 from app_backend.shared.database import get_session
@@ -36,6 +37,20 @@ def initialize_apply(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Gagal melamar lowongan: {exc}",
+        )
+
+
+@router.get("/my", response_model=List[ApplicationDetailResponse], summary="Daftar lamaran mahasiswa saat ini")
+def get_my_applications(
+    current_user=Depends(require_student),
+    app_service: ApplicationService = Depends(get_application_service),
+):
+    try:
+        return app_service.get_my_applications(current_user.id)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Gagal mengambil daftar lamaran: {exc}",
         )
 
 

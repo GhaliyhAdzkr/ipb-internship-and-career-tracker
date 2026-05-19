@@ -1,8 +1,3 @@
-"""
-Job Matching Feature – Command Handler.
-Menghitung persentase kecocokan profil mahasiswa dengan prasyarat lowongan.
-"""
-
 from __future__ import annotations
 
 import uuid
@@ -73,7 +68,7 @@ def _calculate_match(
     3. Formula: (matched_mandatory * 2 + matched_optional) / (total_mandatory * 2 + total_optional) * 100
     """
     if not vacancy_skills:
-        # Tidak ada skill requirement -> 100% match
+        # Tidak ada skill requirement > 100% match
         return {
             "match_percentage": 100.0,
             "matched_skills": [],
@@ -135,8 +130,32 @@ def job_match_command_handler(
         .filter(ProfilesStudent.user_id == command.student_id)
         .first()
     )
-    if not student:
-        return JobMatchResult(error_message="Profil mahasiswa tidak ditemukan")
+    if not student or not student.cv_url:
+        # Return successful result with None values so frontend knows CV is missing without throwing HTTP 400 errors!
+        from app_backend.schemas.vacancy import JobMatchResult as JobMatchResultSchema
+
+        # Get vacancy to map title and company correctly
+        vacancy = (
+            session.query(Vacancies)
+            .options(joinedload(Vacancies.company))
+            .filter(Vacancies.id == command.vacancy_id)
+            .first()
+        )
+        if not vacancy:
+            return JobMatchResult(error_message="Lowongan tidak ditemukan")
+
+        return JobMatchResult(
+            result=JobMatchResultSchema(
+                vacancy_id=vacancy.id,
+                vacancy_title=vacancy.title,
+                company_name=vacancy.company.name if vacancy.company else "",
+                match_percentage=None,
+                matched_skills=[],
+                missing_mandatory_skills=[],
+                total_required_skills=0,
+                total_matched_skills=0,
+            )
+        )
 
     student_skill_ids = {ss.skill_id for ss in student.student_skills}
 
@@ -192,6 +211,9 @@ def job_match_list_command_handler(
     )
     if not student:
         return JobMatchListResult(error_message="Profil mahasiswa tidak ditemukan")
+
+    if not student.cv_url:
+        return JobMatchListResult(error_message="Anda belum mengunggah CV. Silakan unggah CV terlebih dahulu di halaman profil.")
 
     student_skill_ids = {ss.skill_id for ss in student.student_skills}
 

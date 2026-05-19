@@ -1,8 +1,3 @@
-"""
-Register Student Feature – Command Handler.
-Registrasi mahasiswa: buat public.users + public.profiles_student dalam satu transaksi.
-"""
-
 from __future__ import annotations
 
 import uuid
@@ -45,7 +40,7 @@ def register_student_command_handler(
     Business Rules:
     1. Email harus unik (cek public.users).
     2. NIM harus unik (cek profiles_student).
-    3. Role di-hardcode ke STUDENT – tidak bisa diubah dari client.
+    3. Role di-hardcode ke STUDENT, tidak bisa diubah dari client.
     4. user dan profile_student dibuat dalam satu transaksi atomik.
     """
     if session.query(Users).filter(Users.email == command.payload.email).first():
@@ -58,9 +53,17 @@ def register_student_command_handler(
         now = datetime.now(timezone.utc)
         user_id = uuid.uuid4()
 
+        base_username = command.payload.email.split("@")[0]
+        username = base_username
+        suffix = 1
+        while session.query(Users).filter(Users.username == username).first():
+            username = f"{base_username}{suffix}"
+            suffix += 1
+
         user = Users(
             id=user_id,
             email=command.payload.email,
+            username=username,
             password_hash=hash_password(command.payload.password),
             role=UserRole.STUDENT.value,
             is_active=False,  # AKUN TIDAK AKTIF SAMPAI DIVERIFIKASI
@@ -102,22 +105,33 @@ def register_student_command_handler(
 
         # Kirim Email Verifikasi
         from app_backend.shared.mailer import send_direct_email
+        from app_backend.conf.settings import settings
 
-        subject = "Verifikasi Akun LARAS IPB"
+        subject = "Your LARAS verification token"
         body = f"""
-Halo {command.payload.full_name},
-
-Terima kasih telah mendaftar di LARAS (Internship and Career Tracker).
-Untuk mengaktifkan akun Anda, silakan gunakan kode verifikasi berikut:
-
-{raw_token}
-
-Atau klik tautan berikut (jika sudah diimplementasi di frontend):
-http://localhost:5173/verify-email?token={raw_token}
-
-Kode ini berlaku selama 24 jam.
+A new registration attempt was made to create a LARAS account for <strong>{user.email}</strong>.
+<br><br>
+Was this you? Enter this verification token on the activation page:
+<br><br>
+<div id="headline" style="font-size: 26px; font-weight: bold; color: #111827;">
+  {raw_token}
+</div>
+<br>
+Or click the following link to verify your account directly:
+<div class="raw-link" style="margin-top: 15px;">
+  <a href="{settings.frontend_url}/verify-email?token={raw_token}">{settings.frontend_url}/verify-email?token={raw_token}</a>
+</div>
+<br>
+This token is valid for 24 hours. If you did not make this request, please ignore this email.
 """
-        send_direct_email(user.email, subject, body, user_name=command.payload.full_name)
+        import threading
+
+        threading.Thread(
+            target=send_direct_email,
+            args=(user.email, subject, body),
+            kwargs={"user_name": command.payload.full_name},
+            daemon=True,
+        ).start()
 
         return RegisterStudentResult(
             user=UserResponse(

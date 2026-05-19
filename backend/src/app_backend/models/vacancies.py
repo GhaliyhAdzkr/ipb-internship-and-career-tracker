@@ -1,10 +1,3 @@
-"""
-Model: public.vacancies
-Lowongan magang/kerja yang dikurasi atau discraped dari portal publik.
-"""
-
-from __future__ import annotations
-
 import datetime
 import decimal
 import uuid
@@ -24,6 +17,7 @@ from sqlalchemy import (
     Uuid,
     text,
 )
+from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app_backend.models.base import Base
@@ -63,12 +57,14 @@ class Vacancies(Base):
         ),
         PrimaryKeyConstraint("id", name="vacancies_pkey"),
         Index("idx_vacancies_active", "open_date", "close_date"),
+        Index("idx_vacancies_search_vector", "search_vector", postgresql_using="gin"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     company_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
+    search_vector: Mapped[Optional[any]] = mapped_column(TSVECTOR, nullable=True)
     type: Mapped[str] = mapped_column(
         Enum(
             "INTERNSHIP_GENERAL",
@@ -96,6 +92,14 @@ class Vacancies(Base):
     is_active: Mapped[Optional[bool]] = mapped_column(Boolean, server_default=text("true"))
     created_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True), server_default=text("CURRENT_TIMESTAMP"))
     updated_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True), server_default=text("CURRENT_TIMESTAMP"))
+
+    @property
+    def company_name(self) -> str:
+        return self.company.name if self.company else ""
+
+    @property
+    def company_logo(self) -> Optional[str]:
+        return self.company.logo_url if self.company else None
 
     # Relationships
     company: Mapped["MasterExternalCompanies"] = relationship("MasterExternalCompanies", back_populates="vacancies")

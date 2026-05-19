@@ -1,8 +1,3 @@
-"""
-Create Vacancy Feature – Command Handler.
-Membuat lowongan baru dengan skills yang diperlukan.
-"""
-
 from __future__ import annotations
 
 import uuid

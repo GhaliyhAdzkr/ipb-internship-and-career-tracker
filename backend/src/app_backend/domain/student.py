@@ -1,8 +1,3 @@
-"""
-Domain Model untuk Student
-Model domain yang berisi business logic untuk mahasiswa
-"""
-
 import uuid
 from dataclasses import dataclass
 from datetime import datetime
@@ -47,7 +42,7 @@ class Student:
 
         # Validasi phone number format jika ada
         if self.phone_number:
-            # Hapus karakter non-digit
+            # Hapus karakter nondigit
             digits_only = "".join(filter(str.isdigit, self.phone_number))
             if len(digits_only) < 10 or len(digits_only) > 15:
                 raise ValueError("Nomor telepon tidak valid (10-15 digit)")

@@ -1,22 +1,3 @@
-"""
-Vacancy Router – API endpoints untuk vacancy management dan job discovery.
-
-Endpoints:
-  POST /vacancies           – Buat lowongan baru (admin only)
-  GET /vacancies            – List semua lowongan aktif
-  GET /vacancies/search     – Cari lowongan dengan filter
-  GET /vacancies/{id}       – Detail lowongan
-  PUT /vacancies/{id}       – Update lowongan (admin only)
-  DELETE /vacancies/{id}    – Hapus lowongan (admin only)
-  POST /wishlist            – Simpan ke wishlist
-  GET /wishlist             – List wishlist student
-  GET /wishlist/{id}        – Detail wishlist
-  PUT /wishlist/{id}        – Update catatan wishlist
-  DELETE /wishlist/{id}     – Hapus wishlist
-  GET /job-matching         – List kecocokan dengan semua lowongan
-  GET /job-matching/{id}    – Detail kecocokan dengan lowongan tertentu
-"""
-
 from http import HTTPStatus
 from typing import List, Optional
 from uuid import UUID
@@ -64,9 +45,10 @@ from app_backend.schemas.wishlist import (
     WishlistResponse,
     WishlistUpdate,
 )
-from app_backend.shared.auth_dependencies import get_current_active_student, get_current_active_user, require_admin
+from app_backend.shared.auth_dependencies import get_current_active_student, require_admin
 from app_backend.shared.database import get_session
 from app_backend.shared.dependencies import get_vacancy_service
+from app_backend.shared.cache import cache_get, cache_set, cache_delete, cache_delete_pattern
 
 router = APIRouter(
     prefix="/api/v1",
@@ -91,7 +73,9 @@ async def create_vacancy(
     Buat lowongan baru. Hanya admin yang bisa mengakses endpoint ini.
     """
     try:
-        return vacancy_service.create_vacancy(vacancy_data, current_user.id)
+        res = vacancy_service.create_vacancy(vacancy_data, current_user.id)
+        cache_delete_pattern("vacancies:list:*")
+        return res
     except ValueError as exc:
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
@@ -113,22 +97,42 @@ async def list_vacancies(
     page: int = Query(1, ge=1, description="Halaman"),
     per_page: int = Query(10, ge=1, le=100, description="Item per halaman"),
     vacancy_service: VacancyService = Depends(get_vacancy_service),
-    _: DomainUser = Depends(get_current_active_user),
 ) -> VacancyListResponse:
     """
     List semua lowongan aktif dengan pagination.
     """
+    cache_key = f"vacancies:list:page:{page}:per_page:{per_page}"
+    cached = cache_get(cache_key)
+    if cached is not None:
+        return VacancyListResponse(**cached)
+
     skip = (page - 1) * per_page
     vacancies = vacancy_service.list_active_vacancies(skip, per_page)
     total = vacancy_service.count_active_vacancies()
 
-    return VacancyListResponse(
+    res = VacancyListResponse(
         items=vacancies,
         total=total,
         page=page,
         per_page=per_page,
         total_pages=(total + per_page - 1) // per_page if total > 0 else 1,
     )
+    cache_set(cache_key, res.model_dump(), ttl=600)
+    return res
+
+
+@router.get(
+    "/vacancies/industries",
+    response_model=List[str],
+    summary="List semua kategori industri",
+)
+async def list_industries(
+    vacancy_service: VacancyService = Depends(get_vacancy_service),
+) -> List[str]:
+    """
+    Ambil semua kategori industri unik dari data perusahaan eksternal.
+    """
+    return vacancy_service.list_industries()
 
 
 @router.get(
@@ -139,13 +143,13 @@ async def list_vacancies(
 async def search_vacancies(
     query: Optional[str] = Query(None, description="Kata kunci pencarian"),
     location: Optional[str] = Query(None, description="Filter lokasi"),
+    industry: Optional[str] = Query(None, description="Filter industri"),
     type: Optional[VacancyType] = Query(None, alias="type", description="Tipe lowongan"),
     payment_type: Optional[PaymentType] = Query(None, alias="payment_type", description="Tipe pembayaran"),
     is_active: bool = Query(True, description="Hanya lowongan aktif"),
     page: int = Query(1, ge=1, description="Halaman"),
     per_page: int = Query(10, ge=1, le=100, description="Item per halaman"),
     session=Depends(get_session),
-    _: DomainUser = Depends(get_current_active_user),
 ) -> VacancyListResponse:
     """
     Cari lowongan berdasarkan berbagai filter.
@@ -154,6 +158,7 @@ async def search_vacancies(
         command=SearchVacanciesCommand(
             query=query,
             location=location,
+            industry=industry,
             vacancy_type=type.value if type else None,
             payment_type=payment_type.value if payment_type else None,
             is_active=is_active,
@@ -178,17 +183,22 @@ async def search_vacancies(
 async def get_vacancy(
     vacancy_id: UUID,
     vacancy_service: VacancyService = Depends(get_vacancy_service),
-    _: DomainUser = Depends(get_current_active_user),
 ) -> VacancyDetailResponse:
     """
     Ambil detail lowongan berdasarkan ID.
     """
+    cache_key = f"vacancy:detail:{str(vacancy_id)}"
+    cached = cache_get(cache_key)
+    if cached is not None:
+        return VacancyDetailResponse(**cached)
+
     vacancy = vacancy_service.get_vacancy(vacancy_id)
     if not vacancy:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
             detail="Lowongan tidak ditemukan",
         )
+    cache_set(cache_key, vacancy.model_dump(), ttl=600)
     return vacancy
 
 
@@ -207,7 +217,10 @@ async def update_vacancy(
     Update data lowongan. Hanya admin yang bisa mengakses endpoint ini.
     """
     try:
-        return vacancy_service.update_vacancy(vacancy_id, vacancy_data)
+        res = vacancy_service.update_vacancy(vacancy_id, vacancy_data)
+        cache_delete_pattern("vacancies:list:*")
+        cache_delete(f"vacancy:detail:{str(vacancy_id)}")
+        return res
     except ValueError as exc:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
@@ -235,6 +248,8 @@ async def delete_vacancy(
     """
     try:
         vacancy_service.delete_vacancy(vacancy_id)
+        cache_delete_pattern("vacancies:list:*")
+        cache_delete(f"vacancy:detail:{str(vacancy_id)}")
     except ValueError as exc:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,

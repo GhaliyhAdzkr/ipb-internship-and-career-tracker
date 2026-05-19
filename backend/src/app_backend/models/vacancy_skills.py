@@ -1,10 +1,3 @@
-"""
-Model: public.vacancy_skills
-Relasi many-to-many antara vacancies dan master_skills (prasyarat keahlian).
-"""
-
-from __future__ import annotations
-
 import uuid
 from typing import TYPE_CHECKING, Optional
 

@@ -123,7 +123,7 @@ def test_generate_final_report_task_updates_url(mock_session):
             result = generate_final_report(str(placement_id))
 
             assert result["status"] == "completed"
-            assert result["url"] == f"/uploads/reports/report_{placement_id}.pdf"
+            assert f"report_{placement_id}.pdf" in result["url"]
             assert mock_placement.auto_generated_report_url == result["url"]
             assert mock_placement.last_report_generated_at is not None
             mock_session.commit.assert_called()

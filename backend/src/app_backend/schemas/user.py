@@ -1,7 +1,3 @@
-"""
-Pydantic schemas untuk validasi request/response API
-"""
-
 import uuid
 from datetime import datetime
 from enum import Enum
@@ -42,6 +38,14 @@ class StudentRegister(BaseModel):
     full_name: str = Field(..., min_length=3, max_length=150)
     semester: int = Field(..., ge=1, le=14)
 
+    @field_validator("email")
+    @classmethod
+    def validate_ipb_domain(cls, v: str) -> str:
+        domain = v.split("@")[-1].lower()
+        if domain not in ("ipb.ac.id", "apps.ipb.ac.id"):
+            raise ValueError("Hanya diperbolehkan mendaftar dengan email domain @ipb.ac.id atau @apps.ipb.ac.id")
+        return v
+
     @field_validator("password")
     @classmethod
     def validate_password(cls, v: str) -> str:
@@ -57,6 +61,14 @@ class AdminRegister(BaseModel):
     unit_name: str = Field(..., min_length=2, max_length=150, description="Unit kerja (contoh: CDA IPB)")
     nip: Optional[str] = Field(None, max_length=30, description="NIP (opsional)")
 
+    @field_validator("email")
+    @classmethod
+    def validate_ipb_domain(cls, v: str) -> str:
+        domain = v.split("@")[-1].lower()
+        if domain not in ("ipb.ac.id", "apps.ipb.ac.id"):
+            raise ValueError("Hanya diperbolehkan mendaftar dengan email domain @ipb.ac.id atau @apps.ipb.ac.id")
+        return v
+
     @field_validator("password")
     @classmethod
     def validate_password(cls, v: str) -> str:
@@ -69,7 +81,7 @@ class AdminRegister(BaseModel):
 class UserLogin(BaseModel):
     """Payload login dengan email + password."""
 
-    email: EmailStr
+    email: str
     password: str
 
 
@@ -156,6 +168,7 @@ class ProfileUpdate(BaseModel):
     linkedin_url: Optional[str] = None
     gpa: Optional[float] = Field(None, ge=0.0, le=4.0)
     department_id: Optional[uuid.UUID] = None
+    cv_url: Optional[str] = None
 
 
 # Response
@@ -177,6 +190,7 @@ class UserResponse(BaseModel):
     phone_number: Optional[str] = None
     linkedin_url: Optional[str] = None
     cv_url: Optional[str] = None
+    avatar_url: Optional[str] = None
     gpa: Optional[float] = None
     department_id: Optional[uuid.UUID] = None
     department_name: Optional[str] = None

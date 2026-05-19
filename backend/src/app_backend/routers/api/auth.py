@@ -1,21 +1,7 @@
-"""
-Auth Router – API endpoints untuk authentication & session management.
-
-Endpoints:
-  POST /register/student    – Registrasi mahasiswa
-  POST /register/admin      – Registrasi admin/fasilitator (protected: admin only)
-  POST /login               – Login, kembalikan access + refresh token
-  POST /refresh-token       – Token rotation (stateful)
-  POST /logout              – Revoke refresh token (device logout)
-  POST /password/reset-request – Minta link reset password via email
-  POST /password/reset         – Reset password dengan action token
-  GET  /me                     – Info user yang sedang login
-"""
-
 from http import HTTPStatus
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File
 
 from app_backend.conf.settings import settings
 from app_backend.domain.user import User as DomainUser
@@ -43,6 +29,7 @@ from app_backend.schemas.user import (
 from app_backend.shared.auth_dependencies import get_current_active_user, require_admin
 from app_backend.shared.database import get_session
 from app_backend.shared.dependencies import get_auth_service
+from app_backend.shared.s3_storage import get_s3_client, upload_fileobj
 
 router = APIRouter(
     prefix="/api/v1/auth",
@@ -50,6 +37,31 @@ router = APIRouter(
 )
 
 # Registration
+
+
+@router.get(
+    "/register/check-availability",
+    summary="Periksa ketersediaan email atau username",
+)
+async def check_availability(
+    identifier: str,
+    auth_service: AuthService = Depends(get_auth_service),
+):
+    """
+    Periksa ketersediaan email atau username secara asinkron (untuk as-you-type validation).
+    Mendukung debouncing, caching performa tinggi Redis (SRE pattern), dan B-Tree lookup.
+    """
+    if not identifier or len(identifier) < 3:
+        return {"available": False, "reason": "Identifier minimal 3 karakter"}
+
+    # Optional: If email is input, validate domain as well
+    if "@" in identifier:
+        domain = identifier.split("@")[-1].lower()
+        if domain not in ("ipb.ac.id", "apps.ipb.ac.id"):
+            return {"available": False, "reason": "Domain email harus @ipb.ac.id atau @apps.ipb.ac.id"}
+
+    result = auth_service.check_availability(identifier)
+    return result
 
 
 @router.post(
@@ -311,9 +323,10 @@ async def get_me(
     nim = None
     semester = None
     unit_name = None
-    phone_number = None
-    linkedin_url = None
-    cv_url = None
+    phone_number: Optional[str] = None
+    linkedin_url: Optional[str] = None
+    cv_url: Optional[str] = None
+    avatar_url: Optional[str] = None
     gpa = None
     department_id = None
     department_name = None
@@ -327,6 +340,7 @@ async def get_me(
             phone_number = profile.phone_number
             linkedin_url = profile.linkedin_url
             cv_url = profile.cv_url
+            avatar_url = profile.avatar_url
             gpa = float(profile.gpa) if profile.gpa else None
             department_id = profile.department_id
             if profile.department:
@@ -349,6 +363,7 @@ async def get_me(
         phone_number=phone_number,
         linkedin_url=linkedin_url,
         cv_url=cv_url,
+        avatar_url=avatar_url,
         gpa=gpa,
         department_id=department_id,
         department_name=department_name,
@@ -394,6 +409,29 @@ async def update_profile(
             profile.gpa = payload.gpa
         if payload.department_id:
             profile.department_id = payload.department_id
+        if payload.cv_url is not None:
+            from app_backend.conf.settings import settings
+            has_run_sync = False
+            if settings.is_development:
+                try:
+                    from app_backend.shared.tasks.ai_tasks import parse_cv_skills_sync
+                    secured_cv_url = parse_cv_skills_sync(str(current_user.id), str(payload.cv_url), session)
+                    profile.cv_url = secured_cv_url
+                    has_run_sync = True
+                except Exception as sync_err:
+                    print(f"Failed to parse CV synchronously in dev: {sync_err}. Falling back to saving raw URL.")
+                    profile.cv_url = payload.cv_url
+            else:
+                profile.cv_url = payload.cv_url
+
+            session.commit()
+
+            if not has_run_sync:
+                try:
+                    from app_backend.shared.tasks.ai_tasks import parse_cv_skills
+                    parse_cv_skills.delay(str(current_user.id), str(payload.cv_url))
+                except Exception as e:
+                    print(f"Failed to queue CV parsing: {e}")
 
         profile.updated_at = now
 
@@ -406,6 +444,55 @@ async def update_profile(
             profile.full_name = payload.full_name
 
         profile.updated_at = now
+
+    session.commit()
+    return await get_me(current_user=current_user, session=session)
+
+
+@router.post(
+    "/profile/avatar",
+    response_model=UserResponse,
+    summary="Upload foto profil",
+)
+async def upload_avatar(
+    file: UploadFile = File(...),
+    current_user: DomainUser = Depends(get_current_active_user),
+    session=Depends(get_session),
+) -> UserResponse:
+    """Upload dan ganti foto profil user."""
+    from app_backend.models.profiles_student import ProfilesStudent
+    from app_backend.models.profiles_admin import ProfilesAdmin
+
+    # Validasi Tipe File
+    if not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="Hanya file gambar yang diizinkan")
+
+    # Path File di S3 (Disesuaikan dengan Policy Supabase: folder pertama harus 'public')
+    ext = file.filename.split(".")[-1]
+    file_key = f"public/avatars/{current_user.id}.{ext}"
+
+    # Upload ke S3
+    s3_client = get_s3_client()
+    success = upload_fileobj(
+        client=s3_client, fileobj=file.file, bucket=settings.s3_bucket, key=file_key, content_type=file.content_type
+    )
+
+    if not success:
+        raise HTTPException(status_code=500, detail="Gagal mengunggah foto ke storage")
+
+    # URL Public Supabase (Gunakan format public object URL)
+    base_url = settings.s3_endpoint.replace(".storage.supabase.co/storage/v1/s3", ".supabase.co/storage/v1/object/public")
+    avatar_url = f"{base_url}/{settings.s3_bucket}/{file_key}"
+
+    # Update Database
+    if current_user.role == "STUDENT":
+        profile = session.query(ProfilesStudent).filter(ProfilesStudent.user_id == current_user.id).first()
+        if profile:
+            profile.avatar_url = avatar_url
+    elif current_user.role == "ADMIN":
+        profile = session.query(ProfilesAdmin).filter(ProfilesAdmin.user_id == current_user.id).first()
+        if profile:
+            profile.avatar_url = avatar_url
 
     session.commit()
     return await get_me(current_user=current_user, session=session)

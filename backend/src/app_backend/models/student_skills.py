@@ -1,10 +1,3 @@
-"""
-Model: public.student_skills
-Relasi many-to-many antara student dan master_skills dengan level expertise.
-"""
-
-from __future__ import annotations
-
 import uuid
 from typing import TYPE_CHECKING, Optional
 

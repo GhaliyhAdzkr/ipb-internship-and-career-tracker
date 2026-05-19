@@ -1,8 +1,3 @@
-"""
-Domain Models Package
-Pure business logic models tanpa dependency ke infrastructure
-"""
-
 from app_backend.domain.application import Application, ApplicationStatus
 from app_backend.domain.company import Company
 from app_backend.domain.placement import Placement, PlacementStatus

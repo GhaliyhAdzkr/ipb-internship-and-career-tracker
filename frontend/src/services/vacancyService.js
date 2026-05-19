@@ -1,6 +1,6 @@
 import api from '../api/axios';
 
-const buildVacancyParams = ({ page = 1, perPage = 9, query, location, type, paymentType }) => {
+const buildVacancyParams = ({ page = 1, perPage = 9, query, location, type, paymentType, industry }) => {
   const params = {
     page,
     per_page: perPage,
@@ -10,14 +10,15 @@ const buildVacancyParams = ({ page = 1, perPage = 9, query, location, type, paym
   if (location) params.location = location;
   if (type) params.type = type;
   if (paymentType) params.payment_type = paymentType;
+  if (industry) params.industry = industry;
 
   return params;
 };
 
 export const vacancyService = {
-  getVacancies: async ({ page = 1, perPage = 9, query, location, type, paymentType } = {}) => {
-    const hasFilters = Boolean(query || location || type || paymentType);
-    const params = buildVacancyParams({ page, perPage, query, location, type, paymentType });
+  getVacancies: async ({ page = 1, perPage = 9, query, location, type, paymentType, industry } = {}) => {
+    const hasFilters = Boolean(query || location || type || paymentType || industry);
+    const params = buildVacancyParams({ page, perPage, query, location, type, paymentType, industry });
     const endpoint = hasFilters ? '/vacancies/search' : '/vacancies';
     const response = await api.get(endpoint, { params });
     return response.data;
@@ -45,6 +46,10 @@ export const vacancyService = {
   },
   getJobMatch: async (vacancyId) => {
     const response = await api.get(`/job-matching/${vacancyId}`);
+    return response.data;
+  },
+  getIndustries: async () => {
+    const response = await api.get('/vacancies/industries');
     return response.data;
   },
 };

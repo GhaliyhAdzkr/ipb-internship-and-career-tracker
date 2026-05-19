@@ -1,12 +1,3 @@
-"""
-Pydantic schemas untuk Admin management endpoints.
-- Departments CRUD
-- Skills CRUD
-- External Companies CRUD
-- User account activation
-- Admin profile
-"""
-
 from __future__ import annotations
 
 from datetime import datetime
@@ -68,6 +59,7 @@ class CompanyCreate(BaseModel):
     industry: Optional[str] = Field(None, max_length=100, description="Bidang industri")
     website_url: Optional[str] = Field(None, description="URL situs resmi perusahaan")
     address: Optional[str] = Field(None, description="Alamat kantor")
+    logo_url: Optional[str] = Field(None, description="URL logo perusahaan")
 
 
 class CompanyUpdate(BaseModel):
@@ -75,6 +67,7 @@ class CompanyUpdate(BaseModel):
     industry: Optional[str] = Field(None, max_length=100)
     website_url: Optional[str] = None
     address: Optional[str] = None
+    logo_url: Optional[str] = None
 
 
 class CompanyResponse(BaseModel):
@@ -83,6 +76,7 @@ class CompanyResponse(BaseModel):
     industry: Optional[str] = None
     website_url: Optional[str] = None
     address: Optional[str] = None
+    logo_url: Optional[str] = None
     created_at: Optional[datetime] = None
 
     model_config = {"from_attributes": True}

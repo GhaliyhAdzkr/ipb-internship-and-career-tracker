@@ -1,10 +1,3 @@
-"""
-Model: public.master_external_companies
-Katalog perusahaan eksternal untuk referensi lowongan.
-"""
-
-from __future__ import annotations
-
 import datetime
 import uuid
 from typing import TYPE_CHECKING, Optional
@@ -31,6 +24,7 @@ class MasterExternalCompanies(Base):
     industry: Mapped[Optional[str]] = mapped_column(String(100))
     website_url: Mapped[Optional[str]] = mapped_column(Text)
     address: Mapped[Optional[str]] = mapped_column(Text)
+    logo_url: Mapped[Optional[str]] = mapped_column(Text)
     created_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True), server_default=text("CURRENT_TIMESTAMP"))
 
     # Relationships

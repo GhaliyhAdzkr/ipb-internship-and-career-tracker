@@ -1,8 +1,3 @@
-"""
-Get Vacancy Feature – Command Handler.
-Mengambil detail lowongan berdasarkan ID.
-"""
-
 from __future__ import annotations
 
 import uuid

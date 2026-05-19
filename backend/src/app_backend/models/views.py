@@ -1,8 +1,3 @@
-"""
-Model: public.view_internship_distribution (read-only view)
-View untuk analitik distribusi penempatan magang per perusahaan dan prodi.
-"""
-
 from sqlalchemy import BigInteger, Column, Date, String, Table
 
 from app_backend.models.base import Base

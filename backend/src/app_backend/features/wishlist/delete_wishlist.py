@@ -1,8 +1,3 @@
-"""
-Delete Wishlist Feature – Command Handler.
-Menghapus vacancy dari wishlist student.
-"""
-
 from __future__ import annotations
 
 import uuid

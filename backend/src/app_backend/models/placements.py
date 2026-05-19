@@ -1,10 +1,3 @@
-"""
-Model: public.placements
-Rekaman penempatan magang yang aktif setelah lamaran disetujui.
-"""
-
-from __future__ import annotations
-
 import datetime
 import uuid
 from typing import TYPE_CHECKING, Optional

@@ -1,8 +1,3 @@
-"""
-List Vacancies Feature – Command Handler.
-Mengambil semua lowongan dengan pagination.
-"""
-
 from __future__ import annotations
 
 from dataclasses import dataclass

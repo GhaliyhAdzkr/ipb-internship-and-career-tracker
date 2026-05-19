@@ -40,7 +40,12 @@ def get_vacancy_stats_command_handler(
 
     total_active = session.query(func.count(Vacancies.id)).filter(Vacancies.is_active.is_(True)).scalar() or 0
 
-    avg_row = session.query(func.avg(func.count(Applications.id))).group_by(Applications.vacancy_id).scalar()
+    subquery = (
+        session.query(func.count(Applications.id).label("cnt"))
+        .group_by(Applications.vacancy_id)
+        .subquery()
+    )
+    avg_row = session.query(func.avg(subquery.c.cnt)).scalar()
     avg_applicants = round(float(avg_row), 2) if avg_row is not None else 0.0
 
     top_rows = (

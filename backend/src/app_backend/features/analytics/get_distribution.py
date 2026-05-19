@@ -46,7 +46,7 @@ class CompensationBreakdownData:
 @dataclass
 class SemesterTrendData:
     year: int
-    semester: int  # 1 = Genap (Jan-Jun), 2 = Ganjil (Jul-Des)
+    semester: int  # 1 = Genap (JanJun), 2 = Ganjil (JulDes)
     total: int
 
 

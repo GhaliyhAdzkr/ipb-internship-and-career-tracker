@@ -1,8 +1,3 @@
-"""
-Domain Model untuk Application
-Model domain yang berisi business logic untuk lamaran kerja/magang
-"""
-
 import uuid
 from dataclasses import dataclass
 from datetime import datetime

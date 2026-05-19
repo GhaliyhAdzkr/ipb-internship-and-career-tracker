@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -14,3 +14,6 @@ class StudentRepository(BaseRepository[ProfilesStudent]):
     def get_by_nim(self, nim: str) -> Optional[ProfilesStudent]:
         query = select(ProfilesStudent).where(ProfilesStudent.nim == nim)
         return self.session.scalars(query).first()
+
+    def get_by_user_id(self, user_id: Any) -> Optional[ProfilesStudent]:
+        return self.session.get(ProfilesStudent, user_id)

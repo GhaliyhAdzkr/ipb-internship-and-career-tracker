@@ -1,7 +1,3 @@
-"""
-Pydantic schemas untuk validasi request/response API vacancy
-"""
-
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
@@ -40,6 +36,7 @@ class CompanyInfo(BaseModel):
     name: str
     industry: Optional[str] = None
     website_url: Optional[str] = None
+    logo_url: Optional[str] = None
 
 
 class SkillRequirement(BaseModel):
@@ -92,6 +89,7 @@ class VacancyUpdate(BaseModel):
     """Payload untuk update lowongan"""
 
     title: Optional[str] = Field(None, min_length=5, max_length=200)
+    company_id: Optional[UUID] = None
     description: Optional[str] = Field(None, min_length=20)
     type: Optional[VacancyType] = None
     open_date: Optional[datetime] = None
@@ -161,10 +159,34 @@ class VacancyDetailResponse(BaseModel):
     updated_at: Optional[datetime] = None
 
 
+class VacancySummaryResponse(BaseModel):
+    """Response singkat vacancy untuk tampilan list (tanpa description)"""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    company: CompanyInfo
+    title: str
+    type: str
+    open_date: datetime
+    close_date: datetime
+    location: Optional[str] = None
+    payment_type: Optional[str] = None
+    compensation_min: Optional[Decimal] = None
+    compensation_max: Optional[Decimal] = None
+    compensation_note: Optional[str] = None
+    source_url: Optional[str] = None
+    is_scraped: bool
+    is_auto_close: bool
+    is_active: bool
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+
 class VacancyListResponse(BaseModel):
     """Response untuk list vacancy dengan pagination"""
 
-    items: List[VacancyDetailResponse]
+    items: List[VacancySummaryResponse]
     total: int
     page: int
     per_page: int

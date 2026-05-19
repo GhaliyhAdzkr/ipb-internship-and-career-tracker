@@ -1,117 +1,654 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:v="urn:schemas-microsoft-com:vml"
+  xmlns:o="urn:schemas-microsoft-com:office:office"
+>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--[if gte mso 9
+      ]><xml>
+        <o:OfficeDocumentSettings>
+          <o:AllowPNG />
+          <o:PixelsPerInch>96</o:PixelsPerInch>
+        </o:OfficeDocumentSettings>
+      </xml><!
+    [endif]-->
+    <title>{{ title }}</title>
+    <link
+      href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,600,600i,700,700i,800,800i"
+      rel="stylesheet"
+    />
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f9fafb;
-            margin: 0;
-            padding: 0;
-            color: #374151;
-            line-height: 1.6;
+      /* CLIENT-SPECIFIC STYLES */
+      img {
+        -ms-interpolation-mode: bicubic;
+      }
+      #outlook a {
+        padding: 0;
+      }
+      table {
+        mso-table-lspace: 0pt;
+        mso-table-rspace: 0pt;
+      }
+      .ReadMsgBody {
+        width: 100%;
+      }
+      .ExternalClass {
+        width: 100%;
+      }
+      p,
+      a,
+      li,
+      td,
+      blockquote {
+        mso-line-height-rule: exactly;
+      }
+      a[href^="tel"],
+      a[href^="sms"] {
+        color: inherit;
+        cursor: default;
+        text-decoration: none;
+      }
+      p,
+      a,
+      li,
+      td,
+      body,
+      table,
+      blockquote {
+        -ms-text-size-adjust: 100%;
+        -webkit-text-size-adjust: 100%;
+      }
+      .ExternalClass,
+      .ExternalClass p,
+      .ExternalClass td,
+      .ExternalClass div,
+      .ExternalClass span,
+      .ExternalClass font {
+        line-height: 100%;
+      }
+      table {
+        border-collapse: collapse;
+      }
+
+      html {
+        -webkit-text-size-adjust: none;
+      }
+
+      #gmailModule,
+      .mobileOnly {
+        display: none !important;
+      }
+
+      /* Brand Accent Colors */
+      a,
+      a:hover {
+        color: #0284c7 !important;
+        text-decoration: none !important;
+      }
+
+      /* Custom button and elements styles */
+      .btn-container {
+        text-align: center;
+        margin: 25px 0;
+      }
+      
+      .btn-action {
+        display: inline-block;
+        background-color: #002957 !important; /* Premium navy brand color */
+        color: #ffffff !important;
+        padding: 12px 28px;
+        text-decoration: none !important;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 14px;
+        line-height: 14px !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 41, 87, 0.15);
+        transition: background-color 0.2s ease;
+      }
+      
+      .btn-action:hover {
+        background-color: #082f49 !important;
+      }
+
+      .raw-link {
+        font-size: 12px;
+        color: #6b7280;
+        word-break: break-all;
+        margin-top: 20px;
+        background: #f9fafb;
+        padding: 14px;
+        border-radius: 8px;
+        border: 1px dashed #e5e7eb;
+        text-align: left;
+      }
+      
+      .raw-link a {
+        color: #0284c7 !important;
+        text-decoration: underline !important;
+      }
+
+      .footer a,
+      .footer a:hover {
+        color: #8f8f8f !important;
+        text-decoration: none !important;
+      }
+
+      a[x-apple-data-detectors] {
+        color: inherit !important;
+        text-decoration: none !important;
+        font-size: inherit !important;
+        font-family: inherit !important;
+        font-weight: inherit !important;
+        line-height: inherit !important;
+      }
+
+      @media only screen and (max-width: 650px) {
+        #bodyTable {
+          width: 100% !important;
         }
-        .wrapper {
-            padding: 40px 20px;
+        #logo-image {
+          max-height: 35px !important;
         }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: #ffffff;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+
+        #headline {
+          font-size: 20px;
+          line-height: 24px;
         }
-        .header {
-            padding: 40px 40px 20px 40px;
-            text-align: center;
+
+        img {
+          width: auto !important;
+          max-width: 100% !important;
+          height: auto !important;
         }
-        .header-title {
-            color: #002957;
-            font-size: 22px;
-            font-weight: 800;
-            margin: 0;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        .stack {
+          padding-top: 4px !important;
+          padding-right: 5% !important;
+          padding-bottom: 6px !important;
+          padding-left: 5% !important;
+          width: 90% !important;
         }
-        .content {
-            padding: 0 40px 40px 40px;
+
+        .desktopPad,
+        #gmailModule {
+          display: none !important;
         }
-        .greeting {
-            font-size: 16px;
-            margin-bottom: 20px;
-            color: #111827;
+        .left img {
+          margin-left: 0 !important;
         }
-        .message-body {
-            font-size: 15px;
-            color: #4b5563;
+        .center {
+          text-align: center !important;
         }
-        .divider {
-            height: 1px;
-            background-color: #f3f4f6;
-            margin: 30px 0;
-        }
-        .footer {
-            text-align: center;
-            padding-top: 10px;
-        }
-        .footer-text {
-            font-size: 12px;
-            color: #9ca3af;
-        }
-        .btn-container {
-            text-align: center;
-            margin: 35px 0;
-        }
-        .btn-action {
-            display: inline-block;
-            background-color: #002957;
-            color: #ffffff !important;
-            padding: 14px 32px;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 15px;
-        }
-        .raw-link {
-            font-size: 13px;
-            color: #6b7280;
-            word-break: break-all;
-            margin-top: 30px;
-            background: #f3f4f6;
-            padding: 15px;
-            border-radius: 8px;
-        }
+      }
     </style>
-</head>
-<body>
-    <div class="wrapper">
-        <div class="container">
-            <div class="header">
-                <img src="cid:logo" alt="LARAS Logo" style="max-height: 60px; margin-bottom: 20px;">
-                <h1 class="header-title">{{ title }}</h1>
-            </div>
-            
-            <div class="content">
-                <div class="greeting">Halo <strong>{{ user_name }}</strong>,</div>
-                
-                <div class="message-body">
-                    {{ message }}
-                </div>
-                
-                <div class="divider"></div>
-                
-                <div class="footer">
-                    <p class="footer-text">
-                        &copy; {{ year }} LARAS Platform - IPB University.<br>
-                        Direktorat Kemahasiswaan & Pengembangan Karir.
-                    </p>
-                    <p style="font-size: 10px; color: #d1d5db;">{{ timestamp }} WIB</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</body>
+    <!--[if gte mso 9]>
+      <style type="text/css">
+        td,
+        p,
+        ul,
+        ol,
+        li {
+          font-family: Arial, sans-serif !important;
+        }
+      </style>
+    <![endif]-->
+  </head>
+  <body
+    bgcolor="#f6f6f6"
+    style="
+      background: #f6f6f6;
+      margin: 0;
+      padding: 0;
+      mso-padding-alt: 0px 0px 0px 0px;
+    "
+  >
+    <table
+      role="presentation"
+      width="100%"
+      border="0"
+      cellspacing="0"
+      cellpadding="0"
+      style="background: #f6f6f6; mso-padding-alt: 0px 0px 0px 0px"
+    >
+      <tbody>
+        <tr>
+          <td>
+            <!--Body Table-->
+            <table
+              role="presentation"
+              id="bodyTable"
+              width="650"
+              border="0"
+              cellspacing="0"
+              cellpadding="0"
+              align="center"
+              style="margin-left: auto; margin-right: auto"
+            >
+              <tbody>
+                <tr>
+                  <td>
+                    <table
+                      role="presentation"
+                      id="container"
+                      width="100%"
+                      border="0"
+                      cellpadding="0"
+                      cellspacing="0"
+                      style="border-collapse: collapse"
+                    >
+                      <!-- Header -->
+                      <tr>
+                        <td>
+                          <table
+                            role="presentation"
+                            width="100%"
+                            border="0"
+                            cellpadding="0"
+                            cellspacing="0"
+                            style="min-width: 100%"
+                          >
+                            <!--[if gte mso 9]>
+                            <tr>
+                            <td>
+                            <table role="presentation" width="650" border="0" cellpadding="0" cellspacing="0" style="width:650px;">
+                            <![endif]-->
+                            <tbody>
+                              <tr
+                                style="
+                                  white-space: nowrap;
+                                  background-color: #ffffff;
+                                "
+                              >
+                                <td
+                                  class="stack"
+                                  style="
+                                    border-top: 10px solid #002957;
+                                    white-space: normal;
+                                    padding-top: 30px;
+                                    padding-left: 40px;
+                                    padding-bottom: 25px;
+                                    padding-right: 40px;
+                                    background-color: #ffffff;
+                                  "
+                                >
+                                  <table
+                                    role="presentation"
+                                    width="100%"
+                                    cellpadding="0"
+                                    cellspacing="0"
+                                    border="0"
+                                  >
+                                    <tbody>
+                                      <tr>
+                                        <td class="left" style="vertical-align: middle;">
+                                          <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="display: inline-block; vertical-align: middle;"><tr><td style="vertical-align: middle; padding-right: 10px;"><img
+                                            id="logo-image"
+                                            src="https://larascareers.my.id/logo/laras.png"
+                                            alt="LARAS Logo"
+                                            height="36"
+                                            style="display: block; border: 0; max-height: 36px; vertical-align: middle;"
+                                          /></td><td style="vertical-align: middle; padding-left: 2px;"><span style="font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 20px; font-weight: 900; letter-spacing: -0.5px; color: #082f49; line-height: 36px; vertical-align: middle; display: inline-block;">LARAS</span></td></tr></table>
+                                        </td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </td>
+                              </tr>
+                              <!--[if gte mso 9]>
+                              </table>
+                              </td>
+                              </tr>
+                              <![endif]-->
+                            </tbody>
+                          </table>
+                        </td>
+                      </tr>
+
+                      <!-- Spacer -->
+                      <tr class="desktopPad">
+                        <td>
+                          <table
+                            role="presentation"
+                            border="0"
+                            cellpadding="0"
+                            cellspacing="0"
+                            style="min-width: 100%"
+                          >
+                            <!--[if gte mso 9]>
+                            <tr>
+                            <td>
+                            <table role="presentation" width="650" border="0" cellpadding="0" cellspacing="0" style="width:650px;">
+                            <![endif]-->
+                            <tbody>
+                              <tr
+                                style="
+                                  white-space: nowrap;
+                                  background-color: #ffffff;
+                                "
+                              >
+                                <td
+                                  class="desktopPad"
+                                  height="15"
+                                  style="
+                                    background-color: #ffffff;
+                                    line-height: 15px;
+                                    font-size: 15px;
+                                  "
+                                >
+                                  &nbsp;
+                                </td>
+                              </tr>
+                              <!--[if gte mso 9]>
+                              </table>
+                              </td>
+                              </tr>
+                              <![endif]-->
+                            </tbody>
+                          </table>
+                        </td>
+                      </tr>
+
+                      <!-- Main Content -->
+                      <tr>
+                        <td>
+                          <table
+                            role="presentation"
+                            width="100%"
+                            border="0"
+                            cellpadding="0"
+                            cellspacing="0"
+                            style="min-width: 100%"
+                          >
+                            <!--[if gte mso 9]>
+                            <tr>
+                            <td>
+                            <table role="presentation" width="650" border="0" cellpadding="0" cellspacing="0" style="width:650px;">
+                            <![endif]-->
+                            <tbody>
+                              <tr
+                                style="
+                                  white-space: nowrap;
+                                  background-color: #ffffff;
+                                "
+                              >
+                                <td
+                                  class="stack"
+                                  style="
+                                    color: #374151;
+                                    text-align: left;
+                                    white-space: normal;
+                                    font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+                                    font-size: 14px;
+                                    line-height: 24px;
+                                    padding-left: 40px;
+                                    padding-right: 40px;
+                                    background-color: #ffffff;
+                                    font-weight: normal;
+                                  "
+                                >
+                                  <span style="font-size: 18px; color: #111827;"
+                                    ><strong>{{ title }}</strong></span
+                                  >
+                                  <br/>
+                                  <br/>
+
+                                  {{ message }}
+                                </td>
+                              </tr>
+                              <!--[if gte mso 9]>
+                              </table>
+                              </td>
+                              </tr>
+                              <![endif]-->
+                            </tbody>
+                          </table>
+                        </td>
+                      </tr>
+
+                      <!-- Closing Message -->
+                      <tr>
+                        <td>
+                          <table
+                            role="presentation"
+                            width="100%"
+                            border="0"
+                            cellpadding="0"
+                            cellspacing="0"
+                            style="min-width: 100%"
+                          >
+                            <!--[if gte mso 9]>
+                            <tr>
+                            <td>
+                            <table role="presentation" width="650" border="0" cellpadding="0" cellspacing="0" style="width:650px;">
+                            <![endif]-->
+                            <tbody>
+                              <tr
+                                style="
+                                  white-space: nowrap;
+                                  background-color: #ffffff;
+                                "
+                              >
+                                <td
+                                  class="stack"
+                                  style="
+                                    color: #4b5563;
+                                    text-align: left;
+                                    white-space: normal;
+                                    font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+                                    font-size: 14px;
+                                    line-height: 24px;
+                                    padding-left: 40px;
+                                    padding-right: 40px;
+                                    padding-top: 20px;
+                                    padding-bottom: 30px;
+                                    background-color: #ffffff;
+                                    font-weight: normal;
+                                  "
+                                >
+                                  Thanks for using LARAS Platform.<br/>
+                                  LARAS Developer Team
+                                </td>
+                              </tr>
+                              <!--[if gte mso 9]>
+                              </table>
+                              </td>
+                              </tr>
+                              <![endif]-->
+                            </tbody>
+                          </table>
+                        </td>
+                      </tr>
+
+                      <!-- Footer Spacer -->
+                      <tr class="desktopPad">
+                        <td>
+                          <table
+                            role="presentation"
+                            border="0"
+                            cellpadding="0"
+                            cellspacing="0"
+                            style="min-width: 100%"
+                          >
+                            <!--[if gte mso 9]>
+                            <tr>
+                            <td>
+                            <table role="presentation" width="650" border="0" cellpadding="0" cellspacing="0" style="width:650px;">
+                            <![endif]-->
+                            <tbody>
+                              <tr
+                                style="
+                                  white-space: nowrap;
+                                  background-color: #ffffff;
+                                "
+                              >
+                                <td
+                                  class="desktopPad"
+                                  height="10"
+                                  style="
+                                    background-color: #ffffff;
+                                    line-height: 10px;
+                                    font-size: 10px;
+                                  "
+                                >
+                                  &nbsp;
+                                </td>
+                              </tr>
+                              <!--[if gte mso 9]>
+                              </table>
+                              </td>
+                              </tr>
+                              <![endif]-->
+                            </tbody>
+                          </table>
+                        </td>
+                      </tr>
+
+                      <!-- Outer Spacer -->
+                      <tr>
+                        <td>
+                          <table
+                            role="presentation"
+                            width="100%"
+                            border="0"
+                            cellpadding="0"
+                            cellspacing="0"
+                            style="min-width: 100%"
+                          >
+                            <!--[if gte mso 9]>
+                            <tr>
+                            <td>
+                            <table role="presentation" width="650" border="0" cellpadding="0" cellspacing="0" style="width:650px;">
+                            <![endif]-->
+                            <tbody>
+                              <tr
+                                style="
+                                  white-space: nowrap;
+                                  background-color: #f6f6f6;
+                                "
+                              >
+                                <td
+                                  height="25"
+                                  style="
+                                    white-space: normal;
+                                    background-color: #f6f6f6;
+                                    line-height: 25px;
+                                    font-size: 25px;
+                                  "
+                                >
+                                  &nbsp;
+                                </td>
+                              </tr>
+                              <!--[if gte mso 9]>
+                              </table>
+                              </td>
+                              </tr>
+                              <![endif]-->
+                            </tbody>
+                          </table>
+                        </td>
+                      </tr>
+
+                      <!-- Footer -->
+                      <tr>
+                        <td>
+                          <table
+                            role="presentation"
+                            width="100%"
+                            border="0"
+                            cellpadding="0"
+                            cellspacing="0"
+                            style="min-width: 100%"
+                          >
+                            <!--[if gte mso 9]>
+                            <tr>
+                            <td>
+                            <table role="presentation" width="650" border="0" cellpadding="0" cellspacing="0" style="width:650px;">
+                            <![endif]-->
+                            <tbody>
+                              <tr style="white-space: nowrap">
+                                <td
+                                  class="stack"
+                                  style="
+                                    white-space: normal;
+                                    padding-left: 40px;
+                                    padding-right: 40px;
+                                  "
+                                >
+                                  <table
+                                    role="presentation"
+                                    width="100%"
+                                    border="0"
+                                    cellpadding="0"
+                                    cellspacing="0"
+                                  >
+                                    <tbody>
+                                      <tr>
+                                        <td
+                                          class="footer"
+                                          style="
+                                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+                                            color: #8f8f8f;
+                                            font-size: 12px;
+                                            text-align: center;
+                                            line-height: 20px;
+                                          "
+                                        >
+                                          Copyright © {{ year }} LARAS Platform.<br />
+                                          Made with ❤️ from Group 3.<br /><br/>
+                                          <a
+                                            href="https://larascareers.my.id/"
+                                            style="
+                                              color: #8f8f8f;
+                                              text-decoration: none;
+                                            "
+                                            target="_blank"
+                                            >larascareers.my.id</a
+                                          >
+                                          &nbsp;|&nbsp;
+                                          <a
+                                            href="https://cda.ipb.ac.id/"
+                                            style="
+                                              color: #8f8f8f;
+                                              text-decoration: none;
+                                            "
+                                            target="_blank"
+                                            >CDA IPB</a
+                                          >
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td
+                                          style="padding-top: 15px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 10px; color: #c4c4c4; text-align: center;"
+                                          align="center"
+                                        >
+                                          Sent at {{ timestamp }} WIB
+                                        </td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </td>
+                              </tr>
+                              <!--[if gte mso 9]>
+                              </table>
+                              </td>
+                              </tr>
+                              <![endif]-->
+                            </tbody>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <!--End Body Table-->
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
 </html>

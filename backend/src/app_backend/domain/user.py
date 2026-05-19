@@ -1,8 +1,3 @@
-"""
-Domain Model untuk User
-Selaras dengan skema DB: hanya role ADMIN dan STUDENT.
-"""
-
 import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone

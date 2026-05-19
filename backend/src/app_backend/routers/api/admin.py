@@ -1,38 +1,17 @@
-"""
-Admin Router – API endpoints untuk manajemen data master dan akun user.
-
-Endpoints:
-  PATCH /users/{user_id}/toggle-active  – Toggle aktif/nonaktif akun user
-  GET   /profile/me                     – Profil admin yang sedang login
-  PATCH /profile/me                     – Update profil admin
-
-  GET    /departments          – Daftar semua prodi
-  POST   /departments          – Tambah prodi baru
-  PATCH  /departments/{id}     – Update prodi
-  DELETE /departments/{id}     – Hapus prodi
-
-  GET    /skills               – Daftar semua skill
-  POST   /skills               – Tambah skill baru
-  PATCH  /skills/{id}          – Update skill
-  DELETE /skills/{id}          – Hapus skill
-
-  GET    /companies            – Daftar semua perusahaan eksternal
-  POST   /companies            – Tambah perusahaan baru
-  PATCH  /companies/{id}       – Update perusahaan
-  DELETE /companies/{id}       – Hapus perusahaan
-"""
-
-from __future__ import annotations
-
 import uuid
 from datetime import datetime, timezone
 from http import HTTPStatus
-from typing import List
+from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
 
 from app_backend.domain.user import User as DomainUser
-from app_backend.features.admin import ToggleUserActiveCommand, toggle_user_active_command_handler
+from app_backend.features.admin import (
+    ListUsersCommand,
+    ToggleUserActiveCommand,
+    list_users_command_handler,
+    toggle_user_active_command_handler,
+)
 from app_backend.features.admin.master_data_service import MasterDataService
 from app_backend.features.application import (
     ListPendingVerificationCommand,
@@ -57,7 +36,12 @@ from app_backend.schemas.admin import (
     SkillResponse,
     SkillUpdate,
 )
-from app_backend.schemas.application import ApplicationRejectPayload, ApplicationResponse, ApplicationVerifyPayload
+from app_backend.schemas.application import (
+    ApplicationRejectPayload,
+    ApplicationResponse,
+    ApplicationVerifyPayload,
+    AdminApplicationResponse,
+)
 from app_backend.schemas.placement import PlacementResponse
 from app_backend.schemas.user import UserResponse
 from app_backend.shared.auth_dependencies import require_admin
@@ -82,10 +66,8 @@ async def toggle_user_active(
     session=Depends(get_session),
     _: DomainUser = Depends(require_admin),
 ) -> UserResponse:
-    """
-    Admin menonaktifkan atau mengaktifkan kembali akun user.
-    Toggle: `is_active = True` → `False`, dan sebaliknya.
-    """
+    # Admin menonaktifkan atau mengaktifkan kembali akun user.
+    # Toggle: is_active = True, False, dan sebaliknya.
     result = toggle_user_active_command_handler(
         command=ToggleUserActiveCommand(user_id=user_id),
         session=session,
@@ -93,6 +75,26 @@ async def toggle_user_active(
     if result.got_error():
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=result.error_message)
     return result.user
+
+
+@router.get(
+    "/users",
+    response_model=List[UserResponse],
+    summary="Daftar semua user (mahasiswa/admin)",
+)
+async def list_users(
+    role: Optional[str] = None,
+    session=Depends(get_session),
+    _: DomainUser = Depends(require_admin),
+) -> List[UserResponse]:
+    # Daftar semua user di sistem. Bisa difilter berdasarkan role.
+    result = list_users_command_handler(
+        command=ListUsersCommand(role=role),
+        session=session,
+    )
+    if result.got_error():
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=result.error_message)
+    return result.items
 
 
 # Admin Profile (Section 2.3)
@@ -107,7 +109,7 @@ async def get_admin_profile(
     session=Depends(get_session),
     current_user: DomainUser = Depends(require_admin),
 ) -> AdminProfileResponse:
-    """Kembalikan data profil admin berdasarkan JWT access token."""
+    # Kembalikan data profil admin berdasarkan JWT access token.
     profile = session.query(ProfilesAdmin).filter(ProfilesAdmin.user_id == current_user.id).first()
     if not profile:
         raise HTTPException(
@@ -137,7 +139,7 @@ async def update_admin_profile(
     session=Depends(get_session),
     current_user: DomainUser = Depends(require_admin),
 ) -> AdminProfileResponse:
-    """Update nama, unit kerja, atau NIP admin yang sedang login."""
+    # Update nama, unit kerja, atau NIP admin yang sedang login.
     from sqlalchemy.exc import IntegrityError
 
     profile = session.query(ProfilesAdmin).filter(ProfilesAdmin.user_id == current_user.id).first()
@@ -381,18 +383,81 @@ async def delete_company(
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(exc))
 
 
+@router.post(
+    "/companies/upload-logo",
+    status_code=HTTPStatus.OK,
+    summary="Upload logo perusahaan ke storage S3/Lokal",
+)
+async def upload_company_logo(
+    file: UploadFile = File(...),
+    _: DomainUser = Depends(require_admin),
+) -> dict:
+    # Unggah file logo perusahaan (JPEG/PNG/WEBP, max 10MB).
+    # Mengembalikan URL publik file yang diunggah.
+    import os
+    from app_backend.conf.settings import settings
+    from app_backend.shared.s3_storage import get_s3_client, upload_fileobj
+
+    valid_content_types = ["image/jpeg", "image/png", "image/jpg", "image/gif", "image/webp"]
+    if file.content_type not in valid_content_types:
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="File harus berupa gambar (JPEG, PNG, WEBP, GIF)")
+
+    # Extension check
+    filename = file.filename.lower()
+    ext = os.path.splitext(filename)[1]
+    if ext not in [".jpg", ".jpeg", ".png", ".gif", ".webp"]:
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Ekstensi file tidak valid")
+
+    # Size check
+    file.file.seek(0, os.SEEK_END)
+    file_size = file.file.tell()
+    file.file.seek(0)
+
+    MAX_SIZE = 10 * 1024 * 1024  # 10MB
+    if file_size > MAX_SIZE:
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Ukuran logo melebihi batas maksimal 10MB")
+
+    unique_filename = f"logo_{uuid.uuid4().hex[:12]}{ext}"
+    s3_key = f"companies-logo/{unique_filename}"
+
+    try:
+        if settings.storage_type == "s3":
+            s3_client = get_s3_client()
+            success = upload_fileobj(s3_client, file.file, settings.s3_bucket, s3_key, content_type=file.content_type)
+            if not success:
+                raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Gagal mengunggah logo ke S3")
+
+            # Construct public URL (for Supabase Storage S3 gateway)
+            if "storage.supabase.co/storage/v1/s3" in settings.s3_endpoint:
+                public_endpoint = settings.s3_endpoint.replace("/storage/v1/s3", "/storage/v1/object/public")
+                logo_url = f"{public_endpoint}/{settings.s3_bucket}/{s3_key}"
+            else:
+                logo_url = f"{settings.s3_endpoint}/{settings.s3_bucket}/{s3_key}"
+        else:
+            # Fallback local
+            os.makedirs("uploads/companies-logo", exist_ok=True)
+            file_path = os.path.join("uploads/companies-logo", unique_filename)
+            with open(file_path, "wb") as buffer:
+                buffer.write(file.file.read())
+            logo_url = f"/uploads/companies-logo/{unique_filename}"
+
+        return {"logo_url": logo_url}
+    except Exception as exc:
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=f"Gagal mengunggah logo: {exc}")
+
+
 # Manage Applications (Section 4)
 
 
 @router.get(
     "/applications/pending-verification",
-    response_model=List[ApplicationResponse],
+    response_model=List[AdminApplicationResponse],
     summary="Daftar lamaran pending verifikasi",
 )
 async def list_pending_verification(
     session=Depends(get_session),
     _: DomainUser = Depends(require_admin),
-) -> List[ApplicationResponse]:
+) -> List[AdminApplicationResponse]:
     result = list_pending_verification_command_handler(ListPendingVerificationCommand(), session)
     if result.got_error():
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=result.error_message)

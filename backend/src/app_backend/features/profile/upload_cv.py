@@ -1,8 +1,3 @@
-"""
-Upload CV Feature – Command Handler.
-Upload file CV PDF dan simpan URL ke database.
-"""
-
 from __future__ import annotations
 
 import os
@@ -80,7 +75,11 @@ def upload_cv_command_handler(
                 return UploadCVResult(error_message="Gagal mengunggah file ke storage S3")
 
             # Construct public URL (for Supabase Storage S3 gateway)
-            cv_url = f"{settings.s3_endpoint}/{settings.s3_bucket}/{s3_key}"
+            if "storage.supabase.co/storage/v1/s3" in settings.s3_endpoint:
+                public_endpoint = settings.s3_endpoint.replace("/storage/v1/s3", "/storage/v1/object/public")
+                cv_url = f"{public_endpoint}/{settings.s3_bucket}/{s3_key}"
+            else:
+                cv_url = f"{settings.s3_endpoint}/{settings.s3_bucket}/{s3_key}"
         else:
             # Fallback to local
             os.makedirs(f"uploads/{UPLOAD_DIR}", exist_ok=True)

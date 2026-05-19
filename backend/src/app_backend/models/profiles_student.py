@@ -1,10 +1,3 @@
-"""
-Model: public.profiles_student
-Data profil mahasiswa dengan relasi ke master_departments.
-"""
-
-from __future__ import annotations
-
 import datetime
 import decimal
 import uuid
@@ -64,6 +57,7 @@ class ProfilesStudent(Base):
     phone_number: Mapped[Optional[str]] = mapped_column(String(20))
     linkedin_url: Mapped[Optional[str]] = mapped_column(Text)
     cv_url: Mapped[Optional[str]] = mapped_column(Text)
+    avatar_url: Mapped[Optional[str]] = mapped_column(Text)
     is_mbkm_eligible: Mapped[Optional[bool]] = mapped_column(Boolean, server_default=text("true"))
     updated_at: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime(True), server_default=text("CURRENT_TIMESTAMP"))
 

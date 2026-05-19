@@ -1,7 +1,3 @@
-"""
-S3-compatible storage wrapper untuk S3 Compatible Storage dengan boto3.
-"""
-
 from __future__ import annotations
 
 import logging
@@ -63,3 +59,20 @@ def head_bucket(client, bucket: str):
     except ClientError as exc:
         logger.exception("head_bucket failed: %s", exc)
         raise
+
+
+def generate_presigned_url(client, bucket: str, key: str, expiration: int = 3600):
+    """
+    Generate a presigned URL to share an S3 object.
+    :param client: S3 client
+    :param bucket: Bucket name
+    :param key: Object key
+    :param expiration: Time in seconds for the presigned URL to remain valid (default 1 hour)
+    :return: Presigned URL as string. If error, returns None.
+    """
+    try:
+        response = client.generate_presigned_url("get_object", Params={"Bucket": bucket, "Key": key}, ExpiresIn=expiration)
+        return response
+    except ClientError as exc:
+        logger.exception("generate_presigned_url failed: %s", exc)
+        return None

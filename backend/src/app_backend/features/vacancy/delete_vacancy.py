@@ -1,8 +1,3 @@
-"""
-Delete Vacancy Feature – Command Handler.
-Menghapus lowongan (soft delete via is_active=False).
-"""
-
 from __future__ import annotations
 
 import uuid
@@ -45,7 +40,7 @@ def delete_vacancy_command_handler(
         return DeleteVacancyResult(error_message="Lowongan tidak ditemukan")
 
     try:
-        # Soft delete - just set inactive
+        # Soft delete just set inactive
         vacancy.is_active = False
         session.commit()
 

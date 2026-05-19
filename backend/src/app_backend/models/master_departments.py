@@ -1,10 +1,3 @@
-"""
-Model: public.master_departments
-Tabel master untuk Program Studi dan Fakultas.
-"""
-
-from __future__ import annotations
-
 import uuid
 from typing import TYPE_CHECKING
 

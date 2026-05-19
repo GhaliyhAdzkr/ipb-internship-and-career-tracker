@@ -1,8 +1,3 @@
-"""
-Database configuration dan session management
-Konfigurasi koneksi database dan session SQLAlchemy
-"""
-
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -26,7 +21,7 @@ SessionLocal = sessionmaker(
     future=True,
 )
 
-# Re-use the project's Declarative Base (defined in app_backend.models.base)
+# Reuse the project's Declarative Base (defined in app_backend.models.base)
 # This prevents having two different Base classes which can confuse Alembic
 # and model imports.
 # Base is imported above from app_backend.models.base

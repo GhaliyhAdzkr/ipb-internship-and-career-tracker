@@ -1,9 +1,3 @@
-"""
-Reset Password Feature – Command Handlers.
-Menggunakan auth.auth_action_tokens (stateful, one-time token) bukan JWT
-agar token bisa di-invalidate secara eksplisit dan dicegah re-use.
-"""
-
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Optional
@@ -71,18 +65,16 @@ def request_reset_password_command_handler(
     # Kirim email reset password
     from app_backend.shared.mailer import send_direct_email
 
-    subject = "Reset Password Akun LARAS"
-    body = f"""
-Halo,
+    subject = "Your LARAS password reset token"
+    body = (
+        f"A request was made to reset the password for the LARAS account associated with <strong>{user.email}</strong>.<br/>"
+        "Was this you? Enter this password reset token to proceed:<br/><br/>"
+        f'<div id="headline" style="font-size: 26px; font-weight: bold; color: #111827;">{raw_token}</div><br/>'
+        "This token is valid for 15 minutes. If you did not make this request, please ignore this email."
+    )
+    import threading
 
-Anda telah meminta untuk mereset kata sandi akun LARAS Anda.
-Silakan gunakan token berikut untuk melanjutkan:
-
-{raw_token}
-
-Token ini berlaku selama 15 menit. Jika Anda tidak merasa melakukan permintaan ini, silakan abaikan email ini.
-"""
-    send_direct_email(user.email, subject, body)
+    threading.Thread(target=send_direct_email, args=(user.email, subject, body), daemon=True).start()
 
     # Di production: hapus field `token` dari response ini.
     return RequestResetPasswordResult(
