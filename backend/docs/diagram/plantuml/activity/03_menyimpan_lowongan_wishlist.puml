@@ -1,0 +1,18 @@
+@startuml
+title Activity 03 - Menyimpan Lowongan ke Wishlist
+start
+partition Mahasiswa {
+  :Klik simpan lowongan;
+}
+partition "Sistem LARAS" {
+  :Validasi vacancy aktif;
+  :Cek StudentWishlistVacancies existing;
+  if (Belum tersimpan?) then (Ya)
+    :Insert StudentWishlistVacancies;
+    :Tampilkan sukses;
+  else (Tidak)
+    :Tampilkan error sudah tersimpan atau vacancy tidak valid;
+  endif
+}
+stop
+@enduml

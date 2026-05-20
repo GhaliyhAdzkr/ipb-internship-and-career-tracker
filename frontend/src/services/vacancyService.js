@@ -48,6 +48,12 @@ export const vacancyService = {
     const response = await api.get(`/job-matching/${vacancyId}`);
     return response.data;
   },
+  getJobMatches: async ({ page = 1, perPage = 10, minMatch = 0 } = {}) => {
+    const response = await api.get('/job-matching', {
+      params: { page, per_page: perPage, min_match: minMatch },
+    });
+    return response.data;
+  },
   getIndustries: async () => {
     const response = await api.get('/vacancies/industries');
     return response.data;

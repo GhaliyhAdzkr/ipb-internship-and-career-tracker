@@ -1,0 +1,22 @@
+@startuml
+title Activity 07 - Mengajukan Surat Pengantar
+start
+partition Mahasiswa {
+  :Isi tipe dokumen, tujuan, dan referensi lowongan opsional;
+  :Klik Ajukan;
+}
+partition "Sistem LARAS" {
+  :Cek cooldown 5 menit per tipe dokumen;
+  if (Cooldown aman?) then (Ya)
+    :Insert DocumentRequests status PENDING;
+    fork
+      :Queue generate_cover_letter;
+    fork again
+      :Return document_id;
+    end fork
+  else (Tidak)
+    :Tampilkan pesan tunggu 5 menit;
+  endif
+}
+stop
+@enduml

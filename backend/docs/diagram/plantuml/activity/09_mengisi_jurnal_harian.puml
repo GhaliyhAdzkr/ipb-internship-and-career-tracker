@@ -1,0 +1,31 @@
+@startuml
+title Activity 09 - Mengisi Jurnal Aktivitas Harian Placement Aktif
+start
+partition Mahasiswa {
+  :Buka halaman Jurnal/Laporan;
+}
+partition "Sistem LARAS" {
+  :Ambil placements milik mahasiswa;
+  :Ambil ActivityLogs by placement_id;
+  :Tampilkan daftar jurnal;
+}
+partition Mahasiswa {
+  :Tambah aktivitas harian;
+  :Isi tanggal, deskripsi, durasi;
+  :Upload lampiran opsional;
+}
+partition "Sistem LARAS" {
+  :Validasi ownership placement dan payload;
+  if (Valid?) then (Ya)
+    :Insert ActivityLogs;
+    if (Ada lampiran?) then (Ya)
+      :Simpan lampiran local/S3;
+      :Update attachment_url;
+    endif
+    :Tampilkan jurnal tersimpan;
+  else (Tidak)
+    :Tampilkan error;
+  endif
+}
+stop
+@enduml

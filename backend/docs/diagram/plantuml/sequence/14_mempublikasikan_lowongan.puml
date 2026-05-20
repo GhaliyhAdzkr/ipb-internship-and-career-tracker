@@ -1,0 +1,25 @@
+@startuml
+title Sequence 14 - Mempublikasikan Lowongan Magang dan Pekerjaan
+autonumber
+actor "Administrator CDA" as Admin
+participant "Frontend Admin" as FE
+participant "Admin Vacancy API" as API
+database "PostgreSQL" as DB
+
+Admin -> FE: Pilih lowongan dan klik publish/simpan
+FE -> API: PATCH /admin/vacancies/{id} {is_active=true}
+API -> DB: Ambil Vacancies by id
+API -> API: Validasi payload dan close_date
+alt valid
+  API -> DB: Update Vacancies.is_active=true
+  opt berasal dari scraping
+    API -> DB: Set is_scraped=false
+  end
+  DB --> API: Commit OK
+  API --> FE: VacancyResponse
+  FE --> Admin: Tampilkan published
+else tidak valid
+  API --> FE: 400/404
+  FE --> Admin: Tampilkan error
+end
+@enduml

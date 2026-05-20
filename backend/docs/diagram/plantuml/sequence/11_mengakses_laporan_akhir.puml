@@ -1,0 +1,24 @@
+@startuml
+title Sequence 11 - Mengakses File Laporan Akhir
+autonumber
+actor Mahasiswa
+participant "Frontend Portal" as FE
+participant "Placement API" as API
+database "PostgreSQL" as DB
+participant "Storage\nlocal/S3" as Storage
+
+Mahasiswa -> FE: Buka status laporan
+FE -> API: GET /placements/{id}/report
+API -> DB: Validasi placement milik mahasiswa
+API -> DB: Ambil auto_generated_report_url
+alt URL tersedia
+  DB --> API: URL laporan
+  API --> FE: Report status + URL
+  FE -> Storage: Buka URL/presigned URL
+  Storage --> FE: File PDF
+  FE --> Mahasiswa: Browser membuka laporan
+else belum tersedia
+  API --> FE: Status belum dibuat
+  FE --> Mahasiswa: Tampilkan belum tersedia
+end
+@enduml

@@ -1,0 +1,25 @@
+@startuml
+title Sequence 04 - Mengajukan Lamaran
+autonumber
+actor Mahasiswa
+participant "Frontend Portal" as FE
+participant "Application API\n/api/v1/applications" as API
+database "PostgreSQL" as DB
+participant "AI Matching\nCelery" as AI
+
+Mahasiswa -> FE: Klik Lamar Sekarang
+FE -> API: POST /applications {vacancy_id}
+API -> DB: Ambil profile student dan vacancy
+API -> API: Validasi CV wajib, vacancy aktif, belum pernah apply
+alt valid
+  API -> DB: Insert Applications status=APPLIED
+  API -> DB: Insert ApplicationLogs APPLIED
+  API -> AI: Queue match_job_skills(application_id)
+  DB --> API: Commit OK
+  API --> FE: Application APPLIED
+  FE --> Mahasiswa: Tampilkan lamaran terkirim
+else tidak valid
+  API --> FE: 400/409/404
+  FE --> Mahasiswa: Tampilkan alasan gagal
+end
+@enduml

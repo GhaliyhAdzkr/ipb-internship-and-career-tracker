@@ -1,0 +1,36 @@
+@startuml
+title Activity 12 - Input Manual atau Scrape URL Lowongan
+start
+partition "Administrator CDA" {
+  :Pilih input manual atau scrape URL;
+}
+if (Metode?) then (Manual)
+  partition "Administrator CDA" {
+    :Isi form lowongan manual;
+  }
+  partition "Sistem LARAS" {
+    :Validasi payload;
+    :Insert Vacancies is_scraped=false;
+    :Tampilkan sukses;
+  }
+else (Scrape URL)
+  partition "Administrator CDA" {
+    :Masukkan daftar URL;
+  }
+  partition "Sistem LARAS" {
+    :Queue scrape_vacancies(source_urls);
+    :Return job diterima;
+  }
+  partition "Celery Worker / Scraper" {
+    :Fetch halaman eksternal;
+    :Extract job posting;
+    if (Ekstraksi berhasil?) then (Ya)
+      :Format ke schema Vacancies;
+      :Insert is_scraped=true, is_active=false;
+    else (Tidak)
+      :Catat error scraping;
+    endif
+  }
+endif
+stop
+@enduml

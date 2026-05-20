@@ -1,0 +1,23 @@
+@startuml
+title Sequence 07 - Mengajukan Surat Pengantar
+autonumber
+actor Mahasiswa
+participant "Frontend Portal\nLaporan" as FE
+participant "Document API\n/api/v1/document-requests" as API
+database "PostgreSQL" as DB
+participant "Celery Worker" as Worker
+
+Mahasiswa -> FE: Isi tipe dokumen dan tujuan surat
+FE -> API: POST /document-requests
+API -> DB: Cek request tipe sama dalam 5 menit terakhir
+alt cooldown aman
+  API -> DB: Insert DocumentRequests status=PENDING
+  DB --> API: document_id
+  API -> Worker: Queue generate_cover_letter(document_id)
+  API --> FE: Request diterima
+  FE --> Mahasiswa: Tampilkan status PENDING/PROCESSING
+else masih cooldown
+  API --> FE: 429 Too Many Requests
+  FE --> Mahasiswa: Tampilkan pesan tunggu
+end
+@enduml

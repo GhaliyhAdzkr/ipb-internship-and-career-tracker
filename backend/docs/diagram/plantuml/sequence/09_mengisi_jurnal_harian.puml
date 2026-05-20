@@ -1,0 +1,33 @@
+@startuml
+title Sequence 09 - Mengisi Jurnal Aktivitas Harian Placement Aktif
+autonumber
+actor Mahasiswa
+participant "Frontend Portal\nLaporan" as FE
+participant "Placement API\n/api/v1/placements" as API
+database "PostgreSQL" as DB
+participant "Storage\nlocal/S3" as Storage
+
+Mahasiswa -> FE: Buka halaman Jurnal/Laporan
+FE -> API: GET /placements/me
+API -> DB: Query placements by student_id
+DB --> API: Daftar placement
+FE -> API: GET /placements/{placement_id}/logs
+API -> DB: Query ActivityLogs by placement_id
+DB --> API: Jurnal harian
+API --> FE: Logs
+FE --> Mahasiswa: Tampilkan jurnal
+
+Mahasiswa -> FE: Tambah jurnal dan lampiran
+FE -> API: POST /placements/{placement_id}/logs
+API -> DB: Validasi placement milik mahasiswa
+API -> DB: Insert ActivityLogs(description_raw, duration_minutes)
+DB --> API: log_id
+opt upload lampiran
+  FE -> API: POST /placements/{placement_id}/logs/{log_id}/attachment
+  API -> Storage: Simpan file lampiran
+  Storage --> API: attachment_url
+  API -> DB: Update ActivityLogs.attachment_url
+end
+API --> FE: Jurnal tersimpan
+FE --> Mahasiswa: Tampilkan sukses
+@enduml

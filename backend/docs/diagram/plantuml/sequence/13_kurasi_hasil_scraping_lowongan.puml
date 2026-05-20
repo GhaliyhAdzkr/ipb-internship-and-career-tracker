@@ -1,0 +1,28 @@
+@startuml
+title Sequence 13 - Kurasi Hasil Scraping Lowongan
+autonumber
+actor "Administrator CDA" as Admin
+participant "Frontend Admin\nTab Hasil Scraping" as FE
+participant "Admin Vacancy API" as API
+database "PostgreSQL" as DB
+
+Admin -> FE: Buka tab Hasil Scraping
+FE -> API: GET /admin/vacancies
+API -> DB: Query Vacancies is_scraped=true and is_active=false
+DB --> API: Daftar hasil scraping pending
+API --> FE: Vacancies
+FE --> Admin: Tampilkan hasil scraping
+
+Admin -> FE: Edit data lowongan
+alt publish
+  FE -> API: PATCH /admin/vacancies/{id}
+  API -> DB: Update fields, set is_active=true, is_scraped=false
+  DB --> API: Commit OK
+  API --> FE: Lowongan dipublikasikan
+else hapus
+  FE -> API: DELETE /admin/vacancies/{id}
+  API -> DB: Delete Vacancies
+  DB --> API: Commit OK
+  API --> FE: Hasil scraping dihapus
+end
+@enduml

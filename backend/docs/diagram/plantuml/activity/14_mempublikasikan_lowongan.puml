@@ -1,0 +1,23 @@
+@startuml
+title Activity 14 - Mempublikasikan Lowongan Magang dan Pekerjaan
+start
+partition "Administrator CDA" {
+  :Pilih lowongan;
+  :Klik publish atau simpan aktif;
+}
+partition "Sistem LARAS" {
+  :Ambil Vacancies by id;
+  :Validasi payload dan close_date;
+  if (Valid?) then (Ya)
+    :Set is_active=true;
+    if (Berasal dari scraping?) then (Ya)
+      :Set is_scraped=false;
+    endif
+    :Commit perubahan;
+    :Tampilkan published;
+  else (Tidak)
+    :Tampilkan error;
+  endif
+}
+stop
+@enduml

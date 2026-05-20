@@ -10,6 +10,16 @@ export const useVacancies = (params) => {
   });
 };
 
+export const useJobMatches = (params, enabled = true) => {
+  return useQuery({
+    queryKey: ["job-matches", params],
+    queryFn: () => vacancyService.getJobMatches(params),
+    enabled,
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  });
+};
+
 export const useLandingVacancies = () => {
   return useQuery({
     queryKey: ["landing-vacancies"],

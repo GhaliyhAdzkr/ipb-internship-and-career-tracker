@@ -1,0 +1,35 @@
+@startuml
+title Activity 10 - Generate Laporan Akhir dari Jurnal Harian
+start
+partition Mahasiswa {
+  :Klik Generate Laporan pada placement selesai;
+}
+partition "Sistem LARAS" {
+  :Validasi placement milik mahasiswa;
+  :Cek end_date sudah lewat;
+  :Cek cooldown 5 menit;
+  if (Layak generate?) then (Ya)
+    :Update last_report_generated_at;
+    fork
+      :Queue generate_final_report;
+    fork again
+      :Return 202 proses background;
+    end fork
+  else (Tidak)
+    :Tampilkan error validasi;
+    stop
+  endif
+}
+partition "Celery Worker" {
+  :Ambil ActivityLogs;
+  if (Jurnal minimal 1?) then (Ya)
+    :Render PDF laporan akhir;
+    :Upload PDF ke local/S3;
+    :Update Placements.auto_generated_report_url;
+    :Insert NotificationQueue QUEUED;
+  else (Tidak)
+    :Return failed no activity logs;
+  endif
+}
+stop
+@enduml

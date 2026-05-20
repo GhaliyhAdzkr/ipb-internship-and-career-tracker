@@ -1,0 +1,30 @@
+@startuml
+title Sequence 12 - Input Manual atau Scrape URL Lowongan
+autonumber
+actor "Administrator CDA" as Admin
+participant "Frontend Admin\nVacancies" as FE
+participant "Admin Vacancy API" as API
+database "PostgreSQL" as DB
+participant "Celery Worker" as Worker
+participant "Scraping Service" as Scraper
+participant "Situs Eksternal" as Web
+
+Admin -> FE: Pilih input manual atau scrape URL
+alt input manual
+  FE -> API: POST /admin/vacancies
+  API -> DB: Insert Vacancies is_scraped=false
+  DB --> API: Commit OK
+  API --> FE: Lowongan tersimpan
+else scrape URL
+  FE -> API: POST /admin/vacancies/scrape {source_urls}
+  API -> Worker: Queue scrape_vacancies(source_urls)
+  API --> FE: Job diterima
+  Worker -> Scraper: scrape_vacancies
+  loop setiap URL
+    Scraper -> Web: GET halaman lowongan
+    Web --> Scraper: HTML
+    Scraper -> Scraper: Extract dan format ke schema Vacancies
+    Scraper -> DB: Insert Vacancies is_scraped=true, is_active=false
+  end
+end
+@enduml

@@ -1,0 +1,29 @@
+@startuml
+title Activity 15 - Verifikasi Bukti LoA dan Buat Placement
+start
+partition "Administrator CDA" {
+  :Buka halaman Verifikasi;
+}
+partition "Sistem LARAS" {
+  :Query Applications status ACCEPTED dengan proof_url;
+  :Tampilkan antrean verifikasi LoA;
+}
+partition "Administrator CDA" {
+  :Periksa bukti LoA;
+  :Isi start_date dan end_date jika valid;
+}
+partition "Sistem LARAS" {
+  if (Bukti valid?) then (Ya)
+    :Validasi application ACCEPTED dan proof_url ada;
+    :Pastikan placement belum ada;
+    :Insert Placements status ACTIVE;
+    :Insert NotificationQueue QUEUED;
+    :Tampilkan placement dibuat;
+  else (Tidak)
+    :Set Applications.status=OFFERED;
+    :Insert NotificationQueue QUEUED;
+    :Tampilkan bukti ditolak;
+  endif
+}
+stop
+@enduml

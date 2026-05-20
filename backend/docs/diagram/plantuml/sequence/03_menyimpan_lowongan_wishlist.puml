@@ -1,0 +1,22 @@
+@startuml
+title Sequence 03 - Menyimpan Lowongan ke Wishlist
+autonumber
+actor Mahasiswa
+participant "Frontend Portal" as FE
+participant "Wishlist/Vacancy API" as API
+database "PostgreSQL" as DB
+
+Mahasiswa -> FE: Klik simpan lowongan
+FE -> API: POST /wishlist {vacancy_id}
+API -> DB: Cek vacancy aktif
+API -> DB: Cek StudentWishlistVacancies unik
+alt belum tersimpan
+  API -> DB: Insert StudentWishlistVacancies
+  DB --> API: Commit OK
+  API --> FE: Wishlist tersimpan
+  FE --> Mahasiswa: Tampilkan sukses
+else sudah tersimpan / vacancy tidak valid
+  API --> FE: 400/404
+  FE --> Mahasiswa: Tampilkan error
+end
+@enduml

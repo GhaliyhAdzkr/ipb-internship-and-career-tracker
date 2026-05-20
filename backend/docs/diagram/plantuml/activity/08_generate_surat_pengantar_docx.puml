@@ -1,0 +1,24 @@
+@startuml
+title Activity 08 - Generate Surat Pengantar DOCX dari Template
+start
+partition "Celery Worker" {
+  :Ambil job generate_cover_letter;
+}
+partition "Sistem LARAS" {
+  :Load DocumentRequests;
+  :Ambil student, department, vacancy, company;
+  :Bangun konteks surat;
+  :Buka shared/templates/surat_base.docx;
+  :Isi tanggal, nama, NIM, semester, tujuan, instansi;
+  :Render DOCX baru;
+  if (Render dan upload berhasil?) then (Ya)
+    :Upload DOCX ke local/S3;
+    :Update DocumentRequests status COMPLETED dan generated_url;
+    :Insert NotificationQueue QUEUED;
+  else (Tidak)
+    :Rollback;
+    :Retry Celery;
+  endif
+}
+stop
+@enduml

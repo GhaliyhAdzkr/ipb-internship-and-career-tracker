@@ -1,0 +1,23 @@
+@startuml
+title Activity 04 - Mengajukan Lamaran
+start
+partition Mahasiswa {
+  :Klik Lamar Sekarang;
+}
+partition "Sistem LARAS" {
+  :Ambil profile student dan vacancy;
+  :Validasi CV, vacancy aktif, dan duplikasi;
+  if (Valid?) then (Ya)
+    :Insert Applications status APPLIED;
+    :Insert ApplicationLogs APPLIED;
+    fork
+      :Queue AI matching;
+    fork again
+      :Tampilkan lamaran terkirim;
+    end fork
+  else (Tidak)
+    :Tampilkan alasan gagal;
+  endif
+}
+stop
+@enduml

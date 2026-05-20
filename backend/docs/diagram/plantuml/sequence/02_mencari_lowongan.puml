@@ -1,0 +1,27 @@
+@startuml
+title Sequence 02 - Mencari Lowongan
+autonumber
+actor "Pengunjung/Mahasiswa" as User
+participant "Frontend Web" as FE
+participant "Vacancy API\n/api/v1/vacancies" as API
+database "PostgreSQL" as DB
+
+User -> FE: Buka landing/public lowongan
+FE -> API: GET /vacancies?page&per_page
+API -> DB: Query Vacancies is_active=true
+DB --> API: Daftar lowongan publik
+API --> FE: Paginated vacancies
+FE --> User: Tampilkan daftar lowongan
+
+User -> FE: Masukkan keyword/filter
+FE -> API: GET /vacancies/search?q&filters
+API -> DB: Search active vacancies + company + skills
+DB --> API: Hasil pencarian
+alt hasil ditemukan
+  API --> FE: Daftar lowongan relevan
+  FE --> User: Tampilkan hasil
+else kosong
+  API --> FE: Empty list
+  FE --> User: Tampilkan state kosong
+end
+@enduml

@@ -1,0 +1,39 @@
+@startuml
+title Activity 06 - Self-report Status Lamaran dan Upload LoA
+start
+partition Mahasiswa {
+  :Buka Riwayat Lamaran;
+}
+partition "Sistem LARAS" {
+  :Ambil Applications milik mahasiswa;
+  :Tampilkan board status;
+}
+partition Mahasiswa {
+  :Pilih lamaran;
+  :Self-report status atau upload LoA;
+}
+partition "Sistem LARAS" {
+  if (Upload LoA dari OFFERED/ACCEPTED?) then (Ya)
+    :Validasi status dan file proof;
+    if (Valid?) then (Ya)
+      :Simpan proof_url;
+      :Set status ACCEPTED jika sebelumnya OFFERED;
+      :Insert ApplicationLogs;
+      :Queue notifikasi;
+      :Tampilkan menunggu verifikasi CDA;
+    else (Tidak)
+      :Tampilkan error;
+    endif
+  else (Update status biasa)
+    :Validasi transisi status;
+    if (Transisi valid?) then (Ya)
+      :Update Applications;
+      :Insert ApplicationLogs;
+      :Tampilkan status terbaru;
+    else (Tidak)
+      :Tampilkan error transisi;
+    endif
+  endif
+}
+stop
+@enduml

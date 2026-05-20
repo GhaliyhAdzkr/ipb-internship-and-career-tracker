@@ -1,0 +1,37 @@
+@startuml
+title Sequence 06 - Self-report Status Lamaran dan Upload LoA
+autonumber
+actor Mahasiswa
+participant "Frontend Portal\nLamaran" as FE
+participant "Application API" as API
+database "PostgreSQL" as DB
+participant "Storage\nlocal/S3" as Storage
+participant "Notification Queue" as Notif
+
+Mahasiswa -> FE: Buka Riwayat Lamaran
+FE -> API: GET /applications/my
+API -> DB: Query Applications by student_id
+DB --> API: Daftar lamaran + logs
+API --> FE: ApplicationDetailResponse[]
+FE --> Mahasiswa: Tampilkan board status
+
+Mahasiswa -> FE: Update status / upload LoA
+alt status OFFERED diterima dengan bukti LoA
+  FE -> API: POST /applications/{id}/proof
+  API -> DB: Validasi application status OFFERED/ACCEPTED
+  API -> Storage: Simpan file proof
+  Storage --> API: proof_url
+  API -> DB: Set status ACCEPTED dan insert ApplicationLogs(proof_url)
+  API -> Notif: Queue notifikasi status baru
+  API --> FE: Bukti berhasil diunggah
+  FE --> Mahasiswa: Tampilkan menunggu verifikasi CDA
+else self-report status lain
+  FE -> API: PATCH /applications/{id}/status
+  API -> DB: Validasi transisi APPLIED -> SCREENING -> INTERVIEW -> OFFERED / WITHDRAWN
+  API -> DB: Update Applications dan insert ApplicationLogs
+  API --> FE: Status diperbarui
+else transisi/file tidak valid
+  API --> FE: 400
+  FE --> Mahasiswa: Tampilkan error
+end
+@enduml

@@ -1,0 +1,30 @@
+@startuml
+title Activity 01 - Mengelola Profil dan CV
+start
+partition Mahasiswa {
+  :Buka halaman Profil;
+}
+partition "Sistem LARAS" {
+  :Ambil data Users dan ProfilesStudent;
+  :Tampilkan form profil;
+}
+partition Mahasiswa {
+  :Isi data profil;
+  :Upload CV;
+}
+partition "Sistem LARAS" {
+  :Validasi payload dan file CV;
+  if (Valid?) then (Ya)
+    :Simpan file CV ke local/S3;
+    :Update ProfilesStudent;
+    fork
+      :Queue parse_cv_skills;
+    fork again
+      :Return profil tersimpan;
+    end fork
+  else (Tidak)
+    :Tampilkan error validasi;
+  endif
+}
+stop
+@enduml

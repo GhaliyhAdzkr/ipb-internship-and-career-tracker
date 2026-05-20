@@ -2,10 +2,9 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { usePlacements, useActivityLogs, useReportStatus } from "../../hooks/usePlacements";
 import { useApplications } from "../../hooks/useApplications";
-import { useVacancies } from "../../hooks/useVacancies";
+import { useJobMatches } from "../../hooks/useVacancies";
 import { 
 	PiBookmarkSimple, 
-	PiMapPin, 
 	PiClock, 
 	PiCheckCircle,
 	PiArrowRight,
@@ -42,8 +41,8 @@ function Dashboard() {
 	// Fetch applications
 	const { applications, isLoading: isLoadingApps } = useApplications();
 
-	// Fetch recommended vacancies (first page, 2 items)
-	const { data: recommendedData, isLoading: isLoadingRecs } = useVacancies({ page: 1, perPage: 2 });
+	// Fetch AI/skill-based job matches (first page, 2 items)
+	const { data: recommendedData, isLoading: isLoadingRecs, isError: isRecsError } = useJobMatches({ page: 1, perPage: 2 });
 	const recommendedVacancies = recommendedData?.items || [];
 
 	// Calculations
@@ -80,25 +79,6 @@ function Dashboard() {
 	const sortedApplications = applications
 		? [...applications].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)).slice(0, 2)
 		: [];
-
-	const displayType = (value) => {
-		switch (value) {
-			case "INTERNSHIP_GENERAL": return "Magang Umum";
-			case "MBKM_INTERNSHIP": return "MBKM Magang";
-			case "MBKM_STUDY_INDEPENDENT": return "MBKM Studi Independen";
-			case "FULL_TIME": return "Full Time";
-			default: return value || "-";
-		}
-	};
-
-	const displayPayment = (value) => {
-		switch (value) {
-			case "PAID": return "Paid";
-			case "UNPAID": return "Unpaid";
-			case "ALLOWANCE_ONLY": return "Allowance";
-			default: return value || "-";
-		}
-	};
 
 	return (
 		<div className="font-jakarta pb-10">
@@ -281,34 +261,31 @@ function Dashboard() {
 						) : recommendedVacancies.length > 0 ? (
 							recommendedVacancies.map((item) => (
 								<div 
-									key={item.id} 
-									onClick={() => navigate(`/app/detail/${item.id}`)}
+									key={item.vacancy_id} 
+									onClick={() => navigate(`/app/detail/${item.vacancy_id}`)}
 									className="p-6 bg-white rounded-2xl shadow-[0px_8px_24px_0px_rgba(0,41,87,0.04)] border border-slate-100 hover:border-sky-200 hover:shadow-md cursor-pointer transition-all flex flex-col justify-between group hover:scale-[1.01]"
 								>
 									<div>
 										<div className="flex gap-2 justify-between items-start mb-3">
 											<span className="bg-sky-50 text-sky-800 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider">
-												{item.company?.industry || "Internship"}
+												{Math.round(item.match_percentage || 0)}% Match
 											</span>
 											<PiBookmarkSimple size={18} className="text-zinc-400 group-hover:text-sky-800 transition-colors" />
 										</div>
 										<h4 className="text-slate-800 text-sm font-bold group-hover:text-sky-950 transition-colors line-clamp-1">
-											{item.title}
+											{item.vacancy_title}
 										</h4>
 										<p className="text-zinc-500 text-xs mt-0.5 line-clamp-1">
-											{item.company?.name}
+											{item.company_name}
 										</p>
 									</div>
 									<div className="flex gap-2 mt-4">
 										<div className="bg-slate-50 border border-slate-100 px-2 py-0.5 rounded text-[10px] text-zinc-600 font-bold">
-											{displayType(item.type)}
+											{item.total_matched_skills}/{item.total_required_skills} skill cocok
 										</div>
-										<div className="bg-slate-50 border border-slate-100 px-2 py-0.5 rounded text-[10px] text-zinc-600 font-bold">
-											{displayPayment(item.payment_type)}
-										</div>
-										{item.location && (
-											<div className="bg-slate-50 border border-slate-100 px-2 py-0.5 rounded text-[10px] text-zinc-600 font-bold flex items-center gap-0.5 truncate max-w-[100px]">
-												<PiMapPin size={10} /> {item.location}
+										{item.missing_mandatory_skills?.length > 0 && (
+											<div className="bg-amber-50 border border-amber-100 px-2 py-0.5 rounded text-[10px] text-amber-700 font-bold truncate max-w-[130px]">
+												{item.missing_mandatory_skills.length} wajib kurang
 											</div>
 										)}
 									</div>
@@ -316,7 +293,9 @@ function Dashboard() {
 							))
 						) : (
 							<div className="md:col-span-2 bg-white rounded-2xl border border-slate-100 flex flex-col justify-center items-center text-center p-8 gap-2">
-								<p className="text-xs text-zinc-400">Tidak ada rekomendasi lowongan magang saat ini.</p>
+								<p className="text-xs text-zinc-400">
+									{isRecsError ? "Unggah CV di profil untuk mengaktifkan rekomendasi." : "Tidak ada rekomendasi lowongan magang saat ini."}
+								</p>
 							</div>
 						)}
 					</div>

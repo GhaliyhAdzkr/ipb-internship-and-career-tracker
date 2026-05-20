@@ -1,0 +1,33 @@
+@startuml
+title Sequence 01 - Mengelola Profil dan CV
+autonumber
+actor Mahasiswa
+participant "Frontend Portal" as FE
+participant "Profile API\n/api/v1/profile" as API
+database "PostgreSQL" as DB
+participant "Storage\nlocal/S3" as Storage
+participant "AI CV Parser\nCelery" as AI
+
+Mahasiswa -> FE: Buka halaman Profil
+FE -> API: GET /profile/me
+API -> DB: Query Users + ProfilesStudent
+DB --> API: Data profil
+API --> FE: Profil mahasiswa
+FE --> Mahasiswa: Tampilkan form profil
+
+Mahasiswa -> FE: Simpan data profil dan upload CV
+FE -> API: PATCH /profile/me + file CV
+API -> API: Validasi payload dan file
+alt valid
+  API -> Storage: Simpan CV
+  Storage --> API: cv_url
+  API -> DB: Update ProfilesStudent.cv_url + data profil
+  API -> AI: Queue parse_cv_skills(student_id, cv_url)
+  DB --> API: Commit OK
+  API --> FE: Profil tersimpan
+  FE --> Mahasiswa: Tampilkan sukses
+else tidak valid
+  API --> FE: 400 file/payload tidak valid
+  FE --> Mahasiswa: Tampilkan error
+end
+@enduml

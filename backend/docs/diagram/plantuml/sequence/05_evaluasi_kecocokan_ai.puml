@@ -1,0 +1,22 @@
+@startuml
+title Sequence 05 - Evaluasi Kecocokan Profil, CV, dan Lowongan
+autonumber
+participant "Celery Worker" as Worker
+participant "AI Matching Service" as AI
+database "PostgreSQL" as DB
+participant "LLM Provider" as LLM
+
+Worker -> AI: match_job_skills(application_id)
+AI -> DB: Ambil application, student skills, vacancy skills
+DB --> AI: Data profil dan kebutuhan lowongan
+AI -> AI: Hitung overlap skill dan skor awal
+alt LLM tersedia
+  AI -> LLM: Minta reasoning kecocokan
+  LLM --> AI: Reasoning/rekomendasi
+else LLM tidak tersedia
+  AI -> AI: Gunakan fallback deterministic score
+end
+AI -> DB: Simpan/return hasil match untuk FE
+DB --> AI: Commit OK
+AI --> Worker: Task selesai
+@enduml

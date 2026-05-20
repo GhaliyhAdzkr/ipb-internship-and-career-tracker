@@ -1,0 +1,25 @@
+@startuml
+title Sequence 08 - Generate Surat Pengantar DOCX dari Template
+autonumber
+participant "Celery Worker" as Worker
+participant "Report Tasks\ngenerate_cover_letter" as Task
+database "PostgreSQL" as DB
+participant "DOCX Renderer\nsurat_base.docx" as Docx
+participant "Storage\nlocal/S3" as Storage
+participant "Notification Queue" as Notif
+
+Worker -> Task: Jalankan generate_cover_letter(request_id)
+Task -> DB: Ambil DocumentRequests + student + department + vacancy/company
+DB --> Task: Data konteks surat
+Task -> Docx: Render template surat_base.docx
+Docx --> Task: Buffer DOCX
+Task -> Storage: Upload documents/letter_{id}.docx
+Storage --> Task: generated_url/presigned_url
+Task -> DB: Update status=COMPLETED, generated_url
+Task -> Notif: Insert NotificationQueue QUEUED
+Task --> Worker: completed
+alt error render/upload
+  Task -> DB: Rollback
+  Task --> Worker: Retry Celery
+end
+@enduml

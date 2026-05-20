@@ -1,0 +1,25 @@
+@startuml
+title Activity 13 - Kurasi Hasil Scraping Lowongan
+start
+partition "Administrator CDA" {
+  :Buka tab Hasil Scraping;
+}
+partition "Sistem LARAS" {
+  :Query Vacancies is_scraped=true dan is_active=false;
+  :Tampilkan daftar hasil scraping pending;
+}
+partition "Administrator CDA" {
+  :Periksa dan edit data lowongan;
+}
+partition "Sistem LARAS" {
+  if (Dipublikasikan?) then (Ya)
+    :Validasi form edit;
+    :Update is_active=true dan is_scraped=false;
+    :Tampilkan lowongan dipublikasikan;
+  else (Hapus)
+    :Delete Vacancies hasil scraping;
+    :Tampilkan hasil scraping dihapus;
+  endif
+}
+stop
+@enduml

@@ -1,0 +1,19 @@
+@startuml
+title Activity 05 - Evaluasi Kecocokan Profil, CV, dan Lowongan
+start
+partition "Celery Worker" {
+  :Terima job match_job_skills;
+}
+partition "Sistem LARAS / AI" {
+  :Ambil application, student skills, vacancy skills;
+  :Hitung overlap skill dan skor dasar;
+  if (LLM tersedia?) then (Ya)
+    :Minta reasoning kecocokan ke LLM;
+    :Gabungkan skor dan reasoning;
+  else (Tidak)
+    :Gunakan fallback deterministic score;
+  endif
+  :Simpan atau return hasil matching;
+}
+stop
+@enduml

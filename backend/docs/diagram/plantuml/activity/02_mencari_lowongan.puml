@@ -1,0 +1,23 @@
+@startuml
+title Activity 02 - Mencari Lowongan
+start
+partition "Pengunjung/Mahasiswa" {
+  :Buka landing atau halaman lowongan;
+}
+partition "Sistem LARAS" {
+  :Query Vacancies is_active=true;
+  :Tampilkan daftar lowongan publik;
+}
+partition "Pengunjung/Mahasiswa" {
+  :Masukkan keyword atau filter;
+}
+partition "Sistem LARAS" {
+  :Search active vacancies;
+  if (Data ditemukan?) then (Ya)
+    :Tampilkan hasil relevan;
+  else (Tidak)
+    :Tampilkan state kosong;
+  endif
+}
+stop
+@enduml

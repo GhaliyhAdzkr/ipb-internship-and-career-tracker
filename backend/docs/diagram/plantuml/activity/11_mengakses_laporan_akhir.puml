@@ -1,0 +1,24 @@
+@startuml
+title Activity 11 - Mengakses File Laporan Akhir
+start
+partition Mahasiswa {
+  :Buka status laporan;
+}
+partition "Sistem LARAS" {
+  :Validasi placement milik mahasiswa;
+  :Ambil auto_generated_report_url;
+  if (URL tersedia?) then (Ya)
+    :Return URL laporan;
+  else (Tidak)
+    :Return status belum tersedia;
+  endif
+}
+partition Mahasiswa {
+  if (URL tersedia?) then (Ya)
+    :Buka URL laporan PDF;
+  else (Tidak)
+    :Melihat pesan laporan belum dibuat;
+  endif
+}
+stop
+@enduml
