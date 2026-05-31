@@ -1,0 +1,174 @@
+@startuml LARAS_ClassDiagram_Simplified
+
+' Compact top-down layout
+top to bottom direction
+hide members
+hide circle
+
+skinparam dpi 200
+skinparam defaultFontName Arial
+skinparam classFontStyle bold
+skinparam classFontSize 14
+skinparam stereotypeFontSize 10
+skinparam arrowFontSize 9
+skinparam arrowColor #333333
+skinparam linetype polyline
+skinparam nodesep 42
+skinparam ranksep 58
+skinparam roundcorner 6
+skinparam padding 5
+skinparam classBorderThickness 2
+skinparam classBorderColor #888888
+skinparam classBackgroundColor White
+skinparam packageStyle rectangle
+
+' Core users
+package "Core Users" #f7fbff {
+  together {
+    class Users #dae8fc
+    class "Profiles\nAdmin" as ProfilesAdmin #dae8fc
+    class "Profiles\nStudent" as ProfilesStudent #dae8fc
+  }
+}
+
+' Reference and junction tables
+package "Reference Data" #fffdf5 {
+  together {
+    class "Master\nDepartments" as MasterDepartments #fff2cc
+    class "Master External\nCompanies" as MasterExternalCompanies #fff2cc
+    class MasterSkills #fff2cc
+  }
+}
+
+package "Skill Junctions" #fff8f8 {
+  together {
+    class "Student\nSkills" as StudentSkills #f8cecc
+    class "Vacancy\nSkills" as VacancySkills #f8cecc
+  }
+}
+
+' Business entities
+package "Vacancy Flow" #ffffff {
+  together {
+    class Vacancies
+    class "Student Wishlist\nVacancies" as StudentWishlistVacancies
+  }
+}
+
+package "Application Flow" #ffffff {
+  together {
+    class Applications
+    class "Application\nLogs" as ApplicationLogs
+  }
+}
+
+package "Placement Flow" #ffffff {
+  together {
+    class Placements
+    class "Activity\nLogs" as ActivityLogs
+  }
+}
+
+package "Documents and Notifications" #ffffff {
+  together {
+    class "Document\nRequests" as DocumentRequests
+    class "Notification\nQueue" as NotificationQueue
+  }
+}
+
+' Services
+package "Services" #fbf7ff {
+  together {
+    class "Scraping\nService" as ScrapingService <<service>> #e1d5e7
+    class "AI Matching\nService" as AIMatchingService <<service>> #e1d5e7
+    class "Notification\nService" as NotificationService <<service>> #e1d5e7
+  }
+}
+
+' Enumerations at bottom
+package "Enumerations" #f7fff7 {
+  together {
+    enum "VacancyType\nEnum" as VacancyTypeEnum #d5e8d4
+    enum "PaymentType\nEnum" as PaymentTypeEnum #d5e8d4
+    enum "ApplicationStatus\nEnum" as ApplicationStatusEnum #d5e8d4
+    enum "PlacementStatus\nEnum" as PlacementStatusEnum #d5e8d4
+    enum "DocumentStatus\nEnum" as DocumentStatusEnum #d5e8d4
+    enum "NotificationStatus\nEnum" as NotificationStatusEnum #d5e8d4
+    enum "NotificationChannel\nEnum" as NotificationChannelEnum #d5e8d4
+  }
+}
+
+' Hidden anchors: keep compact top-down tiers and stable row order
+ProfilesAdmin -[hidden]right-> Users
+Users -[hidden]right-> ProfilesStudent
+MasterDepartments -[hidden]right-> MasterExternalCompanies
+MasterExternalCompanies -[hidden]right-> MasterSkills
+StudentSkills -[hidden]right-> VacancySkills
+Vacancies -[hidden]right-> StudentWishlistVacancies
+Applications -[hidden]right-> ApplicationLogs
+Placements -[hidden]right-> ActivityLogs
+DocumentRequests -[hidden]right-> NotificationQueue
+ScrapingService -[hidden]right-> AIMatchingService
+AIMatchingService -[hidden]right-> NotificationService
+VacancyTypeEnum -[hidden]right-> PaymentTypeEnum
+PaymentTypeEnum -[hidden]right-> ApplicationStatusEnum
+ApplicationStatusEnum -[hidden]right-> PlacementStatusEnum
+PlacementStatusEnum -[hidden]right-> DocumentStatusEnum
+DocumentStatusEnum -[hidden]right-> NotificationStatusEnum
+NotificationStatusEnum -[hidden]right-> NotificationChannelEnum
+
+Users -[hidden]down-> MasterDepartments
+MasterDepartments -[hidden]down-> StudentSkills
+StudentSkills -[hidden]down-> Vacancies
+Vacancies -[hidden]down-> Applications
+Applications -[hidden]down-> Placements
+Placements -[hidden]down-> DocumentRequests
+DocumentRequests -[hidden]down-> ScrapingService
+ScrapingService -[hidden]down-> VacancyTypeEnum
+
+' Inheritance
+ProfilesAdmin -up-|> Users
+ProfilesStudent -up-|> Users
+
+' Associations
+ProfilesStudent "0..*" -down-> "1" MasterDepartments : department
+ProfilesStudent "1" -down-> "0..*" StudentSkills : skills
+StudentSkills "0..*" -up-> "1" MasterSkills : skill
+Vacancies "1" -up-> "0..*" VacancySkills : required
+VacancySkills "0..*" -up-> "1" MasterSkills : skill
+ProfilesStudent "1" -down-> "0..*" StudentWishlistVacancies : wishlist
+StudentWishlistVacancies "0..*" -left-> "1" Vacancies : vacancy
+Vacancies "0..*" -up-> "1" MasterExternalCompanies : company
+Vacancies "0..*" -up-> "0..1" ProfilesAdmin : creator
+ProfilesStudent "1" -down-> "0..*" Applications : applies
+Applications "0..*" -up-> "1" Vacancies : vacancy
+Applications "1" *--> "0..*" ApplicationLogs : history
+ApplicationLogs "0..*" -up-> "0..1" Users : actor
+Placements "0..1" -up-> "0..1" Applications : source
+Placements "0..*" -up-> "1" ProfilesStudent : student
+Placements "0..*" -up-> "1" MasterExternalCompanies : company
+Placements "1" *--> "0..*" ActivityLogs : journals
+DocumentRequests "0..*" -up-> "1" ProfilesStudent : requester
+DocumentRequests "0..*" -up-> "0..1" Vacancies : reference
+NotificationQueue "0..*" -up-> "1" Users : recipient
+
+' Enum references
+Vacancies -down-> VacancyTypeEnum : type
+Vacancies -down-> PaymentTypeEnum : payment
+Applications -down-> ApplicationStatusEnum : status
+Placements -down-> PlacementStatusEnum : status
+DocumentRequests -down-> DocumentStatusEnum : status
+NotificationQueue -down-> NotificationStatusEnum : status
+NotificationQueue -down-> NotificationChannelEnum : channel
+
+' Service dependencies
+AIMatchingService ..> ProfilesStudent : profile
+AIMatchingService ..> Vacancies : match
+AIMatchingService ..> Applications : score
+AIMatchingService ..> ActivityLogs : enhance
+ScrapingService ..> Vacancies : scrape
+ScrapingService ..> MasterExternalCompanies : company
+NotificationService ..> NotificationQueue : queue
+NotificationService ..> Applications : notify
+
+@enduml

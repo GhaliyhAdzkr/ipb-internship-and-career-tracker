@@ -1,0 +1,400 @@
+@startuml LARAS_ClassDiagram
+
+' Layout & Spacing
+skinparam nodesep 18
+skinparam ranksep 28
+skinparam classAttributeIconSize 0
+skinparam classFontStyle bold
+skinparam classFontSize 12
+skinparam classAttributeFontSize 10
+skinparam arrowFontSize 9
+skinparam arrowColor #444444
+skinparam defaultFontName Arial
+skinparam dpi 150
+skinparam padding 4
+skinparam roundcorner 4
+
+' Enumerations
+together {
+
+  enum VacancyTypeEnum #d5e8d4 {
+    INTERNSHIP_GENERAL
+    MBKM_INTERNSHIP
+    MBKM_STUDY_INDEPENDENT
+    FULL_TIME
+  }
+
+  enum PaymentTypeEnum #d5e8d4 {
+    PAID
+    UNPAID
+    ALLOWANCE_ONLY
+  }
+
+  enum ApplicationStatusEnum #d5e8d4 {
+    APPLIED
+    SCREENING
+    INTERVIEW
+    OFFERED
+    ACCEPTED
+    REJECTED
+    WITHDRAWN
+  }
+
+  enum PlacementStatusEnum #d5e8d4 {
+    ACTIVE
+    COMPLETED
+    DROPPED
+    EXTENDED
+  }
+
+  enum DocumentStatusEnum #d5e8d4 {
+    PENDING
+    PROCESSING
+    COMPLETED
+    FAILED
+  }
+
+  enum NotificationStatusEnum #d5e8d4 {
+    QUEUED
+    PROCESSING
+    SENT
+    READ
+    DELETED
+    FAILED
+  }
+
+  enum NotificationChannelEnum #d5e8d4 {
+    ALL
+    EMAIL
+    IN_APP
+  }
+
+}
+
+' Core User Classes
+together {
+
+  class Users #dae8fc {
+    - id: UUID
+    - email: String
+    - username: String
+    - password_hash: String
+    - role: UserRoleEnum
+    - is_active: boolean
+    - last_login_at: DateTime
+    - created_at: DateTime
+    - updated_at: DateTime
+    --
+    + to_domain(): User
+    + from_domain(domain_user): Users
+  }
+
+  class ProfilesAdmin #dae8fc {
+    - user_id: UUID
+    - full_name: String
+    - unit_name: String
+    - nip: String
+    - avatar_url: String
+    - updated_at: DateTime
+    --
+    + updateProfile(data): void
+    + inputVacancyManual(data): Vacancies
+    + queueScrapeVacancies(urls): Task
+    + curateScrapedVacancy(vacancyId): void
+    + verifyApplicationProof(appId): Placements
+    + rejectApplicationProof(appId, reason): void
+  }
+
+  class ProfilesStudent #dae8fc {
+    - user_id: UUID
+    - nim: String
+    - full_name: String
+    - semester: int
+    - department_id: UUID
+    - gpa: Decimal
+    - phone_number: String
+    - linkedin_url: String
+    - cv_url: String
+    - avatar_url: String
+    - is_mbkm_eligible: boolean
+    - updated_at: DateTime
+    --
+    + updateProfile(data): void
+    + uploadCV(file): String
+    + searchVacancies(filters): List
+    + addWishlist(vacancyId): StudentWishlistVacancies
+    + applyToVacancy(vacancyId): Applications
+    + selfReportStatus(appId, status): Applications
+    + uploadOfferProof(appId, file): ApplicationLogs
+    + logActivity(placementId, data): ActivityLogs
+    + requestDocument(type, purpose): DocumentRequests
+    + getMatchScore(vacancyId): Decimal
+  }
+
+}
+
+' Master / Reference Tables
+together {
+
+  class MasterDepartments #fff2cc {
+    - id: UUID
+    - code: String
+    + name: String
+    + faculty: String
+    --
+    + getStudents(): List<ProfilesStudent>
+  }
+
+  class MasterExternalCompanies #fff2cc {
+    - id: UUID
+    - name: String
+    - industry: String
+    - website_url: String
+    - address: String
+    - logo_url: String
+    - created_at: DateTime
+    --
+    + getVacancies(): List<Vacancies>
+    + getActivePlacements(): List<Placements>
+  }
+
+  class MasterSkills #fff2cc {
+    + id: UUID
+    + name: String
+    + category: String
+  }
+
+}
+
+' Junction Tables
+together {
+
+  class StudentSkills #f8cecc {
+    - student_id: UUID
+    - skill_id: UUID
+    - level: int
+    --
+    + updateLevel(newLevel): void
+  }
+
+  class VacancySkills #f8cecc {
+    + vacancy_id: UUID
+    + skill_id: UUID
+    + is_mandatory: boolean
+  }
+
+}
+
+' Main Business Entities
+class Vacancies {
+  - id: UUID
+  - company_id: UUID
+  - created_by: UUID
+  - title: String
+  - description: String
+  - type: VacancyTypeEnum
+  - location: String
+  - payment_type: PaymentTypeEnum
+  - compensation_min: Decimal
+  - compensation_max: Decimal
+  - compensation_note: String
+  - source_url: String
+  - is_scraped: boolean
+  - open_date: DateTime
+  - close_date: DateTime
+  - is_auto_close: boolean
+  - is_active: boolean
+  - created_at: DateTime
+  - updated_at: DateTime
+  --
+  + publishFromScrape(): void
+  + deactivate(): void
+  + isOpen(): boolean
+  + getRequiredSkills(): List<VacancySkills>
+  + getApplicants(): List<Applications>
+}
+
+class StudentWishlistVacancies {
+  - id: UUID
+  - student_id: UUID
+  - vacancy_id: UUID
+  - notes: String
+  - created_at: DateTime
+  --
+  + updateNote(note): void
+  + remove(): void
+}
+
+together {
+
+  class Applications {
+    - id: UUID
+    - vacancy_id: UUID
+    - student_id: UUID
+    - status: ApplicationStatusEnum
+    - match_percentage: Decimal
+    - cv_snapshot_url: String
+    - applied_at: DateTime
+    - updated_at: DateTime
+    --
+    + selfReportStatus(newStatus, reason): void
+    + uploadProof(proofUrl): void
+    + getStatusHistory(): List
+    - isAlreadyApplied(studentId, vacancyId): boolean
+  }
+
+  class ApplicationLogs {
+    - id: UUID
+    - application_id: UUID
+    + previous_status: ApplicationStatusEnum
+    + new_status: ApplicationStatusEnum
+    - changed_by: UUID
+    + proof_url: String
+    + reason: String
+    - created_at: DateTime
+  }
+
+}
+
+together {
+
+  class Placements {
+    - id: UUID
+    - application_id: UUID
+    - student_id: UUID
+    - company_id: UUID
+    - external_supervisor_name: String
+    - start_date: Date
+    - end_date: Date
+    - status: PlacementStatusEnum
+    - auto_generated_report_url: String
+    - last_report_generated_at: DateTime
+    - created_at: DateTime
+    - updated_at: DateTime
+    --
+    + complete(): void
+    + cancel(): void
+    + generateReport(): String
+    + getActivityLogs(): List<ActivityLogs>
+    + getTotalHours(): Decimal
+  }
+
+  class ActivityLogs {
+    - id: UUID
+    - placement_id: UUID
+    - activity_date: Date
+    - duration_hours: Decimal
+    - description_raw: String
+    - description_ai_enhanced: String
+    - attachment_url: String
+    - created_at: DateTime
+    --
+    + enhanceDescriptionWithAI(): String
+    + attachFile(file): String
+  }
+
+}
+
+together {
+
+  class DocumentRequests {
+    - id: UUID
+    - student_id: UUID
+    - document_type: String
+    - reference_vacancy_id: UUID
+    - purpose: Text
+    - generated_url: String
+    - status: DocumentStatusEnum
+    - created_at: DateTime
+    --
+    + requestDocument(type, purpose): void
+    + generateCoverLetterDocx(): String
+  }
+
+  class NotificationQueue {
+    - id: UUID
+    - user_id: UUID
+    - title: String
+    - message: String
+    - channel: NotificationChannelEnum
+    - scheduled_at: DateTime
+    - sent_at: DateTime
+    - status: NotificationStatusEnum
+    --
+    + send(): void
+    - markAsSent(): void
+    + cancel(): void
+  }
+
+}
+
+' Services
+together {
+
+  class ScrapingService <<service>> #e1d5e7 {
+    --
+    + queueScrapeVacancies(urls): Task
+    + scrapeFromURL(url): Vacancies
+    - extractJobPosting(html): Map
+    - getOrCreateCompany(data): MasterExternalCompanies
+    - savePendingScrape(data): Vacancies
+    - attachMatchingSkills(vacancy): int
+  }
+
+  class AIMatchingService <<service>> #e1d5e7 {
+    --
+    + evaluateMatch(student, vacancy): Decimal
+    - extractCVMetadata(cvUrl): Map
+    - compareSkills(studentSkills, vacancySkills): Decimal
+    - generateRecommendation(matchScore): String
+    + enhanceActivityDescription(rawText): String
+  }
+
+  class NotificationService <<service>> #e1d5e7 {
+    --
+    + sendNotification(userId, title, message, channel): void
+    - scheduleNotification(notification): void
+    + processQueue(): void
+    + notifyApplicationUpdate(applicationId): void
+    + notifyNewVacancy(vacancyId): void
+  }
+
+}
+
+' Inheritance
+ProfilesAdmin  --|> Users
+ProfilesStudent --|> Users
+
+' Associations
+ProfilesStudent "0..*" --> "1"    MasterDepartments        : terdaftar di
+ProfilesStudent "1"    --> "0..*" StudentSkills            : memiliki
+StudentSkills   "0..*" --> "1"    MasterSkills             : merujuk
+Vacancies       "1"    --> "0..*" VacancySkills            : mensyaratkan
+VacancySkills   "0..*" --> "1"    MasterSkills             : merujuk
+ProfilesStudent "1"    --> "0..*" StudentWishlistVacancies : menyimpan
+StudentWishlistVacancies "0..*" --> "1" Vacancies          : merujuk
+Vacancies       "0..*" --> "1"    MasterExternalCompanies  : ditawarkan oleh
+Vacancies       "0..*" --> "0..1" ProfilesAdmin            : dibuat oleh
+ProfilesStudent "1"    --> "0..*" Applications             : mengajukan
+Applications    "0..*" --> "1"    Vacancies                : untuk
+Applications    "1"    *--> "0..*" ApplicationLogs         : mencatat riwayat
+ApplicationLogs "0..*" --> "0..1" Users                   : diubah oleh
+Placements      "0..1" --> "0..1" Applications             : berasal dari
+Placements      "0..*" --> "1"    ProfilesStudent          : ditempatkan
+Placements      "0..*" --> "1"    MasterExternalCompanies  : di perusahaan
+Placements      "1"    *--> "0..*" ActivityLogs            : berisi logbook
+DocumentRequests "0..*" --> "1"   ProfilesStudent          : diminta oleh
+DocumentRequests "0..*" --> "0..1" Vacancies               : referensi
+NotificationQueue "0..*" --> "1"  Users                   : dikirim kepada
+
+' Service Dependencies
+AIMatchingService  ..> ProfilesStudent       : menganalisis profil & CV
+AIMatchingService  ..> Vacancies             : mengevaluasi kecocokan
+AIMatchingService  ..> Applications          : memperbarui skor
+AIMatchingService  ..> ActivityLogs          : menyempurnakan deskripsi
+ScrapingService    ..> Vacancies             : membuat draf lowongan
+ScrapingService    ..> MasterExternalCompanies : mengekstrak data perusahaan
+NotificationService ..> NotificationQueue    : mengelola antrian
+NotificationService ..> Applications         : notifikasi status
+
+@enduml
